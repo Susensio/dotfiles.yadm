@@ -1,0 +1,4 @@
+$XDG_CONFIG_HOME/fish/functions/*.fish
+$XDG_CONFIG_HOME/fish/completions/*.fish
+$XDG_CONFIG_HOME/fish/conf.d/*.fish
+

@@ -7,4 +7,3 @@ function sufi -d "Login as root using fish shell with user config"
 	#command sudo -i (which sh) -c "XDG_CONFIG_HOME=$HOME/.config $(which fish)"
 	command sudo -sE
 end
-
