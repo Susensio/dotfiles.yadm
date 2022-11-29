@@ -1,9 +1,17 @@
 # https://gist.github.com/NotTheDr01ds/6357e48b511735c42b94c4cc081ac5dc
 
 function sudo -d "Sudo with fish user functions"
+  # Avoid recursion
+  if fish_is_root_user
+    echo "Already using root!"
+    return 1
+  end    
+
   # Substitute double bang !!
-  if test "$argv[1]" = !! 
-    set argv "$history[1]"
+  if test "$argv" = !! 
+    # NOT WORKING
+    # set argv $history[1]
+    # echo "$argv"
   end
 
   # If fish function, execute with fish
