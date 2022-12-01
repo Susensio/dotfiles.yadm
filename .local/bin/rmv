@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Safer rm alternative with trash-cli or gio trash
+
+if command -v trash-put >/dev/null 2>&1; then
+  command trash-put "$@"
+elif command -v gio >/dev/null 2>&1; then
+  command gio trash "$@"
+else
+  echo "WARNING: trash management not installed, items will be deleted permanently"
+  command rm -ir -- "$@"
+fi
