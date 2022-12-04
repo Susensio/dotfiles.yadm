@@ -1,6 +1,6 @@
 function fd --wraps=fdfind --description 'alias fd=fdfind'
-  if isatty stdin
-    command fdfind --color always $argv | less -XRF
+  if isatty stdout
+    command fdfind --color always $argv | less
   else
     command fdfind $argv
   end
