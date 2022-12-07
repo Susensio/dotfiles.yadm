@@ -15,6 +15,7 @@ function myip -d "Return public and local IPs"
 
   # Default
 
+  # printf because of \t
   printfn "Public IP:\t$(__public_ip)"
   printfn "Local IP:\t$(__local_ip)"
 
