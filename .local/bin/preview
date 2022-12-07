@@ -3,7 +3,7 @@
 
 image() {
   [ "$#" -eq 1 ] \
-    && chafa "$1" -s "$(expr $(tput cols) - 2)"x"$(expr $(tput lines) - 2)" \
+    && chafa "$1" -s "$(tput cols)"x"$(tput lines)" \
     || chafa "$1" -s "$2"x"$3"
 }
 
