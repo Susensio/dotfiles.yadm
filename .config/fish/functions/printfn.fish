@@ -1,3 +1,3 @@
 function printfn --wraps=printf --description 'alias printfn=printf'
-  printf $argv; 
+  printf {$argv}'\n'; 
 end
