@@ -2,7 +2,9 @@
 # Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
 
 image() {
-  chafa "$1" -s "$2"x"$3"
+  [ "$#" -eq 1 ] \
+    && chafa "$1" -s "$(expr $(tput cols) - 2)"x"$(expr $(tput lines) - 2)" \
+    || chafa "$1" -s "$2"x"$3"
 }
 
 text() {

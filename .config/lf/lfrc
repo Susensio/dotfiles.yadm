@@ -13,8 +13,8 @@ set hidden
 
 set icons
 
-# Use bat as previewer
-set previewer ~/.config/lf/pv.sh
+# Use custom previewer in .local/bin
+set previewer preview
 map i $LESSOPEN='| ~/.config/lf/pv.sh %s' less -R $f
 
 # use enter for shell commands
