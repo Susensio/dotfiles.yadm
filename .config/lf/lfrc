@@ -15,7 +15,7 @@ set icons
 
 # Use custom previewer in .local/bin
 set previewer preview
-map i $LESSOPEN='| ~/.config/lf/pv.sh %s' less -R $f
+map i $LESSOPEN='| preview %s' less -R $f
 
 # use enter for shell commands
 map <enter> shell-pipe
