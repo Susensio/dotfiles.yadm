@@ -1,8 +1,22 @@
 function upgrade --description 'Upgrade system'
+  __info "Upgrading apt..."
   __upgrade_apt
   __purge_apt
+
+  __info "Upgrading fish plugins..."
   fisher update
+
+
+  __info "Upgrading nvim from github..."
+  $HOME/.local/lib/nvim/upgrade.sh
+
+  __info "Upgrading nvim plugins..."
   __packersync_nvim
+
+  __info "Upgrading python venv..."
+  __upgrade_venv
+
+  __info "Deleting global pip cache..."
   pip cache purge
 end
 
@@ -19,4 +33,15 @@ end
 
 function __packersync_nvim
   command nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+end
+
+function __upgrade_venv
+  set -l pip_venv $XDG_DATA_HOME/venv/bin/pip 
+  $pip_venv install --upgrade --requirement $XDG_CONFIG_HOME/venv/requirements.txt | sed -n '/^Requirement already satisfied/!p'
+  $pip_venv cache purge
+end
+
+function __info
+  printfn
+  printfn (set_color --bold green)$argv | box
 end
