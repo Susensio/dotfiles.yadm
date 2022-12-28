@@ -1,35 +1,47 @@
 #!/bin/sh
+IFS="\n"
 # Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
+## Script arguments
+FILE_PATH="${1}"        # Full path of the highlighted file
 
-image() {
-  [ "$#" -eq 1 ] \
-    && chafa "$1" -s "$(tput cols)"x"$(tput lines)" \
-    || chafa "$1" -s "$2"x"$3"
-}
+PV_WIDTH="${2}"         # Width of the preview pane (number of fitting characters)
+if [ -z "${PV_WIDTH}" ];then 
+  [ -n "${FZF_PREVIEW_COLUMNS}" ] &&
+    PV_WIDTH="$((FZF_PREVIEW_COLUMNS - 2))" ||
+    PV_WIDTH="$(tput cols)"
+fi
 
-text() {
-  file="$1"
-  # save bat args to $@
-  set -- "--paging=never" "--style=auto" "-f"
-  if command -v batcat >/dev/null 2>&1; then
-    batcat "$@" "$file"
-  elif command -v bat >/dev/null 2>&1; then
-    bat "$@" "$file"
-  else
-    cat "$file"
-  fi
-}
+PV_HEIGHT="${3}"         # Height of the preview pane (number of fitting characters)
+if [ -z "${PV_HEIGHT}" ];then 
+  [ -n "${FZF_PREVIEW_LINES}" ] &&
+    PV_HEIGHT="$((FZF_PREVIEW_LINES - 2))" ||
+    PV_HEIGHT="$(tput lines)"
+fi
 
-case "$1" in
-  *.tar*) tar tf "$1";;
-  *.zip) unzip -l "$1";;
-  *.rar) unrar l "$1";;
-  *.7z) 7z l "$1";;
-  *.pdf) pdftotext "$1" -;;
-  *.jpg) image "$@" ;;
-  *.jpeg) image "$@" ;;
-  *.png) image "$@" ;;
-  *.gif) image "$@" ;;
-  *.bmp) image "$@" ;;
-  *) text "$@";;
+FILE_EXTENSION="${FILE_PATH##*.}"
+FILE_EXTENSION_LOWER="$(printf "%s" "${FILE_EXTENSION}" | tr '[:upper:]' '[:lower:]')"
+
+MIMETYPE="$(file --dereference --brief --mime-type -- "$FILE_PATH")"
+
+case "$MIMETYPE" in
+  */directory) exa --all --color=always --icons -- $FILE_PATH ;;
+  */image) chafa "$FILE_PATH" -s "$PV_WIDTH"x"$PV_HEIGHT" ;;
+  */pdf) pdftotext "$FILE_PATH" ;;
+  text/* | */xml | application/json)
+    bat --color=always --style=plain --line-range=:500 \
+      --paging=never --terminal-width="$PV_WIDTH" \
+      "$FILE_PATH"
+    ;;
+  *)
+    case "$FILE_EXTENSION_LOWER" in
+      tar*) tar tf "$FILE_PATH";;
+      zip) unzip -l "$FILE_PATH";;
+      rar) unrar l "$FILE_PATH";;
+      7z) 7z l "$FILE_PATH";;
+      *) 
+        echo '----- File Type Classification -----'
+        echo "$(file --dereference --brief -- "$FILE_PATH")" | 
+          fold --spaces --width="$PV_WIDTH"
+        ;;
+    esac
 esac
