@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -eu
+set -o noglob
+
+function usage(){
+  cat << EOF
+Usage: $(basename "$0") [-r|--repo] 'author/repo' [-c|--cmd] 'command'
+
+Programs are installed in ${HOME}/.local/lib/\${cmd}/ and symlinked to ${HOME}/.local/bin/\${cmd}
+
+EOF
+}
+
+# read --repo and --cmd from command line
+SHORT=h,r:,c:
+LONG=help,repo:,cmd:
+OPTS=$(getopt --options $SHORT --longoptions $LONG -- "$@")
+eval set -- "$OPTS"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help )
+      usage
+      exit 0
+      ;;
+    -r | --repo )
+      repo="$2"
+      shift 2
+      ;;
+    -c | --cmd )
+      cmd="$2"
+      shift 2
+      ;;
+    -- )
+      shift;
+      break
+      ;;
+    * )
+      echo "Unexpected option: $1"
+      exit
+      ;;
+  esac
+done
+
+function get_version(){
+  regex='v\d+\.\d+\.\d+'
+  cat | grep -Po -m1 "$regex" 
+}
+
+latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
+  || gh --repo "$repo" release view --json 'body' | get_version)
+
+current_version=$("$cmd" --version >> /dev/null | get_version || echo "NOT-INSTALLED" )
+
+if [[ "$latest_version" = "$current_version" ]]; then
+  echo "Already is up to date."
+else
+  echo "Updating ${cmd} from ${current_version} to ${latest_version}..."
+  folder="${HOME}/.local/lib/${cmd}/"
+  download="download.tar.gz"
+  release="release"
+
+  cd "$folder"
+  gh --repo "$repo" release download --clobber --pattern "${cmd}*x86_64*linux*.tar.gz" --pattern "${cmd}*linux64*.tar.gz" --output 'download.tar.gz'
+
+  echo "Extracting downloaded file..."
+  mkdir -pv "$release" && tar -xzf "$download" -C "$release" --recursive-unlink && echo "Done extracting"
+
+  executable=$(find . -type f -executable -name "$cmd")
+  symlink="${HOME}/.local/bin/${cmd}"
+  echo "Updating symlink..."
+  ln -sfv "$(realpath ${executable})" "$(realpath ${symlink})"
+
+  echo "Removing downloaded file..."
+  rm -v "$download"
+fi
