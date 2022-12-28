@@ -50,7 +50,7 @@ function get_version(){
 latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
   || gh --repo "$repo" release view --json 'body' | get_version)
 
-current_version=$("$cmd" --version >> /dev/null | get_version || echo "NOT-INSTALLED" )
+current_version=$("$cmd" --version 2>/dev/null | get_version || echo "NOT-INSTALLED" )
 
 if [[ "$latest_version" = "$current_version" ]]; then
   echo "Already is up to date."
@@ -69,6 +69,8 @@ else
   executable=$(find . -type f -executable -name "$cmd")
   symlink="${HOME}/.local/bin/${cmd}"
   echo "Updating symlink..."
+  echo $executable
+  echo $symlink
   ln -sfv "$(realpath ${executable})" "$(realpath ${symlink})"
 
   echo "Removing downloaded file..."
