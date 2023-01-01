@@ -44,7 +44,7 @@ done
 
 function get_version(){
   regex='v\d+\.\d+\.\d+'
-  cat | grep -Po -m1 "$regex" 
+  cat | grep -Po -m1 "$regex"
 }
 
 latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \

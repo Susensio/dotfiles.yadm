@@ -6,9 +6,8 @@ function upgrade --description 'Upgrade system'
   __info "Upgrading fish plugins..."
   fisher update
 
-
-  __info "Upgrading nvim from github..."
-  $HOME/.local/lib/nvim/upgrade.sh
+  __info "Upgrading user installed from github..."
+  $HOME/bin/update-repos
 
   __info "Upgrading nvim plugins..."
   __packersync_nvim
@@ -37,7 +36,7 @@ end
 
 function __upgrade_venv
   set -l pip_venv $XDG_DATA_HOME/venv/bin/pip 
-  $pip_venv install --upgrade --requirement $XDG_CONFIG_HOME/venv/requirements.txt | sed -n '/^Requirement already satisfied/!p'
+  $pip_venv install --upgrade --requirement "$XDG_CONFIG_HOME/venv/requirements.txt" | sed -n '/^Requirement already satisfied/!p'
   $pip_venv cache purge
 end
 
