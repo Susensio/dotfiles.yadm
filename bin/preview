@@ -1,5 +1,5 @@
 #!/bin/sh
-IFS="\n"
+IFS=$'\n'
 # Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
 ## Script arguments
 FILE_PATH="${1}"        # Full path of the highlighted file
@@ -24,8 +24,8 @@ FILE_EXTENSION_LOWER="$(printf "%s" "${FILE_EXTENSION}" | tr '[:upper:]' '[:lowe
 MIMETYPE="$(file --dereference --brief --mime-type -- "$FILE_PATH")"
 
 case "$MIMETYPE" in
-  */directory) exa --all --color=always --icons -- $FILE_PATH ;;
-  */image) chafa "$FILE_PATH" -s "$PV_WIDTH"x"$PV_HEIGHT" ;;
+  */directory) exa --all --color=always --icons -- "$FILE_PATH" ;;
+  image/*) chafa "$FILE_PATH" -s "$PV_WIDTH"x"$PV_HEIGHT" ;;
   */pdf) pdftotext "$FILE_PATH" ;;
   text/* | */xml | application/json)
     bat --color=always --style=plain --line-range=:500 \
