@@ -1,0 +1,34 @@
+%YAML 1.3
+---
+- Feature: REPROG CONTROLS V4
+- Rule:
+  - And:
+    - Key: [Mouse Gesture Button, pressed]
+    - Process: chrome
+  - KeyPress:
+    - [Control_L, w]
+    - click
+...
+---
+- Feature: THUMB WHEEL
+- Rule:
+  - Test: [thumb_wheel_up, 10]
+  - KeyPress:
+    - [Alt_L, XF86_AudioRaiseVolume]
+    - click
+- Rule:
+  - Test: [thumb_wheel_down, 10]
+  - KeyPress:
+    - [Alt_L, XF86_AudioLowerVolume]
+    - click
+- Rule:
+  - Test: 'False'
+  - Execute: [pactl, set-sink-volume, '@DEFAULT_SINK@', +2%]
+  - Execute: [pactl, set-sink-volume, '@DEFAULT_SINK@', -2%]
+  - KeyPress:
+    - [Shift_L, XF86_AudioLowerVolume]
+    - click
+  - KeyPress:
+    - [Shift_L, XF86_AudioRaiseVolume]
+    - click
+...
