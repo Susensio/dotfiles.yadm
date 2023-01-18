@@ -43,8 +43,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 function get_version(){
-  regex='v\d+\.\d+\.\d+'
-  cat | grep -Po -m1 "$regex"
+  text=$(cat)
+  regex='\d+(\.\d+)+'
+  version=$(echo "$text" | grep -Po -m1 "v${regex}")
+  # Try to find it without `v` and prepend it later...
+  if [[ -z "$version" ]]; then
+    version=$(echo "$text" | grep -Po -m1 "$regex")
+    [[ -n "$version" ]] && version="v${version}"
+  fi
+  [[ -n "$version" ]] && echo "$version" || return 1
 }
 
 latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
@@ -53,26 +60,51 @@ latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
 current_version=$("$cmd" --version 2>/dev/null | get_version || echo "NOT-INSTALLED" )
 
 if [[ "$latest_version" = "$current_version" ]]; then
-  echo "Already is up to date."
+  echo "Already up to date."
 else
   echo "Updating ${cmd} from ${current_version} to ${latest_version}..."
+
   folder="${HOME}/.local/lib/${cmd}/"
   download="download.tar.gz"
   release="release"
 
+  mkdir -pv "$folder"
   cd "$folder"
-  gh --repo "$repo" release download --clobber --pattern "${cmd}*x86_64*linux*.tar.gz" --pattern "${cmd}*linux64*.tar.gz" --output 'download.tar.gz'
+  echo "Downloading release..."
+
+  patterns=(
+    "${cmd}*x86_64*linux*gnu*.gz"
+    "${cmd}*x86_64*linux*.gz"
+    "${cmd}*64*linux*gnu*.gz"
+    "${cmd}*64*linux*.gz"
+    "${cmd}*linux*64*.gz"
+    )
+  downloaded=0
+  # Download the first pattern encountered
+  for pattern in ${patterns[@]}; do
+    gh --repo "$repo" release download --clobber \
+      --pattern "${pattern}" \
+      --output "${download}" \
+      && downloaded=1 \
+      && break
+  done
+  if [[ $downloaded -eq 1 ]]; then
+    echo "Asset found with pattern '${pattern}' and downloaded to ${download}."
+  else
+    echo "ERROR: No single asset found" >&2
+    exit 1
+  fi
 
   echo "Extracting downloaded file..."
   mkdir -pv "$release" && tar -xzf "$download" -C "$release" --recursive-unlink && echo "Done extracting"
 
-  executable=$(find . -type f -executable -name "$cmd")
+  executable=$(find "${folder}" -type f -executable -name "${cmd}")
   symlink="${HOME}/.local/bin/${cmd}"
   echo "Updating symlink..."
-  echo $executable
-  echo $symlink
-  ln -sfv "$(realpath ${executable})" "$(realpath ${symlink})"
+  # echo $executable
+  # echo $symlink
+  ln -sfv "$(realpath ${executable})" "${symlink})"
 
   echo "Removing downloaded file..."
-  rm -v "$download"
+  rm -v "${download}"
 fi
