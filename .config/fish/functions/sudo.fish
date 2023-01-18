@@ -5,12 +5,6 @@ function sudo -d "Sudo with fish user functions"
     return 1
   end
 
-  # Substitute double bang !!
-  if test "$argv" = !! 
-    # Save last command as list argument
-    echo $history[1] | read --list argv
-  end
-
   # If command, remove and use system bins
   # `sudo command ls` -> `sudo ls`
   if test "$argv[1]" = "command" 
