@@ -3,7 +3,7 @@ function fish_right_prompt -d "Write out the right prompt"
   set -lx last_status $status
 
   # Print git info
-  set --append elements (fish_git_prompt)
+  set --append elements (string trim -l (fish_git_prompt))
 
   # Duration of last command
   set --local threshold 1000 # ms
@@ -26,7 +26,7 @@ end
 
 # https://github.com/jichu4n/fish-command-timer
 function _format_cmd_duration
-  set -l unit_color (set_color 888)
+  set -l unit_color (set_color 999)
   set -l num_color (set_color --bold brwhite)
   set -l normal (set_color normal)
 
@@ -52,7 +52,7 @@ function _format_cmd_duration
   end
   set --append out {$num_color}{$secs}{$normal}{$unit_color}"s"{$normal}
 
-  echo "["(string join '' $out)"]"
+  echo -n "["(string join '' $out)"]"
 end
 
 function fish_git_prompt_loading_indicator -a last_prompt
