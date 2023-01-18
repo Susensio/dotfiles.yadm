@@ -4,12 +4,10 @@ for dir in ~/.local/lib/*/
 do
   cd "${dir}"
   dirname="$(basename ${dir})"
+
   # If inside git repo, pull
-  # git status >/dev/null 2>&1
-  # [ -d .git ] && echo "Updating ${dir%*/}..."
-  # check if exit status of above was 0, indicating we're in a git repo
-  [ -d ".git" ] && echo "Updating ${dir%*/}..." && git pull --ff-only
+  [ -d ".git" ] && echo "Updating repository ${dir%*/}..." && git pull --ff-only
   
-  # If gh release file, do the thing
-  [ -f "gh-repo" ] && echo "Updating ${dir%*/}..." && download-gh-release --cmd "$dirname" --repo "$(cat gh-repo)"
+  # Else If gh release file, do the thing
+  [ -f "gh-repo" ] && echo "Updating release ${dir%*/}..." && download-gh-release --cmd "$dirname" --repo "$(cat gh-repo)"
 done
