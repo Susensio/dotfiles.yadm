@@ -12,12 +12,12 @@
 ---
 - Feature: THUMB WHEEL
 - Rule:
-  - Test: [thumb_wheel_up, 10]
+  - Test: [thumb_wheel_up, 8]
   - KeyPress:
     - [Alt_L, XF86_AudioRaiseVolume]
     - click
 - Rule:
-  - Test: [thumb_wheel_down, 10]
+  - Test: [thumb_wheel_down, 8]
   - KeyPress:
     - [Alt_L, XF86_AudioLowerVolume]
     - click
