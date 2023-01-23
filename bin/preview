@@ -26,7 +26,7 @@ MIMETYPE="$(file --dereference --brief --mime-type -- "$FILE_PATH")"
 case "$MIMETYPE" in
   */directory) exa --all --color=always --icons -- "$FILE_PATH" ;;
   image/*) chafa "$FILE_PATH" -s "$PV_WIDTH"x"$PV_HEIGHT" ;;
-  */pdf) pdftotext "$FILE_PATH" ;;
+  */pdf) pdftotext "$FILE_PATH" -;;
   text/* | */xml | application/json)
     bat --color=always --style=plain --line-range=:500 \
       --paging=never --terminal-width="$PV_WIDTH" \
