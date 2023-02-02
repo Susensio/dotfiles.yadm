@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -eu
 set -o noglob
 
@@ -51,7 +51,7 @@ function get_version(){
     version=$(echo "$text" | grep -Po -m1 "$regex")
     [[ -n "$version" ]] && version="v${version}"
   fi
-  [[ -n "$version" ]] && echo "$version" || return 1
+  [[ -n "$version" ]] && echo "$version" | head -n1 || return 1
 }
 
 latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
@@ -67,17 +67,23 @@ else
   folder="${HOME}/.local/lib/${cmd}/"
   download="download.tar.gz"
   release="release"
-
+  
   mkdir -pv "$folder"
   cd "$folder"
+
+  # Save release file if not present
+  [[ ! -f 'gh-repo' ]] && echo "$repo" > gh-repo
   echo "Downloading release..."
 
   patterns=(
-    "${cmd}*x86_64*linux*gnu*.gz"
-    "${cmd}*x86_64*linux*.gz"
-    "${cmd}*64*linux*gnu*.gz"
-    "${cmd}*64*linux*.gz"
-    "${cmd}*linux*64*.gz"
+    "${cmd}*x86_64*inux*gnu*.gz"
+    "${cmd}*x86_64*inux*.gz"
+    "${cmd}*inux*x86_64*.gz"
+    "${cmd}*64*inux*gnu*.gz"
+    "${cmd}*64*inux*.gz"
+    "${cmd}*inux*64*.gz"
+    "*64*inux*.gz"
+    "*.gz"
     )
   downloaded=0
   # Download the first pattern encountered
@@ -103,7 +109,7 @@ else
   echo "Updating symlink..."
   # echo $executable
   # echo $symlink
-  ln -sfv "$(realpath ${executable})" "${symlink})"
+  ln -sfv "$(realpath ${executable})" "${symlink}"
 
   echo "Removing downloaded file..."
   rm -v "${download}"
