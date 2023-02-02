@@ -18,5 +18,7 @@ abbr --add ta task add
 abbr --add ti taski
 abbr --add tap --set-cursor task add project:%
 
+abbr --add lg lazygit
+
 # Common mistake
 abbr --add please fix
