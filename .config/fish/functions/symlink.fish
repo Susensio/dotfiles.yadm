@@ -4,7 +4,7 @@ function symlink --argument _from _to --description 'Create a symbolic link, usi
     return 1
   end
 
-  set abs_to (realpath (string replace '~' "$HOME" $_to))
+  set abs_to (realpath --no-symlinks (string replace '~' "$HOME" $_to))
 
   if test -d $_to && not test -d $_from
     set to "$abs_to/"(basename $_from)
@@ -14,5 +14,5 @@ function symlink --argument _from _to --description 'Create a symbolic link, usi
 
   set from (realpath (string replace '~' "$HOME" $_from))
   
-  ln -s $from $to
+  ln -sf $from $to
 end
