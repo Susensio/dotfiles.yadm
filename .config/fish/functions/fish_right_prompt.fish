@@ -1,6 +1,8 @@
 function fish_right_prompt -d "Write out the right prompt"
   set -l elements
   set -lx last_status $status
+  # set -l max_shlvl 1 && test (string sub -l 4 "$TERM") = "tmux" && set -l max_shlvl 2
+  set -l max_shlvl 1
 
   # Print git info
   set --append elements (string trim -l (fish_git_prompt))
@@ -17,7 +19,7 @@ function fish_right_prompt -d "Write out the right prompt"
   end
 
   # Print a fork symbol when in a subshell
-  if test $SHLVL -gt 1 
+  if test $SHLVL -gt $max_shlvl 
     set --append elements (set_color --bold yellow)"⑂"(set_color normal)
   end
 
