@@ -34,7 +34,6 @@ if not set -q colorscheme || test $colorscheme != $modified
     set -U fish_pager_color_prefix white --bold --underline
     set -U fish_pager_color_progress brwhite --background=cyan
     set -U fish_pager_color_selected_background -r
-    set -U fish_prompt_pwd_dir_length 0
 
     set -U colorscheme $modified
 end
