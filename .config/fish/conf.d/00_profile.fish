@@ -14,9 +14,10 @@ function _source -d "Translate export, path additions and subsequent sources fro
   end
 end
 
-_source $HOME/.profile
-_source ~/.config/profile
-
+if status is-login
+  _source $HOME/.profile
+  _source ~/.config/profile
+end
 
 # if test -f ~/.profile
 #   replay source ~/.profile
