@@ -1,0 +1,15 @@
+#!/bin/bash
+# Attach to the first unattached session or start a new session
+#
+if [[ -z "$TMUX" ]]; then
+  first_unattached=$(tmux 2> /dev/null ls -F \
+      '#{session_attached} #{?#{==:#{session_last_attached},},1,#{session_last_attached}} #{session_id}' | \
+      awk '/^0/ { if ($2 > t) { t = $2; s = $3 } }; END { if (s) printf "%s", s }')
+  if [[ -n "$first_unattached" ]]; then
+    tmux attach -t "$first_unattached"
+  else
+    tmux new-session
+  fi
+else
+  echo "Already in tmux!"
+fi
