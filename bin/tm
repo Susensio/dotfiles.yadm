@@ -1,6 +1,9 @@
 #!/bin/bash
 # Attach to the first unattached session or start a new session
 #
+[[ -f ~/.profile ]] && source ~/.profile
+[[ -f ~/.config/profile ]] && source ~/.config/profile
+
 if [[ -z "$TMUX" ]]; then
   first_unattached=$(tmux 2> /dev/null ls -F \
       '#{session_attached} #{?#{==:#{session_last_attached},},1,#{session_last_attached}} #{session_id}' | \
