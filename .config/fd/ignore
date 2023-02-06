@@ -1,0 +1,2 @@
+$XDG_STATE_HOME/nvim/swap/*
+$XDG_STATE_HOME/nvim/undo/*
