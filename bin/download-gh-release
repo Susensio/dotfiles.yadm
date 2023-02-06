@@ -107,9 +107,16 @@ else
   executable=$(find "${folder}" -type f -executable -name "${cmd}")
   symlink="${HOME}/.local/bin/${cmd}"
   echo "Updating symlink..."
-  # echo $executable
-  # echo $symlink
   ln -sfv "$(realpath ${executable})" "${symlink}"
+
+  usermanpages="${XDG_DATA_HOME}/man/man1"
+  manpage=$(find "${folder}" -type d -name "man1")
+  if [[ -n "${manpage}" ]]; then
+    echo "Updating manpages..."
+    for file in $(find ${manpage} -type f); do
+      ln -svf "${file}" "${usermanpages}/$(basename ${file})"
+    done
+  fi
 
   echo "Removing downloaded file..."
   rm -v "${download}"
