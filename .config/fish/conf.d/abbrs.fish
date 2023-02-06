@@ -12,6 +12,8 @@ abbr --add nd nextd
 function _last_history_item; echo $history[1]; end
 abbr --add !! --position anywhere --function _last_history_item
 
+abbr --add v vim
+
 # taskwarrior
 abbr --add t task
 abbr --add ta task add
