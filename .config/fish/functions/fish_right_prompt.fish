@@ -1,8 +1,10 @@
 function fish_right_prompt -d "Write out the right prompt"
   set -l elements
   set -lx last_status $status
-  # set -l max_shlvl 1 && test (string sub -l 4 "$TERM") = "tmux" && set -l max_shlvl 2
   set -l max_shlvl 1
+  if test -n "$TMUX"
+    set max_shlvl 2
+  end
 
   # Print git info
   set --append elements (string trim -l (fish_git_prompt))
