@@ -6,7 +6,6 @@ function ls --wraps=exa --description 'List contents in directory'
       exa $argv
     end
   else
-    source /usr/share/fish/functions/ls.fish
     command ls $argv
   end
 end
