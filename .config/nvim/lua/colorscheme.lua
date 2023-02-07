@@ -14,5 +14,5 @@ else
   highlight(0, "CursorLine", { bg = "#272727" })
 
   -- Line number
-  highlight(0, "LineNr", { fg="grey"})
+  highlight(0, "LineNr", { fg="grey" })
 end

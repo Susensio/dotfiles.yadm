@@ -9,12 +9,14 @@ vim.g.mapleader = " "
 -- handled by "max397574/better-escape.nvim"
 
 -- Open side explorer
-keymap("n", "<leader>e", ":Lex 30<cr>", opts)
+keymap("n", "<leader>e", ":Lex 30<cr>", { desc = "Show side explorer" }, opts)
 -- keymap("n", "<leader>e", ":NvimTreeToggle<CR>", opts)
 
--- Indent with <Tab>
+-- Indent with <Tab> and preserve selection
 keymap("v", "<S-Tab>", "<gv", opts)
 keymap("v", "<Tab>", ">gv", opts)
+keymap("v", "<", "<gv", opts)
+keymap("v", ">", ">gv", opts)
 
 -- CENTERING
 -- Next search
@@ -26,12 +28,13 @@ keymap("n", "<C-u>", "<C-u>zz", opts)
 keymap("n", "<C-d>", "<C-d>zz", opts)
 
 
--- -- Better window navigation
-vim.keymap.set({'n', 't', 'i'}, '<M-h>', '<CMD>NavigatorLeft<CR>')
-vim.keymap.set({'n', 't', 'i'}, '<M-l>', '<CMD>NavigatorRight<CR>')
-vim.keymap.set({'n', 't', 'i'}, '<M-k>', '<CMD>NavigatorUp<CR>')
-vim.keymap.set({'n', 't', 'i'}, '<M-j>', '<CMD>NavigatorDown<CR>')
--- vim.keymap.set({'n', 't'}, '<M-p>', '<CMD>NavigatorPrevious<CR>')
+-- Better window navigation
+-- defined in plugins/tmux.lua
+--vim.keymap.set({"n", "t", "i"}, "<M-h>", "<CMD>NavigatorLeft<CR>")
+--vim.keymap.set({"n", "t", "i"}, "<M-l>", "<CMD>NavigatorRight<CR>")
+--vim.keymap.set({"n", "t", "i"}, "<M-k>", "<CMD>NavigatorUp<CR>")
+--vim.keymap.set({"n", "t", "i"}, "<M-j>", "<CMD>NavigatorDown<CR>")
+-- vim.keymap.set({"n", "t"}, "<M-p>", "<CMD>NavigatorPrevious<CR>")
 --
 -- keymap("n", "<M-h>", "<C-w>h", opts)
 -- keymap("n", "<M-j>", "<C-w>j", opts)
