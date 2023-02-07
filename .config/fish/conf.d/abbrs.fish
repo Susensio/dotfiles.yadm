@@ -1,7 +1,7 @@
 # Faster cd
 function _multicd
-  set -l dots (string match --regex '\.\.+' $argv[1])
-  echo cd (string repeat -n (math (string length -- $argv[1]) - 1) ../)
+  set -l dots (string match --regex '\.\.+$' $argv[1])
+  echo cd (string repeat -n (math (string length -- "$dots") - 1) ../)
 end
 abbr --add dotdot --regex '^(?>cd)?\.\.+$' --function _multicd
 
