@@ -2,7 +2,7 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    event = "BufReadPost",
+    event = { "BufReadPost", "BufNewFile" },
     keys = {
       { "<CR>", desc = "Increment selection" },
       { "<BS>", desc = "Shrink selection", mode = "x" },
@@ -32,14 +32,33 @@ return {
           init_selection = "<CR>",
           node_incremental = "<CR>",
           node_decremental = "<BS>",
-          scope_incremental = false,
+          scope_incremental = nil,
         },
       },
-      endwise = { enable = true },
-      autotag = { enable = true },
+      -- autotag = { enable = true },
     },
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
     end,
+  },
+
+  {
+    "RRethy/nvim-treesitter-textsubjects",
+    enabled = false,
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter" },
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        textsubjects = {
+          enable = true,
+          prev_selection = ',', -- (Optional) keymap to select the previous selection
+          keymaps = {
+            ['.'] = 'textsubjects-smart',
+            [';'] = 'textsubjects-container-outer',
+            ['i;'] = 'textsubjects-container-inner',
+          },
+        },
+      })
+    end
   },
 }
