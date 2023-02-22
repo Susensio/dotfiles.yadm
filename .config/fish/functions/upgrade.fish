@@ -10,7 +10,7 @@ function upgrade --description 'Upgrade system'
   $HOME/bin/update-repos
 
   __info "Upgrading nvim plugins..."
-  __packersync_nvim
+#  __packersync_nvim
 
   __info "Upgrading python venv..."
   __upgrade_venv
