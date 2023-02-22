@@ -15,12 +15,16 @@ else
     highlight(0, "LineNr", {ctermfg = "grey"})
 end
 set.cursorline = true
-set.encoding = "utf-8" 
+-- Blink on insert mode
+set.guicursor:append('i:blinkon700')
 
 -- Wrap long lines
 set.wrap = true
 set.linebreak = true
 set.breakindent = true
+
+-- Context lines on moving
+set.scrolloff = 5
 
 -- Mouse selection and clipboard
 set.mouse = "a"
