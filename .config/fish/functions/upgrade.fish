@@ -9,8 +9,11 @@ function upgrade --description 'Upgrade system'
   _info "Upgrading user installed from github..."
   $HOME/bin/update-repos
 
-  _info "Upgrading nvim plugins..."
+  # _info "Upgrading nvim plugins..."
 #  _packersync_nvim
+
+  _info "Upgrading tmux plugins..."
+  _upgrade_tpm
 
   _info "Upgrading python venv..."
   _upgrade_venv
@@ -38,6 +41,10 @@ function _upgrade_venv
   set -l pip_venv $XDG_DATA_HOME/venv/bin/pip
   $pip_venv install --upgrade --requirement "$XDG_CONFIG_HOME/venv/requirements.txt" | sed -n '/^Requirement already satisfied/!p'
   $pip_venv cache purge
+end
+
+function _upgrade_tpm
+   $XDG_DATA_HOME/tmux/plugins/tpm/bin/update_plugins all
 end
 
 function _info
