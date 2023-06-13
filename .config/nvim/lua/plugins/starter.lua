@@ -14,17 +14,17 @@ return {
     "echasnovski/mini.starter",
     event = "VimEnter",
     enabled = true,
-    -- cond = function()   -- only if nvim started without arguments
-    --   return vim.fn.argc() == 0
-    -- end,
+    cond = function()   -- only if nvim started without arguments
+      return vim.fn.argc() == 0
+    end,
     opts = function()
       local starter = require("mini.starter")
       local config = {
         header = header,
         items = {
           starter.sections.builtin_actions(),
-          -- starter.sections.recent_files(10, false),
-          starter.sections.recent_files(10, true),
+          -- starter.sections.recent_files(10, false),      -- absolute
+          starter.sections.recent_files(10, true),          -- relative
         },
         footer = "",
       }

@@ -10,7 +10,8 @@ local function fix_monokai()
       pattern = "*monokai",
       callback = function()
         -- maintain terminal background color
-        hl(0, "Normal", { ctermfg="none" })
+        hl(0, "Normal", { bg="none" })
+        hl(0, "NormalNC", { bg="#1a1a1a" })
 
         -- current line less intrusive
         hl(0, "CursorLine", { bg="#272727" })

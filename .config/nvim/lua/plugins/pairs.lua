@@ -53,7 +53,10 @@ return {
     "abecodes/tabout.nvim",
     event = "InsertEnter",
     dependencies = { "nvim-treesitter" },
-    config = true,
+    opt = {
+      ignore_beginning = false,
+    },
+    -- config = true,
   },
 
   { -- Add `end` after function
