@@ -1,4 +1,6 @@
 # Everything else is in ./conf.d
+# `conf.d/*` is sourced first, `config.fish` later
+# so `config.fish` has the last word.
 
 # Safer root usage, just like /root/.bashrc
 if fish_is_root_user

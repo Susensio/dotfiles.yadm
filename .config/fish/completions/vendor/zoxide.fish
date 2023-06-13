@@ -1,0 +1,1 @@
+/home/susensio/.local/lib/zoxide/release/completions/zoxide.fish

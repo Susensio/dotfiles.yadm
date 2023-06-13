@@ -24,5 +24,11 @@ abbr --add lg lazygit
 
 abbr --add y yadm
 
+# Docker
+abbr --add dc docker-compose
+
 # Common mistake
 abbr --add please fix
+
+abbr --add howto howdoi
+abbr --add ipy ipython

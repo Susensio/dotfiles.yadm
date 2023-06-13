@@ -1,0 +1,1 @@
+/home/susensio/.local/lib/delta/etc/completion/completion.fish

@@ -2,7 +2,7 @@ function fish_right_prompt -d "Write out the right prompt"
   set -l elements
   set -lx last_status $status
   set -l max_shlvl 1
-  if test -n "$TMUX"
+  if test -n "$TMUX" || test "$TERM_PROGRAM" = "vscode"
     set max_shlvl 2
   end
 
@@ -21,7 +21,7 @@ function fish_right_prompt -d "Write out the right prompt"
   end
 
   # Print a fork symbol when in a subshell
-  if test $SHLVL -gt $max_shlvl 
+  if test $SHLVL -gt $max_shlvl
     set --append elements (set_color --bold yellow)"⑂"(set_color normal)
   end
 
@@ -40,13 +40,13 @@ function _format_cmd_duration
 
   set -l hours (math --scale=0 "$CMD_DURATION / $HOUR")
   set -l mins (math --scale=0 "$CMD_DURATION % $HOUR / $MIN")
-  
+
   set -l millis 0
   if test $hours -eq 0; and test $mins -eq 0
     set millis 1
   end
   set -l secs (math --scale="$millis" "$CMD_DURATION % $MIN / $SEC")
-  
+
   set -l out
   if test $hours -gt 0
     set --append out {$num_color}{$hours}{$normal}{$unit_color}"h"{$normal}

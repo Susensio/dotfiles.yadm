@@ -5,9 +5,9 @@ function sudo -d "Sudo with fish user functions"
     return 1
   end
 
-  # If command, remove and use system bins
+  # If command, remove and use system bins with default shell
   # `sudo command ls` -> `sudo ls`
-  if test "$argv[1]" = "command" 
+  if test "$argv[1]" = "command"
     set argv $argv[2..-1]
     # command sudo $argv[2..-1]
 
