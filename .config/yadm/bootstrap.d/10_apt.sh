@@ -4,7 +4,7 @@
 set -eu -o pipefail
 
 # script must be run as regular user
-if [ "$EUID" -e 0 ]
+if [ "$EUID" -eq 0 ]
   then echo "Please run as NON-root"
   exit
 fi
