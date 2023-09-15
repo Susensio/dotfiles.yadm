@@ -12,6 +12,9 @@ yadm sparse-checkout set '/*' '!README.md'
 # ~/.config/yadm/bootstrap.d directory when run.
 # https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir
 
+# Directory to look for bootstrap executables in
+BOOTSTRAP_D="${BASH_SOURCE[0]}.d"
+
 if [[ ! -d "$BOOTSTRAP_D" ]]; then
   echo "Error: bootstrap directory '$BOOTSTRAP_D' not found" >&2
   exit 1
