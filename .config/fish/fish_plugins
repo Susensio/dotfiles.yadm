@@ -1,9 +1,6 @@
 jorgebucaran/fisher
 jorgebucaran/autopair.fish
-jorgebucaran/replay.fish
 PatrickF1/fzf.fish
-acomagu/fish-async-prompt
 markcial/upto
-daleeidd/fish-git-ignore
 kentork/fish-comp
-/home/susensio/Projects/zoxide.fish
+susensio/zoxide.fish
