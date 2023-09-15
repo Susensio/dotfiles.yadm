@@ -67,7 +67,7 @@ else
   folder="${HOME}/.local/lib/${cmd}/"
   download="download.tar.gz"
   release="release"
-  
+
   mkdir -pv "$folder"
   cd "$folder"
 
@@ -87,7 +87,7 @@ else
     )
   downloaded=0
   # Download the first pattern encountered
-  for pattern in ${patterns[@]}; do
+  for pattern in "${patterns[@]}"; do
     gh --repo "$repo" release download --clobber \
       --pattern "${pattern}" \
       --output "${download}" \
@@ -95,12 +95,14 @@ else
       && break
   done
   if [[ $downloaded -eq 1 ]]; then
-    echo "Asset found with pattern '${pattern}' and downloaded to ${download}."
+    echo "Asset found with pattern '${pattern}' and downloaded to '${download}'."
   else
     echo "ERROR: No single asset found" >&2
     exit 1
   fi
 
+  echo "Removing old release..."
+  rm -vrf "$release"
   echo "Extracting downloaded file..."
   mkdir -pv "$release" && tar -xzf "$download" -C "$release" --recursive-unlink && echo "Done extracting"
 

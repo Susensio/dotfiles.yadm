@@ -1,0 +1,28 @@
+curl
+wget
+fish
+python3-venv
+xclip
+fzf
+exa
+fd-find
+zoxide
+htop
+git
+trash-cli
+git-lfs
+yadm
+# gh
+# vim-gtk3
+neovim
+# python3-neovim
+duf
+gdu
+thefuck
+tldr
+ripgrep
+
+lf
+bat
+poppler-utils
+chafa
