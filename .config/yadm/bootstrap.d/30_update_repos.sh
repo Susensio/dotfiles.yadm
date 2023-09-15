@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-~/bin/update-repos
+mkdir ~/.local/bin
+PATH=~/bin:$PATH update-repos
