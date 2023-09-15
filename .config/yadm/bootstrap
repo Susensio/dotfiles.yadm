@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -o nounset
+set -o errexit
+set -o pipefail
+
+# Do not checkout README.md
+yadm gitconfig core.sparseCheckout true
+yadm sparse-checkout set '/*' '!README.md'
+
+
+
+# Execute all executable files (excluding templates and editor backups) in the
+# ~/.config/yadm/bootstrap.d directory when run.
+# https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir
+
+if [[ ! -d "$BOOTSTRAP_D" ]]; then
+  echo "Error: bootstrap directory '$BOOTSTRAP_D' not found" >&2
+  exit 1
+fi
+
+find -L "$BOOTSTRAP_D" -type f | sort | while IFS= read -r bootstrap; do
+  if [[ -x "$bootstrap" && ! "$bootstrap" =~ "##" && ! "$bootstrap" =~ "~$" ]]; then
+    if ! "$bootstrap"; then
+      echo "Error: bootstrap '$bootstrap' failed" >&2
+      exit 1
+    fi
+  fi
+done
