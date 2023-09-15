@@ -16,9 +16,8 @@ test $? -eq 0 || exit 1 "you should have sudo privilege to run this script"
 
 # edit system config files
 echo "Non interactive upgrades needrestart"
+sudo mkdir -p /etc/needrestart/conf.d/
 echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/noninteractive.conf > /dev/null
-
-
 
 
 # update system and install requirements.sys
