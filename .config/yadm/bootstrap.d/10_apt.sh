@@ -26,7 +26,7 @@ sudo apt update
 echo "Perfodming a full system upgrade..."
 sudo apt full-upgrade -y
 echo "Installing user requirements..."
-xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.sys) -r -- sudo apt -y install
+xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt) -r -- sudo apt -y install
 echo "Cleaning up..."
 sudo apt autoremove -y
 sudo apt autoclean -y
