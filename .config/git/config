@@ -1,0 +1,30 @@
+[pull]
+	ff = only
+[user]
+	name = Saúl Nogueras
+[init]
+	defaultBranch = master
+[alias]
+	graph = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	root = rev-parse --show-toplevel
+	ignore = "!f() { args=$@; fish --command \"__gitignore $args\"; }; f"
+[credential]
+	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+[include]
+	path = config.local
+	path = config.delta
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[push]
+	autoSetupRemote = true
+[rebase]
+	autoStash = true
