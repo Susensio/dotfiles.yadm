@@ -3,6 +3,9 @@ function upgrade --description 'Upgrade system'
   _upgrade_apt
   _purge_apt
 
+  _info "Upgrading snap apps..."
+  _upgrade_snap
+
   _info "Upgrading fish plugins..."
   fisher update
 
@@ -44,7 +47,13 @@ function _upgrade_venv
 end
 
 function _upgrade_tpm
-   $XDG_DATA_HOME/tmux/plugins/tpm/bin/update_plugins all
+  $XDG_DATA_HOME/tmux/plugins/tpm/bin/update_plugins all
+end
+
+function _upgrade_snap
+  if command -qs snap
+    sudo snap refresh
+  end
 end
 
 function _info
