@@ -75,16 +75,28 @@ else
   [[ ! -f 'gh-repo' ]] && echo "$repo" > gh-repo
   echo "Downloading release..."
 
-  patterns=(
-    "${cmd}*x86_64*inux*gnu*.gz"
-    "${cmd}*x86_64*inux*.gz"
-    "${cmd}*inux*x86_64*.gz"
-    "${cmd}*64*inux*gnu*.gz"
-    "${cmd}*64*inux*.gz"
-    "${cmd}*inux*64*.gz"
-    "*64*inux*.gz"
-    "*.gz"
-    )
+  if [ $(uname -m) = "x86_64" ]; then
+    patterns=(
+      "${cmd}*x86_64*inux*gnu*.gz"
+      "${cmd}*x86_64*inux*.gz"
+      "${cmd}*inux*x86_64*.gz"
+      "${cmd}*64*inux*gnu*.gz"
+      "${cmd}*64*inux*.gz"
+      "${cmd}*inux*64*.gz"
+      "*64*inux*.gz"
+      "*.gz"
+      )
+  elif [[ $(uname -m) = armv7* ]]; then
+    patterns=(
+      "${cmd}*armv7*gnu*.gz"
+      "${cmd}*armv7*.gz"
+      "${cmd}*arm-*gnu*.gz"
+      "${cmd}*arm-*.gz"
+      )
+  else
+    echo "Architecture not recognized" 1>&2 && exit 1
+  fi
+
   downloaded=0
   # Download the first pattern encountered
   for pattern in "${patterns[@]}"; do
