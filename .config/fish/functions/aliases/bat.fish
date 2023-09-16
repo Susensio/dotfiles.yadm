@@ -1,4 +1,8 @@
 function bat --wraps=batcat --description 'Alternative to cat, with default options'
   set -l opt --style=auto
-  command batcat $opt $argv
+  if command -qs bat
+    command bat $opt $argv
+  else
+    command batcat $opt $argv
+  end
 end
