@@ -13,7 +13,7 @@ return {
         "bash", "fish",
         "dockerfile", "regex",
         -- "gitignore", "gitcommit",
-        "help", "comment",
+        "vimdoc", "comment",
         "python", "lua", "vim",
         "yaml",
       },
@@ -22,7 +22,7 @@ return {
         enable = true,
         additional_vim_regex_highlighting = false,
       },
-      indent = { 
+      indent = {
         enable = true,
         -- disable = { "fish" },
       },
