@@ -1,0 +1,1 @@
+90_xdg_sudo.sh##distro.Debian

@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if command -v gh &> /dev/null; then
+  echo "GitHub CLI already installed" >&2
+  exit 0
+fi
+
+echo "Installing GitHub CLI..." >&2
+
 type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
   && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -6,3 +13,5 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
   && sudo apt update \
   && sudo apt install gh -y
 gh config set -h github.com git_protocol ssh
+
+echo "GitHub CLI installed" >&2

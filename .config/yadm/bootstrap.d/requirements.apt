@@ -1,12 +1,10 @@
 curl
 wget
-fish
 python3-venv
 xclip
 fzf
 exa
 fd-find
-zoxide
 htop
 git
 trash-cli
@@ -21,6 +19,7 @@ gdu
 thefuck
 tldr
 ripgrep
+tmux
 
 lf
 bat
