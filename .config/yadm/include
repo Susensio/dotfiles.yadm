@@ -5,3 +5,4 @@ $XDG_CONFIG_HOME/fish/conf.d/*.fish
 $HOME/bin/*
 $XDG_CONFIG_HOME/tmux/*.conf
 $XDG_CONFIG_HOME/nvim/lua/**/*.lua
+$XDG_CONFIG_HOME/yadm/bootstrap.d/*
