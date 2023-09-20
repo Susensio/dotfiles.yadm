@@ -23,15 +23,19 @@ echo "\$nrconf{restart} = 'a';" | sudo tee /etc/needrestart/conf.d/noninteractiv
 # update system and install requirements.sys
 echo "Updating repositories..." >&2
 sudo apt update
-echo "Performing a full system upgrade..." >&2
+# echo "Performing a full system upgrade..." >&2
 # sudo apt full-upgrade -y
 echo "Installing user requirements..." >&2
-xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt) -r -- sudo apt --ignore-missing install -y
+xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt) -r -- \
+  # filter not available packages
+  apt-cache madison 2>/dev/null | awk -F '|' '{print $1}' | tr -d '[:blank:]' \
+  | sudo apt install -y
+
 # awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt | while read -r package; do
   # sudo apt -y install "$package" || true
 # done
-echo "Cleaning up..." >&2
-sudo apt autoremove -y
-sudo apt autoclean -y
+# echo "Cleaning up..." >&2
+# sudo apt autoremove -y
+# sudo apt autoclean -y
 
 echo "Done installing apt packages" >&2
