@@ -112,17 +112,18 @@ else
   done
 
   if [[ $downloaded -eq 0 ]]; then
-    echo "Tarball not found, fallback to AppImage" >&2
-    appimage="${cmd}.appimage"
-    gh --repo "$repo" release download --clobber \
-      --pattern "${appimage}" \
-      --output "${appimage}" \
-      || ( echo "ERROR: no release found" >&2 && exit 1 )
-    echo "AppImage downloaded. Updating symlink..." >&2
-    chmod +x "${appimage}"
-    ln -sfv "$(realpath ${appimage})" "${symlink}"
-    echo "${cmd} AppImage installed" >&2
-    exit 0
+    echo "ERROR: no release found" >&2 && exit 1
+    # echo "Tarball not found, fallback to AppImage" >&2
+    # appimage="${cmd}.appimage"
+    # gh --repo "$repo" release download --clobber \
+    #   --pattern "${appimage}" \
+    #   --output "${appimage}" \
+    #   || ( echo "ERROR: no release found" >&2 && exit 1 )
+    # echo "AppImage downloaded. Updating symlink..." >&2
+    # chmod +x "${appimage}"
+    # ln -sfv "$(realpath ${appimage})" "${symlink}"
+    # echo "${cmd} AppImage installed" >&2
+    # exit 0
   fi
 
   echo "Asset found with pattern '${pattern}' and downloaded to '${download}'." >&2
