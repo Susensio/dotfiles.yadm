@@ -115,7 +115,7 @@ else
     gh --repo "$repo" release download --clobber \
       --pattern "${appimage}" \
       --output "${appimage}" \
-      || echo "ERROR: no release found" >&2 && exit 1
+      || ( echo "ERROR: no release found" >&2 && exit 1 )
     echo "AppImage downloaded. Updating symlink..." >&2
     chmod +x "${appimage}"
     ln -sfv "$(realpath ${appimage})" "${symlink}"
