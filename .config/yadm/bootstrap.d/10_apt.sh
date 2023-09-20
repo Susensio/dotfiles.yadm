@@ -26,7 +26,7 @@ sudo apt update
 echo "Performing a full system upgrade..." >&2
 # sudo apt full-upgrade -y
 echo "Installing user requirements..." >&2
-xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt) -r -- sudo apt -y --ignore-missing install
+xargs -a <(awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt) -r -- sudo apt --ignore-missing install -y
 # awk '! /^ *(#|$)/' ~/.config/yadm/bootstrap.d/requirements.apt | while read -r package; do
   # sudo apt -y install "$package" || true
 # done
