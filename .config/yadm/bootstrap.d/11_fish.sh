@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # fail on error and report it, debug all lines
-set -eu -o
+set -eu -o pipefail
 
 # Add repo if not present
 if ! compgen -G "/etc/apt/sources.list.d/*fish*.list" &> /dev/null; then
