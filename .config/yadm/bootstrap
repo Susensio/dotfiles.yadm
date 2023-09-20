@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -o errexit
-set -o pipefail
+set -eu
 
 # Do not checkout README.md
 yadm gitconfig core.sparseCheckout true
