@@ -29,4 +29,7 @@ if [ "$SHELL" != "$(which fish)" ]; then
   sudo chsh -s "$(which fish)" "$USER"
 fi
 
+# update plugins from fish_plugins
+fish -c "fisher update"
+
 echo "Fish shell installed" >&2
