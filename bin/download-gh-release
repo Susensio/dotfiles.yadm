@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
       break
       ;;
     * )
-      echo "Unexpected option: $1"
+      echo "Unexpected option: $1" >&2
       exit
       ;;
   esac
@@ -60,13 +60,15 @@ latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
 current_version=$("$cmd" --version 2>/dev/null | get_version || echo "NOT-INSTALLED" )
 
 if [[ "$latest_version" = "$current_version" ]]; then
-  echo "Already up to date."
+  echo "Already up to date." >&2
 else
-  echo "Updating ${cmd} from ${current_version} to ${latest_version}..."
+  echo "Updating ${cmd} from ${current_version} to ${latest_version}..." >&2
 
   folder="${HOME}/.local/lib/${cmd}/"
   download="download.tar.gz"
   release="release"
+  symlink="${HOME}/.local/bin/${cmd}"
+  usermanpages="${XDG_DATA_HOME}/man/man1"
 
   mkdir -pv "$folder"
   cd "$folder"
@@ -94,7 +96,7 @@ else
       "${cmd}*arm-*.gz"
       )
   else
-    echo "Architecture not recognized" 1>&2 && exit 1
+    echo "System architecture not recognized" >&2 && exit 1
   fi
 
   downloaded=0
@@ -106,32 +108,41 @@ else
       && downloaded=1 \
       && break
   done
-  if [[ $downloaded -eq 1 ]]; then
-    echo "Asset found with pattern '${pattern}' and downloaded to '${download}'."
-  else
-    echo "ERROR: No single asset found" >&2
-    exit 1
+
+  if [[ $downloaded -eq 0 ]]; then
+    echo "Tarball not found, fallback to AppImage" >&2
+    appimage="${cmd}.appimage"
+    gh --repo "$repo" release download --clobber \
+      --pattern "${appimage}" \
+      --output "${appimage}" \
+      || echo "ERROR: no release found" >&2 && exit 1
+    echo "AppImage downloaded. Updating symlink..." >&2
+    chmod +x "${appimage}"
+    ln -sfv "$(realpath ${appimage})" "${symlink}"
+    echo "${cmd} AppImage installed" >&2
+    exit 0
   fi
 
-  echo "Removing old release..."
+  echo "Asset found with pattern '${pattern}' and downloaded to '${download}'." >&2
+  echo "Removing old release..." >&2
   rm -vrf "$release"
-  echo "Extracting downloaded file..."
+  echo "Extracting downloaded file..." >&2
   mkdir -pv "$release" && tar -xzf "$download" -C "$release" --recursive-unlink && echo "Done extracting"
 
   executable=$(find "${folder}" -type f -executable -name "${cmd}")
-  symlink="${HOME}/.local/bin/${cmd}"
-  echo "Updating symlink..."
+  echo "Updating symlink..." >&2
   ln -sfv "$(realpath ${executable})" "${symlink}"
 
-  usermanpages="${XDG_DATA_HOME}/man/man1"
   manpage=$(find "${folder}" -type d -name "man1")
   if [[ -n "${manpage}" ]]; then
-    echo "Updating manpages..."
+    echo "Updating manpages..." >&2
     for file in $(find ${manpage} -type f); do
       ln -svf "${file}" "${usermanpages}/$(basename ${file})"
     done
   fi
 
-  echo "Removing downloaded file..."
+  echo "Removing downloaded file..." >&2
   rm -v "${download}"
+
+  echo "${cmd} Tarball installed" >&2
 fi
