@@ -3,7 +3,7 @@ set -eu
 
 # Do not checkout README.md
 yadm gitconfig core.sparseCheckout true
-yadm sparse-checkout set '/*' '!README.md'
+( cd && yadm sparse-checkout set  '/*' '!/README.md' )
 
 
 

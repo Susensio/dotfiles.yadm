@@ -4,7 +4,8 @@
 mkdir -p "${XDG_CONFIG_HOME:-~./config}/anacron"
 mkdir -p "${XDG_STATE_HOME:-~./local/state}/anacron"
 
-if ! crontab -l; then
+if ! crontab -l &> /dev/null; then
+  echo "Crontab not present, initializing..." >&2
   cat << EOF | crontab -
 XDG_CONFIG_HOME="~/.config"
 XDG_STATE_HOME="~.local/state"

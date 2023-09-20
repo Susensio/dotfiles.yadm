@@ -9,6 +9,7 @@ if [ ! -f ~/.ssh/authorized_keys ]; then
 fi
 
 curl https://github.com/susensio.keys -o ~/.ssh/authorized_keys &> /dev/null
+echo "Ssh keys updated from GitHub" >&2
 
 if ! crontab -l | grep "github.com/susensio.keys" &> /dev/null; then
   echo "Creating crontab for updated ssh keys..."

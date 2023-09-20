@@ -30,6 +30,8 @@ if [ "$SHELL" != "$(which fish)" ]; then
 fi
 
 # update plugins from fish_plugins
-fish -c "fisher update"
+fish -c 'fisher update' &
+# have to wait bc fisher is async
+wait
 
 echo "Fish shell installed" >&2
