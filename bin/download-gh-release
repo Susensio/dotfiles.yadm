@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-folder="${HOME}/.local/lib/${cmd}/"
+folder="${HOME}/.local/lib/${cmd}"
 download="download.tar.gz"
 release="release"
 symlink="${HOME}/.local/bin/${cmd}"
@@ -50,7 +50,6 @@ usermanpages="${XDG_DATA_HOME}/man/man1"
 
 # Save release file if not present
 [[ ! -f 'gh-repo' ]] && echo "$repo" > "${folder}/gh-repo"
-echo "Downloading release..."
 
 function get_version(){
   text=$(cat)
@@ -64,6 +63,7 @@ function get_version(){
   [[ -n "$version" ]] && echo "$version" | head -n1 || return 1
 }
 
+echo "Finding latest version..." >&2
 latest_version=$(gh --repo "$repo" release view --json 'tagName' | get_version \
   || gh --repo "$repo" release view --json 'body' | get_version)
 
