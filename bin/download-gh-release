@@ -54,7 +54,7 @@ mkdir -pv "$folder"
 
 function get_version(){
   text=$(cat)
-  regex='\d+(\.\d+)+'
+  regex='\d+(\.\d+)+|r/d+'
   version=$(echo "$text" | grep -Po -m1 "v${regex}")
   # Try to find it without `v` and prepend it later...
   if [[ -z "$version" ]]; then
