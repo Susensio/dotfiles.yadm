@@ -90,11 +90,13 @@ else
       )
   elif [[ $(uname -m) = armv7* ]]; then
     patterns=(
+      "${cmd}*inux*armv7*gnu*.gz"
+      "${cmd}*inux*armv7*.gz"
       "${cmd}*armv7*gnu*.gz"
-      "${cmd}*armv7*.gz"
       "${cmd}*arm[\-\.]*gnu*.gz"
       "${cmd}*arm[\-\.]*inux*.gz"
       "${cmd}*inux*arm[\-\.]*.gz"
+      "${cmd}*armv7*.gz"
       "${cmd}*arm[\-\.]*.gz"
       )
   else
