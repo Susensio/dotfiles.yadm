@@ -16,12 +16,17 @@
 #     fi
 # fi
 
+# add snap PATH
+if [ -d "/snap/bin" ] ; then
+    PATH="/snap/bin:$PATH"
+fi
+
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
 fi
 
-# set PATH so it includes user's private bin if it exists
+# ADD LAST for priority. set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
@@ -62,7 +67,8 @@ export PAGER="less"
 export LESS="--incsearch -XRF --mouse --wheel-lines=3"
 
 # Colorize man pages with bat
-export MANPAGER="sh -c 'col -bx | batcat -l man -p --paging always'"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
 
 # fd as default in fzf
 export FZF_FD_OPTS="--hidden --exclude=.git"
@@ -91,4 +97,9 @@ export HOWDOI_COLORIZE=1
 
 
 # Source secrets
-source $XDG_CONFIG_HOME/profile.secrets
+if [ ! -f "${XDG_CONFIG_HOME}/profile.secrets" ]; then
+    source $XDG_CONFIG_HOME/profile.secrets
+fi
+
+# stderr in red
+export LD_PRELOAD="/home/susensio/.local/lib/stderred/build/libstderred.so"

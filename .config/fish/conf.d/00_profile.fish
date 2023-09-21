@@ -9,7 +9,7 @@ function _source -d "Translate export, path additions and subsequent sources fro
            s/^\s*PATH/fish_add_path/;
            s/=/ /;
            s/:$PATH//;
-           s/^source/_source/' |
+           s/^\s*source/_source/' |
       source
   end
 end
