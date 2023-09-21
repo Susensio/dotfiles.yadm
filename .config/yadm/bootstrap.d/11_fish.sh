@@ -21,6 +21,7 @@ fi
 if ! command -v fish &> /dev/null; then
   sudo apt update
   sudo apt install fish
+  echo "Fish shell installed" >&2
 fi
 
 # set defaults
@@ -29,9 +30,12 @@ if [ "$SHELL" != "$(which fish)" ]; then
   sudo chsh -s "$(which fish)" "$USER"
 fi
 
-# update plugins from fish_plugins
-fish -c 'fisher update' &
-# have to wait bc fisher is async
-wait
-
-echo "Fish shell installed" >&2
+# update plugins from fish_plugins if changed
+if comm -3 \
+    <(fish -c 'fisher list' | tr '[:upper:]' '[:lower:]' | sort) \
+    <(cat fish_plugins |tr '[:upper:]' '[:lower:]' | sort) \
+    &> /dev/null; then
+  fish -c 'fisher update' &
+  # have to wait bc fisher is async
+  wait
+fi
