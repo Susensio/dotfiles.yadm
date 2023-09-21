@@ -1,4 +1,10 @@
 # Same opts as system fzf
+
+# Not neccesary if not interactive, besides this guards on bootstrap
+if not status is-interactive
+  exit
+end
+
 set fzf_fd_opts (string split -- ' ' $FZF_FD_OPTS)
 
 # Default bindings but bind Search Directory to Ctrl+F and Search Variables to Ctrl+Alt+V prepending $
@@ -14,7 +20,7 @@ function _fzf_search_variables_prepend
   end
 end
 bind \e\cv _fzf_search_variables_prepend
-# bind \e\cv "commandline --append '\$'; $_fzf_search_vars_command" 
+# bind \e\cv "commandline --append '\$'; $_fzf_search_vars_command"
 
 # Better dir and file previews
 set fzf_preview_dir_cmd preview
