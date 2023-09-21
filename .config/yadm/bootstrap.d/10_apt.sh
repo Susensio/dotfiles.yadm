@@ -30,7 +30,6 @@ missing="$(comm -23 <(echo "${required}" | tr ' ' '\n' | sort) <(echo "${availab
 
 # now check if all packages are installed, avoid updating apt if not necessary
 not_installed="$(comm -13 <(dpkg -l | awk '/^ii/ {print $2}' | sort) <(echo "$available" | sort))"
-
 if [[ -z "$not_installed" ]]; then
   echo "All packages are installed" >&2
   exit 0
@@ -40,5 +39,5 @@ fi
 echo "Updating repositories..." >&2
 sudo apt update
 echo "Installing user requirements..." >&2
-echo "${not_installed}" | sudo apt install -y
+sudo apt install -y $(echo "${not_installed}")
 echo "Done installing apt packages" >&2
