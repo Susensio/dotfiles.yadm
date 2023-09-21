@@ -3,4 +3,4 @@
 echo "ARM arch detected. Installing nvim from snap..." >&2
 sudo apt install snapd
 sudo snap install core
-sudo snap install nvim classic
+sudo snap install nvim --classic
