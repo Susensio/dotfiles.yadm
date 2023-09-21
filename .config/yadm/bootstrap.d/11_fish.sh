@@ -31,10 +31,10 @@ if [ "$SHELL" != "$(which fish)" ]; then
 fi
 
 # update plugins from fish_plugins if changed
-if comm -3 \
+if [[ -n $(comm -3 \
     <(fish -c 'fisher list' | tr '[:upper:]' '[:lower:]' | sort) \
-    <(cat fish_plugins |tr '[:upper:]' '[:lower:]' | sort) \
-    &> /dev/null; then
+    <(cat ~/.config/fish/fish_plugins |tr '[:upper:]' '[:lower:]' | sort) \
+    &> /dev/null) ]]; then
   fish -c 'fisher update' &
   # have to wait bc fisher is async
   wait
