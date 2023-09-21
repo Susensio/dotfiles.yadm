@@ -92,10 +92,10 @@ else
     patterns=(
       "${cmd}*armv7*gnu*.gz"
       "${cmd}*armv7*.gz"
-      "${cmd}*arm![:alnum:]*gnu*.gz"
-      "${cmd}*arm![:alnum:]*inux*.gz"
-      "${cmd}*inux*arm![:alnum:]*.gz"
-      "${cmd}*arm![:alnum:]*.gz"
+      "${cmd}*arm[\-\.]*gnu*.gz"
+      "${cmd}*arm[\-\.]*inux*.gz"
+      "${cmd}*inux*arm[\-\.]*.gz"
+      "${cmd}*arm[\-\.]*.gz"
       )
   else
     echo "System architecture not recognized" >&2 && exit 1
