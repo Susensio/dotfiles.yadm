@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo "ARM arch detected. Installing nvim from snap..." >&2
 if ! command -v snap &> /dev/null; then
+  echo "ARM arch detected. Installing nvim from snap..." >&2
   echo "Installing snap..." >&2
   sudo apt install snapd
   sudo snap install core
