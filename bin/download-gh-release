@@ -49,6 +49,7 @@ symlink="${HOME}/.local/bin/${cmd}"
 usermanpages="${XDG_DATA_HOME}/man/man1"
 
 # Save release file if not present
+mkdir -pv "$folder"
 [[ ! -f 'gh-repo' ]] && echo "$repo" > "${folder}/gh-repo"
 
 function get_version(){
@@ -74,7 +75,6 @@ if [[ "$latest_version" = "$current_version" ]]; then
 else
   echo "Updating ${cmd} from ${current_version} to ${latest_version}..." >&2
 
-  mkdir -pv "$folder"
   cd "$folder"
 
   if [ $(uname -m) = "x86_64" ]; then
