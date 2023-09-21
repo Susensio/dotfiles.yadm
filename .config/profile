@@ -102,4 +102,4 @@ if [ ! -f "${XDG_CONFIG_HOME}/profile.secrets" ]; then
 fi
 
 # stderr in red
-export LD_PRELOAD="/home/susensio/.local/lib/stderred/build/libstderred.so"
+#export LD_PRELOAD="/home/susensio/.local/lib/stderred/build/libstderred.so"
