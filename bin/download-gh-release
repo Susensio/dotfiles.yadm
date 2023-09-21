@@ -42,6 +42,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+folder="${HOME}/.local/lib/${cmd}/"
+download="download.tar.gz"
+release="release"
+symlink="${HOME}/.local/bin/${cmd}"
+usermanpages="${XDG_DATA_HOME}/man/man1"
+
+# Save release file if not present
+[[ ! -f 'gh-repo' ]] && echo "$repo" > "${folder}/gh-repo"
+echo "Downloading release..."
+
 function get_version(){
   text=$(cat)
   regex='\d+(\.\d+)+'
@@ -64,18 +74,8 @@ if [[ "$latest_version" = "$current_version" ]]; then
 else
   echo "Updating ${cmd} from ${current_version} to ${latest_version}..." >&2
 
-  folder="${HOME}/.local/lib/${cmd}/"
-  download="download.tar.gz"
-  release="release"
-  symlink="${HOME}/.local/bin/${cmd}"
-  usermanpages="${XDG_DATA_HOME}/man/man1"
-
   mkdir -pv "$folder"
   cd "$folder"
-
-  # Save release file if not present
-  [[ ! -f 'gh-repo' ]] && echo "$repo" > gh-repo
-  echo "Downloading release..."
 
   if [ $(uname -m) = "x86_64" ]; then
     patterns=(
