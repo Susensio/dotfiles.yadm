@@ -64,7 +64,8 @@ export RUSTUP_HOME="$XDG_CONFIG_HOME"/rustup
 
 export EDITOR="$(command -v nvim)"
 export PAGER="less"
-export LESS="--incsearch -XRF --mouse --wheel-lines=3"
+# incsearch only works from version 590
+export LESS=$(test $(less --version | head -n1 | cut -d ' ' -f 2) -ge 590 && echo '--incsearch ' || true)"-XRF --mouse --wheel-lines=3"
 
 # Colorize man pages with bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
