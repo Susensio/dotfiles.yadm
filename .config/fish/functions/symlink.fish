@@ -13,6 +13,6 @@ function symlink --argument _from _to --description 'Create a symbolic link, usi
   end
 
   set from (realpath (string replace '~' "$HOME" $_from))
-  
-  ln -sf $from $to
+
+  ln -s $from $to
 end
