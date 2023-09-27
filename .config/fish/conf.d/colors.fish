@@ -1,8 +1,8 @@
 # Update variables when file is modified
 
-set -l modified (stat --format="%Y" (status --current-filename))
-
-if not set -q colorscheme || test $colorscheme != $modified
+# set -l modified (stat --format="%Y" (status --current-filename))
+#
+# if not set -q colorscheme || test $colorscheme != $modified
 
     set -U fish_color_autosuggestion brblack
     set -U fish_color_cancel normal
@@ -27,7 +27,7 @@ if not set -q colorscheme || test $colorscheme != $modified
     set -U fish_color_user green --bold
     set -U fish_color_user_root red --bold
     set -U fish_color_valid_path normal
-    set -U fish_greeting 
+    set -U fish_greeting
     set -U fish_key_bindings fish_default_key_bindings
     set -U fish_pager_color_completion normal
     set -U fish_pager_color_description B3A06D yellow
@@ -35,5 +35,5 @@ if not set -q colorscheme || test $colorscheme != $modified
     set -U fish_pager_color_progress brwhite --background=cyan
     set -U fish_pager_color_selected_background -r
 
-    set -U colorscheme $modified
-end
+    # set -U colorscheme $modified
+# end

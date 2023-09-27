@@ -9,7 +9,7 @@ function _source -d "Translate export, path additions and subsequent sources fro
     command grep -P '^export|^\s*add_path|^\s*source|^if|^fi$|^\s*for|^\s*done$|^\w+=' $file |
       sed -E 's/^export (\w+)=/set -gx \1 /;
         s/^(\w+)=/set -l \1 /;
-        s/\badd_path\b/fish_add_path/;
+        s/\badd_path\b/fish_add_path -P/;
         s/\bsource\b/_source/;
         s/;\s*then$//;
         s/^fi$/end/;
