@@ -23,6 +23,7 @@ abbr --add tap --set-cursor task add project:%
 abbr --add lg lazygit
 
 abbr --add y yadm
+abbr --add yc --set-cursor 'yadm commit -m "%"'
 
 # Docker
 abbr --add dc docker-compose

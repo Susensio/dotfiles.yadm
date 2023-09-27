@@ -25,7 +25,7 @@ SETUVAR _fisher_patrickf1_2F_fzf_2E_fish_files:\x7e/\x2econfig/fish/fisher/funct
 SETUVAR _fisher_plugins:jorgebucaran/autopair\x2efish\x1epatrickf1/fzf\x2efish\x1ejorgebucaran/fisher\x1emarkcial/upto\x1ekentork/fish\x2dcomp\x1esusensio/zoxide\x2efish
 SETUVAR _fisher_susensio_2F_zoxide_2E_fish_files:\x7e/\x2econfig/fish/fisher/functions/__zoxide_cd\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_pwd\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_z\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_z_complete\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_zi\x2efish\x1e\x7e/\x2econfig/fish/fisher/conf\x2ed/zoxide\x2efish
 SETUVAR _fisher_upgraded_to_4_4:\x1d
-SETUVAR --export colorscheme:1694795370
+SETUVAR --export colorscheme:1674722738
 SETUVAR fifc_open_keybinding:ctrl\x2do
 SETUVAR --export fish_color_autosuggestion:brblack
 SETUVAR --export fish_color_cancel:normal
