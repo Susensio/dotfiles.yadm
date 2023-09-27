@@ -6,7 +6,7 @@ set ifs "\n"
 
 # Mouse interaction
 # waiting for next release
-#set mouse
+set mouse
 
 # Show hidden files
 set hidden
@@ -44,7 +44,7 @@ map <esc> quit
 # }}
 
 cmd z %{{
-    result="$(zoxide query --exclude "${PWD}" -- 
+    result="$(zoxide query --exclude "${PWD}" --
     "$@")"
     lf -remote "send ${id} cd '${result}'"
 }}
