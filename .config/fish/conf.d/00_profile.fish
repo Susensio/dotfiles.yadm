@@ -1,27 +1,25 @@
 function _source -d "Translate export, path additions and subsequent sources from POSIX file (~/.profile)"
   # export NAME=VALUE -> set -gx NAME VALUE
-  # PATH=VALUE:$PATH  -> fish_add_path VALUE   # already checks if directory exists
+  # NAME=VALUE        -> set -l NAME VALUE
+  # add_path VALUE    -> fish_add_path VALUE   # already checks if directory exists
   # source FILE       -> _source FILE          # use recursion
+  # also conditional and loops are converted
   set -l file "$argv[1]"
   if test -f $file
-    command grep '^export\|^\s*PATH\|^source' $file |
-      sed 's/^export /set -gx /;
-           s/^\s*PATH/fish_add_path/;
-           s/=/ /;
-           s/:$PATH//;
-           s/^\s*source/_source/' |
+    command grep -P '^export|^\s*add_path|^\s*source|^if|^fi$|^\s*for|^\s*done$|^\w+=' $file |
+      sed -E 's/^export (\w+)=/set -gx \1 /;
+        s/^(\w+)=/set -l \1 /;
+        s/\badd_path\b/fish_add_path/;
+        s/\bsource\b/_source/;
+        s/;\s*then$//;
+        s/^fi$/end/;
+        s/\bdone\b/end/;
+        s/;\s*do$//;' |
       source
   end
 end
 
 # if status is-login
-  _source $HOME/.profile
-  _source ~/.config/profile
-# end
-
-# if test -f ~/.profile
-#   replay source ~/.profile
-# end
-# if test -f ~/.config/profile
-#   replay source ~/.config/profile
+_source $HOME/.profile
+_source ~/.config/profile
 # end
