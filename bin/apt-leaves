@@ -1,0 +1,9 @@
+#!/bin/bash
+# List all packages that no package depends on
+
+dpkg-query --show --showformat='${Package}\t${Status}\n' \
+  | tac \
+  | awk '/installed$/ {print $1}' \
+  | xargs apt-cache rdepends --installed \
+  | tac \
+  | awk '{ if (/^ /) ++deps; else if (!/:$/) { if (!deps) print; deps = 0 } }'

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Force bluetooth headset to use a2dp
 bluezcard=$(pactl list cards short | awk '/bluez/{print $2}')
 pactl set-card-profile "$bluezcard" a2dp
 pactl set-card-profile "$bluezcard" hsp

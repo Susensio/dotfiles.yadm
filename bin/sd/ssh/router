@@ -1,0 +1,3 @@
+#!/bin/bash
+# Access to Xiaomi AX3600 router on 10.10.10.1 with password hardcoded
+sshpass -p "$XIAOMI_AX3600_PSWD" ssh -oHostKeyAlgorithms=+ssh-rsa root@10.10.10.1

@@ -1,0 +1,20 @@
+#!/bin/bash
+# Using gnome-extensions-sync, push changes to github and check if changes where made to gist
+
+currtime=$(date -u +%s)
+
+busctl --user call org.gnome.Shell /io/elhan/ExtensionsSync io.elhan.ExtensionsSync save
+# Wait for github to update gist
+sleep 10
+
+modtime=$(date -d "$(gh gist list | awk -F '\t' '/^10505086/ {print $5}')" +%s)
+delta=$((modtime-currtime))
+# Absolute value
+delta=${delta#-}
+
+if (( delta > 100 )); then
+  echo "Error syncing gnome extensions to GitHub" >&2
+  exit 1
+fi
+
+echo "Gnome extensions synced" >&2
