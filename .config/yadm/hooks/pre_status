@@ -18,5 +18,7 @@ include="$XDG_CONFIG_HOME/yadm/include"
   # expand globs
   # https://unix.stackexchange.com/a/671797/279958
   xargs -I{} bash -O nullglob -c "echo {}" | xargs -n1 |
+  # remove symlinks
+  xargs -I{} find {} -type f ! -type l |
   # mark files as intent to add
   eval $git_cmd 'add --intent-to-add --pathspec-from-file=-'
