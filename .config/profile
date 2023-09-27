@@ -20,7 +20,7 @@ add_path "$HOME/.local/bin"
 export EDITOR="$(command -v nvim || command -v vim)"
 export PAGER="less"
 # incsearch only works from version 590
-export LESS=$(test $(less --version | head -n1 | cut -d ' ' -f 2) -ge 590 && echo '--incsearch ' || true)"-XRF --mouse --wheel-lines=3"
+export LESS="$(test $(less --version | head -n1 | cut -d ' ' -f 2) -ge 590 && echo '--incsearch ' || true)-XRF --mouse --wheel-lines=3"
 #
 # Colorize man pages with bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
