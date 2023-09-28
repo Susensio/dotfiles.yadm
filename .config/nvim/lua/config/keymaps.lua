@@ -89,3 +89,9 @@ keymap({"n","v"}, "x", '"_x', opts)
 
 -- Disable command history `q:`, can still be accessed from command mode <Ctrl+F>
 keymap("n", "q:", "<nop>")
+
+-- wildoptions menu (:edit) correction for vertical horizontal navigation
+keymap('c', '<Up>', 'wildmenumode() ? "<Left>" : "<Up>"', {expr = true, noremap=true, replace_keycodes=false})
+keymap('c', '<Down>', 'wildmenumode() ? "<Right>" : "<Down>"', {expr = true, noremap=true, replace_keycodes=false})
+keymap('c', '<Left>', 'wildmenumode() ? "<Up>" : "<Left>"', {expr = true, noremap=true, replace_keycodes=false})
+keymap('c', '<Right>', 'wildmenumode() ? "<Down>" : "<Right>"', {expr = true, noremap=true, replace_keycodes=false})
