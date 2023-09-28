@@ -1,12 +1,12 @@
 #!/bin/bash
 set -eu
-set -o noglob
+# set -o noglob
 
 function usage(){
   cat << EOF
 Usage: $(basename "$0") [-r|--repo] 'author/repo' [-c|--cmd] 'command'
 
-Programs are installed in ${HOME}/.local/lib/\${cmd}/ and symlinked to ${HOME}/.local/bin/\${cmd}
+Programs are installed in $HOME/.local/lib/\$cmd/ and symlinked to $HOME/.local/bin/\${cmd}
 
 EOF
 }
@@ -42,15 +42,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-folder="${HOME}/.local/lib/${cmd}"
+folder="$HOME/.local/lib/$cmd"
 download="download.tar.gz"
 release="release"
-symlink="${HOME}/.local/bin/${cmd}"
-usermanpages="${XDG_DATA_HOME}/man/man1"
+symlink="$HOME/.local/bin/$cmd"
+usermanpages="$XDG_DATA_HOME/man/man1"
+fish_completions="$XDG_CONFIG_HOME/fish/completions/vendor"
 
 # Save release file if not present
 mkdir -pv "$folder"
-[[ ! -f 'gh-repo' ]] && echo "$repo" > "${folder}/gh-repo"
+[[ ! -f 'gh-repo' ]] && echo "$repo" > "$folder/gh-repo"
 
 function get_version(){
   text=$(cat)
@@ -73,11 +74,11 @@ current_version=$("$cmd" --version 2>/dev/null | get_version || echo "NOT-INSTAL
 if [[ "$latest_version" = "$current_version" ]]; then
   echo "Already up to date." >&2
 else
-  echo "Updating ${cmd} from ${current_version} to ${latest_version}..." >&2
+  echo "Updating $cmd from $current_version to $latest_version..." >&2
 
   cd "$folder"
 
-  if [ $(uname -m) = "x86_64" ]; then
+  if [ "$(uname -m)" = "x86_64" ]; then
     patterns=(
       "${cmd}*x86_64*inux*gnu*.gz"
       "${cmd}*x86_64*inux*.gz"
@@ -88,7 +89,7 @@ else
       "*64*inux*.gz"
       "*.gz"
       )
-  elif [[ $(uname -m) = armv7* ]]; then
+  elif [[ "$(uname -m)" = armv7* ]]; then
     patterns=(
       "${cmd}*inux*armv[76]*gnu*.gz"
       "${cmd}*inux*armv[76]*.gz"
@@ -107,8 +108,8 @@ else
   # Download the first pattern encountered
   for pattern in "${patterns[@]}"; do
     gh --repo "$repo" release download --clobber \
-      --pattern "${pattern}" \
-      --output "${download}" \
+      --pattern "$pattern" \
+      --output "$download" \
       && downloaded=1 \
       && break
   done
@@ -128,26 +129,44 @@ else
     # exit 0
   fi
 
-  echo "Asset found with pattern '${pattern}' and downloaded to '${download}'." >&2
+  echo "Asset found with pattern '$pattern' and downloaded to '$download'." >&2
   echo "Removing old release..." >&2
   rm -vrf "$release"
   echo "Extracting downloaded file..." >&2
   mkdir -pv "$release" && tar -xzf "$download" -C "$release" --recursive-unlink && echo "Done extracting"
 
-  executable=$(find "${folder}" -type f -executable -name "${cmd}")
+  executable=$(find "$folder" -type f -executable -name "${cmd}")
   echo "Updating symlink..." >&2
-  ln -sfv "$(realpath ${executable})" "${symlink}"
+  ln -sfv "$(realpath "$executable")" "$symlink"
 
-  manpage=$(find "${folder}" -type d -name "man1")
-  if [[ -n "${manpage}" ]]; then
-    echo "Updating manpages..." >&2
-    for file in $(find ${manpage} -type f); do
-      ln -svf "${file}" "${usermanpages}/$(basename ${file})"
-    done
-  fi
+
+  shopt -s globstar nullglob
+  echo "Updating manpages..." >&2
+  for file in **/man1/*; do
+    ln -svf "$(realpath "$file")" "$usermanpages/$(basename "$file")"
+  done
+  # manpage=$(find "$folder" -type d -name "man1")
+  # if [[ -n "$manpage" ]]; then
+  #   echo "Updating manpages..." >&2
+  #   find "$manpage" -type f -exec \
+  #     bash -c 'ln -svf "$(realpath "$1")" "$usermanpages/$(basename "$1")"' bash {} \;
+  # fi
+
+  echo "Updating fish completion..." >&2
+  # should not use a loop, bc only one file is expected
+  for file in **/*complet*/**/*.fish; do
+    ln -svf "$(realpath "$file")" "$fish_completions/$cmd.fish"
+  done
+
+  # completion=$(find "$folder" -type f -path '*complet*.fish')
+  # if [[ -n "$completion" ]]; then
+  #   echo "Updating fish completion..." >&2
+  #   ln -svf "$(realpath "$completion")" "$fish_completions/$cmd.fish"
+  # fi
+  shopt -u globstar nullglob
 
   echo "Removing downloaded file..." >&2
-  rm -v "${download}"
+  rm -v "$download"
 
-  echo "${cmd} Tarball installed" >&2
+  echo "$cmd Tarball installed" >&2
 fi
