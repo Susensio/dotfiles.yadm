@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eu
 
 repo=https://github.com/TheLocehiliosan/yadm.git
 folder="${HOME}/.local/lib/yadm"

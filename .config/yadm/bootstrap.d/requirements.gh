@@ -1,3 +1,2 @@
-bat;sharkdp/bat
-zoxide;ajeetdsouza/zoxide
-jesseduffield/lazygit
+nvim;neovim/neovim
+lazygit;jesseduffield/lazygit

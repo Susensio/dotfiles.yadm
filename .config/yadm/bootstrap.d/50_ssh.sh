@@ -8,10 +8,12 @@ if [ ! -f ~/.ssh/authorized_keys ]; then
   chmod 600 ~/.ssh/authorized_keys
 fi
 
-curl https://github.com/susensio.keys -o ~/.ssh/authorized_keys &> /dev/null
-echo "Ssh keys updated from GitHub" >&2
+"$HOME"/bin/sd/ssh/sync-keys
 
-if ! crontab -l | grep "github.com/susensio.keys" &> /dev/null; then
-  echo "Creating crontab for updated ssh keys..."
-  (crontab -l 2> /dev/null; echo "* */4 * * * curl https://github.com/susensio.keys -o ~/.ssh/authorized_keys &> /dev/null") | crontab -
-fi
+# curl https://github.com/susensio.keys -o $HOME/.ssh/authorized_keys &> /dev/null
+# echo "Ssh keys updated from GitHub" >&2
+
+# if ! crontab -l | grep "github.com/susensio.keys" &> /dev/null; then
+#   echo "Creating crontab for updated ssh keys..."
+#   (crontab -l 2> /dev/null; echo "0 */4 * * * curl https://github.com/susensio.keys -o ~/.ssh/authorized_keys &> /dev/null") | crontab -
+# fi

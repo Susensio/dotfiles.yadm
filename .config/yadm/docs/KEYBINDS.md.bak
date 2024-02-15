@@ -1,0 +1,57 @@
+## TMUX
+
+`prefix` <kbd>Ctrl</kbd> + <kbd>Space</kbd>
+
+### Panes
+Split vertical
+<kbd>prefix</kbd> , <kbd>\\</kbd>
+...expanded
+<kbd>prefix</kbd> , <kbd>|</kbd>
+
+Split horizontal
+<kbd>prefix</kbd> , <kbd>-</kbd>
+...expanded
+<kbd>prefix</kbd> , <kbd>\_</kbd>
+
+Number panes
+<kbd>prefix</kbd> , <kbd>\`</kbd>
+
+Move between panes
+<kbd>Alt</kbd> + <kbd>h/j/k/l</kbd>
+Resize panes
+<kbd>prefix</kbd> , <kbd>h/j/k/l</kbd>
+Swap panes
+<kbd>prefix</kbd> , <kbd>Alt</kbd> + <kbd>h/j/k/l</kbd>
+
+Close pane
+<kbd>Ctrl</kbd> + <kbd>d</kbd>
+<kbd>prefix</kbd> + <kbd>x</kbd>
+
+
+### Windows (tabs)
+New window
+<kbd>prefix</kbd> , <kbd>Ctrl</kbd> + <kbd>t</kbd>
+
+Move between windows
+<kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>h/l</kbd>
+Swap windows
+<kbd>prefix</kbd> , <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>h/l</kbd>
+
+Close window
+<kbd>prefix</kbd> , <kbd>Shift</kbd> + <kbd>x</kbd>
+
+### Sessions
+New session
+<kbd>prefix</kbd> , <kbd>Ctrl</kbd> + <kbd>n</kbd>
+
+Move between sessions
+<kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>j/k</kbd>
+
+Close session
+<kbd>prefix</kbd> , <kbd>Shift</kbd> + <kbd>q</kbd>
+
+
+### Others
+Reload
+<kbd>prefix</kbd> + <kbd>r</kbd>
+

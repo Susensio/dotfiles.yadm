@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -eu
 
-# Do not checkout README.md
-yadm gitconfig core.sparseCheckout true
-( cd && yadm sparse-checkout set  '/*' '!/README.md' )
-
-
-
 # Execute all executable files (excluding templates and editor backups) in the
 # ~/.config/yadm/bootstrap.d directory when run.
 # https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir

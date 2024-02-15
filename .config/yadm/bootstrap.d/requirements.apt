@@ -1,7 +1,6 @@
 curl
 wget
 python3-venv
-xclip
 fzf
 exa
 fd-find
@@ -9,17 +8,14 @@ htop
 git
 trash-cli
 git-lfs
-# gh
-# vim-gtk3
-# python3-neovim
 duf
 gdu
 thefuck
 tldr
 ripgrep
 tmux
-
 lf
 bat
+zoxide
 poppler-utils
 chafa
