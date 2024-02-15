@@ -4,9 +4,8 @@
 - Rule:
   - And:
     - Key: [Mouse Gesture Button, pressed]
-    - Process: chrome
   - KeyPress:
-    - [Control_L, w]
+    - Return
     - click
 ...
 ---

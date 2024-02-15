@@ -1,0 +1,125 @@
+{
+  "404D:AF667B2A": {
+    "_modelId": "404D00000000",
+    "_name": "Wireless Touch Keyboard K400 Plus",
+    "_unitId": "AFD8775A",
+    "disable-keyboard-keys": {
+      "1": false,
+      "16": false,
+      "4": false,
+      "8": false
+    },
+    "fn-swap": false,
+    "gesture2-gestures": {
+      "1": true,
+      "10": true,
+      "2": true,
+      "30": true,
+      "34": false,
+      "42": true,
+      "43": true,
+      "45": false,
+      "64": false,
+      "65": false,
+      "67": false,
+      "84": true
+    },
+    "gesture2-params": {
+      "4": {
+        "scale": 256
+      }
+    }
+  },
+  "407B:7C15AA8F": {
+    "_dpi-sliding": 11,
+    "_modelId": "B020407BC08A",
+    "_name": "MX Vertical Wireless Mouse",
+    "_sensitive": {
+      "divert-keys": false,
+      "dpi": true,
+      "dpi-sliding": true,
+      "lowres-smooth-scroll": false,
+      "reprogrammable-keys": false
+    },
+    "_serial": "7C15AA8F",
+    "_unitId": "CED7F00B",
+    "divert-keys": {
+      "253": 1,
+      "82": 0,
+      "83": 0,
+      "86": 0
+    },
+    "dpi": 2400,
+    "dpi-sliding": "253",
+    "lowres-smooth-scroll": false,
+    "mouse-gestures": 0,
+    "reprogrammable-keys": {
+      "253": 253,
+      "80": 80,
+      "81": 81,
+      "82": 82,
+      "83": 83,
+      "86": 86
+    }
+  },
+  "4082:C4A67048": {
+    "_absent": [
+      "hi-res-scroll",
+      "lowres-smooth-scroll",
+      "report_rate",
+      "pointer_speed",
+      "speed-change",
+      "backlight",
+      "fn-swap",
+      "disable-keyboard-keys",
+      "divert-crown",
+      "crown-smooth",
+      "divert-gkeys",
+      "m-key-leds",
+      "mr-key-led",
+      "multiplatform",
+      "gesture2-gestures",
+      "gesture2-params"
+    ],
+    "_dpi-sliding": 41,
+    "_modelId": "B02340820000",
+    "_name": "MX Master 3 Wireless Mouse",
+    "_sensitive": {
+      "divert-keys": true,
+      "dpi": true,
+      "dpi-sliding": false,
+      "hires-smooth-resolution": "ignore",
+      "mouse-gestures": false,
+      "reprogrammable-keys": true,
+      "smart-shift": false,
+      "thumb-scroll-mode": false
+    },
+    "_serial": "C4A67048",
+    "_unitId": "C4A67048",
+    "divert-keys": {
+      "195": 0,
+      "196": 0,
+      "82": 0,
+      "83": 0,
+      "86": 0
+    },
+    "dpi": "2400",
+    "dpi-sliding": "0",
+    "hires-smooth-invert": false,
+    "hires-smooth-resolution": true,
+    "mouse-gestures": "0",
+    "reprogrammable-keys": {
+      "195": 195,
+      "196": 196,
+      "80": 80,
+      "81": 81,
+      "82": 82,
+      "83": 83,
+      "86": 86
+    },
+    "smart-shift": 10,
+    "thumb-scroll-invert": false,
+    "thumb-scroll-mode": false
+  },
+  "_version": "1.1.1"
+}
