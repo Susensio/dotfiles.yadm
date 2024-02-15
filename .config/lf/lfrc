@@ -3,9 +3,7 @@ set shell bash
 set shellopts '-eu'
 set ifs "\n"
 
-
 # Mouse interaction
-# waiting for next release
 set mouse
 
 # Show hidden files
@@ -34,30 +32,15 @@ cmd open
 cmd q quit
 map <esc> quit
 
-# z.fish integration
-# TODO:change for zoxide for speed
-# cmd z %{{
-#     cmd="z -e $@"
-#     fish_cmd="fish -c '$cmd'"
-#     result="$(eval $fish_cmd)"
-#     lf -remote "send ${id} cd ${result}"
-# }}
-
 cmd z %{{
-    result="$(zoxide query --exclude "${PWD}" --
-    "$@")"
-    lf -remote "send ${id} cd '${result}'"
-}}
-
-cmd zi ${{
-    result="$(zoxide query -i -- "$@")"
+    result="$(zoxide query --exclude "${PWD}" -- "$@")"
     lf -remote "send ${id} cd '${result}'"
 }}
 
 # Jump to a file or directory in lf using fuzzy matching
 cmd fzf_jump ${{
     # res="$(find . -maxdepth 1 | fzf-tmux $FZF_TMUX_OPTS -- --header='Jump to location' | sed 's/\\/\\\\/g;s/"/\\"/g')"
-    res="$(eval $FZF_FD_COMMAND_DIRS | eval fzf-tmux $FZF_TMUX_OPTS -- $FZF_BIND_SWITCH_FILES_DIRS --header=\'Jump to location\' | sed 's/\\/\\\\/g;s/"/\\"/g')"
+    res="$(eval $FZF_FD_COMMAND_DIRS | eval fzf-tmux-auto -- $FZF_BIND_SWITCH_FILES_DIRS --header=\'Jump to location\' | sed 's/\\/\\\\/g;s/"/\\"/g')"
     if [ -d "$res" ] ; then
         cmd="cd"
     elif [ -f "$res" ] ; then
