@@ -2,5 +2,5 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # period  delay  job-identifier  command
-1         10     dailyjob        run-parts --report ${HOME}/.config/anacron/daily/
-7         20     weeklyjob       run-parts --report ${HOME}/.config/anacron/weekly/
+1         10     dailyjob        run-parts --report $HOME/.config/anacron/daily/
+7         20     weeklyjob       run-parts --report $HOME/.config/anacron/weekly/
