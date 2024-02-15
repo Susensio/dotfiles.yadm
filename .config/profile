@@ -23,8 +23,11 @@ export PAGER="less"
 export LESS="$(test $(less --version | head -n1 | cut -d ' ' -f 2) -ge 590 && echo '--incsearch ' || true)-XRF --mouse --wheel-lines=3"
 #
 # Colorize man pages with bat
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+# substitute non-breaking hyphen for easy search
+export MANPAGER="sh -c 'col -bx | sed s/‐/-/g | bat -l man -p'"
 export MANROFFOPT="-c"
+# add user man pages
+export MANPATH="$MANPATH:$XDG_DATA_HOME/man"
 
 # Source profile.d files
 profile_d="$XDG_CONFIG_HOME/profile.d"
