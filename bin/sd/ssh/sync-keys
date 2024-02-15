@@ -1,0 +1,5 @@
+#!/bin/bash
+# Update ssh keys from GitHub
+
+curl https://github.com/susensio.keys -o $HOME/.ssh/authorized_keys &> /dev/null
+echo "Ssh keys updated from GitHub" >&2
