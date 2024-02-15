@@ -10,7 +10,7 @@ function upgrade --description 'Upgrade system'
   fisher update
 
   _info "Upgrading user installed from github..."
-  $HOME/bin/update-repos
+  $HOME/bin/sd/repos/upgrade
 
   # _info "Upgrading nvim plugins..."
 #  _packersync_nvim
@@ -28,7 +28,7 @@ end
 function _upgrade_apt
   sudo apt update &&
   sudo apt full-upgrade -y &&
-  sudo apt autoremove -y &&
+  sudo apt autopurge -y &&
   sudo apt autoclean -y
 end
 

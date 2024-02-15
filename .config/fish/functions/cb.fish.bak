@@ -5,10 +5,10 @@ function cb --description 'Allow piping to and from the system ClipBoard'
   if isatty stdin
     # Paste
     # xclip -o -selection clipboard
-    clipboard paste
+    fish_clipboard_paste
   else
     # Copy
-    clipboard copy
     # xclip -selection clipboard
+    fish_clipboard_copy
   end
 end

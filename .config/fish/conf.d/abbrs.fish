@@ -13,12 +13,15 @@ function _last_history_item; echo $history[1]; end
 abbr --add !! --position anywhere --function _last_history_item
 
 abbr --add v vim
+abbr --add vi vim
 
 # taskwarrior
-abbr --add t task
-abbr --add ta task add
-abbr --add ti taski
-abbr --add tap --set-cursor task add project:%
+# abbr --add t task
+# abbr --add ta task add
+# abbr --add ti taski
+# abbr --add tap --set-cursor 'task add project:%'
+# todoist
+abbr --add q --set-cursor 'tod -q "%"'
 
 abbr --add lg lazygit
 

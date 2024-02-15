@@ -42,11 +42,12 @@ function prompt_pwd --description 'short CWD for the prompt'
                 set full $all[2..]
             else if test $fish_prompt_pwd_full_dirs -eq 0
                 # 0 means not even the last component is kept
-                string replace -ar '(\.?[^/]{'"$f…ish_prompt_pwd_dir_length"'})[^/]*' '$1' $tmp
+                string replace -ar '(\.?[^/]{'"$fish_prompt_pwd_dir_length"'})[^/]*' '$1' $tmp
                 continue
             end
 
-            string join / (string replace -ar '(\.?[^/]{'"$fish_prompt_pwd_dir_length"'})[^/]*/' '$1/' $tmp) $full
+            # string join / (string replace -ar '(\.?[^/~]{'"$(math $fish_prompt_pwd_dir_length - 1)"'})[^/][^/][^/]*/' '$1…/' $tmp) $full
+            string join / (string replace -ar '(\.?[^/~]{'"$fish_prompt_pwd_dir_length"'})[^/]*/' '$1/' $tmp) $full
         end
     end
 end

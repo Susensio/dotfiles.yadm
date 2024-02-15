@@ -1,0 +1,1 @@
+/home/susensio/.local/lib/bat/release/bat-v0.24.0-x86_64-unknown-linux-gnu/autocomplete/bat.fish

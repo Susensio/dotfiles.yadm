@@ -25,7 +25,7 @@ function __list_subcommand
         set cmd (basename $file .help)
         set helpfile $cmd.help
         if [ (basename $file) != "$helpfile" ]
-            set -a commands $cmd
+            set commands $commands $cmd
         end
     end
 
@@ -74,7 +74,7 @@ function __list_commands
         if [ (basename $file) != "$helpfile" ]
             # Ignore the special commands that take the paths as input.
             if not contains $cmd cat edit help new which
-                set -a commands $cmd
+                set commands $commands $cmd
             end
         end
     end

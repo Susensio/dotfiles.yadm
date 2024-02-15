@@ -1,1 +1,1 @@
-complete -c unbak -x -a '(command ls *.bak)'
+complete -c unbak -x -a '*bak'

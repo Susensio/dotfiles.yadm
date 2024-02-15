@@ -2,21 +2,6 @@
 # VERSION: 3.0
 SETUVAR Z_DATA_DIR:/home/susensio/\x2elocal/share/z
 SETUVAR __fish_initialized:3400
-SETUVAR _fish_abbr__21_21_:\x2d\x2dposition\x20anywhere\x20\x2d\x2dfunction\x20_last_history_item
-SETUVAR _fish_abbr_dc:docker\x2dcompose
-SETUVAR _fish_abbr_dotdot:\x2d\x2dregex\x20\x5e\x28\x3f\x3ecd\x29\x3f\x5c\x2e\x5c\x2e\x2b\x24\x20\x2d\x2dfunction\x20_multicd
-SETUVAR _fish_abbr_howto:howdoi
-SETUVAR _fish_abbr_ipy:ipython
-SETUVAR _fish_abbr_lg:lazygit
-SETUVAR _fish_abbr_nd:nextd
-SETUVAR _fish_abbr_pd:prevd
-SETUVAR _fish_abbr_please:fix
-SETUVAR _fish_abbr_t:task
-SETUVAR _fish_abbr_ta:task\x20add
-SETUVAR _fish_abbr_tap:\x2d\x2dset\x2dcursor\x20task\x20add\x20project\x3a\x25
-SETUVAR _fish_abbr_ti:taski
-SETUVAR _fish_abbr_v:vim
-SETUVAR _fish_abbr_y:yadm
 SETUVAR _fisher_jorgebucaran_2F_autopair_2E_fish_files:\x7e/\x2econfig/fish/fisher/functions/_autopair_backspace\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/_autopair_insert_left\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/_autopair_insert_right\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/_autopair_insert_same\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/_autopair_tab\x2efish\x1e\x7e/\x2econfig/fish/fisher/conf\x2ed/autopair\x2efish
 SETUVAR _fisher_jorgebucaran_2F_fisher_files:\x7e/\x2econfig/fish/fisher/functions/fisher\x2efish\x1e\x7e/\x2econfig/fish/fisher/completions/fisher\x2efish
 SETUVAR _fisher_kentork_2F_fish_2D_comp_files:\x7e/\x2econfig/fish/fisher/functions/comp\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/decomp\x2efish\x1e\x7e/\x2econfig/fish/fisher/completions/comp\x2efish\x1e\x7e/\x2econfig/fish/fisher/completions/decomp\x2efish
@@ -58,3 +43,4 @@ SETUVAR --export fish_pager_color_prefix:white\x1e\x2d\x2dbold\x1e\x2d\x2dunderl
 SETUVAR --export fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
 SETUVAR --export fish_pager_color_selected_background:\x2dr
 SETUVAR fish_plugins_changed:1669032454
+SETUVAR fish_user_paths:/home/susensio/bin\x1e/home/susensio/\x2elocal/bin\x1e/home/susensio/\x2elocal/share/cargo/bin\x1e/snap/bin
