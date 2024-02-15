@@ -1,0 +1,14 @@
+#!/bin/bash
+# Quick add task to Todoist
+# Used with a gnome shortcut Ctrl+Super+Q
+
+# Prompt for user input using zenity
+USER_INPUT=$(zenity --entry --title="Todoist" --name="Todoist" --ok-label="Add task" --text="Task name:" --width=400 --window-icon="/snap/todoist/current/meta/gui/icon.png")
+
+# Check if the user pressed OK and input is not empty
+if [ $? -eq 0 ] && [ ! -z "$USER_INPUT" ]; then
+    # Execute your command with the user input
+      tod -q "$USER_INPUT"
+    else
+        echo "No input provided or cancelled."
+fi

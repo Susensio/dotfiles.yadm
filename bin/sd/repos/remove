@@ -1,0 +1,55 @@
+#!/bin/bash
+set -eu
+
+cmd="$1"
+folder="$HOME/.local/lib/$cmd"
+
+if [[ -z "$folder" ]]; then
+  echo "Usage: $(basename "$0") <folder>" >&2
+  exit 1
+fi
+
+if [[ ! -d "$folder" ]]; then
+  echo "Error: folder not found: $folder" >&2
+  exit 1
+fi
+
+repo="$(cat "$folder/gh-repo")"
+
+if [[ -z "$repo" ]]; then
+  echo "Error: no gh-repo file found in $folder" >&2
+  exit 1
+fi
+
+symlink="$HOME/.local/bin/$cmd"
+
+if [[ ! -L "$symlink" ]]; then
+  echo "Error: symlink not found: $symlink" >&2
+  exit 1
+fi
+
+echo "Removing symlink: $symlink..." >&2
+rm -v "$symlink"
+
+shopt -s globstar nullglob
+echo "Removing manpages..." >&2
+for file in "$XDG_DATA_HOME/man/man1/$cmd"*; do
+  if [[ -L "$file" ]]; then
+    echo "Removing manpage symlink: $file..." >&2
+    rm -v "$file"
+  fi
+done
+
+echo "Removing fish completions..." >&2
+for file in "$XDG_CONFIG_HOME/fish/completions/vendor/$cmd"*; do
+  if [[ -L "$file" ]]; then
+    echo "Removing fish completion symlink: $file..." >&2
+    rm -v "$file"
+  fi
+done
+
+shopt -u globstar nullglob
+
+
+echo "Removing folder: $folder..." >&2
+rm -rv "$folder"

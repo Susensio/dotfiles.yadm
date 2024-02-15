@@ -78,7 +78,7 @@ else
 
   cd "$folder"
 
-  if [ "$(uname -m)" = "x86_64" ]; then
+  if [[ "$(uname -m)" = "x86_64" ]]; then
     patterns=(
       "${cmd}*x86_64*inux*gnu*.gz"
       "${cmd}*x86_64*inux*.gz"
@@ -89,16 +89,12 @@ else
       "*64*inux*.gz"
       "*.gz"
       )
-  elif [[ "$(uname -m)" = armv7* ]]; then
+  elif [[ "$(uname -m)" = "aarch64" ]]; then
     patterns=(
-      "${cmd}*inux*armv[76]*gnu*.gz"
-      "${cmd}*inux*armv[76]*.gz"
-      "${cmd}*armv[76]*gnu*.gz"
-      "${cmd}*arm[\-\.]*gnu*.gz"
-      "${cmd}*arm[\-\.]*inux*.gz"
-      "${cmd}*inux*arm[\-\.]*.gz"
-      "${cmd}*armv[76]*.gz"
-      "${cmd}*arm[\-\.]*.gz"
+      "${cmd}*inux*arm64*.gz"
+      "${cmd}*arm64*inux*.gz"
+      "${cmd}*inux*aarch64*.gz"
+      "${cmd}*aarch64*inux*.gz"
       )
   else
     echo "System architecture not recognized" >&2 && exit 1
@@ -142,9 +138,11 @@ else
 
   shopt -s globstar nullglob
   echo "Updating manpages..." >&2
-  for file in **/man1/*; do
+  for file in ./**/man1/*; do
     ln -svf "$(realpath "$file")" "$usermanpages/$(basename "$file")"
   done
+  # reindex manpages
+  mandb
   # manpage=$(find "$folder" -type d -name "man1")
   # if [[ -n "$manpage" ]]; then
   #   echo "Updating manpages..." >&2

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Update all git repositories in ~/.local/lib, either by pulling or by downloading a release from github
+
+scriptdir="$(dirname "$(readlink -f "$0")")"
+
+#https://gist.github.com/phette23/7620214
+for dir in ~/.local/lib/*/
+do
+  cd "${dir}" || continue
+  dirname="$(basename ${dir})"
+
+  # If inside git repo, pull
+  [ -d ".git" ] && echo "Updating repository ${dir%*/}..." && git pull --ff-only
+
+  # Else If gh release file, do the thing
+  [ -f "gh-repo" ] && echo "Updating release ${dir%*/}..." && $scriptdir/upgrade --cmd "$dirname" --repo "$(cat gh-repo)"
+done

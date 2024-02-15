@@ -3,6 +3,7 @@ IFS=$'\n'
 # Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
 ## Script arguments
 FILE_PATH="${1}"        # Full path of the highlighted file
+FILE_PATH="$(echo $FILE_PATH | sed "s|~|$HOME|g")"
 
 PV_WIDTH="${2}"         # Width of the preview pane (number of fitting characters)
 if [ -z "${PV_WIDTH}" ];then

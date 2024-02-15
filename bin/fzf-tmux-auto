@@ -1,0 +1,2 @@
+#!/bin/bash
+command fzf-tmux $($HOME/bin/sd/tmux/popup-size) --preview-window='right:50%:wrap,<80(down:50%:wrap)' "$@"

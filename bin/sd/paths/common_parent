@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Display script usage information.
+display_help() {
+    echo "Usage: $0 <path1> <path2> [path3 ...]"
+    echo ""
+    echo "Find the longest common directory prefix among a list of paths."
+    echo ""
+    echo "Options:"
+    echo "  -h, --help    Display this help and exit."
+}
+
+# Function to get the common path prefix.
+main() {
+    local prefix="$1"
+    shift
+    for path; do
+        while [[ "$path" != "$prefix"* && "$prefix" != "/" ]]; do
+            prefix="${prefix%/*}"
+        done
+    done
+    echo "$prefix"
+}
+
+# If no arguments, or the user specifies '-h' or '--help', display help.
+if [ "$#" -lt 2 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+    display_help
+    exit 0
+fi
+
+# Call the function and print the longest common prefix
+main "$@"

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+declare -Ar COLORS=(
+    [RED]=$'\033[0;31m'
+    [GREEN]=$'\033[0;32m'
+    [BLUE]=$'\033[0;34m'
+    [PURPLE]=$'\033[0;35m'
+    [CYAN]=$'\033[0;36m'
+    [WHITE]=$'\033[0;37m'
+    [YELLOW]=$'\033[0;33m'
+    [OFF]=$'\033[0m'
+    [BOLD]=$'\033[1m'
+)
+# Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
+rm -f /tmp/rg-fzf-{r,f}
+HEADER="${COLORS[BOLD]}Enter${COLORS[OFF]}=edit"
+HEADER+=" ${COLORS[BOLD]}ALT-Enter${COLORS[OFF]}=insert"
+HEADER+=" ${COLORS[BOLD]}CTRL-F${COLORS[OFF]}=fzf"
+HEADER+=" ${COLORS[BOLD]}CTRL-G${COLORS[OFF]}=grep"
+
+RG_PREFIX="rg --line-number --no-heading --color=always --smart-case "
+INITIAL_QUERY="${*:-}"
+: | fzf --ansi --disabled --query "$INITIAL_QUERY" \
+  --bind "start:reload($RG_PREFIX {q})+unbind(ctrl-g)" \
+  --bind "change:reload:sleep 0.05; $RG_PREFIX {q} || true" \
+  --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(fzf> )+enable-search+rebind(ctrl-g)+transform-query(echo {q} > /tmp/rg-fzf-r; cat /tmp/rg-fzf-f)" \
+  --bind "ctrl-g:unbind(ctrl-g)+change-prompt(grep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)+transform-query(echo {q} > /tmp/rg-fzf-f; cat /tmp/rg-fzf-r)" \
+  --color "hl:-1:underline,hl+:-1:underline:reverse" \
+  --prompt 'grep> ' \
+  --header "$HEADER" \
+  --delimiter : \
+  --preview 'bat --color=always {1} --highlight-line {2}' \
+  --bind "alt-enter:become(echo {1})" \
+  --bind "enter:become(nvim {1} +{2})"
+  # --bind "alt-enter:abort+become(nvim {1} +{2})"
+  # \
+  # | xargs -d':' -r bash -c 'nvim "$0" +$1'
+  # --header '╱ CTRL-R (ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \

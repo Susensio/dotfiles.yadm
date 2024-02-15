@@ -1,0 +1,97 @@
+#!/bin/bash
+# This script is a wrapper for consistent clipboard across system
+
+# Clipboard environment variables
+CLIPBOARD="${CB_CLIPBOARD:-xclip}"  # Default to xclip if not set
+# can be set via env var, and overwrite with flag
+SELECTION="${CB_SELECTION:-clipboard}"
+mode=''
+
+# Copying function
+copy_to_clipboard() {
+  local data
+  IFS='' read -d '' -r data
+
+  case "$CLIPBOARD" in
+    "wl-clipboard")
+      if [ "$SELECTION" == "clipboard" ]; then
+        printf '%s' "$data" | wl-copy
+      else
+        printf '%s' "$data" | wl-copy --primary
+      fi
+      ;;
+    "xclip")
+      printf '%s' "$data" | xclip -selection "$SELECTION"
+      ;;
+    "xsel")
+      printf '%s' "$data" | xsel --"$SELECTION"
+      ;;
+    *)
+      echo "Unsupported clipboard tool: $CLIPBOARD" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# Pasting function
+paste_from_clipboard() {
+  case "$CLIPBOARD" in
+    "wl-clipboard")
+      if [ "$SELECTION" == "clipboard" ]; then
+        wl-paste
+      else
+        wl-paste --primary
+      fi
+      ;;
+    "xclip")
+      xclip -selection "$SELECTION" -o
+      ;;
+    "xsel")
+      xsel --"$SELECTION"
+      ;;
+    *)
+      echo "Unsupported clipboard tool: $CLIPBOARD" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# Main functionality
+  # Check flags
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    copy|paste)
+      mode=$1
+      shift
+      ;;
+    -s|--selection)
+      shift
+      case "$1" in
+        "clipboard"|"primary")
+          SELECTION="$1"
+          ;;
+        *)
+          echo "Invalid selection value: $1. Allowed values are 'clipboard' or 'primary'."
+          exit 1
+          ;;
+      esac
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+
+case $mode in
+  copy)
+    copy_to_clipboard
+    ;;
+  paste)
+    paste_from_clipboard
+    ;;
+  *)
+    echo "ERROR: No command provided" >&2
+    exit 1
+esac

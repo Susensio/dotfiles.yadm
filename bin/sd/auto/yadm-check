@@ -2,5 +2,5 @@
 
 # export $(dbus-launch)
 if (($(yadm status --porcelain=2 | wc -l) > 5)); then
-  /usr/bin/notify-send -i 'software-update-available' 'Yadm out of sync' 'Please, commit your dotfiles.'
+  XDG_RUNTIME_DIR=/run/user/$(id -u) /usr/bin/notify-send -i 'software-update-available' 'Yadm out of sync' 'Please, commit your dotfiles.'
 fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+# Backup and encrypt a given gpg key.
+command cat \
+  <(gpg --export --output - "$1") \
+  <(gpg --export-secret-keys --output - --export-options export-backup "$1") |\
+  gpg --symmetric --armor --output "${2:--}" --cipher-algo AES256

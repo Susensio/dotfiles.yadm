@@ -1,0 +1,10 @@
+#!/bin/bash
+
+items=$(find $HOME/.config -maxdepth 2 -name "init.lua" -type f -execdir sh -c 'pwd | xargs basename' \; | sort)
+selected=$(echo "$items" | fzf-tmux-auto --prompt=" Neovim Config  " --no-sort --preview="preview $XDG_CONFIG_HOME/{}")
+if [[ -z $selected ]]; then
+  return 0
+elif [[ $selected == "nvim" ]]; then
+  selected=""
+fi
+NVIM_APPNAME=$selected nvim "$@"

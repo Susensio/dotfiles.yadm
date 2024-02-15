@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+preview=$'echo {} | tr -d \'()\' | awk \'{printf "%s ", $2} {print $1}\' | xargs -r man | col -bx | bat -l man -p --color always'
+
+$HOME/bin/sd/tmux/popup-auto \
+  "man -k . \
+  | command fzf \
+    --prompt='man> ' \
+    --border-label='Man pages' \
+    --border none \
+    --height 100% \
+    --tiebreak=begin \
+    --preview='echo {} \
+              | tr -d '\''()'\'' \
+              | awk '\''{print \$2\" \"\$1}'\'' \
+              | xargs -r man \
+              | col -bx \
+              | bat -l man -p --color always ' \
+  | tr -d '()' \
+  | awk '{print \$2\" \"\$1}' \
+  | xargs -r man" || true
