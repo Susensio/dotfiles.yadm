@@ -1,2 +1,4 @@
 #!/bin/bash
+# Launch fzf with tmux popup if available, preview window on the best side
+
 command fzf-tmux $($HOME/bin/sd/tmux/popup-size) --preview-window='right:50%:wrap,<80(down:50%:wrap)' "$@"
