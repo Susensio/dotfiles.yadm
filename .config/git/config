@@ -7,7 +7,7 @@
 [alias]
 	graph = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	root = rev-parse --show-toplevel
-	ignore = "!f() { args=$@; fish --command \"__gitignore $args\"; }; f"
+	ignore = "!gi() { curl -sL https://www.toptal.com/developers/gitignore/api/$@ ;}; gi"
 [credential]
 	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
 [include]
@@ -19,10 +19,10 @@
 	required = true
 	clean = git-lfs clean -- %f
 [credential "https://github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = 
+	helper =
 	helper = !/usr/bin/gh auth git-credential
 [push]
 	autoSetupRemote = true
