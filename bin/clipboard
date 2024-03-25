@@ -1,67 +1,68 @@
 #!/bin/bash
-# This script is a wrapper for consistent clipboard across system
+# Clipboard, platform agnostic
 
-# Clipboard environment variables
-CLIPBOARD="${CB_CLIPBOARD:-xclip}"  # Default to xclip if not set
-# can be set via env var, and overwrite with flag
-SELECTION="${CB_SELECTION:-clipboard}"
-mode=''
+MODE="pipe"
+SELECTION="clipboard"
+
+get_system() {
+  if uname -r | grep -q -i wsl; then
+    echo "wsl"
+  elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+    echo "wayland"
+  elif [[ $XDG_SESSION_TYPE == "x11" ]]; then
+    echo "x11"
+  else
+    echo "Unsupported system" >&2
+    exit 1
+  fi
+}
 
 # Copying function
 copy_to_clipboard() {
   local data
   IFS='' read -d '' -r data
 
-  case "$CLIPBOARD" in
-    "wl-clipboard")
+  case "$(get_system)" in
+    wayland)
       if [ "$SELECTION" == "clipboard" ]; then
         printf '%s' "$data" | wl-copy
       else
         printf '%s' "$data" | wl-copy --primary
       fi
       ;;
-    "xclip")
+    x11)
       printf '%s' "$data" | xclip -selection "$SELECTION"
       ;;
-    "xsel")
-      printf '%s' "$data" | xsel --"$SELECTION"
-      ;;
-    *)
-      echo "Unsupported clipboard tool: $CLIPBOARD" >&2
-      exit 1
+    wsl)
+      printf '%s' "$data" | clip.exe
       ;;
   esac
 }
 
 # Pasting function
 paste_from_clipboard() {
-  case "$CLIPBOARD" in
-    "wl-clipboard")
+  case "$(get_system)" in
+    wayland)
       if [ "$SELECTION" == "clipboard" ]; then
         wl-paste
       else
         wl-paste --primary
       fi
       ;;
-    "xclip")
+    x11)
       xclip -selection "$SELECTION" -o
       ;;
-    "xsel")
-      xsel --"$SELECTION"
-      ;;
-    *)
-      echo "Unsupported clipboard tool: $CLIPBOARD" >&2
-      exit 1
+    wsl)
+      clip.exe
       ;;
   esac
 }
 
-# Main functionality
-  # Check flags
+# Parse command line arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     copy|paste)
-      mode=$1
+      MODE=$1
       shift
       ;;
     -s|--selection)
@@ -84,12 +85,19 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
-case $mode in
+case $MODE in
   copy)
     copy_to_clipboard
     ;;
   paste)
     paste_from_clipboard
+    ;;
+  pipe)
+    if [[ -p /dev/stdin ]]; then
+      copy_to_clipboard
+    else
+      paste_from_clipboard
+    fi
     ;;
   *)
     echo "ERROR: No command provided" >&2
