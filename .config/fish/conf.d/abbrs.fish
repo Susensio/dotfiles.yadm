@@ -15,6 +15,8 @@ abbr --add !! --position anywhere --function _last_history_item
 abbr --add v vim
 abbr --add vi vim
 
+abbr --add l ll
+
 # taskwarrior
 # abbr --add t task
 # abbr --add ta task add

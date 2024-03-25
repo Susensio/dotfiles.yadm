@@ -11,36 +11,6 @@ SETUVAR _fisher_plugins:jorgebucaran/autopair\x2efish\x1epatrickf1/fzf\x2efish\x
 SETUVAR _fisher_susensio_2F_zoxide_2E_fish_files:\x7e/\x2econfig/fish/fisher/functions/__zoxide_cd\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_pwd\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_z\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_z_complete\x2efish\x1e\x7e/\x2econfig/fish/fisher/functions/__zoxide_zi\x2efish\x1e\x7e/\x2econfig/fish/fisher/conf\x2ed/zoxide\x2efish
 SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR fifc_open_keybinding:ctrl\x2do
-SETUVAR --export fish_color_autosuggestion:brblack
-SETUVAR --export fish_color_cancel:normal
-SETUVAR --export fish_color_command:white\x1e\x2d\x2dbold
-SETUVAR --export fish_color_comment:red
-SETUVAR --export fish_color_cwd:blue\x1e\x2d\x2dbold
-SETUVAR fish_color_cwd_root:red
-SETUVAR --export fish_color_end:green
-SETUVAR --export fish_color_error:red
-SETUVAR --export fish_color_escape:00a6b2\x1ecyan
-SETUVAR --export fish_color_history_current:normal
-SETUVAR --export fish_color_host:white\x1e\x2d\x2dbold
-SETUVAR --export fish_color_host_remote:yellow\x1e\x2d\x2dbold
-SETUVAR --export fish_color_match:normal
-SETUVAR --export fish_color_normal:normal
-SETUVAR --export fish_color_operator:cyan
-SETUVAR --export fish_color_param:white
-SETUVAR --export fish_color_quote:yellow
-SETUVAR --export fish_color_redirection:00afff\x1ebrcyan
-SETUVAR --export fish_color_search_match:bryellow
-SETUVAR --export fish_color_selection:white
-SETUVAR --export fish_color_status:red
-SETUVAR --export fish_color_user:green\x1e\x2d\x2dbold
-SETUVAR --export fish_color_user_root:red\x1e\x2d\x2dbold
-SETUVAR --export fish_color_valid_path:normal
-SETUVAR --export fish_greeting:\x1d
-SETUVAR --export fish_key_bindings:fish_default_key_bindings
-SETUVAR --export fish_pager_color_completion:normal
-SETUVAR --export fish_pager_color_description:B3A06D\x1eyellow
-SETUVAR --export fish_pager_color_prefix:white\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
-SETUVAR --export fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
-SETUVAR --export fish_pager_color_selected_background:\x2dr
+SETUVAR fish_key_bindings:fish_default_key_bindings
 SETUVAR fish_plugins_changed:1669032454
 SETUVAR fish_user_paths:/home/susensio/bin\x1e/home/susensio/\x2elocal/bin\x1e/home/susensio/\x2elocal/share/cargo/bin\x1e/snap/bin

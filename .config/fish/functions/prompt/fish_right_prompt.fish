@@ -9,6 +9,24 @@ function fish_right_prompt -d "Write out the right prompt"
   # Print git info
   set --append elements (string trim -l (fish_git_prompt))
 
+  # Print venv
+  if test -n "$VIRTUAL_ENV"
+    set -l venv_name "venv:"(basename "$VIRTUAL_ENV")
+
+    if test "$VIRTUAL_ENV" = "$XDG_DATA_HOME/venv"
+      set venv_name "/venv"
+    else if test (basename "$VIRTUAL_ENV") = ".venv"
+      set -l parent (dirname "$VIRTUAL_ENV")
+      # if pwd is inside parent, shorten
+      if test $parent = (pwd) || string match -q "$parent/*" (pwd)
+        set venv_name ".venv"
+      else
+        set venv_name (basename "$parent")"/.venv"
+      end
+    end
+    set --append elements '('(set_color blue)"$venv_name"(set_color normal)')'
+  end
+
   # Duration of last command
   set --local threshold 1000 # ms
   if test $CMD_DURATION -gt $threshold
