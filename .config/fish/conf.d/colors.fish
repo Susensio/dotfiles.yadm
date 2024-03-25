@@ -20,7 +20,7 @@ set -g fish_color_selection white
 set -g fish_color_status red
 set -g fish_color_user green --bold
 set -g fish_color_user_root red --bold
-set -g fish_color_cwd red --bold
+set -g fish_color_cwd_root red --bold
 set -g fish_color_valid_path normal
 set -g fish_greeting
 set -g fish_key_bindings fish_default_key_bindings
