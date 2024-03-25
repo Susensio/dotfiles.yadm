@@ -1,10 +1,10 @@
 # Do not pollute fish config folder, use a subfolder
 # https://github.com/jorgebucaran/fisher/issues/677
 
-if set -q XDG_CONFIG_HOME
-  set -gx fisher_path $XDG_CONFIG_HOME/fish/fisher
+if set -q XDG_DATA_HOME
+  set -gx fisher_path $XDG_DATA_HOME/fish/fisher
 else
-  set -gx fisher_path $HOME/.config/fish/fisher
+  set -gx fisher_path $HOME/.local/share/fish/fisher
 end
 
 set fish_function_path $fish_function_path[1] $fisher_path/functions $fish_function_path[2..-1]
