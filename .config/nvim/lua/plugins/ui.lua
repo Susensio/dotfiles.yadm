@@ -1,67 +1,79 @@
 return {
-  {
-    "nvim-lualine/lualine.nvim",
-    event = "VeryLazy",
-    dependencies = {
-      "kyazdani42/nvim-web-devicons",
-      "RRethy/nvim-base16",
-    },
-    opts = {
-      options = {
-        icons_enabled = true,
-        theme = "base16",
-        section_separators = { left = '', right = '' },
-        component_separators = { left = '', right = '' },
-        disabled_filetypes = { "starter", "lazy" },
-      },
-      sections = {
-        lualine_a = {'mode'},
-        lualine_b = {'branch', 'diff', 'diagnostics'},
-        lualine_c = {'filename'},
-        lualine_x = {'filetype'},
-        lualine_y = {'progress'},
-        lualine_z = {'location'}
-      },
-    },
-    config = function(_, opts)
-      vim.opt.showmode = false
-      require("lualine").setup(opts)
-    end
-  },
-
-  {
+  { -- indent-blankline
     "lukas-reineke/indent-blankline.nvim",
-    event = { "BufReadPost", "BufNewFile" },
+    main = 'ibl',
+    -- dependencies = { "nvim-treesitter/nvim-treesitter" },
+    event = { "LazyFile" },
     opts = {
-      char = "⎸",
-      context_char = "⎸",
-      show_trailing_blankline_indent = false,
-      show_current_context = true,
-      show_current_context_start = false,
-
-      indent_blankline_strict_tabs = true,
-      show_end_of_line = true,
-
-      use_treesitter = true,
-      use_treesitter_scope = false,
-
-      filetype_exclude = {
-        "help",
-        "starter",
-        "lazy",
+      indent = {
+        char = "│",
+      },
+      scope = {
+        enabled = true,
+        char = "┃",
+        -- char = "│",
+        show_start = false,
+        show_end = false,
+      },
+      exclude = {
+        filetypes = {
+          "help",
+          "starter",
+          "lazy",
+          "mason",
+        },
       },
     },
   },
 
   {
-    "NvChad/nvim-colorizer.lua",
+    "echasnovski/mini.cursorword",
+    enabled = false,
+    lazy = false,
+    config = true,
+  },
+
+  {
+    "tzachar/local-highlight.nvim",
+    enabled = false,
+    lazy = false,
+    config = true,
+  },
+  -- {
+  --   dir = ".",
+  --   enabled = false,
+  --   name = "lsp_highlight",
+  --   lazy = false,
+  --   config = function()
+  --     local grp = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = true })
+  --     require("utils").lsp_on_attach(function(client, buffer)
+  --       if client.server_capabilities["documentHighlightProvider"] then
+  --         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+  --           buffer = buffer,
+  --           group = grp,
+  --           callback = vim.lsp.buf.document_highlight,
+  --         })
+  --         vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+  --           buffer = buffer,
+  --           group = grp,
+  --           callback = vim.lsp.buf.clear_references,
+  --         })
+  --
+  --         require("nvim-treesitter-refactor.highlight_definitions").detach(buffer)
+  --       end
+  --     end)
+  --   end,
+  -- },
+
+  {
+    "nvim-treesitter/nvim-treesitter-refactor",
     enabled = true,
-    event = "FileType",
+    optional = true,
+    event = { "CursorHold" },
     opts = {
-      filetypes = {
-        "lua",
-        "tmux",
+      highlight_definitions = {
+        enable = true,
       },
     },
-  },
+  }
 }

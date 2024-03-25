@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Application
+Exec=wine "$HOME/.local/lib/wine/apps/myapp.exe"
+Icon=/path/to/iconfile
+Type=Application
+Categories=Wine;

@@ -10,10 +10,10 @@ local function header()
 end
 
 return {
-  {
+  { -- mini.starter
     "echasnovski/mini.starter",
     event = "VimEnter",
-    enabled = true,
+    enabled = false,
     cond = function()   -- only if nvim started without arguments
       return vim.fn.argc() == 0
     end,
