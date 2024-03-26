@@ -1,0 +1,72 @@
+#!/bin/bash
+
+nohidden='#{?@hidden,,1}'
+detached='#{?session_attached,,1}'
+filters=()
+
+format="#{session_name}: #{session_windows} windows (created #{t:session_created})#{?session_grouped, (group ,}#{session_group}#{?session_grouped,),}#{?session_attached, (attached),}" # default
+mru=false
+mru_key="#{?session_last_attached,#{session_last_attached},#{session_created}}"
+sep=$'\x1f'
+
+args=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --nohidden)
+      filters+=("$nohidden")
+      shift
+      ;;
+    --detached)
+      filters+=("$detached")
+      shift
+      ;;
+    --mru)
+      mru=true
+      shift
+      ;;
+    --id)
+      format='#{session_id}'
+      shift
+      ;;
+    -f)
+      filters+=("$2")
+      shift 2
+      ;;
+    -F)
+      format="$2"
+      shift 2
+      ;;
+    *) # add remaining
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+and_filters() {
+  echo "#{&&:$1,$2}"
+}
+
+join_filters=""
+for i in "${!filters[@]}"; do
+  element="${filters[i]}"
+  if [[ -z $join_filters ]]; then
+    join_filters="$element"
+  else
+    join_filters="$(and_filters "$join_filters" "$element")"
+  fi
+done
+
+if [[ -n $join_filters ]]; then
+  args+=("-f" "$join_filters")
+fi
+
+if $mru; then
+  args+=("-F" "$mru_key$sep$format")
+  tmux ls "${args[@]}" | sort -t${sep} -rnk1,2 | cut -d${sep} -f2-
+  exit 0
+else
+  args+=("-F" "$format")
+  tmux ls "${args[@]}"
+fi

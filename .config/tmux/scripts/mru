@@ -1,0 +1,4 @@
+#!/bin/bash
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+$tmux_scripts/ls --mru --nohidden --detached --id 2>/dev/null | head -n1

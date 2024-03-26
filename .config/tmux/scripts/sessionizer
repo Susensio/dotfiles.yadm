@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+# Open and switch tmux sessions with fzf selectos
+
+# Get first argument if it exists
+if [[ -n $1 ]]; then
+  query="$(realpath "$1")"
+
+  if ! [[ -d $query ]]; then
+    echo "ERROR: $query is not a valid directory" >&2 && exit 1
+  fi
+fi
+
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+zoxide_max=50
+sep=$'\x1f'
+
+# The input table should be a tab delimited with fields:
+# {1} ID
+# {2} PATH
+# {3} PRETTY_NAME
+
+prepend() { while read -r line; do printf "%s\t%s\n" "$1" "$line"; done; }
+append() { while read -r line; do printf "%s\t%s\n" "$line" "$1"; done; }
+
+concat_lists(){
+  for list in "$@"; do
+    echo "$list"
+  done
+}
+
+
+blank_icon="󰄱"
+blank_session(){
+  echo "~${sep}${HOME}${sep}${blank_icon} +New session"
+}
+
+tmux_icon=""
+list_sessions(){
+  # sorted by mru, but current session last
+  sessions=$("$tmux_scripts/ls" --nohidden --mru \
+    -F "#{session_id}${sep}#{session_path}${sep}${tmux_icon} [#{session_name}]")
+  # Move current session to the end
+  echo "$sessions" | tail -n +2
+  echo "$sessions" | head -n 1
+  }
+
+list_zoxide() {
+  zoxide query --exclude "$HOME" --list | head -n $zoxide_max
+}
+
+list_projects() {
+  find ~/Projects -mindepth 1 -maxdepth 1 -type d
+}
+
+list_pwd() {
+  pwd="$(test -n "$TMUX" && tmux display -pF '#{pane_current_path}' || echo "$PWD")"
+  echo "$pwd"
+  find "$pwd" -mindepth 1 -maxdepth 1 -type d
+}
+
+shorten_path() {
+  # echo "$1" | sed "s|^$HOME|~|"
+  echo "${1//^$HOME/~}"
+}
+full_path() {
+  # echo "$1" | sed "s|^~|$HOME|"
+  echo "${1//^~/$HOME}"
+}
+
+directory_icon=""
+code_icon=""
+git_icon="󰊢"
+config_icon=""
+
+get_icon() {
+  path="$1"
+  case "$path" in
+    $HOME/.config* )
+      echo "$config_icon"
+      ;;
+    $HOME/Projects* )
+      echo "$git_icon"
+      ;;
+    $HOME/bin* )
+      echo "$code_icon"
+      ;;
+    /*)
+      echo "$directory_icon"
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+}
+
+format_directories() {
+    while read -r path; do \
+      echo -e "_${sep}$path${sep}$(get_icon "$path") $(shorten_path "$path")"
+    done
+}
+list_directories() {
+  # print fast for responsivenes
+  list_zoxide
+
+  # now filter the remaining
+  comm -13 <(list_zoxide | sort) <( { list_projects && list_pwd ; } | sort )
+
+  # old logic
+  # remove duplicates while keeping sort
+  # {
+  #   list_zoxide
+  #   list_projects
+  #   list_pwd
+  # } | format_directories | \
+  #   nl -s"$sep" | sort -t"$sep" -uk3,3 | sort -t"$sep" -nk1 | cut -d"$sep" -f2-
+}
+
+list_all() {
+  # sort: https://stackoverflow.com/a/20639730/4623227
+
+  blank_session
+  list_sessions
+  list_directories | format_directories
+  # concat_lists "$(blank_session)" "$(list_sessions)" "$(list_directories)"
+}
+
+# Only interactive if not argument provided
+if [[ -z $query ]]; then
+  preview="test {1} != '_' && $tmux_scripts/preview-tree {1} || exa --color always --tree --git-ignore --level=3 {2}"
+  result=$(list_all | fzf-tmux-auto --no-sort --filepath-word --delimiter="$sep" --scheme=path --with-nth=3 --preview="$preview" --print-query --query="$query" --bind="tab:transform-query(echo {3} | cut -c5-)" )
+
+  # split result
+  mapfile -t lines <<< "$result"
+  query="${lines[0]}"
+  selected="${lines[1]}"
+fi
+
+
+if [[ -z $query ]] && [[ -z $selected ]]; then
+  exit 0
+fi
+
+if [[ -n $query ]] && [[ -z $selected ]]; then
+  query_path="$(full_path "$query")"
+  if ! [[ -d $query_path ]]; then
+    echo "ERROR: $query_path is not a valid directory" >&2 && exit 1
+  fi
+  selected="_$sep$query_path$sep"
+fi
+
+# split selected
+IFS="$sep" read -r id path _ <<< "$selected"
+
+# new session
+if [[ $id == '~' ]]; then
+  id="$(tmux new-session -d -c "$path")"
+fi
+# directory selected
+if [[ $id == '_' ]]; then
+  icon=$(get_icon "$path")
+  session_name="$icon $(basename "$path" | tr '.' '_')"
+  if tmux has-session -t "=$session_name" 2>/dev/null; then
+    id="$(tmux ls -f "#{==:#{session_name},$session_name}" -F '#{session_id}')"
+  else
+    # Possible startup script
+    if [[ -e $path/.t ]]; then
+      id="$(tmux new-session -d -s "$session_name" -c "$path" -PF '#{session_id}' "$path/.t ; $SHELL")"
+    else
+      id="$(tmux new-session -d -s "$session_name" -c "$path" -PF '#{session_id}')"
+    fi
+    zoxide add "$path"
+    # Possible startup script
+    # if [[ -e $path/.t ]]; then
+    #   tmux send-keys -t "$id" "exec $path/.t '$id'; $SHELL" ENTER
+    # fi
+  fi
+fi
+
+if [[ -n "$TMUX" ]]; then
+  tmux switch -t "$id"
+else
+  tmux attach -t "$id"
+fi

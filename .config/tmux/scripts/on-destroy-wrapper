@@ -1,0 +1,9 @@
+#!/bin/bash
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "" >> /tmp/ondestroy.log
+echo "$(date -u +%Y-%m-%dT%H:%M:%S%Z)" >> /tmp/ondestroy.log
+echo "START" >> /tmp/ondestroy.log
+echo "$@" >> /tmp/ondestroy.log
+tmux ls -F '#{session_id} #{session_name} #{?session_attached,attached,detached} #{?hidden,hidden,nohidden}' >> /tmp/ondestroy.log
+bash -x "$CURRENT_DIR/on-destroy" $@ 2>> /tmp/ondestroy.log
+echo "END" >> /tmp/ondestroy.log

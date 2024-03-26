@@ -1,0 +1,21 @@
+#!/bin/bash
+# Calculate a popup size that looks good on ultrawide and portrait
+# it can be used as `tmux popup $(sd tmux popup-size)`
+# or in fish: `tmux popup (sd tmnux popup-size | string split -- ' ')`
+
+# Assign the first and second argument to w and h respectively
+w=$(tmux display -p '#{window_width}')
+h=$(tmux display -p '#{window_height}')
+# Calculate x using bc with scale for floating-point precision
+x=$(echo "sqrt(sqrt($w / (2*$h)))" | bc -l)
+
+## Check if x is smaller than 1 and return the appropriate calculated string
+if (( $(echo "$x < 1" | bc) )); then
+  # Calculate 90*X
+  result=$(echo "(90 * $x) / 1" | bc)
+  echo "-w90%" "-h$result%"
+else
+  # Calculate 90/X
+  result=$(echo "(90 / $x) / 1" | bc)
+  echo "-w$result%" "-h90%"
+fi

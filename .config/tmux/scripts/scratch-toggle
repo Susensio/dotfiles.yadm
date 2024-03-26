@@ -1,0 +1,97 @@
+#!/bin/bash
+# Toggle a scratch session in a popup.
+# There are session' scratchs, and a global one.
+# Each one persists unless closed.
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+
+if [[ -z $TMUX ]]; then
+  echo "ERROR: this should only be used inside tmux" >&2 && exit 1
+fi
+
+if [[ $# -ne 1 ]]; then
+  echo "ERROR: either --global or --session are needed" >&2 && exit 1
+fi
+
+if [[ $1 == '--global' ]]; then
+  scope="global"
+else
+  scope="session"
+fi
+
+is_scratch="$(tmux show -vq '@is_scratch')"
+
+if [[ $is_scratch == "true" ]]; then
+  tmux detach
+  exit 0
+fi
+
+prefix="_scratch"
+
+if [[ $scope == "global" ]]; then
+
+  scratch_name="$prefix"
+  scratch_path="$HOME"
+
+  # parent is server
+  parent_id='$-1'
+  parent_opt="-s"
+  # fires when zero non-hidden sesions
+  parent_hook_condition='#{==:#{S:#{?@hidden,,#S}},}'
+else
+  current_session="$(tmux display -p -F '#{session_id}')"
+  current_name="$(tmux display -p -F '#{session_name}')"
+  current_path="$(tmux display -p -F '#{session_path}')"
+
+  scratch_name="$prefix-$current_name"
+  scratch_path="$current_path"
+
+  # parent is session
+  parent_id="$current_session"
+  parent_opt="-t "$current_session
+  parent_hook_condition="#{==:#{hook_session},$current_session}"
+fi
+
+scratch_id="$(tmux show $parent_opt -vq '@scratch_id')"
+
+# must be calculated before `tmux new` because of problems
+popup_size="$($tmux_scripts/popup-size)"
+
+if [[ -z $scratch_id ]] || ! tmux has -t "$scratch_id" 2> /dev/null; then
+  # creating session...
+  scratch_id=$(tmux new -d -c "$scratch_path" -s "$scratch_name" -PF '#{session_id}')
+  tmux set -t "$scratch_id" status off
+  # BUG: disable because tmux exists unexpectedly
+  # tmux set -t "$scratch_id" detach-on-destroy on
+  tmux set -t "$scratch_id" -q @is_scratch true
+  tmux set -t "$scratch_id" -q @hidden true
+  tmux set -t "$scratch_id" -q @parent_id "$parent_id"
+
+  # save info on parent (single session or global)
+  tmux set $parent_opt -q @scratch_id "$scratch_id"
+
+  # hooks on dying sessions don't work, using session_id+100 as index is a workaraound
+  #                     trim dollar sign   offset
+  hook_scratch_index=$(( ${scratch_id:1} + 100 ))
+  hook_parent_index=$(( ${parent_id:1} + 100 ))
+
+  # this could be waaaay easier if I implement it only in bash instead of hooks...
+
+  # if scratch dies, remove info from parent and hooks
+  tmux set-hook -g session-closed[$hook_scratch_index] \
+    "if -F '#{==:#{hook_session},$scratch_id}' {
+      set -u $parent_opt -q @scratch_id;
+      set-hook -gu session-closed[$hook_scratch_index];
+      set-hook -gu session-closed[$hook_parent_index];
+    }"
+
+  # if parent dies, kill scratch child
+  tmux set-hook -g session-closed[$hook_parent_index] \
+    "if -F '$parent_hook_condition' {
+      run '$tmux_scripts/scratch-cleanup \\$parent_id';
+      set-hook -gu session-closed[$hook_parent_index];
+    }"
+
+fi
+
+tmux popup ${popup_size} -E tmux attach -t "$scratch_id"

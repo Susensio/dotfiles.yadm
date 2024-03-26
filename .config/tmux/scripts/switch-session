@@ -1,0 +1,27 @@
+#!/bin/bash
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+
+case "$1" in
+  -n) direction="+" ;;
+  -p) direction="-" ;;
+  *) echo "Unknown flag" >&2 && exit 1
+esac
+
+current_session="$(tmux display -pF '#{session_id}')"
+readarray -t sessions < <("$tmux_scripts"/ls --id --nohidden | sort -n -k1.2 )
+
+for i in "${!sessions[@]}"; do
+  if [[ ${sessions[$i]} == "$current_session" ]]; then
+    break
+  fi
+done
+
+i=$(( $i "$direction" 1 ))
+i_max=$(( "${#sessions[@]}" - 1 ))
+
+# wrap
+[[ $i -lt 0 ]] && i=$i_max
+[[ $i -gt $i_max ]] && i=0
+
+tmux switch-client -t "${sessions[$i]}"

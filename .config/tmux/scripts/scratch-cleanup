@@ -1,0 +1,8 @@
+#!/bin/bash
+session_closed="$1"
+dangling="$(tmux ls -f "#{==:#{@parent_id},$session_closed}" -F '#{session_id}')"
+
+if [[ -z $dangling ]]; then
+  exit 0
+fi
+tmux kill-session -t "$dangling"

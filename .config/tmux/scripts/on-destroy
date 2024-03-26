@@ -1,0 +1,42 @@
+#!/bin/bash
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+# TODO: what if multiple clients?
+client="$1"
+
+echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
+mru="$($tmux_scripts/mru)"
+current_session="$(tmux display -pF '#{session_id}')"
+
+echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
+
+if [[ -n "$mru" ]]; then
+  tmux switch-client -c "$client" -t "$mru"
+else
+  tmux detach-client -t "$client"
+fi
+
+echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
+tmux kill-session -t "$current_session"
+echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
+# detach_on_destroy=$(tmux show-options -gqv detach-on-destroy)
+#
+# case "$detach_on_destroy" in
+#   "on")
+#     tmux detach-client
+#     ;;
+#   "off")
+#     echo "Not implemented" >&2 && exit 1
+#     ;;
+#   "no-detached")
+#     if [[ -n "$mru" ]]; then
+#       tmux switch-client -t "$mru"
+#     else
+#       tmux detach-client
+#     fi
+#     ;;
+#   *)
+#     echo "Option not expected" >&2 && exit 1
+#     ;;
+# esac
+#
+# tmux kill-session -t "$current_session"

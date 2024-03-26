@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+
+session_path=$(tmux display -pF '#{session_path}')
+current_path=$(tmux display -pF '#{pane_current_path}')
+
+realpath --relative-to="$session_path" "$current_path" | sed '/^[\.]/! s|^|./|g'

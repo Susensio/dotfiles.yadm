@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Fancy tree view of tmux sessions windows and panes
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+
+all=false && [[ "$1" == "--all" ]] && { all=true; shift; }
+# if not provided, current session
+target_id="${1:-$(tmux display -pF '#{session_id}')}"
+
+RESET="\e[0m"
+BOLD="\e[1m"
+DIM="\e[2m"
+ITALIC="\e[3m"
+LGRAY="\e[37m"
+GRAY="\e[90m"
+BLUE="\e[94m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+
+RESET="\e[0m"
+echo -en "${RESET}"
+
+[[ -n $target_id ]] && ! $all && filter="-f #{==:#{session_id},$target_id}"
+
+readarray -t sessions < <($tmux_scripts/ls --nohidden $filter -F '#{session_id}:#{session_name}:#{T:tree_mode_format}:#{session_path}')
+for session in "${sessions[@]}"; do
+  IFS=':' read -r s_id s_name s_info s_path <<< "$session"
+  [[ $s_id == $target_id ]] && echo -en "${BLUE}"
+  echo -en "${BOLD}"
+  echo -n "[$s_name]"
+  echo -en "${RESET}"
+  [[ $s_id == $target_id ]] && echo -en "${BLUE}" || echo -en "${LGRAY}"
+  echo -n ": $(echo "$s_path" | sed "s|$HOME|~|")"
+  echo -en "${ITALIC}"
+  echo -n " - $s_info"
+  echo -en "${RESET}"
+  echo
+
+  readarray -t windows < <(tmux lsw -t"$s_id" -F '#{window_id}:#{window_index}:#{window_name}:#{window_active}')
+  w_id_last=$(echo "${windows[-1]}" | cut -d':' -f1)
+  for window in "${windows[@]}"; do
+    IFS=':' read -r w_id w_i w_name w_info <<< "$window"
+    echo -en "${GRAY}"
+    [[ $w_id != $w_id_last ]] && echo -en "├──" || echo -en "└──"
+    echo -en "${RESET}"
+    [[ $s_id == $target_id ]] && echo -en "${YELLOW}"
+    echo -n "󰓩 "
+    echo -en "${BOLD}"
+    echo -n "$w_i:$w_name"
+    echo -en "${RESET}"
+    echo -en "${BOLD}"
+    [[ $w_info -eq 1 ]] && echo -n "*"
+    echo -en "${RESET}"
+    echo
+
+    readarray -t panes < <(tmux lsp -t"$w_id" -F '#{pane_id}:#{pane_current_command}:#{pane_title}')
+    p_id_last=$(echo "${panes[-1]}" | cut -d':' -f1)
+    for pane in "${panes[@]}"; do
+      IFS=':' read -r p_id p_name p_info <<< "$pane"
+      echo -en "${GRAY}"
+      [[ $w_id != $w_id_last ]] && echo -en "│  " || echo -en "   "
+      [[ $p_id != $p_id_last ]] && echo -en "├──" || echo -en "└──"
+      echo -en "${RESET}"
+
+      [[ $s_id == $target_id ]] && echo -en "${GREEN}"
+      echo -n " "
+      echo -en "${BOLD}"
+      echo -n "$p_name"
+      echo -en "${RESET}"
+      echo -en "${LGRAY}"
+      [[ $s_id == $target_id ]] && echo -en "${GREEN}"
+      echo -n ": "
+      echo -n "$p_info"
+      # echo -n "$p_info"
+      echo -en "${RESET}"
+      echo
+    done
+  done
+done

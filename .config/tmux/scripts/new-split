@@ -1,0 +1,11 @@
+#!/bin/bash
+# Try to open a tmux popup with appropiate size
+
+width="$(tmux display -pF '#{pane_width}')"
+height="$(tmux display -pF '#{pane_height}')"
+
+if [[ $width -gt $(( height  * 2 )) ]]; then
+  tmux split-window -h -c "#{pane_current_path}"
+else
+  tmux split-window -v -c "#{pane_current_path}"
+fi

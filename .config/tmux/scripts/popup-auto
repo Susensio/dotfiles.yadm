@@ -1,0 +1,10 @@
+#!/bin/bash
+# Try to open a tmux popup with appropiate size
+
+tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
+
+if [[ -n $TMUX ]]; then
+  tmux popup $("$tmux_scripts"/popup-size) -E "$@"
+else
+  eval "$@"
+fi
