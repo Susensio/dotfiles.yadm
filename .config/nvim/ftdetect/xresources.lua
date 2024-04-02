@@ -1,5 +1,5 @@
 vim.filetype.add({
   extension = {
-    Xresources = 'xdefaults',
+    Xresources = "xdefaults",
   }
 })
