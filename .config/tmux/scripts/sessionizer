@@ -14,6 +14,8 @@ fi
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 zoxide_max=50
 sep=$'\x1f'
+# sep="␞" # U+241E
+
 
 # The input table should be a tab delimited with fields:
 # {1} ID
@@ -43,7 +45,7 @@ list_sessions(){
   # Move current session to the end
   echo "$sessions" | tail -n +2
   echo "$sessions" | head -n 1
-  }
+}
 
 list_zoxide() {
   zoxide query --exclude "$HOME" --list | head -n $zoxide_max

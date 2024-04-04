@@ -8,6 +8,8 @@ format="#{session_name}: #{session_windows} windows (created #{t:session_created
 mru=false
 mru_key="#{?session_last_attached,#{session_last_attached},#{session_created}}"
 sep=$'\x1f'
+sep_mangled='\037'
+# sep="␞" # U+241E
 
 args=()
 
@@ -64,9 +66,11 @@ fi
 
 if $mru; then
   args+=("-F" "$mru_key$sep$format")
-  tmux ls "${args[@]}" | sort -t${sep} -rnk1,2 | cut -d${sep} -f2-
-  exit 0
+  tmux ls "${args[@]}" | sort -r | sed "s/${sep_mangled}/${sep}/g" | cut -d"${sep}" -f2-
+  # tmux ls "${args[@]}" | sort -r | sed "s/${sep_mangled}/${sep}/g" | awk "BEGIN {FS=\"${sep}\";}{print \$2}"
+  # { echo "1${sep}hi"; echo "3${sep}ho"; echo "2${sep}hu"; } | sort -r | awk "BEGIN {FS=\"${sep}\";}{print \$2}"
+
 else
   args+=("-F" "$format")
-  tmux ls "${args[@]}"
+  tmux ls "${args[@]}" | sed "s/${sep_mangled}/${sep}/g"
 fi

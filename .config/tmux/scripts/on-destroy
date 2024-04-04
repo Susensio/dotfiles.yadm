@@ -3,8 +3,8 @@ tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 # TODO: what if multiple clients?
 client="$1"
 
-echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
-mru="$($tmux_scripts/mru)"
+(tmux display -p -F '#{S:#{session_id}}') > /dev/null
+mru="$("$tmux_scripts"/mru)"
 current_session="$(tmux display -pF '#{session_id}')"
 
 echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
@@ -18,6 +18,7 @@ fi
 echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
 tmux kill-session -t "$current_session"
 echo "$(tmux display -p -F '#{S:#{session_id}}')" > /dev/null
+
 # detach_on_destroy=$(tmux show-options -gqv detach-on-destroy)
 #
 # case "$detach_on_destroy" in
