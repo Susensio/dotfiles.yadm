@@ -11,12 +11,13 @@ Programs are installed in $HOME/.local/lib/\$cmd/ and symlinked to $HOME/.local/
 EOF
 }
 
-# read --repo and --cmd from command line
-SHORT=h,r:,c:
-LONG=help,repo:,cmd:
-OPTS=$(getopt --options $SHORT --longoptions $LONG -- "$@")
-eval set -- "$OPTS"
-
+# # read --repo and --cmd from command line
+# SHORT=h,r:,c:
+# LONG=help,repo:,cmd:
+# OPTS=$(getopt --options $SHORT --longoptions $LONG -- "$@")
+# eval set -- "$OPTS"
+repo=""
+cmd=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h | --help )
@@ -36,12 +37,18 @@ while [[ $# -gt 0 ]]; do
       break
       ;;
     * )
-      echo "Unexpected option: $1" >&2
-      exit
+      if [[ -n "$repo" ]]; then
+        echo "Unexpected option: $1" >&2
+        exit
+      else
+        repo="$1"
+        shift
+      fi
       ;;
   esac
 done
 
+cmd=${cmd:-$(basename "$repo" | tr '[:upper:]' '[:lower:]')}
 folder="$HOME/.local/lib/$cmd"
 download="download.tar.gz"
 release="release"
@@ -142,7 +149,8 @@ else
     ln -svf "$(realpath "$file")" "$usermanpages/$(basename "$file")"
   done
   # reindex manpages
-  mandb
+  mandb --user-db
+
   # manpage=$(find "$folder" -type d -name "man1")
   # if [[ -n "$manpage" ]]; then
   #   echo "Updating manpages..." >&2
@@ -153,7 +161,7 @@ else
   echo "Updating fish completion..." >&2
   # should not use a loop, bc only one file is expected
   for file in **/*complet*/**/*.fish; do
-    ln -svf "$(realpath "$file")" "$fish_completions/$cmd.fish"
+    ln -svf "$(realpath --relative-to="$fish_completions" "$file")" "$fish_completions/$cmd.fish"
   done
 
   # completion=$(find "$folder" -type f -path '*complet*.fish')

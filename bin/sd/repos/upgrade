@@ -13,5 +13,5 @@ do
   [ -d ".git" ] && echo "Updating repository ${dir%*/}..." && git pull --ff-only
 
   # Else If gh release file, do the thing
-  [ -f "gh-repo" ] && echo "Updating release ${dir%*/}..." && $scriptdir/upgrade --cmd "$dirname" --repo "$(cat gh-repo)"
+  [ -f "gh-repo" ] && echo "Updating release ${dir%*/}..." && $scriptdir/download --cmd "$dirname" --repo "$(cat gh-repo)"
 done
