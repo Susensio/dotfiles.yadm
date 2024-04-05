@@ -61,8 +61,8 @@ if [[ -z $scratch_id ]] || ! tmux has -t "$scratch_id" 2> /dev/null; then
   # creating session...
   scratch_id=$(tmux new -d -c "$scratch_path" -s "$scratch_name" -PF '#{session_id}')
   tmux set -t "$scratch_id" status off
-  # BUG: disable because tmux exists unexpectedly
-  # tmux set -t "$scratch_id" detach-on-destroy on
+  tmux set -t "$scratch_id" detach-on-destroy on
+  tmux set -t "$scratch_id" remain-on-exit off
   tmux set -t "$scratch_id" -q @is_scratch true
   tmux set -t "$scratch_id" -q @hidden true
   tmux set -t "$scratch_id" -q @parent_id "$parent_id"
