@@ -53,7 +53,7 @@ paste_from_clipboard() {
       xclip -selection "$SELECTION" -o
       ;;
     wsl)
-      clip.exe
+      powershell.exe -noprofile -c '[Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))'
       ;;
   esac
 }
