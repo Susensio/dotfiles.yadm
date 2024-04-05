@@ -18,7 +18,7 @@ sep=$'\x1f'
 
 
 # The input table should be a tab delimited with fields:
-# {1} ID
+# {1} ID|~|_
 # {2} PATH
 # {3} PRETTY_NAME
 
@@ -52,7 +52,7 @@ list_zoxide() {
 }
 
 list_projects() {
-  find ~/Projects -mindepth 1 -maxdepth 1 -type d
+  find ~/Projects ~/workspace -mindepth 1 -maxdepth 1 -type d 2>/dev/null
 }
 
 list_pwd() {

@@ -8,7 +8,7 @@ format="#{session_name}: #{session_windows} windows (created #{t:session_created
 mru=false
 mru_key="#{?session_last_attached,#{session_last_attached},#{session_created}}"
 sep=$'\x1f'
-sep_mangled='\037'
+sep_mangled='\\037'
 # sep="␞" # U+241E
 
 args=()
