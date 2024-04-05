@@ -44,9 +44,9 @@ paste_from_clipboard() {
   case "$(get_system)" in
     wayland)
       if [ "$SELECTION" == "clipboard" ]; then
-        wl-paste
+        wl-paste --no-newline
       else
-        wl-paste --primary
+        wl-paste --primary --no-newline
       fi
       ;;
     x11)
