@@ -371,15 +371,20 @@ end, {expr = true})
 
 -- [[ ABBREVIATIONS ]] --
 -- patch has not been merged yet...
-if vim.fn.has('nvim-0.9.6') == 1 then
-  map("ca", "W", "w")
-  map("ca", "Wq", "wq")
-  map("ca", "WQ", "wq")
-else
-  -- do the same with commands
-  command("W", "w", {})
-  command("Wq", "wq", {})
-  command("WQ", "wq", {})
+local abbrs = {
+  W = "w",
+  Wq = "wq",
+  WQ = "wq",
+  Q = "q",
+  Qa = "qa",
+}
+for lhs, rhs in pairs(abbrs) do
+  if vim.fn.has('nvim-0.10') == 1 then
+    map("ca", lhs, rhs, { desc = "Abbreviation for " .. rhs })
+  else
+    -- do the same with commands
+    command(lhs, rhs, {})
+  end
 end
 
 
@@ -418,7 +423,12 @@ map_ft("lazy", "n", "<Esc>", function() vim.api.nvim_win_close(0, false) end,
 map_ft("qf", "n", "q",
   function()
     -- vim.bo[buf].buflisted = false
-    vim.api.nvim_win_close(0, true)
+    if vim.fn.getwininfo(vim.api.nvim_get_current_win())[1].loclist == 1 then
+      vim.cmd.lclose()
+    else
+      vim.cmd.cclose()
+    end
+    -- vim.api.nvim_win_close(0, true)
   end,
-  { nowait = true }
+  { nowait = true, desc = "Close quickfix or loclist with `q`" }
 )
