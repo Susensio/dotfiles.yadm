@@ -27,12 +27,16 @@ return {
         if suggestion.is_visible() then
           local ns_id = vim.api.nvim_get_namespaces()["copilot.suggestion"]
           local suggested_text = vim.api.nvim_buf_get_extmark_by_id(0, ns_id, 1, { details = true })[3].virt_text[1][1]
-          if string.match(suggested_text, "^ ") == nil then
+          local starts_with_spaces = string.match(suggested_text, "^ +")
+          if starts_with_spaces ~= nil then
+            -- insert those spaces
+            vim.api.nvim_feedkeys(starts_with_spaces, "n", true)
+          else
             suggestion.accept()
-            return
           end
+        else
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
         end
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
       end, { desc = "Super Tab" })
     end,
     opts = {
@@ -40,7 +44,8 @@ return {
         enabled = true,
         auto_trigger = true,
         keymap = {
-          accept_line = '<C-l>',
+          accept_word = '<C-l>',
+          accept_line = '<C-L>',
           accept = false
           --
         },
