@@ -21,6 +21,11 @@ if not status is-interactive
 end
 
 # Default bindings but bind Search Directory to Ctrl+F and Search Variables to Ctrl+Alt+V prepending $
+if not fisher list fzf >/dev/null then
+  echo "fzf.fish not found" >&2
+  exit 1
+end
+
 fzf_configure_bindings --directory=\cf --variables=
 function _fzf_search_variables_prepend
   if not string match -q 'set*' (commandline) && test (commandline -t) != '$'
