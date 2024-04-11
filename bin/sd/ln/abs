@@ -1,0 +1,12 @@
+#!/bin/bash
+# changes relative symbolic links to absolute
+# will work for links & filenames with spaces
+
+for l in "$@"; do
+    [[ ! -L "$l" ]] && echo "Not a link: $l" && exit 1
+done
+
+for l in "$@"; do
+    # Use -b here to get a backup.  Unnecessary because reversible.
+    ln -sf "$(realpath "$(readlink "$l")")" "$l"
+done

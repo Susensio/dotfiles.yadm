@@ -1,0 +1,21 @@
+#!/bin/bash
+# changes symbolic links to hard links
+# This will work for filenames with spaces,
+# but only for regular files in the same filesystem as the link.
+# Thorough discussion of correct way to confirm devices are the same:
+# https://unix.stackexchange.com/questions/120810/check-if-2-directories-are-hosted-on-the-same-partition-on-linux
+
+for l in "$@"; do
+    [[ ! -L "$l" ]] && echo "Not a symbolic link: $l" && exit 1
+
+    rl="$(readlink "$l")"
+    rld="$(dirname "$l")"
+    [[ ! -e "$rl" || -d "$rl" || "$(df --output=target "$rld")" != "$(df --output=target "$rl")" ]] && \
+        echo "Target \"$rl\" must exist on same filesystem as link \"$l\", and may not be a directory" && \
+        exit 1
+done
+
+for l in "$@"; do
+    # Using -b here to get a backup, because it's not easy to revers a soft->hard link conversion
+    ln -fb "$(readlink "$l")" "$l"
+done
