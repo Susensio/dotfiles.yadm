@@ -1,13 +1,20 @@
 function venv --description 'Activates local python venv'
-  if test -d ".venv"
-    echo "Activating local venv..."
-    set venv_path .venv/bin/activate.fish
-  else
-    echo "Activating global venv..."
-    set venv_path $XDG_DATA_HOME/venv/bin/activate.fish
+  set -l venv_path
+
+  for dir in .venv venv
+    if test -d $dir
+      echo "Local $dir/ found. Activating..."
+      set venv_path $dir
+      break
+    end
   end
 
-  source $venv_path
+  if not set -q venv_path
+    echo "Using global venv. Activating..."
+    set venv_path $XDG_DATA_HOME/venv
+  end
+
+  source $venv_path/bin/activate.fish
 
   if set -q argv[1]
     python $argv
