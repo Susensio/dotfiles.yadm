@@ -92,6 +92,12 @@ if compgen -G "${files}" > /dev/null; then
         # remove dot with :1
     dest="${confdir}/${base:1}"
 
-    mv --interactive -- "${file}" "${dest}"
+    if [[ ! -f $dest ]]; then
+        mv -- "${file}" "${dest}"
+    else
+        mv -- "${file}" "${file}.bak"
+        echo "File ${dest} already exists. Renamed to ${file}.bak"
+    fi
+
     done
 fi

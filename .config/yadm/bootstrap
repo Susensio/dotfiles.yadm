@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -eu
 
+# All subsequent commands must have the right environment variables
+source "$HOME"/.config/profile
+
 # Execute all executable files (excluding templates and editor backups) in the
 # ~/.config/yadm/bootstrap.d directory when run.
 # https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir
@@ -15,7 +18,7 @@ fi
 
 find -L "$BOOTSTRAP_D" -type f | sort | while IFS= read -r bootstrap; do
   if [[ -x "$bootstrap" && ! "$bootstrap" =~ "##" && ! "$bootstrap" =~ "~$" ]]; then
-    echo "Bootstraping file $(basename -- ${bootstrap})..." >&2
+    [[ -n "${DEBUG-}" ]] && echo "Bootstraping file $(basename -- ${bootstrap})..." >&2
     if ! "$bootstrap"; then
       echo "Error: bootstrap '$bootstrap' failed" >&2
       exit 1

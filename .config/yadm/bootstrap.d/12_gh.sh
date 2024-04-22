@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 if command -v gh &> /dev/null; then
-  echo "GitHub CLI already installed" >&2
+  [[ -n "${DEBUG-}" ]] && echo "GitHub CLI already installed" >&2
   exit 0
 fi
 

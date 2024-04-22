@@ -37,5 +37,10 @@ if [[ -f ${file} ]]; then
     base=$(basename "${file}")
     # remove dot with :1
     dest="${confdir}/${base:1}"
-    mv --interactive -- "${file}" "${dest}"
+    if [[ ! -f $dest ]]; then
+        mv -- "${file}" "${dest}"
+    else
+        mv -- "${file}" "${file}.bak"
+        echo "File ${dest} already exists, moved ${file} to ${file}.bak" >&2
+    fi
 fi
