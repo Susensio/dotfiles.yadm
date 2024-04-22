@@ -1,2 +1,5 @@
 gui:
   showIcons: true
+  scrollHeight: 10
+os:
+  editPreset: 'nvim'
