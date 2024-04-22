@@ -1,6 +1,7 @@
 return {
   { -- mason
     "williamboman/mason.nvim",
+    main = "mason",
     config = true,
     cmd = "Mason",
     build = ":MasonUpdate",
@@ -8,6 +9,7 @@ return {
 
   { -- mason-lspconfig
     "williamboman/mason-lspconfig.nvim",
+    main = "mason-lspconfig",
     dependencies = {
       "williamboman/mason.nvim",
     },
