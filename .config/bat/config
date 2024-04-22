@@ -27,3 +27,4 @@
 --map-syntax '/home/*/.config/profile*:Bourne Again Shell (bash)'
 --map-syntax '/home/*/.config/profile.d/*:Bourne Again Shell (bash)'
 --map-syntax '/home/*/.config/bash/*:Bourne Again Shell (bash)'
+--theme "everforest"
