@@ -28,3 +28,5 @@
 	autoSetupRemote = true
 [rebase]
 	autoStash = true
+[blame]
+	coloring = highlightRecent
