@@ -3172,6 +3172,85 @@
           <string>italic</string>
         </dict>
       </dict>
+<!-- Add minimal scope coverage, necessary for manpages syntax highlighting -->
+<!-- https://github.com/sharkdp/bat/issues/2115 -->
+<!-- https://www.sublimetext.com/docs/scope_naming.html#minimal-scope-coverage -->
+      <dict>
+        <key>name</key>
+        <string>Markdown heading</string>
+        <key>scope</key>
+        <string>markup.heading</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#e69875</string>
+          <key>fontStyle</key>
+          <string>bold</string>
+        </dict>
+      </dict>
+      <dict>
+        <key>name</key>
+        <string>Command line option</string>
+        <key>scope</key>
+        <string>entity.name.command-line-option</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#a7c080</string>
+          <key>fontStyle</key>
+          <string>bold</string>
+        </dict>
+      </dict>
+      <dict>
+        <key>name</key>
+        <string>Variable parameter</string>
+        <key>scope</key>
+        <string>variable.parameter.man</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#dbbc7f</string>
+          <key>fontStyle</key>
+          <string>underline</string>
+        </dict>
+      </dict>
+      <!-- <dict> -->
+      <!--   <key>name</key> -->
+      <!--   <string>Variable parameter</string> -->
+      <!--   <key>scope</key> -->
+      <!--   <string>keyword.operator.man</string> -->
+      <!--   <key>settings</key> -->
+      <!--   <dict> -->
+      <!--     <key>foreground</key> -->
+      <!--     <string>#dbbc7f</string> -->
+          <!-- <key>fontStyle</key> -->
+          <!-- <string>underline</string> -->
+      <!--   </dict> -->
+      <!-- </dict> -->
+      <dict>
+        <key>name</key>
+        <string>Environment variables $</string>
+        <key>scope</key>
+        <string>punctuation.definition.variable.man</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#7fbbb3</string>
+          <!-- <key>fontStyle</key> -->
+          <!-- <string>bold</string> -->
+        </dict>
+      </dict>
+      <dict>
+        <key>name</key>
+        <string>Environment variables</string>
+        <key>scope</key>
+        <string>constant.other.man</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#7fbbb3</string>
+        </dict>
+      </dict>
     </array>
     <key>uuid</key>
     <string>3f688e48-bd62-4cd7-9981-9b491786d8c6</string>
