@@ -1,137 +1,79 @@
 return {
-  { -- tree.lua
-    "nvim-tree/nvim-tree.lua",
-    enabled = false,
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-    },
-    init = function()
-      vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = function(data)
-        -- buffer is a directory
-        local directory = vim.fn.isdirectory(data.file) == 1
-
-        if not directory then
-          return
-        end
-
-        -- change to the directory
-        vim.cmd.cd(data.file)
-
-        -- open the tree
-        require("nvim-tree.api").tree.open()
-      end
-      })
-    end,
-    opts = {
-      hijack_unnamed_buffer_when_opening = true,
-      disable_netrw = true,
-      hijack_cursor = true,
-      renderer = {
-        add_trailing = false,
-        highlight_modified = "name",
-        highlight_opened_files = "name",
-        icons = {
-          show = {
-            modified = false,
-            folder_arrow = false,
-          },
-        },
-        indent_markers = {
-          enable = true,
-          -- inline_arrows = false,
-          icons = {
-            item = "├",
-          },
-        },
-      },
-      update_focused_file = {
-        enable = true,
-      },
-      modified = {
-        enable = true,
-        show_on_dirs = false,
-      },
-      live_filter = {
-        always_show_folders = false,
-      },
-      diagnostics = {
-        enable = true,
-      },
-    },
-    config = function(_, opts)
-      require("nvim-tree").setup(opts)
-      -- Auto close
-      vim.api.nvim_create_autocmd({"QuitPre"}, {
-        callback = function() vim.cmd("NvimTreeClose") end,
-      })
-
-      local hl_update = require("utils").highlight_update
-      hl_update(0, "NvimTreeModifiedFile", { italic = true })
-      hl_update(0, "NvimTreeOpenedFile", { bold = false })
-
-      hl_update(0, "Directory", { bold = true })
-      hl_update(0, "NvimTreeFolderName", { link = "Directory" })
-      hl_update(0, "NvimTreeRootFolder", { bold = true })
-
-      -- Just like regular buffers:
-      hl_update(0, "NvimTreeNormal", { link = "Normal" })
-      hl_update(0, "NvimTreeNormalNC", { link = "NormalNC" })
-      hl_update(0, "NvimTreeEndOfBuffer", { link = "EndOfBuffer" })
-
-      -- vim.wo.fillchars = 'eob: '
-    end,
-    keys = {
-      { mode = "n", "<leader>e", vim.cmd.NvimTreeFindFileToggle, desc = "Toggle file tree" },
-    },
-  },
-
   { -- mini.files
     "echasnovski/mini.files",
     enabled = true,
-    event = "BufEnter */",
+    event = { "VimEnter */*,.*", "BufNew */*,.*" },
     dependencies = {
       "nvim-tree/nvim-web-devicons",
     },
     opts = {
       mappings = {
-        go_in = 'l',
+        go_in = '',
         go_in_plus = '<CR>',
-        go_out = 'h',
-        go_out_plus = '<BS>',
-        reveal_cwd = '@',
+        go_out = '-',
+        go_out_plus = '',
+        reset = '_',
       },
       windows = {
         preview = false
       },
       options = {
-        use_as_default_explorer = true,
+        -- use_as_default_explorer = true,
       },
     },
     config = function(plugin, opts)
       require(plugin.name).setup(opts)
 
+      local show_dotfiles = true
+      local filter_show = function(fs_entry)
+        return true
+      end
+      local filter_hide = function(fs_entry)
+        return not vim.startswith(fs_entry.name, ".")
+      end
+
+      local toggle_dotfiles = function()
+        show_dotfiles = not show_dotfiles
+        local new_filter = show_dotfiles and filter_show or filter_hide
+        require("mini.files").refresh({ content = { filter = new_filter } })
+      end
+
       -- use :w to save filesystem change
       -- https://github.com/echasnovski/mini.nvim/issues/391
       vim.api.nvim_create_autocmd('User', {
-        pattern = 'MiniFilesBufferCreate',
+        pattern = { 'MiniFilesBufferCreate', 'MiniFilesBufferUpdate' },
         callback = function(ev)
           local buf_id = ev.data.buf_id
           vim.schedule(function()
-            vim.api.nvim_buf_set_option(0, 'buftype', 'acwrite')
-            vim.api.nvim_buf_set_name(0, tostring(vim.api.nvim_get_current_win()))
+            vim.api.nvim_buf_set_option(buf_id, 'buftype', 'acwrite')
+            vim.api.nvim_buf_set_name(buf_id, "MiniFiles_" .. buf_id)
             vim.api.nvim_create_autocmd('BufWriteCmd', {
               buffer = buf_id,
               callback = MiniFiles.synchronize,
             })
 
+            -- Trigger LSP rename refactoring
+            vim.api.nvim_create_autocmd("User", {
+              pattern = "MiniFilesActionRename",
+              callback = function(event)
+                require("utils.lsp").on_rename(event.data.from, event.data.to)
+              end,
+            })
+
             -- close with <esc>
             vim.keymap.set("n", "<Esc>", MiniFiles.close, { buffer = buf_id })
             -- Move around without traversing the tree
-            vim.keymap.set("n", "<C-h>", "h", { buffer = buf_id })
-            vim.keymap.set("n", "<C-j>", "j", { buffer = buf_id })
-            vim.keymap.set("n", "<C-k>", "k", { buffer = buf_id })
-            vim.keymap.set("n", "<C-l>", "l", { buffer = buf_id })
+            -- vim.keymap.set("n", "<C-h>", "h", { buffer = buf_id })
+            -- vim.keymap.set("n", "<C-j>", "j", { buffer = buf_id })
+            -- vim.keymap.set("n", "<C-k>", "k", { buffer = buf_id })
+            -- vim.keymap.set("n", "<C-l>", "l", { buffer = buf_id })
+
+            vim.keymap.set("n", "g.", toggle_dotfiles, {
+              buffer = buf_id,
+              desc = "Toggle hidden files"
+            })
           end)
+
         end,
       })
     end,
@@ -141,6 +83,7 @@ return {
         "<leader>e",
         function()
           if not MiniFiles.close() then
+            -- Handle not yet created folders
             local get_parent = vim.fs.dirname
             local exists = function(path) return vim.loop.fs_stat(path) ~= nil end
             local path = vim.api.nvim_buf_get_name(0)
@@ -158,4 +101,13 @@ return {
     },
   },
 
+  { -- oil
+    'stevearc/oil.nvim',
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    event = { "VimEnter */*,.*", "BufNew */*,.*" },
+    cmd = { "Oil" },
+    opts = {
+      default_file_explorer = true,
+    },
+  }
 }

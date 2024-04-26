@@ -165,12 +165,27 @@ return {
           -- lualine_y = {"progress"},
           -- lualine_z = {"location"},
         },
+        -- winbar = {
+        --   lualine_z = {
+        --     {
+        --       "filename"
+        --     },
+        --   },
+        -- },
+        -- inactive_winbar = {
+        --   lualine_y = {
+        --     {
+        --       "filename"
+        --     },
+        --   },
+        -- },
         extensions = {
           -- "nvim-tree",
           "lazy",
           "mason",
           "man",
           "quickfix",
+          "oil",
           {
             filetypes = { "minipick" },
             sections = {
@@ -187,7 +202,28 @@ return {
             filetypes = { "minifiles" },
             sections = {
               lualine_a = { function() return "FILES" end },
-              lualine_b = { function() return vim.fn.fnamemodify(vim.fn.getcwd(), ":~") end },
+              lualine_b = { function()
+                local ok, minifiles = pcall(require, 'mini.files')
+                if ok then
+                  return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+                else
+                  return ''
+                end
+              end },
+            },
+          },
+          {
+            filetypes = { "oil" },
+            sections = {
+              lualine_a = { function() return "OIL" end },
+              lualine_b = { function()
+                local ok, oil = pcall(require, 'oil')
+                if ok then
+                  return vim.fn.fnamemodify(oil.get_current_dir(), ":~")
+                else
+                  return ''
+                end
+              end },
             },
           },
         },
@@ -279,4 +315,22 @@ return {
       require(plugin.main).setup(opts)
     end
   },
+
+
+  { -- incline
+    "b0o/incline.nvim",
+    version = false,
+    event = "VeryLazy",
+    opts = {
+      hide = {
+        focused_win = true,
+        only_win = "count_ignored",
+      },
+      window = {
+        overlap = {
+          borders = true,
+        },
+      },
+    },
+  }
 }

@@ -100,7 +100,7 @@ require("lazy").setup("plugins", {
   },
   install = {
     missing = true,
-    colorscheme = { "monokai", "habamax" },
+    colorscheme = { "monokai", "everforest", "habamax" },
   },
   dev = {
     path = '~/Projects'
