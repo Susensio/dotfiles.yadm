@@ -4,6 +4,7 @@ $XDG_CONFIG_HOME/fish/completions/*.fish
 $XDG_CONFIG_HOME/fish/conf.d/*.fish
 $HOME/bin/*
 $XDG_CONFIG_HOME/tmux/*.conf
+$XDG_CONFIG_HOME/tmux/scripts/*
 $XDG_CONFIG_HOME/nvim/lua/**/*.lua
 $XDG_CONFIG_HOME/yadm/bootstrap.d/*
 $XDG_CONFIG_HOME/yadm/hooks/*
