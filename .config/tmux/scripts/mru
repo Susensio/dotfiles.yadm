@@ -6,11 +6,6 @@ tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 target="$($tmux_scripts/ls --mru --nohidden --detached --id 2>/dev/null | head -n1)"
 
 if [[ -z $target ]]; then
-  # If no detached sessions are found, try attached sessions (skip current with tail)
-  target="$($tmux_scripts/ls --mru --nohidden --id 2>/dev/null | tail -n +2 | head -n1)"
-fi
-
-if [[ -z $target ]]; then
   tmux display-message "No sessions found"
   exit 1
 fi
