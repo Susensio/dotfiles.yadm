@@ -1,5 +1,8 @@
 gui:
   showIcons: true
   scrollHeight: 10
+  theme:
+    selectedLineBgColor:
+      - black
 os:
   editPreset: 'nvim'
