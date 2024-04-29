@@ -6,7 +6,8 @@ filters=()
 
 format="#{session_name}: #{session_windows} windows (created #{t:session_created})#{?session_grouped, (group ,}#{session_group}#{?session_grouped,),}#{?session_attached, (attached),}" # default
 mru=false
-mru_key="#{?session_last_attached,#{session_last_attached},#{session_created}}"
+# mru_key="#{?session_last_attached,#{session_last_attached},#{session_created}}"
+mru_key="#{session_activity}"
 sep=$'\x1f'
 sep_mangled='\\037'
 # sep="␞" # U+241E
