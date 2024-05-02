@@ -108,6 +108,9 @@ return {
     cmd = { "Oil" },
     opts = {
       default_file_explorer = true,
+      keymaps = {
+        ["~"] = false,
+      },
     },
   }
 }
