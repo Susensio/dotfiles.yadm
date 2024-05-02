@@ -447,5 +447,5 @@ local del_qf_item = function()
   vim.api.nvim_win_set_cursor(0, { line, 0 })
 end
 
-vim.keymap.set("n", "dd", del_qf_item, { silent = true, buffer = true, desc = "Remove entry from QF" })
-vim.keymap.set("v", "D", del_qf_item, { silent = true, buffer = true, desc = "Remove entry from QF" })
+map_ft("qf", "n", "dd", del_qf_item, { silent = true, desc = "Remove entry from QF" })
+map_ft("qf", "v", "D", del_qf_item, { silent = true, desc = "Remove entry from QF" })
