@@ -71,18 +71,18 @@ return {
           goto_right = "",
         },
         custom_textobjects = {
-          m = ts({ a = "@function.outer", i = "@function.inner" }),
-          f = ts({ a = "@call.outer", i = "@call.inner" }),
+          f = ts({ a = "@function.outer", i = "@function.inner" }),
+          -- f = ts({ a = "@call.outer", i = "@call.inner" }),
           o = ts({
             a = { "@conditional.outer", "@loop.outer" },
             i = { "@conditional.inner", "@loop.inner" },
           }),
-          t = ts({ a = "@class.outer", i = "@class.inner" }),
+          c = ts({ a = "@class.outer", i = "@class.inner" }),
           a = ts({ a = "@parameter.outer", i = "@parameter.inner" }),
           i = extra.indent(),
           g = extra.buffer(),
           -- c = ts({ a = "@comment.outer", i = "@comment.inner" }),
-          c = comment_ai_spec,
+          -- c = comment_ai_spec,
           -- B = ts({ a = "@scope.outer", i = "@scope.inner" })
         },
         search_method = "cover_or_next",

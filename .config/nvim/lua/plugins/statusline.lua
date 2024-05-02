@@ -58,6 +58,7 @@ return {
           component_separators = { left = "", right = "" },
           disabled_filetypes = { "starter" },
           ignore_focus = {
+            -- "minifiles",
             -- "minipick",
           },
           globalstatus = true,
@@ -202,14 +203,14 @@ return {
             filetypes = { "minifiles" },
             sections = {
               lualine_a = { function() return "FILES" end },
-              lualine_b = { function()
-                local ok, minifiles = pcall(require, 'mini.files')
-                if ok then
-                  return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
-                else
-                  return ''
-                end
-              end },
+              -- lualine_b = { function()
+              --   local ok, minifiles = pcall(require, 'mini.files')
+              --   if ok then
+              --     return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+              --   else
+              --     return ''
+              --   end
+              -- end },
             },
           },
           {

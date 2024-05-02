@@ -18,10 +18,11 @@ function M.on_attach(fun, opts)
   })
 end
 
+
 ---@param from string
 ---@param to string
 function M.on_rename(from, to)
-  local clients = M.get_clients()
+  local clients = vim.lsp.get_active_clients()
   for _, client in ipairs(clients) do
     if client.supports_method("workspace/willRenameFiles") then
       ---@diagnostic disable-next-line: invisible

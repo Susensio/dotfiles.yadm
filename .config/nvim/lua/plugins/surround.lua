@@ -6,7 +6,7 @@ return {
     config = true,
     opts = function()
       local ts_input = require('mini.surround').gen_spec.input.treesitter
-      vim.keymap.set('n', 'yss', 'ys_', { remap = true })
+      vim.keymap.set('n', 'gss', 'gs_', { remap = true })
       return {
         mappings = {
           add = 'gs',

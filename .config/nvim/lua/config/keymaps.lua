@@ -80,6 +80,8 @@ map("n", "<Esc>",
     -- vim.cmd.lclose()
     -- close loclist if open, but only for current window
 
+    -- clear command line
+    vim.cmd("echo")
   end
 )
 
@@ -104,6 +106,9 @@ map("x", "<Leader>s", [["*ygv:<C-u>%s/\V<C-r>*//g<Left><Left>]],
 
 
 -- Open with external program (link, file, etc)
+if vim.fn.has('nvim-0.10') == 1 then
+  vim.notify("This is already implemented in Neovim 0.10", vim.log.levels.WARN)
+end
 map("n", "gx", [[:!xdg-open <C-R>=escape("<C-R><C-F>", "#?&;\|%")<CR><CR>]],
   { desc = "Open with external program", silent = true })
 
@@ -263,9 +268,9 @@ require("utils.lsp").on_attach(
     lsp_map("n", "gd", vim.lsp.buf.definition, "definitionProvider", { desc = "Goto Definition (LSP)" })
     lsp_map("n", "gD", vim.lsp.buf.declaration, "declarationProvider", { desc = "Goto Declaration (LSP)" })
     lsp_map("n", "gr", vim.lsp.buf.references, "referencesProvider", { desc = "Goto References (LSP)" })
-    lsp_map("n", "<leader>cr", vim.lsp.buf.rename, "renameProvider", { desc = "Rename (LSP)" })
-    lsp_map("n", "<leader>ca", vim.lsp.buf.code_action, "codeActionProvider", { desc = "Code Action" })
-    lsp_map({ "n", "v" }, "<leader>cf", vim.lsp.buf.format, "documentFormattingProvider", { desc = "Format Code" })
+    lsp_map("n", "crn", vim.lsp.buf.rename, "renameProvider", { desc = "Rename (LSP)" })
+    lsp_map("n", "crr", vim.lsp.buf.code_action, "codeActionProvider", { desc = "Code Action" })
+    lsp_map({ "n", "v" }, "crf", vim.lsp.buf.format, "documentFormattingProvider", { desc = "Format Code" })
   end,
   { desc = "LSP keymaps" }
 )
