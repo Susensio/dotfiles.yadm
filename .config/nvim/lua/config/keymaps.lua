@@ -444,6 +444,9 @@ local del_qf_item = function()
   local line = vim.fn.line('.')
   table.remove(items, line)
   vim.fn.setqflist(items, "r")
+  if line > #items then
+    line = #items
+  end
   vim.api.nvim_win_set_cursor(0, { line, 0 })
 end
 
