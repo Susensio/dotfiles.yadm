@@ -1,1 +1,0 @@
-/home/susensio/.local/lib/taskwarrior/scripts/fish/task.fish
