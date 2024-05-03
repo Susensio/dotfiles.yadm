@@ -1,9 +1,9 @@
-function ls --wraps=exa --description 'List contents in directory'
-  if command -qs exa
+function ls --wraps=eza --description 'List contents in directory'
+  if command -qs eza
     if isatty stdout
-      exa --group-directories-first --icons $argv
+      eza --group-directories-first --icons --hyperlink $argv
     else
-      exa $argv
+      eza $argv
     end
   else
     command ls $argv
