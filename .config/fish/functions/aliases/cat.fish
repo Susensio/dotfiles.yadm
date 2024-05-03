@@ -1,8 +1,8 @@
 function cat --wraps=batcat --description 'Run batcat if installed'
   if command -qs bat
-    command bat --plain --paging=never $argv
+    command bat --paging=never --plain $argv
   else if command -qs batcat
-    command batcat --plain --paging=never $argv
+    command batcat --paging=never --plain $argv
   else
     command cat $argv
   end
