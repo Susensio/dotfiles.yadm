@@ -68,7 +68,7 @@ return {
       clues = {
         -- { mode = "n", keys = "<leader>f", desc = "+Find"},
         { mode = "n", keys = "<leader>u", desc = "+Toggle" },
-        { mode = "n", keys = "cr", desc = "+Code Refactor" },
+        { mode = "n", keys = "<leader>c", desc = "+Code Refactor" },
 
         { mode = "n", keys = "]]", desc = "Section next" },
         { mode = "n", keys = "[[", desc = "Section previous" },

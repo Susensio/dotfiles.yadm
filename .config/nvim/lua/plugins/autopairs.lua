@@ -38,7 +38,7 @@ return {
     "RRethy/nvim-treesitter-endwise",
     enabled = false,
     init = function(plugin)
-      require("utils.lazy").load_nested_events(plugin.name, { "LazyFile", "InsertEnter" })
+      require("utils.lazy").load_on_nested_events(plugin.name, { "LazyFile", "InsertEnter" })
     end,
     -- event = { "InsertEnter" },
     dependencies = { "nvim-treesitter" },

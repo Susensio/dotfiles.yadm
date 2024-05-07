@@ -80,6 +80,8 @@ command(
       return
     end
     vim.cmd("0r "..template_path)
+    -- set filetype to the template extension
+    vim.bo.filetype = vim.fn.fnamemodify(template, ":e")
   end,
   {
     nargs = 1,

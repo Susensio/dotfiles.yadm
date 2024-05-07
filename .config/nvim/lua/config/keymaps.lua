@@ -268,9 +268,9 @@ require("utils.lsp").on_attach(
     lsp_map("n", "gd", vim.lsp.buf.definition, "definitionProvider", { desc = "Goto Definition (LSP)" })
     lsp_map("n", "gD", vim.lsp.buf.declaration, "declarationProvider", { desc = "Goto Declaration (LSP)" })
     lsp_map("n", "gr", vim.lsp.buf.references, "referencesProvider", { desc = "Goto References (LSP)" })
-    lsp_map("n", "crn", vim.lsp.buf.rename, "renameProvider", { desc = "Rename (LSP)" })
-    lsp_map("n", "crr", vim.lsp.buf.code_action, "codeActionProvider", { desc = "Code Action" })
-    lsp_map({ "n", "v" }, "crf", vim.lsp.buf.format, "documentFormattingProvider", { desc = "Format Code" })
+    lsp_map("n", "<leader>cn", vim.lsp.buf.rename, "renameProvider", { desc = "Rename (LSP)" })
+    lsp_map("n", "<leader>cr", vim.lsp.buf.code_action, "codeActionProvider", { desc = "Code Action" })
+    lsp_map({ "n", "x" }, "<leader>cf", vim.lsp.buf.format, "documentFormattingProvider", { desc = "Format Code" })
   end,
   { desc = "LSP keymaps" }
 )
@@ -423,6 +423,7 @@ map_ft("help", "n", "q", vim.cmd.helpclose, { nowait = true, desc = "Quit help w
 -- Exit lazy with `<Esc>`
 map_ft("lazy", "n", "<Esc>", function() vim.api.nvim_win_close(0, false) end,
   { desc = "Quit lazy with `<Esc>`", nowait = true })
+map_ft("lazy", "n", "<Tab>", nil, { nowait = true })
 
 -- Close some windows with `q`
 map_ft("qf", "n", "q",

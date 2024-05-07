@@ -5,10 +5,10 @@ return {
     enabled = true,
     event = "VeryLazy",
     opts = {
-      -- mappings = {
-      --   comment_visual = "gc",
-      --   textobject = "",
-      -- },
+      mappings = {
+        comment_visual = "gc",
+        textobject = "",
+      },
     },
     config = function(plugin, opts)
       local mc = require("mini.comment")

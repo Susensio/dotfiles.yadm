@@ -1,31 +1,3 @@
--- MONOKAI PRO
--- name = "monokai_pro",
--- aqua = "#78DCE8",
--- base0 = "#222426",
--- base1 = "#211F22",
--- base2 = "#26292C",
--- base3 = "#2E323C",
--- base4 = "#333842",
--- base5 = "#4d5154",
--- base6 = "#72696A",
--- base7 = "#B1B1B1",
--- base8 = "#e3e3e1",
--- black = "#000000",
--- border = "#A1B5B1",
--- brown = "#504945",
--- diff_add = "#3d5213",
--- diff_change = "#27406b",
--- diff_remove = "#4a0f23",
--- diff_text = "#23324d",
--- green = "#A9DC76",
--- grey = "#72696A",
--- orange = "#FC9867",
--- pink = "#FF6188",
--- purple = "#AB9DF2",
--- red = "#FD6883",
--- white = "#FFF1F3",
--- yellow = "#FFD866"
-
 return {
   { -- monokai
     "tanvirtin/monokai.nvim",
@@ -196,7 +168,7 @@ return {
 
   { -- sonokai
     "sainnhe/sonokai",
-    enabled = true,
+    enabled = false,
     lazy = false,
     priority = 1000,
     config = function(plugin, opts)
@@ -238,12 +210,19 @@ return {
         hl.Search = { fg = palette.bg1, bg = palette.yellow }
         hl.CurSearch = { fg = palette.bg0, bg = palette.orange }
         hl.IncSearch = { fg = palette.bg0, bg = palette.orange }
+
+        hl.TSDefinitionUsage = { link = "CurrentWord" }
+        hl.TSDefinition = { link = "CurrentWord" }
+        hl.TSCurrentNode = { link = "CurrentWord" }
+
+        hl.CurrentWord = { bg = palette.bg2 }
       end,
     },
     config = function(plugin, opts)
       local everforest = require(plugin.main)
       everforest.setup(opts)
-      vim.cmd.colorscheme("everforest")
+      everforest.load()
+      -- vim.cmd.colorscheme("everforest")
 
       -- HACK: export to global namespace
       local palette = require("everforest.colours").generate_palette(

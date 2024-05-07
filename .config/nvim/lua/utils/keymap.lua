@@ -18,7 +18,7 @@ function M.set_per_filetype(filetype, mode, lhs, rhs, opts)
     callback = function(event)
       -- BUG: rhs sometimes expect buf, sometimes do not, and sometimes is a string...
       -- vim.keymap.set(mode, lhs, function() rhs(buf) end, opts)
-      vim.keymap.set(mode, lhs, rhs, opts)
+      M.set(mode, lhs, rhs, opts)
     end,
     group = augroup_filetype,
   })

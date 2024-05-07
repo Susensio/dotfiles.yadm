@@ -7,27 +7,24 @@ return {
     main = "copilot",
     event = "InsertEnter",
     init = function(_)
-      local suggestion = require("copilot.suggestion")
-
-      -- local client = require("copilot.client")
-      -- local api = require("copilot.api")
-      -- local util = require("copilot.util")
       vim.keymap.set(
         "n",
         "<leader>uc",
         function()
-          suggestion.toggle_auto_trigger()
+          require("copilot.suggestion").toggle_auto_trigger()
           require("utils").refresh_statusline()
           require("utils.log").toggle("copilot", vim.b.copilot_suggestion_auto_trigger)
         end,
         { desc = "Toggle Copilot" }
       )
+
       vim.keymap.set("i", "<Tab>", function()
+        local suggestion = require("copilot.suggestion")
         -- not starting with a space
         if suggestion.is_visible() then
           local ns_id = vim.api.nvim_get_namespaces()["copilot.suggestion"]
           local suggested_text = vim.api.nvim_buf_get_extmark_by_id(0, ns_id, 1, { details = true })[3].virt_text[1][1]
-          local starts_with_spaces = string.match(suggested_text, "^ +")
+          local starts_with_spaces = string.match(suggested_text, "^  +")
           if starts_with_spaces ~= nil then
             -- insert those spaces
             vim.api.nvim_feedkeys(starts_with_spaces, "n", true)

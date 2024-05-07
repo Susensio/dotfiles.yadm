@@ -52,7 +52,11 @@ end
 return {
   { -- mini.ai
     "echasnovski/mini.ai",
-    event = "VeryLazy",
+    -- event = "VeryLazy",
+    keys = {
+      {"a", mode = {"o", "x"}},
+      {"i", mode = {"o", "x"}},
+    },
     dependencies = {
       -- "nvim-treesitter-textobjects"
       "echasnovski/mini.extra",
