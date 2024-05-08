@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Open and switch tmux sessions with fzf selectos
+# Open and switch tmux sessions with fzf selector
 
 # Get first argument if it exists
 if [[ -n $1 ]]; then
