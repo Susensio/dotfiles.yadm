@@ -217,7 +217,7 @@ map("n", "<leader>ud",
       vim.fn.setloclist(curr_win, {})
       vim.cmd.lclose()
     end
-    log.toggle("diagnostics", vim.diagnostic.is_disabled(curr_buf))
+    log.toggle("diagnostics", not vim.diagnostic.is_disabled(curr_buf))
   end,
   { desc = "Toggle diagnostics" })
 
