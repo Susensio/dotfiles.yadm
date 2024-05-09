@@ -11,35 +11,12 @@ function fish_right_prompt -d "Write out the right prompt"
 
   # Print venv
   if test -n "$VIRTUAL_ENV"
-    set -l venv_name
-
-    if test "$VIRTUAL_ENV" = "$XDG_DATA_HOME/venv"
-      set venv_name "/venv"
-    else if test (basename "$VIRTUAL_ENV") = ".venv"
-      set -l parent (dirname "$VIRTUAL_ENV")
-      # if pwd is inside parent, shorten
-      if test $parent = (pwd) || string match -q "$parent/*" (pwd)
-        set venv_name ".venv"
-      else
-        set venv_name (basename "$parent")"/.venv"
-      end
-    else if test (basename "$VIRTUAL_ENV") = "venv"
-      set -l parent (dirname "$VIRTUAL_ENV")
-      # if pwd is inside parent, shorten
-      if test $parent = (pwd) || string match -q "$parent/*" (pwd)
-        set venv_name "venv"
-      else
-        set venv_name (basename "$parent")"/venv"
-      end
-    else
-      set -l venv_name "venv:"(basename "$VIRTUAL_ENV")
-    end
-    set --append elements '('(set_color blue)"$venv_name"(set_color normal)')'
+    set --append elements '('(set_color blue)(_venv_name)(set_color normal)')'
   end
 
   # Duration of last command
   set --local threshold 1000 # ms
-  if test $CMD_DURATION -gt $threshold
+  if test $CMD_DURATION -gt $threshold && test $status_generation -gt 0
     set --append elements (_format_cmd_duration)
   end
 
@@ -54,6 +31,33 @@ function fish_right_prompt -d "Write out the right prompt"
   end
 
   echo -n (string join ' ' $elements)
+end
+
+function _venv_name
+  set -l venv_name
+
+  if test "$VIRTUAL_ENV" = "$XDG_DATA_HOME/venv"
+    set venv_name "/venv"
+  else if test (basename "$VIRTUAL_ENV") = ".venv"
+    set -l parent (dirname "$VIRTUAL_ENV")
+    # if pwd is inside parent, shorten
+    if test $parent = (pwd) || string match -q "$parent/*" (pwd)
+      set venv_name ".venv"
+    else
+      set venv_name (basename "$parent")"/.venv"
+    end
+  else if test (basename "$VIRTUAL_ENV") = "venv"
+    set -l parent (dirname "$VIRTUAL_ENV")
+    # if pwd is inside parent, shorten
+    if test $parent = (pwd) || string match -q "$parent/*" (pwd)
+      set venv_name "venv"
+    else
+      set venv_name (basename "$parent")"/venv"
+    end
+  else
+    set -l venv_name "venv:"(basename "$VIRTUAL_ENV")
+  end
+  echo -n $venv_name
 end
 
 # https://github.com/jichu4n/fish-command-timer
@@ -87,6 +91,7 @@ function _format_cmd_duration
   echo -n "["(string join '' $out)"]"
 end
 
+# https://github.com/acomagu/fish-async-prompt?tab=readme-ov-file#loading-indicator
 function fish_git_prompt_loading_indicator -a last_prompt
     echo -n (set_color brblack)(uncolor "$last_prompt")(set_color normal)
 end
