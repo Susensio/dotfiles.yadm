@@ -1,23 +1,14 @@
-function venv --description 'Activates local python venv'
-  set -l venv_path
-
-  for dir in .venv venv
-    if test -d $dir
-      echo "Local $dir/ found. Activating..."
-      set venv_path $dir
-      break
-    end
+function venv --description 'Creates a new environment and activates it'
+  # Check if we are inside a git repository
+  if git rev-parse --show-toplevel &>/dev/null
+    set dir (realpath (git rev-parse --show-toplevel))
+  else
+    set dir (pwd)
   end
 
-  if not set -q venv_path
-    echo "Using global venv. Activating..."
-    set venv_path $XDG_DATA_HOME/venv
-  end
+  echo "Creating a new environment in $dir/.venv ..." >&2
+  python -m venv $dir/.venv
 
-  source $venv_path/bin/activate.fish
-
-  if set -q argv[1]
-    python $argv
-    deactivate
-  end
+  echo "Activating the environment ..." >&2
+  source $dir/.venv/bin/activate.fish
 end
