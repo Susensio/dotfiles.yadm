@@ -91,9 +91,9 @@ return {
               isort = {
                 enabled = true,
               },
-              rope_autoimport = {
-                enabled = true,
-              },
+              -- rope_autoimport = {
+              --   enabled = true,
+              -- },
               pylsp_rope = {
                 rename = {
                   enabled = true,
