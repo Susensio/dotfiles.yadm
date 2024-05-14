@@ -7,7 +7,7 @@ function venv --description 'Creates a new environment and activates it'
   end
 
   echo "Creating a new environment in $dir/.venv ..." >&2
-  python -m venv $dir/.venv
+  python3 -m venv $dir/.venv
 
   echo "Activating the environment ..." >&2
   source $dir/.venv/bin/activate.fish
