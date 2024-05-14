@@ -7,7 +7,7 @@ return {
     opts = {
       mappings = {
         comment_visual = "gc",
-        textobject = "",
+        textobject = "gc",
       },
     },
     config = function(plugin, opts)
