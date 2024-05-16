@@ -2,14 +2,31 @@
 # Open and switch tmux sessions with fzf selector
 
 # Get first argument if it exists
-if [[ -n $1 ]]; then
-  query="$(realpath "$1")"
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --echo)
+      echo=true
+      shift
+      PID=$1
+      shift
+      ;;
+    *)
+      query="$(realpath "$1")"
 
-  if ! [[ -d $query ]]; then
-    echo "ERROR: $query is not a valid directory" >&2 && exit 1
-  fi
+      if ! [[ -d $query ]]; then
+        echo "ERROR: $query is not a valid directory" >&2 && exit 1
+      fi
+      ;;
+  esac
+done
+
+PID="${PID:-$$}"
+cache_file="/tmp/sessionizer-$PID"
+
+if [[ -n $echo ]]; then
+  cat "$cache_file"
+  exit 0
 fi
-
 
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 zoxide_max=50
@@ -127,10 +144,30 @@ list_all() {
   # concat_lists "$(blank_session)" "$(list_sessions)" "$(list_directories)"
 }
 
+
+# cached for perfodmance, list is reloaded on first keystroke to remove "new session"
+if [[ -z $echo ]]; then
+  list_all | tail -n +2 > "$cache_file"
+fi
+
+
 # Only interactive if not argument provided
 if [[ -z $query ]]; then
   preview="test {1} != '_' && $tmux_scripts/preview-tree {1} || exa --color always --tree --git-ignore --level=3 {2}"
-  result=$(list_all | fzf-tmux-auto --no-sort --filepath-word --delimiter="$sep" --scheme=path --with-nth=3 --preview="$preview" --print-query --query="$query" --bind="tab:transform-query(echo {3} | cut -c5-)" )
+  result=$(
+    list_all | \
+      fzf-tmux-auto \
+        --no-sort \
+        --filepath-word \
+        --delimiter="$sep" \
+        --scheme=path \
+        --with-nth=3 \
+        --preview="$preview" \
+        --print-query \
+        --query="$query" \
+        --bind="tab:transform-query(echo {3} | cut -c5-)" \
+        --bind="change:reload($tmux_scripts/sessionizer --echo $PID)"
+  )
 
   # split result
   mapfile -t lines <<< "$result"
