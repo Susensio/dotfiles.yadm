@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Remove scratch sessions from saved file
+
+last="$1"
+
+if [ -z "$last" ]; then
+  echo "No file provided"
+  exit 1
+fi
+
+if [ ! -f "$last" ]; then
+  echo "File does not exist: $last"
+  exit 1
+fi
+
+# awk does not support in-place editing
+awk -F'\t' '$2 !~ /^_scratch/' "$last" > "$last.tmp" && mv "$last.tmp" "$last"
