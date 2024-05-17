@@ -4,7 +4,7 @@
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 
 if [[ -n $TMUX ]]; then
-  tmux popup $("$tmux_scripts"/popup-size) -E "$@"
+  tmux popup $("$tmux_scripts"/popup-size) -E -e BAT_PAGER="$BAT_PAGER" "$@"
 else
   eval "$@"
 fi
