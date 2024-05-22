@@ -6,7 +6,10 @@ fi
 
 # This is way faster and more reliable than parsing pstree
 ppid() {
-  cat /proc/$1/stat | cut -d')' -f2 | cut -d' ' -f3
+  if [[ -z "$1" ]] || [[ ! -d "/proc/$1" ]]; then
+    return
+  fi
+  cat "/proc/$1/stat" | cut -d')' -f2 | cut -d' ' -f3
 }
 
 if [[ -n "$TMUX" ]]; then
@@ -14,14 +17,13 @@ if [[ -n "$TMUX" ]]; then
   # tty="$(tmux display -p "#{client_tty}")"
   pid="$(tmux display -p "#{client_pid}")"
   while true; do
-    ppid="$(ppid "$pid")"
-    if grep -q 'sshd' "/proc/$ppid/comm"; then
-      exit 0
-    fi
-    pid="$ppid"
-    if [[ "$pid" -eq 1 ]]; then
+    if [[ "$pid" -eq 1 ]] || [[ -z "$pid" ]]; then
       break
     fi
+    if grep -q 'sshd' "/proc/$pid/comm"; then
+      exit 0
+    fi
+    pid="$(ppid "$pid")"
   done
 fi
 
