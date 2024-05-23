@@ -7,7 +7,7 @@
 # * Handle virtualenvs that are not located in the root of a git directory.
 # * Traverse up the directory tree to find the closest virtualenv.
 
-function __auto_source_venv --on-variable PWD --description "Activate/Deactivate virtualenv on directory change"
+function _auto_source_venv --on-variable PWD --description "Activate/Deactivate virtualenv on directory change"
   status --is-command-substitution; and return
 
   # Check if we are inside a git repository
@@ -48,4 +48,4 @@ function __auto_source_venv --on-variable PWD --description "Activate/Deactivate
   end
 end
 
-__auto_source_venv
+_auto_source_venv
