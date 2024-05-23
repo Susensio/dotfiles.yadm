@@ -5,6 +5,12 @@ function sudo -d "Sudo with fish user functions"
     return 1
   end
 
+  # if no arguments, run sudo with no arguments
+  if test -z "$argv"
+    command sudo -Es
+    return
+  end
+
   # If command, remove and use system bins with default shell
   # `sudo command ls` -> `sudo ls`
   if test "$argv[1]" = "command"
