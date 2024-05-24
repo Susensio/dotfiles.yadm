@@ -34,7 +34,7 @@ copy_to_clipboard() {
       printf '%s' "$data" | xclip -selection "$SELECTION"
       ;;
     wsl)
-      printf '%s' "$data" | clip.exe
+      printf '%s' "$data" | /mnt/c/Windows/System32/clip.exe
       ;;
   esac
 }
@@ -93,6 +93,7 @@ case $MODE in
     paste_from_clipboard
     ;;
   pipe)
+
     if [[ -p /dev/stdin ]]; then
       copy_to_clipboard
     else
