@@ -204,6 +204,7 @@ return {
         palette.bg0 = bg_dim
       end,
       on_highlights = function(hl, palette)
+        local blend = require("utils").color_blend
         hl.NormalNC = { fg = palette.fg_dim, bg = palette.bg_dim }
         hl.NormalFloat = { bg = palette.bg }
         hl.TSString = { link = "Yellow" }
@@ -216,7 +217,17 @@ return {
         hl.TSCurrentNode = { link = "CurrentWord" }
 
         hl.CurrentWord = { bg = palette.bg2 }
+
+        hl.DiagnosticError = { fg = palette.red }
+        hl.DiagnosticWarn = { fg = palette.yellow }
+        hl.DiagnosticInfo = { fg = palette.blue }
+        hl.DiagnosticHint = { fg = palette.green }
+        hl.DiagnosticVirtualTextError = { fg = blend(palette.red, palette.bg_dim, 0.4) }
+        hl.DiagnosticVirtualTextWarn = { fg = blend(palette.yellow, palette.bg_dim, 0.6) }
+        hl.DiagnosticVirtualTextInfo = { fg = blend(palette.blue, palette.bg_dim, 0.6) }
+        hl.DiagnosticVirtualTextHint = { fg = blend(palette.green, palette.bg_dim, 0.6) }
       end,
+      diagnostic_text_highlight = false, -- only underline
     },
     config = function(plugin, opts)
       local everforest = require(plugin.main)
