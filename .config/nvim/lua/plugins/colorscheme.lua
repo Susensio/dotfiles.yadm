@@ -222,8 +222,8 @@ return {
         hl.DiagnosticWarn = { fg = palette.yellow }
         hl.DiagnosticInfo = { fg = palette.blue }
         hl.DiagnosticHint = { fg = palette.green }
-        hl.DiagnosticVirtualTextError = { fg = blend(palette.red, palette.bg_dim, 0.4) }
-        hl.DiagnosticVirtualTextWarn = { fg = blend(palette.yellow, palette.bg_dim, 0.6) }
+        hl.DiagnosticVirtualTextError = { fg = blend(palette.red, palette.bg_dim, 0.3) }
+        hl.DiagnosticVirtualTextWarn = { fg = blend(palette.yellow, palette.bg_dim, 0.5) }
         hl.DiagnosticVirtualTextInfo = { fg = blend(palette.blue, palette.bg_dim, 0.6) }
         hl.DiagnosticVirtualTextHint = { fg = blend(palette.green, palette.bg_dim, 0.6) }
       end,
