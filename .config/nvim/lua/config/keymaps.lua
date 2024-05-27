@@ -114,9 +114,17 @@ map("n", "gx", [[:!xdg-open <C-R>=escape("<C-R><C-F>", "#?&;\|%")<CR><CR>]],
 
 
 -- [[ INSERT and VISUAL ]] --
-
+-- Completion menu
 map("i", "<C-space>", "<C-x><C-o>", { desc = "Auto complete" })
-
+map("i", "<CR>",
+  function()
+    if vim.fn.pumvisible() == 1 then
+      return "<C-y>"
+    else
+      return "<CR>"
+    end
+  end,
+  { desc = "Accept completion", expr = true })
 
 -- Indent and preserve selection
 map("x", "<", "<gv", { desc = "Indent left" })

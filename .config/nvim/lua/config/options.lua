@@ -114,8 +114,8 @@ lsp.on_attach(
 -- Completion
 -- set.completeopt:remove("preview")             -- Remove a strange preview window that appears on the bottom
 set.completeopt = {
+  "menu",     -- Show the popup menu
   "menuone",  -- Show the popup menu even if there is only one match
-  "noselect", -- Do not automatically select the first completion item
   "longest"   -- Automatically select the longest common text
 }
 
