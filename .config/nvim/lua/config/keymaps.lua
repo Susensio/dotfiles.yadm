@@ -402,7 +402,15 @@ end
 
 
 -- [[ OTHERS ]] --
-map("n", "<F9>", cmd "!%:p", { desc = "Execute current file" })
+map("n", "<Leader>!", cmd "!%:p", { desc = "Execute current file" })
+
+-- This is not working well because the file is no reloaded
+if vim.fn.has('nvim-0.10') == 1 then
+  map("ca", "w!!", "w !sudo tee % > /dev/null", { desc = "Write as sudo", silent = true })
+else
+  -- do the same with normal keymaps (adds delay)
+  map("c", "w!!", "execute 'write !sudo tee %:p > /dev/null' | setl nomod", { desc = "Write as sudo" })
+end
 
 -- [[ FIXES ]] --
 -- wildoptions menu (:edit) correction for vertical horizontal navigation
