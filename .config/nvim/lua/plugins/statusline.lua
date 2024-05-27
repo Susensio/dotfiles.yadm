@@ -1,30 +1,30 @@
 return {
-  -- { -- lsp-progress
-  --   "linrongbin16/lsp-progress.nvim",
-  --   main = "lsp-progress",
-  --   opts = {
-  --     format = function(messages)
-  --       if #messages == 0 then
-  --         return ""
-  --       end
-  --     local spinner = messages[1]
-  --     return spinner .. " LSP"
-  --     end,
-  --     client_format = function(client_name, spinner, series_messages)
-  --       if #series_messages > 0 then
-  --         return spinner
-  --       end
-  --     end,
-  --   },
-  --   config = function(plugin, opts)
-  --     require("lsp-progress").setup(opts)
-  --     vim.api.nvim_create_autocmd("User", {
-  --       group = vim.api.nvim_create_augroup("lualine_augroup", { clear = true }),
-  --       pattern = "LspProgressStatusUpdated",
-  --       callback = require("lualine").refresh,
-  --     })
-  --   end,
-  -- },
+  { -- lsp-progress
+    "linrongbin16/lsp-progress.nvim",
+    main = "lsp-progress",
+    opts = {
+      format = function(messages)
+        if #messages == 0 then
+          return ""
+        end
+      local spinner = messages[1]
+      return spinner .. " LSP"
+      end,
+      client_format = function(client_name, spinner, series_messages)
+        if #series_messages > 0 then
+          return spinner
+        end
+      end,
+    },
+    config = function(plugin, opts)
+      require("lsp-progress").setup(opts)
+      vim.api.nvim_create_autocmd("User", {
+        group = vim.api.nvim_create_augroup("lualine_augroup", { clear = true }),
+        pattern = "LspProgressStatusUpdated",
+        callback = require("lualine").refresh,
+      })
+    end,
+  },
 
   { -- lualine
     "nvim-lualine/lualine.nvim",
@@ -33,7 +33,7 @@ return {
     enabled = true,
     dependencies = {
       "nvim-tree/nvim-web-devicons",
-      "WhoIsSethDaniel/lualine-lsp-progress.nvim",
+      "linrongbin16/lsp-progress.nvim",
       { "AndreM222/copilot-lualine", dev = false },
     },
     init = function()
@@ -92,21 +92,23 @@ return {
           },
           lualine_x = {
             {
-              "lsp_progress",
-              hide = { "copilot" },
-              display_components = {
-                "spinner"
-              },
-              separators = {
-                spinner = {
-                  post = " LSP",
-                },
-              },
-              timer = {
-                spinner = 500,
-                lsp_client_name_enddelay = 500,
-              },
-              spinner_symbols = require("copilot-lualine.spinners").dots_negative
+              function()
+                return require('lsp-progress').progress()
+              end,
+              -- hide = { "copilot" },
+              -- display_components = {
+              --   "spinner"
+              -- },
+              -- separators = {
+              --   spinner = {
+              --     post = " LSP",
+              --   },
+              -- },
+              -- timer = {
+              --   spinner = 500,
+              --   lsp_client_name_enddelay = 500,
+              -- },
+              -- spinner_symbols = require("copilot-lualine.spinners").dots_negative
             },
             {
               require("lazy.status").updates,
