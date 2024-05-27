@@ -41,8 +41,8 @@ return {
         enabled = true,
         auto_trigger = true,
         keymap = {
-          accept_word = '<C-l>',
-          accept_line = '<C-L>',
+          accept_word = '<C-e>',  -- Like end-of-word
+          accept_line = '<C-l>',
           accept = false
           --
         },
