@@ -1,12 +1,24 @@
 #!/bin/bash
+# TOOD: this does not work well for global scratch
+# maybe I should delete global scratchs....
 
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 
+is_scratch="$(tmux show -vq '@is_scratch')"
+
+# Hide scratch session, otherwise it will appear on top
+if [[ -n "$is_scratch" ]]; then
+  $tmux_scripts/scratch-toggle
+  # save it for restore
+  tmux set -t "$current_session" -q @scratch_visible true
+fi
+
+current_session="$(tmux display -pF '#{session_id}')"
+current_client="$(tmux display -pF '#{client_tty}')"
 
 rotate() {
   direction="$1"
 
-  current_session="$(tmux display -pF '#{session_id}')"
   readarray -t sessions < <("$tmux_scripts"/ls --id --nohidden | sort -n -k1.2 )
 
   for i in "${!sessions[@]}"; do
@@ -22,11 +34,14 @@ rotate() {
   [[ $i -lt 0 ]] && i=$i_max
   [[ $i -gt $i_max ]] && i=0
 
-  tmux switch-client -t "${sessions[$i]}"
+  tmux switch-client -c "$current_client" -t "${sessions[$i]}"
 }
 
 last() {
-  tmux switch-client -t "$("$tmux_scripts"/mru)"
+  last_session="$("$tmux_scripts"/mru)"
+  if [[ -n "$last_session" ]]; then
+    tmux switch-client -c "$current_client" -t "$last_session"
+  fi
 }
 
 case "$1" in
@@ -35,3 +50,9 @@ case "$1" in
   -l) last ;;
   *) echo "Unknown flag" >&2 && exit 1
 esac
+
+
+if tmux show '@scratch_visible' > /dev/null; then
+  tmux set -u @scratch_visible
+  $tmux_scripts/scratch-toggle
+fi

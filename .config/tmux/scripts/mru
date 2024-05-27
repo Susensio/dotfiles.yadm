@@ -1,9 +1,8 @@
 #!/bin/bash
 # Get the most recently used tmux session
-
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
-# First, try detached sessions
-target="$($tmux_scripts/ls --mru --nohidden --detached --id 2>/dev/null | head -n1)"
+
+target="$("$tmux_scripts"/ls --mru --nohidden --detached --id 2>/dev/null | head -n1)"
 
 if [[ -z $target ]]; then
   tmux display-message "No sessions found"
