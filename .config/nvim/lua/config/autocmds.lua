@@ -116,6 +116,17 @@ autocmd("BufWinEnter", {
   group = user_grp,
 })
 
+-- fails with C
+-- autocmd("FocusLost", {
+--   desc = "Escape insert mode on focus lost",
+--   pattern = "*",
+--   callback = function()
+--     if vim.fn.mode() == "i" then
+--       vim.cmd("stopinsert")
+--     end
+--   end,
+--   group = user_grp,
+-- })
 -- -- only highlight current line on focused window
 -- autocmd({ "VimEnter", "WinEnter", "BufWinEnter", "FocusGained" }, {
 --   desc = "Only highlight current line on focused window",
