@@ -15,6 +15,13 @@
 	st = status -sb
 	last = log -1 HEAD --stat
 	cm = commit -m
+	big = !git rev-list --objects --all | \
+					git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | \
+					sed -n 's/^blob //p' | \
+					sort --numeric-sort --key=2 | \
+					cut -c 1-12,41- | \
+					numfmt --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
+	blob = log --raw --all --find-object
 
 [credential]
 	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
