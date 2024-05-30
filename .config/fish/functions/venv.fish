@@ -6,9 +6,19 @@ function venv --description 'Creates a new environment and activates it'
     set dir (pwd)
   end
 
-  echo "Creating a new environment in $dir/.venv ..." >&2
-  python3 -m venv $dir/.venv
+  set -l venv_dir $dir/.venv
 
-  echo "Activating the environment ..." >&2
-  source $dir/.venv/bin/activate.fish
+  if test -d $venv_dir
+    echo "Environment already exists in $dir/.venv" >&2
+  else
+    echo "Creating a new environment in $dir/.venv ..." >&2
+    python3 -m venv $dir/.venv
+  end
+
+  if test $VIRTUAL_ENV = $venv_dir
+    echo "Environment already activated" >&2
+  else
+    echo "Activating the environment ..." >&2
+    source $dir/.venv/bin/activate.fish
+  end
 end
