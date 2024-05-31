@@ -121,13 +121,13 @@ return {
         "TreesitterContextBottom",
         { underline = true }
       )
-      vim.keymap.set("n", "<leader>ug",
+      vim.keymap.set("n", "<leader>uh",
         function()
           local tsc = require("treesitter-context")
           tsc.toggle()
           require("utils.log").toggle("treesitter context", tsc.enabled())
         end,
-        { desc = "Toggle context" })
+        { desc = "Toggle context header" })
     end,
   },
 

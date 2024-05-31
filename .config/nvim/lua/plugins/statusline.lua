@@ -70,11 +70,23 @@ return {
           lualine_a = { { "mode", color = { gui = "bold" } } },
           lualine_b = {
             "branch",
-            "diff",
+            {
+              "diff",
+              source = function()
+                local summary = vim.b.minidiff_summary
+                return summary
+                  and {
+                    added = summary.add,
+                    modified = summary.change,
+                    removed = summary.delete,
+                  }
+              end,
+              padding = { left = 0, right = 1 },
+            },
             {
               "diagnostics",
               -- symbols = {error = "E", warn = "W", info = "I", hint = "H"},
-              cond = function() return not vim.diagnostic.is_disabled(0) end,
+              cond = function() return vim.diagnostic.is_enabled({ bufnr=0 }) end,
             }
           },
           lualine_c = {
@@ -326,7 +338,7 @@ return {
     event = "VeryLazy",
     opts = {
       hide = {
-        focused_win = true,
+        focused_win = false,
         only_win = "count_ignored",
       },
       window = {

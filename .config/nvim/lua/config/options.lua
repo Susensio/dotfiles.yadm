@@ -27,6 +27,7 @@ set.termguicolors = true                     -- Enable true color support
 set.background = "dark"                      -- Use a dark background
 set.number = true                            -- Show line numbers
 set.relativenumber = true                    -- Show relative line numbers
+set.signcolumn = "auto"                        -- Do not append an extra column for diagnostics
 set.cursorline = true                        -- Highlight the current line
 set.guicursor = ""
 set.guicursor:append("n-v-c-sm:block")       -- Block non insert mode
@@ -39,7 +40,7 @@ set.foldlevel = 99                           -- Start with all folds open
 set.foldlevelstart = 99                      -- Start with all folds open
 set.list = true                              -- Show non printable characters
 set.listchars = {                            -- Define characters for non printable chars
-  tab = "»»",
+  tab = "» ",
   trail = "·",
   nbsp = "+",
   eol = "↲",
@@ -75,7 +76,6 @@ lsp.on_attach(
 
 -- Diagnostics
 set.updatetime = 1000                         -- User for CursorHold autocmd
-set.signcolumn = "no"                         -- Do not append an extra column for diagnostics
 lsp.on_attach(
   function(client, buffer)
     vim.diagnostic.config({
