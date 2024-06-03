@@ -14,7 +14,7 @@ set -g fish_color_normal normal
 set -g fish_color_operator cyan
 set -g fish_color_param white
 set -g fish_color_quote yellow
-set -g fish_color_redirection 00afff brcyan
+set -g fish_color_redirection brcyan
 set -g fish_color_search_match bryellow
 set -g fish_color_selection white
 set -g fish_color_status red
@@ -22,10 +22,10 @@ set -g fish_color_user green --bold
 set -g fish_color_user_root red --bold
 set -g fish_color_cwd_root red --bold
 set -g fish_color_valid_path normal
-set -g fish_greeting
-set -g fish_key_bindings fish_default_key_bindings
 set -g fish_pager_color_completion normal
-set -g fish_pager_color_description B3A06D yellow
+set -g fish_pager_color_description yellow
 set -g fish_pager_color_prefix white --bold --underline
 set -g fish_pager_color_progress brwhite --background=cyan
 set -g fish_pager_color_selected_background -r
+set -g fish_key_bindings fish_default_key_bindings
+set -g fish_greeting
