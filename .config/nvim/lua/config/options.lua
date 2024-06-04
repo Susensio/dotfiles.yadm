@@ -116,7 +116,8 @@ lsp.on_attach(
 set.completeopt = {
   "menu",     -- Show the popup menu
   "menuone",  -- Show the popup menu even if there is only one match
-  "longest"   -- Automatically select the longest common text
+  "longest",  -- Automatically select the longest common text
+  "select",   -- Automatically select the first match
 }
 
 -- BEHAVIOR SETTINGS: Tabs, scrolling, search, and special characters handling.
