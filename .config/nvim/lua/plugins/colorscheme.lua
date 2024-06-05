@@ -216,6 +216,7 @@ return {
         hl.TSDefinition = { link = "CurrentWord" }
         hl.TSCurrentNode = { link = "CurrentWord" }
 
+
         hl.CurrentWord = { bg = palette.bg2 }
 
         hl.DiagnosticError = { fg = palette.red }
@@ -226,6 +227,15 @@ return {
         hl.DiagnosticVirtualTextWarn = { fg = blend(palette.yellow, palette.bg_dim, 0.5) }
         hl.DiagnosticVirtualTextInfo = { fg = blend(palette.blue, palette.bg_dim, 0.6) }
         hl.DiagnosticVirtualTextHint = { fg = blend(palette.green, palette.bg_dim, 0.6) }
+
+        -- fix git diff colors
+        -- https://github.com/neovim/neovim/issues/29013
+        hl.Added = { link ="DiffAdded" }
+        hl.Changed = { link ="DiffChanged" }
+        hl.Removed = { link ="DiffRemoved" }
+        -- hl.Delimiter = { link ="Special" }
+        -- hl.Operator = { link ="Statement" }
+        -- hl.@variable = { link ="Identifier" }
       end,
       diagnostic_text_highlight = false, -- only underline
     },
