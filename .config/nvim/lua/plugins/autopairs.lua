@@ -10,21 +10,27 @@ return {
           require("utils.log").toggle("auto pairs", vim.b.minipairs_disable)
         end,
         { desc = "Toggle autopairs" })
+
+      -- Support removing the brackets with <C-w> and <C-u> (just like <BS>)
+      -- https://github.com/echasnovski/mini.nvim/issues/246
+      vim.keymap.set('i', '<C-w>', 'v:lua.MiniPairs.bs("\23")', { expr = true, replace_keycodes = false })
+      vim.keymap.set('i', '<C-u>', 'v:lua.MiniPairs.bs("\21")', { expr = true, replace_keycodes = false })
     end,
     opts = {
       mappings = {
-        -- modify default ones
+        -- modify default ones to not open if right to closing bracket
         ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^%)%w]' },
         ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\][^%]%w]' },
         ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^%}%w]' },
 
-        [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
-        [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
-        ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
+        -- [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
+        -- [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
+        -- ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
 
-        ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\].', register = { cr = false } },
-        ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = '[^%a\\].', register = { cr = false } },
-        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\].', register = { cr = false } },
+        -- add third quote without fourth
+        ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\"].', register = { cr = false } },
+        ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[^%a\\'].", register = { cr = false } },
+        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\`].', register = { cr = false } },
 
         -- add double space inside other brackets
         -- https://github.com/echasnovski/mini.nvim/issues/10
