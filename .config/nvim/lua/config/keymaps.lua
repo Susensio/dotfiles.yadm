@@ -8,12 +8,14 @@ local cmd = function(cmd)
   return "<cmd>" .. cmd .. "<CR>"
 end
 
---[[ LEADER ]]--
+--[[ LEADER ]]
+--
 map({ "n", "v" }, "<Space>", nil)
 vim.g.mapleader = " "
 
 
---[[ MOVEMENT ]]--
+--[[ MOVEMENT ]]
+--
 -- Harcore
 local hardcore = 1
 if hardcore >= 1 then
@@ -32,7 +34,6 @@ if hardcore >= 2 then
   map("i", "<Down>", nil)
   map("i", "<Left>", nil)
   map("i", "<Right>", nil)
-
 end
 -- -- Remap control-arrow keys for movement
 -- map("i", "<C-k>", "<C-o>gk")
@@ -59,7 +60,8 @@ map("n", "H", nil)
 map("n", "M", nil)
 map("n", "L", nil)
 
---[[ SUPER KEYS ]]--
+--[[ SUPER KEYS ]]
+--
 -- map("i", "<Tab>", require("supertab").press, { desc = "SuperTab" })
 
 -- Hide search results (activates back on search)
@@ -85,32 +87,26 @@ map("n", "<Esc>",
   end
 )
 
--- map("i", "<Tab>")
+-- mapa("i", "<Tab>")
 
 
---[[ SEARCH ]]--
+--[[ SEARCH ]]
+--
 -- Search like * but without jumping to next match
 -- map("n", "*",
 --   function()
---     vim.fn.setreg("/", vim.fn.expand("<cword>"))
+--     vim.fn.setreg("/", '\<' .. vim.fn.expand("<cword>") .. '\>' )
 --     vim.opt_local.hlsearch = true
 --   end,
 --   { desc = "Highlight word under cursor" })
 
 -- Search and replace word under cursor (\< \> are text boundaries)
 map("n", "<Leader>s", [[:%s/\<<C-r><C-w>\>//g<Left><Left>]],
-  { desc = "Replace word under cursor"})
+  { desc = "Replace word under cursor" })
 -- Search and replace selected text (uses * register)
 map("x", "<Leader>s", [["*ygv:<C-u>%s/\V<C-r>*//g<Left><Left>]],
   { desc = "Replace selected text" })
 
-
--- Open with external program (link, file, etc)
-if vim.fn.has('nvim-0.10') == 1 then
-  vim.notify("This is already implemented in Neovim 0.10", vim.log.levels.WARN)
-end
-map("n", "gx", [[:!xdg-open <C-R>=escape("<C-R><C-F>", "#?&;\|%")<CR><CR>]],
-  { desc = "Open with external program", silent = true })
 
 
 -- [[ INSERT and VISUAL ]] --
@@ -131,15 +127,19 @@ map("x", "<", "<gv", { desc = "Indent left" })
 map("x", ">", ">gv", { desc = "Indent right" })
 
 -- Merge lines
-map({ "n" , "x" }, "M", "J", { desc = "Merge lines" })
+map({ "n", "x" }, "M", "J", { desc = "Merge lines" })
 
 -- Move text around
 -- BUG: this has to be relative to the start of the selection
-map("x" , "J",
-  function() return ":m '>+" .. (vim.v.count1) .. "<CR>gv=gv" end,
+map("x", "J",
+  function()
+    return ":m '>+" .. (vim.v.count1) .. "<CR>gv=gv"
+  end,
   { desc = "Move text down", expr = true, silent = true })
-map("x" , "K",
-  function() return ":m '<-" .. (vim.v.count1 +1) .. "<CR>gv=gv" end,
+map("x", "K",
+  function()
+    return ":m '<-" .. (vim.v.count1 + 1) .. "<CR>gv=gv"
+  end,
   { desc = "Move text up", expr = true, silent = true })
 
 -- Add empty lines before and after cursor line
@@ -172,12 +172,17 @@ map_repeat('n', 'go',
   { desc = "Add empty line after", expr = true }
 )
 
--- map("n" , "J",
---   function() return ":<C-U>m .+" .. (vim.v.count1) .. "<CR>==" end,
---   { desc = "Move text down", expr = true, silent = true })
--- map("n" , "K",
---   function() return ":<C-U>m .-" .. (vim.v.count1 +1) .. "<CR>==" end,
---   { desc = "Move text up", expr = true, silent = true })
+
+map("x", "gc",
+  function()
+    if require("utils").is_visual_selection_empty() then
+      return ":<C-U>lua require('vim._comment').textobject()<CR>"
+    else
+      return require('vim._comment').operator()
+    end
+  end,
+  { desc = "Comment selection", expr = true }
+)
 
 -- Select last pasted text
 map("n", "gp", "`[v`]", { desc = "Reselect last pasted text" })
@@ -186,7 +191,6 @@ map("n", "gp", "`[v`]", { desc = "Reselect last pasted text" })
 -- map("i", "<C-K>", "<C-O>D", { desc = "Delete until end of line" })
 map("c", "<C-K>", "<C-\\>e(strpart(getcmdline(), 0, getcmdpos() - 1))<CR>", { desc = "Delete until end of line" })
 
--- map("n", "<leader>l", "<C-^>", { desc = "Alternate file" })
 -- [[ BRACKETED ]] --
 map("n", "[b", vim.cmd.bprevious, { desc = "Buffer previous" })
 map("n", "]b", vim.cmd.bnext, { desc = "Buffer next" })
@@ -194,15 +198,8 @@ map("n", "]b", vim.cmd.bnext, { desc = "Buffer next" })
 -- using <CMD> because error on last element is shorter. Why? Idk
 map("n", "[q", "<CMD>cprevious<CR>", { desc = "Quickfix previous" })
 map("n", "]q", "<CMD>cnext<CR>", { desc = "Quickfix next" })
-
 map("n", "[l", "<CMD>lprevious<CR>", { desc = "Location previous" })
 map("n", "]l", "<CMD>lnext<CR>", { desc = "Location next" })
-
--- map("n", "[q", vim.cmd.cprevious, { desc = "Quickfix previous" })
--- map("n", "]q", vim.cmd.cnext, { desc = "Quickfix next" })
---
--- map("n", "[l", vim.cmd.lprevious, { desc = "Location previous" })
--- map("n", "]l", vim.cmd.lnext, { desc = "Location next" })
 
 map("n", "[t", vim.cmd.tabprevious, { desc = "Tab previous" })
 map("n", "]t", vim.cmd.tabnext, { desc = "Tab next" })
@@ -215,32 +212,32 @@ map("n", "[g", "g,", { desc = "Change previous" })
 map("n", "<leader>ud",
   function()
     -- in case focus is in loclist
-    local curr_win = vim.fn.getloclist(0, {all=1}).winid or vim.api.nvim_get_current_win()
+    local curr_win = vim.fn.getloclist(0, { all = 1 }).winid or vim.api.nvim_get_current_win()
     local curr_buf = vim.api.nvim_win_get_buf(curr_win)
-    if vim.diagnostic.is_disabled(curr_buf) then
-      vim.diagnostic.enable(curr_buf)
-      vim.diagnostic.setloclist({winnr = curr_win, open = false})
+    if not vim.diagnostic.is_enabled({ bufnr = curr_buf }) then
+      vim.diagnostic.enable(true, { bufnr = curr_buf })
+      vim.diagnostic.setloclist({ winnr = curr_win, open = false })
     else
-      vim.diagnostic.disable(curr_buf)
+      vim.diagnostic.enable(false, { bufnr = curr_buf })
       vim.fn.setloclist(curr_win, {})
       vim.cmd.lclose()
     end
-    log.toggle("diagnostics", not vim.diagnostic.is_disabled(curr_buf))
+    log.toggle("diagnostics", vim.diagnostic.is_enabled({ bufnr = curr_buf }))
   end,
   { desc = "Toggle diagnostics" })
 
 map("n", "<leader>cd", function()
   local is_visible = require("utils.loclist").is_visible()
   if not is_visible then
-    vim.diagnostic.setloclist({open = true})
+    vim.diagnostic.setloclist({ open = true })
     vim.cmd.wincmd("p")
     -- if loclist not empty dict
-    if #vim.fn.getloclist(0, {all=1}).items ~= 0 then
+    if #vim.fn.getloclist(0, { all = 1 }).items ~= 0 then
       require("utils.loclist").follow_cursor()
     end
     local _, winid = vim.diagnostic.open_float()
     if not winid then
-      _, winid = vim.diagnostic.open_float({scope = "line"})
+      _, winid = vim.diagnostic.open_float({ scope = "line" })
     end
   else
     vim.cmd.lclose()
@@ -284,7 +281,8 @@ require("utils.lsp").on_attach(
 )
 
 
---[[ SPLITS AND TABS ]]--
+--[[ SPLITS AND TABS ]]
+--
 -- Split new
 map("n", "<leader>-", vim.cmd.new, { desc = "Split horizontal new" })
 map("n", "<leader>\\", vim.cmd.vnew, { desc = "Split vertical new" })
@@ -336,7 +334,7 @@ map("n", "<C-w>z", zoom_toggle, { desc = "Toogle zoom" })
 -- )
 
 -- Equalize
-map("n", "<leader>=", "<C-w>=", { desc = "Equalize split sizes"})
+map("n", "<leader>=", "<C-w>=", { desc = "Equalize split sizes" })
 
 -- Resize with hjkl
 -- map("n", "<leader>k", ":resize +2<CR>")
@@ -365,25 +363,24 @@ map("n", "zz", "1z=", { desc = "Fix spelling mistake" })
 map({ "n", "x" }, "x", '"_x')
 map({ "n", "x" }, "X", '"_X')
 -- dd, cc, S goes to blackhole if empty line
-map("n", "dd", function ()
+map("n", "dd", function()
   if vim.fn.getline(".") == "" then return '"_dd' end
   return "dd"
-end, {expr = true})
-map("n", "cc", function ()
+end, { expr = true })
+map("n", "cc", function()
   if vim.fn.getline(".") == "" then return '"_cc' end
   return "cc"
-end, {expr = true})
-map("n", "S", function ()
+end, { expr = true })
+map("n", "S", function()
   if vim.fn.getline(".") == "" then return '"_S' end
   return "S"
-end, {expr = true})
+end, { expr = true })
 -- No yank alternatives (like helix)
 -- map("n", "<M-c>", '"_c', { desc = "Change selection, without yanking" })
 -- map("n", "<M-d>", '"_d', { desc = "Delete selection, without yanking" })
 
 
 -- [[ ABBREVIATIONS ]] --
--- patch has not been merged yet...
 local abbrs = {
   W = "w",
   Wq = "wq",
@@ -392,12 +389,7 @@ local abbrs = {
   Qa = "qa",
 }
 for lhs, rhs in pairs(abbrs) do
-  if vim.fn.has('nvim-0.10') == 1 then
-    map("ca", lhs, rhs, { desc = "Abbreviation for " .. rhs })
-  else
-    -- do the same with commands
-    command(lhs, rhs, {})
-  end
+  map("ca", lhs, rhs, { desc = "Abbreviation for " .. rhs })
 end
 
 
@@ -405,32 +397,29 @@ end
 map("n", "<Leader>!", cmd "!%:p", { desc = "Execute current file" })
 
 -- This is not working well because the file is no reloaded
-if vim.fn.has('nvim-0.10') == 1 then
-  map("ca", "w!!", "w !sudo tee % > /dev/null", { desc = "Write as sudo", silent = true })
-else
-  -- do the same with normal keymaps (adds delay)
-  map("c", "w!!", "execute 'write !sudo tee %:p > /dev/null' | setl nomod", { desc = "Write as sudo" })
-end
+map("ca", "w!!", "w !sudo tee % > /dev/null", { desc = "Write as sudo", silent = true })
 
 -- [[ FIXES ]] --
 -- wildoptions menu (:edit) correction for vertical horizontal navigation
-map('c', '<Up>', 'wildmenumode() ? "<Left>" : "<Up>"', { expr = true, replace_keycodes = false})
-map('c', '<Down>', 'wildmenumode() ? "<Right>" : "<Down>"', { expr = true, replace_keycodes = false})
-map('c', '<Left>', 'wildmenumode() ? "<Up>" : "<Left>"', { expr = true, replace_keycodes = false})
-map('c', '<Right>', 'wildmenumode() ? "<Down>" : "<Right>"', { expr = true, replace_keycodes = false})
+map('c', '<Up>', 'wildmenumode() ? "<Left>" : "<Up>"', { expr = true, replace_keycodes = false })
+map('c', '<Down>', 'wildmenumode() ? "<Right>" : "<Down>"', { expr = true, replace_keycodes = false })
+map('c', '<Left>', 'wildmenumode() ? "<Up>" : "<Left>"', { expr = true, replace_keycodes = false })
+map('c', '<Right>', 'wildmenumode() ? "<Down>" : "<Right>"', { expr = true, replace_keycodes = false })
 
 -- map("c", "<C-h>", "<Left>", { remap = true })
 -- map("c", "<C-j>", "<Down>", { remap = true })
 -- map("c", "<C-k>", "<Up>", { remap = true })
 -- map("c", "<C-l>", "<Right>", { remap = true })
 
---[[ DISABLED ]]--
+--[[ DISABLED ]]
+--
 -- Disable command history `q:`, can still be accessed from command mode <Ctrl+R>
 map("n", "q:", nil)
 -- map("n", "q/", nil)
 -- map("n", "q?", nil)
 
---[[ HELP ]]--
+--[[ HELP ]]
+--
 -- Disable F1 help
 map({ "n", "x", "i" }, "<F1>", nil)
 -- Exit help with `q`
