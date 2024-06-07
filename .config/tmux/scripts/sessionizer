@@ -23,15 +23,14 @@ done
 PID="${PID:-$$}"
 cache_file="/tmp/sessionizer-$PID"
 
-# if [[ -n $echo ]] && [[ -f "$cache_file" ]]; then
-#   cat "$cache_file"
-#   exit 0
-# fi
+if [[ -n $echo ]] && [[ -f "$cache_file" ]]; then
+  cat "$cache_file"
+  exit 0
+fi
 
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 zoxide_max=50
 sep=$'\x1f'
-# sep="␞" # U+241E
 
 
 # The input table should be a tab delimited with fields:
@@ -41,12 +40,6 @@ sep=$'\x1f'
 
 prepend() { while read -r line; do printf "%s\t%s\n" "$1" "$line"; done; }
 append() { while read -r line; do printf "%s\t%s\n" "$line" "$1"; done; }
-
-concat_lists(){
-  for list in "$@"; do
-    echo "$list"
-  done
-}
 
 
 blank_icon="󰄱"
@@ -79,11 +72,9 @@ list_pwd() {
 }
 
 shorten_path() {
-  # echo "$1" | sed "s|^$HOME|~|"
   echo "${1//^$HOME/~}"
 }
 full_path() {
-  # echo "$1" | sed "s|^~|$HOME|"
   echo "${1//^~/$HOME}"
 }
 
@@ -119,20 +110,11 @@ format_directories() {
     done
 }
 list_directories() {
-  # print fast for responsivenes
+  # print fast for responsivenes (these are always first)
   list_zoxide
 
   # now filter the remaining
   comm -13 <(list_zoxide | sort) <( { list_projects && list_pwd ; } | sort )
-
-  # old logic
-  # remove duplicates while keeping sort
-  # {
-  #   list_zoxide
-  #   list_projects
-  #   list_pwd
-  # } | format_directories | \
-  #   nl -s"$sep" | sort -t"$sep" -uk3,3 | sort -t"$sep" -nk1 | cut -d"$sep" -f2-
 }
 
 list_all() {
@@ -141,14 +123,13 @@ list_all() {
   blank_session
   list_sessions
   list_directories | format_directories
-  # concat_lists "$(blank_session)" "$(list_sessions)" "$(list_directories)"
 }
 
 
 # cached for perfodmance, list is reloaded on first keystroke to remove "new session"
-# if [[ -z $echo ]]; then
-#   list_all | tail -n +2 > "$cache_file"
-# fi
+if [[ -z $echo ]]; then
+  list_all | tail -n +2 > "$cache_file" &
+fi
 
 
 # Only interactive if not argument provided
@@ -166,8 +147,8 @@ if [[ -z $query ]]; then
         --print-query \
         --query="$query" \
         --bind="tab:transform-query(echo {3} | cut -c5-)" \
-        # --bind="tab:transform-query(echo {3} | cut -c5-)+reload(find {q} -mindepth 1 -maxdepth 1 -type d 2>/dev/null)" \
-        # --bind="change:reload($tmux_scripts/sessionizer --echo $PID)"
+        --bind="change:reload($tmux_scripts/sessionizer --echo $PID)" \
+        # --bind="tab:transform-query(echo {3} | cut -c5-)+reload(find {q} -mindepth 1 -maxdepth 1 -type d 2>/dev/null)"
   )
 
   # split result
