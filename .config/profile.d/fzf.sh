@@ -24,10 +24,11 @@ export FZF_DEFAULT_OPTS='--cycle '\
 '--bind "ctrl-w:backward-kill-word" '\
 '--color=fg:#9da9a0,fg+:#e4e1cd,bg:#1e2326,bg+:#1e2326,hl:underline:#a7c080,hl+:underline:#a7c080,spinner:#e69875,header:#a7c080,info:#dbbc7f,pointer:#e69e80,marker:#e69875,prompt:#dbbc7f'
 
+export FZF_PREVIEW="--preview='preview {}'"
 # # used on fish function that launchs fzf-tmux
 # export FZF_TMUX_OPTS="-p90%,60%"
 # # non standard
-# export FZF_OPTS_PREVIEW="$FZF_DEFAULT_OPTS --preview='preview {}'"
+export FZF_OPTS_PREVIEW="$FZF_DEFAULT_OPTS $FZF_PREVIEW"
 #
 # # zoxide
 # export _ZO_FZF_OPTS="$FZF_DEFAULT_OPTS --preview='preview {2..}'"
