@@ -17,9 +17,9 @@ function sudo -d "Sudo with fish user functions"
     set argv $argv[2..-1]
     # command sudo $argv[2..-1]
 
-  # Allow pipx system installs
-  else if test "$argv[1]" = "pipx"
-    set argv PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin $argv
+  # Preserve environment for nvim
+  else if contains -- "$argv[1]" "vim" "nvim"
+    set argv -E -s $argv
 
   # If fish function, execute with fish
   # https://gist.github.com/NotTheDr01ds/6357e48b511735c42b94c4cc081ac5dc
