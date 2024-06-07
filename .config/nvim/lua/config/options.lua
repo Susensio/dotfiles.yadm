@@ -27,7 +27,7 @@ set.termguicolors = true                     -- Enable true color support
 set.background = "dark"                      -- Use a dark background
 set.number = true                            -- Show line numbers
 set.relativenumber = true                    -- Show relative line numbers
-set.signcolumn = "auto"                        -- Do not append an extra column for diagnostics
+set.signcolumn = "yes:1"                     -- Do not append an extra column for diagnostics
 set.cursorline = true                        -- Highlight the current line
 set.guicursor = ""
 set.guicursor:append("n-v-c-sm:block")       -- Block non insert mode

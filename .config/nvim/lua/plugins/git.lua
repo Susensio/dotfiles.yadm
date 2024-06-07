@@ -6,7 +6,7 @@ return {
       vim.keymap.set(
         "n",
         "<leader>ug",
-        function() require("mini.diff").toggle_overlay() end,
+        function() require("mini.diff").toggle_overlay(0) end,
         { desc = "Toggle git overlay" }
       )
     end,
@@ -16,9 +16,9 @@ return {
         signs = {
           add = '▎',
           change = '▎',
-          delete = '🭻'
+          delete = '▁',
         },
       },
     },
-  }
+  },
 }
