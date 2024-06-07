@@ -23,10 +23,10 @@ done
 PID="${PID:-$$}"
 cache_file="/tmp/sessionizer-$PID"
 
-if [[ -n $echo ]]; then
-  cat "$cache_file"
-  exit 0
-fi
+# if [[ -n $echo ]] && [[ -f "$cache_file" ]]; then
+#   cat "$cache_file"
+#   exit 0
+# fi
 
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 zoxide_max=50
@@ -146,9 +146,9 @@ list_all() {
 
 
 # cached for perfodmance, list is reloaded on first keystroke to remove "new session"
-if [[ -z $echo ]]; then
-  list_all | tail -n +2 > "$cache_file"
-fi
+# if [[ -z $echo ]]; then
+#   list_all | tail -n +2 > "$cache_file"
+# fi
 
 
 # Only interactive if not argument provided
@@ -166,7 +166,8 @@ if [[ -z $query ]]; then
         --print-query \
         --query="$query" \
         --bind="tab:transform-query(echo {3} | cut -c5-)" \
-        --bind="change:reload($tmux_scripts/sessionizer --echo $PID)"
+        # --bind="tab:transform-query(echo {3} | cut -c5-)+reload(find {q} -mindepth 1 -maxdepth 1 -type d 2>/dev/null)" \
+        # --bind="change:reload($tmux_scripts/sessionizer --echo $PID)"
   )
 
   # split result
