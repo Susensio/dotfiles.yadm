@@ -15,7 +15,7 @@ function venv --description 'Creates a new environment and activates it'
     python3 -m venv $dir/.venv
   end
 
-  if test $VIRTUAL_ENV = $venv_dir
+  if test "$VIRTUAL_ENV" = $venv_dir
     echo "Environment already activated" >&2
   else
     echo "Activating the environment ..." >&2
