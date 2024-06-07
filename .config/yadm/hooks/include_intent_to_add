@@ -21,4 +21,4 @@ include="$XDG_CONFIG_HOME/yadm/include"
   # remove symlinks
   xargs -I{} find {} -type f -or -type l |
   # mark files as intent to add
-  eval $git_cmd 'add --intent-to-add --pathspec-from-file=-'
+  eval $git_cmd 'add --intent-to-add --pathspec-from-file=- || true'
