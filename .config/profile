@@ -19,12 +19,11 @@ add_path "$HOME/.local/bin"
 
 export EDITOR="$(command -v nvim || command -v vim)"
 export PAGER="less"
-# incsearch only works from version 590
-export LESS="$(test $(less --version | head -n1 | cut -d ' ' -f 2) -ge 590 && echo '--incsearch ' || true)-XRF --mouse --wheel-lines=3"
+export LESS="--incsearch -XRF --mouse --wheel-lines=3"
 #
 # Colorize man pages with bat
 # substitute non-breaking hyphen for easy search
-export MANPAGER="sh -c 'col -bx | sed s/‐/-/g | bat -l man -p'"
+export MANPAGER="sh -c 'col -bx | sed s/‐/-/g | bat --language man --plain'"
 export MANROFFOPT="-c"
 # add user man pages
 export MANPATH="$MANPATH:$XDG_DATA_HOME/man"
