@@ -26,6 +26,7 @@ abbr --add l ll
 abbr --add q --set-cursor 'tod -q "%"'
 
 abbr --add lg lazygit
+abbr --add lzd lazydocker
 
 abbr --add y yadm
 abbr --add yc --set-cursor 'yadm commit -m "%"'
