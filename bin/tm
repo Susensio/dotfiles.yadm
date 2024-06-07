@@ -5,7 +5,7 @@
 [[ -f ~/.config/profile ]] && source ~/.config/profile
 
 if [[ -z "$TMUX" ]]; then
-  mru="$($HOME/bin/sd/tmux/mru)"
+  mru="$($HOME/bin/sd/tmux/mru 2>/dev/null)"
   if [[ -n "$mru" ]]; then
     tmux attach -t "$mru"
   else
