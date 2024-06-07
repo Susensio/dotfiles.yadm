@@ -13,7 +13,6 @@ export VSCODE_EXTENSIONS="$XDG_DATA_HOME/code/extensions"
 export ANSIBLE_HOME="${XDG_CONFIG_HOME}/ansible"
 export ANSIBLE_GALAXY_CACHE_DIR="${XDG_CACHE_HOME}/ansible/galaxy_cache"
 export ANSIBLE_LOCAL_TEMP="${XDG_CACHE_HOME}/ansible/tmp"
-export ANSIBLE_REMOTE_TEMP="${XDG_CACHE_HOME}/ansible/tmp"
 
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 
@@ -23,7 +22,6 @@ export _JAVA_OPTIONS="-Djava.util.prefs.userRoot=$XDG_CONFIG_HOME/java"
 export WGETRC="$XDG_CONFIG_HOME/wgetrc"
 
 export ICEAUTHORITY="$XDG_CACHE_HOME/ICEauthority"
-# export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority"
 
 export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
 export WINEPREFIX="$XDG_DATA_HOME/wine"
