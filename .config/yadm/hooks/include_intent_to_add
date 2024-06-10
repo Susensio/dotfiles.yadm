@@ -10,7 +10,7 @@ eval $git_cmd 'diff --name-only --diff-filter=AD -z' |
   xargs -r $git_cmd reset -q --
 
 # Second, add possible new files
-include="$XDG_CONFIG_HOME/yadm/include"
+include="${XDG_CONFIG_HOME:-$HOME/.config}/yadm/include"
 # If such config file exists
 [ -r "$include" ] && cat "$include" |
   # environment variable substitution
