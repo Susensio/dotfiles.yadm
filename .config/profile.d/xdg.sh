@@ -1,7 +1,7 @@
 # python
-export PYTHONSTARTUP=$XDG_CONFIG_HOME/python/startup.py
-export IPYTHONDIR=$XDG_CONFIG_HOME/ipython
-export JUPYTER_CONFIG_DIR=$XDG_CONFIG_HOME/jupyter
+export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/startup.py"
+export IPYTHONDIR="$XDG_CONFIG_HOME/ipython"
+export JUPYTER_CONFIG_DIR="$XDG_CONFIG_HOME/jupyter"
 
 # nvim
 export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$XDG_CONFIG_HOME/nvim/init.lua" | so $MYVIMRC'
@@ -10,9 +10,9 @@ export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$X
 export VSCODE_EXTENSIONS="$XDG_DATA_HOME/code/extensions"
 
 # ansible
-export ANSIBLE_HOME="${XDG_CONFIG_HOME}/ansible"
-export ANSIBLE_GALAXY_CACHE_DIR="${XDG_CACHE_HOME}/ansible/galaxy_cache"
-export ANSIBLE_LOCAL_TEMP="${XDG_CACHE_HOME}/ansible/tmp"
+export ANSIBLE_HOME="$XDG_CONFIG_HOME/ansible"
+export ANSIBLE_GALAXY_CACHE_DIR="$XDG_CACHE_HOME/ansible/galaxy_cache"
+export ANSIBLE_LOCAL_TEMP="$XDG_CACHE_HOME/ansible/tmp"
 
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 
@@ -44,3 +44,5 @@ export RUSTUP_HOME="$XDG_CONFIG_HOME/rustup"
 export TEXMFHOME="$XDG_DATA_HOME/texmf"
 export TEXMFVAR="$XDG_CACHE_HOME/texlive/texmf-var"
 export TEXMFCONFIG="$XDG_CONFIG_HOME/texlive/texmf-config"
+
+export COOCKIECUTTER_CONFIG="$XDG_CONFIG_HOME/cookiecutter.yaml"
