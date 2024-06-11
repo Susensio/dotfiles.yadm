@@ -21,6 +21,7 @@ vim.g.do_filetype_lua = 1                     -- Use filetype.lua for filetype d
 set.spellsuggest:append("9")                  -- The maximum number of suggestions listed
 set.spelllang = "en,es_es"                    -- Set spell check language
 set.shell = "/usr/bin/bash"                   -- Avoid pluggin problems
+set.isfname:append("{,}")                  -- Include curly braces in file name (${VAR})
 
 -- VISUAL SETTINGS: Theme, cursor appearance, line numbers, folding and text display.
 set.termguicolors = true                     -- Enable true color support
