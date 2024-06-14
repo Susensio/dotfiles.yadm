@@ -61,13 +61,27 @@ return {
             -- "minifiles",
             -- "minipick",
           },
-          globalstatus = true,
+          globalstatus = false,
           refresh = {
             statusline = 500,
           },
         },
         sections = {
-          lualine_a = { { "mode", color = { gui = "bold" } } },
+          -- lualine_c = { { "mode", color = { gui = "bold" } } },
+          lualine_a = {
+            -- {
+            --   "filetype",
+            --   icon_only = true,
+            --   padding = { left = 1, right = 0 },
+            -- },
+            {
+              "filename",
+              newfile_status = true,
+              path = 1,
+              symbols = { newfile = "[N]" },
+              separator = { right = "◤", },
+            },
+          },
           lualine_b = {
             "branch",
             {
@@ -89,19 +103,7 @@ return {
               cond = function() return vim.diagnostic.is_enabled({ bufnr=0 }) end,
             }
           },
-          lualine_c = {
-            -- {
-            --   "filetype",
-            --   icon_only = true,
-            --   padding = { left = 1, right = 0 },
-            -- },
-            {
-              "filename",
-              newfile_status = true,
-              path = 1,
-              symbols = { newfile = "[N]" },
-            },
-          },
+          lualine_c = {},
           lualine_x = {
             {
               function()
@@ -152,18 +154,19 @@ return {
           },
           lualine_y = { "filetype" },
           lualine_z = {
-            {
-              "progress",
-              color = { gui = "" },
-            },
-            { "location" }
+            "mode",
+            -- {
+            --   "progress",
+            --   color = { gui = "" },
+            -- },
+            -- { "location" }
           },
           -- lualine_z = { { "location" , color = { gui = "bold" } } },
         },
         inactive_sections = {
           -- lualine_a = { { "mode" , color = { gui = "bold" } } },
           -- lualine_b = {"branch", "diff", "diagnostics"},
-          lualine_c = {
+          lualine_a = {
             -- {
             --   "filetype",
             --   icon_only = true,
@@ -174,9 +177,16 @@ return {
               newfile_status = true,
               path = 1,
               symbols = { newfile = "[N]" },
+              separator = { right = "◤", },
             }
           },
-          lualine_x = { "filetype" },
+          lualine_b = {},
+          lualine_c = {},
+          lualine_x = {},
+          lualine_y = {},
+          lualine_z = {},
+          -- lualine_y = { "filetype" },
+          -- lualine_z = { "mode" },
           -- lualine_y = {"progress"},
           -- lualine_z = {"location"},
         },
@@ -200,45 +210,70 @@ return {
           "mason",
           "man",
           "quickfix",
-          "oil",
-          {
-            filetypes = { "minipick" },
-            sections = {
-              lualine_a = { function() return "PICK" end },
-              lualine_b = { function()
-                return MiniPick.get_picker_opts().source.name
-              end },
-              lualine_c = { function()
-                return "items: " .. #MiniPick.get_picker_matches().all
-              end },
-            },
-          },
-          {
-            filetypes = { "minifiles" },
-            sections = {
-              lualine_a = { function() return "FILES" end },
-              -- lualine_b = { function()
-              --   local ok, minifiles = pcall(require, 'mini.files')
-              --   if ok then
-              --     return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
-              --   else
-              --     return ''
-              --   end
-              -- end },
-            },
-          },
+          -- {
+          --   filetypes = { "minipick" },
+          --   sections = {
+          --     lualine_a = { function() return "PICK" end },
+          --     lualine_b = { function()
+          --       return MiniPick.get_picker_opts().source.name
+          --     end },
+          --     lualine_c = { function()
+          --       return "items: " .. #MiniPick.get_picker_matches().all
+          --     end },
+          --   },
+          -- },
+          -- {
+          --   filetypes = { "minifiles" },
+          --   sections = {
+          --     lualine_a = { function() return "FILES" end },
+          --     -- lualine_b = { function()
+          --     --   local ok, minifiles = pcall(require, 'mini.files')
+          --     --   if ok then
+          --     --     return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+          --     --   else
+          --     --     return ''
+          --     --   end
+          --     -- end },
+          --   },
+          -- },
+          -- "oil",
           {
             filetypes = { "oil" },
             sections = {
-              lualine_a = { function() return "OIL" end },
-              lualine_b = { function()
-                local ok, oil = pcall(require, 'oil')
-                if ok then
-                  return vim.fn.fnamemodify(oil.get_current_dir(), ":~")
-                else
-                  return ''
-                end
-              end },
+              -- lualine_b = { 'branch' },
+              -- lualine_b = {
+              --   -- {
+              --   --   -- 'branch',
+              --   --   function()
+              --   --     -- local cache = {}
+              --   --
+              --   --     local ok, oil = pcall(require, 'oil')
+              --   --     if ok then
+              --   --       local current_dir = oil.get_current_dir()
+              --   --       local gb_module = require('lualine.components.branch.git_branch')
+              --   --       local git_dir = gb_module.find_git_dir(current_dir)
+              --   --       return "todo..."
+              --   --     else
+              --   --       return ''
+              --   --     end
+              --   --   end,
+              --   --   icon = ''
+              --   -- },
+              -- },
+              lualine_a = {
+                {
+                  function()
+                    local ok, oil = pcall(require, 'oil')
+                    if ok then
+                      return vim.fn.fnamemodify(oil.get_current_dir() or '', ":~")
+                    else
+                      return ''
+                    end
+                  end,
+                  separator = { right = "◤", },
+                }
+              },
+              lualine_z = { 'mode' },
             },
           },
         },
@@ -289,39 +324,46 @@ return {
         local palette = colors.raw
         theme = {
           normal = {
-            a = { bg = palette.green, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.green, fg = palette.bg0, gui = "bold" },
           },
           insert = {
-            a = { bg = palette.blue, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.blue, fg = palette.bg0, gui = "bold" },
           },
           visual = {
-            a = { bg = palette.red, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.red, fg = palette.bg0, gui = "bold" },
           },
           replace = {
-            a = { bg = palette.orange, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.orange, fg = palette.bg0, gui = "bold" },
           },
           command = {
-            a = { bg = palette.yellow, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.yellow, fg = palette.bg0, gui = "bold" },
           },
           terminal = {
-            a = { bg = palette.purple, fg = palette.bg0, gui = "bold" },
+            a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
             b = { bg = palette.bg3, fg = palette.fg },
-            c = { bg = palette.bg1, fg = palette.grey2 },
+            c = { bg = nil, fg = palette.grey2 },
+            z = { bg = palette.purple, fg = palette.bg0, gui = "bold" },
           },
           inactive = {
-            a = { bg = palette.bg1, fg = palette.grey1 },
-            b = { bg = palette.bg1, fg = palette.grey1 },
-            c = { bg = palette.bg1, fg = palette.grey1 },
+            a = { bg = palette.grey0, fg = palette.bg0, gui = "bold" },
+            b = { bg = palette.bg3, fg = palette.grey1 },
+            c = { bg = palette.bg_dim, fg = palette.grey1 },
+            z = { bg = palette.grey0, fg = palette.bg1, gui = "bold" },
           },
         }
       end
@@ -334,6 +376,7 @@ return {
 
   { -- incline
     "b0o/incline.nvim",
+    enabled = false,
     version = false,
     event = "VeryLazy",
     opts = {
