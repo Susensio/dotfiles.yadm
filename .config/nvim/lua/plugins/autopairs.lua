@@ -21,7 +21,8 @@ return {
         -- modify default ones to not open if right to closing bracket
         ['('] = { action = 'open', pair = '()', neigh_pattern = '[^\\][^%)%w]' },
         ['['] = { action = 'open', pair = '[]', neigh_pattern = '[^\\][^%]%w]' },
-        ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^%}%w]' },
+        -- keep curly brackets because of jinja
+        -- ['{'] = { action = 'open', pair = '{}', neigh_pattern = '[^\\][^%}%w]' },
 
         -- [')'] = { action = 'close', pair = '()', neigh_pattern = '[^\\].' },
         -- [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },

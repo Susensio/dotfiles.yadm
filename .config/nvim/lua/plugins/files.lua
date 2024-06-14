@@ -1,7 +1,7 @@
 return {
   { -- mini.files
     "echasnovski/mini.files",
-    enabled = true,
+    enabled = false,
     event = { "VimEnter */*,.*", "BufNew */*,.*" },
     dependencies = {
       "nvim-tree/nvim-web-devicons",
@@ -18,7 +18,7 @@ return {
         preview = false
       },
       options = {
-        -- use_as_default_explorer = true,
+        use_as_default_explorer = true,
       },
     },
     config = function(plugin, opts)
@@ -73,7 +73,6 @@ return {
               desc = "Toggle hidden files"
             })
           end)
-
         end,
       })
     end,
@@ -103,13 +102,26 @@ return {
 
   { -- oil
     'stevearc/oil.nvim',
+    enabled = true,
     dependencies = { "nvim-tree/nvim-web-devicons" },
     event = { "VimEnter */*,.*", "BufNew */*,.*" },
     cmd = { "Oil" },
+    init = function()
+      vim.keymap.set("n", "-", "<cmd>Oil<CR>", { desc = "Open parent directory" })
+    end,
     opts = {
       default_file_explorer = true,
       keymaps = {
         ["~"] = false,
+      },
+      delete_to_trash = true,
+      skip_confirm_for_simple_edits = true,
+      view_options = {
+        show_hidden = true,
+        natural_order = true,
+        is_always_hidden = function(name, _)
+          return name == '..' or name == '.git'
+        end,
       },
     },
   }
