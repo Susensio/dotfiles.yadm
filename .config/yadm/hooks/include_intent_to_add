@@ -1,14 +1,6 @@
 #!/bin/sh
 git_cmd="/usr/bin/git --git-dir=${YADM_HOOK_REPO} --work-tree=${YADM_HOOK_WORK}"
 
-# First, remove previously intent-to-added files
-# or added and deleted
-eval $git_cmd 'diff --name-only --diff-filter=AD -z' |
-  # ignore blanks and prepend repo root folder
-  awk 'BEGIN {RS="\0";OFS="\n"} NF {print "\":/" $0 "\""}' |
-  # remove from index
-  xargs -r $git_cmd reset -q --
-
 # Second, add possible new files
 include="${XDG_CONFIG_HOME:-$HOME/.config}/yadm/include"
 # If such config file exists
@@ -21,4 +13,4 @@ include="${XDG_CONFIG_HOME:-$HOME/.config}/yadm/include"
   # remove symlinks
   xargs -I{} find {} -type f -or -type l |
   # mark files as intent to add
-  eval $git_cmd 'add --intent-to-add --pathspec-from-file=- || true'
+  eval "$git_cmd add --intent-to-add --pathspec-from-file=-"
