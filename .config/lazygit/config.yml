@@ -6,4 +6,8 @@ gui:
       - black
 os:
   editPreset: 'nvim'
+git:
+  paging:
+    colorArg: always
+    pager: "delta --dark --paging=never"
 promptToReturnFromSubprocess: false
