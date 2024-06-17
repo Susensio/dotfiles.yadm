@@ -70,7 +70,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     if event.match:match("^%w%w+://") then
       return
     end
-    local file = vim.loop.fs_realpath(event.match) or event.match
+    local file = vim.uv.fs_realpath(event.match) or event.match
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
@@ -83,7 +83,7 @@ lsp.on_attach(
       -- buffer = buffer,
       desc = "Put diagnostics on location list",
       callback = function(event)
-        local lsp_clients = vim.lsp.get_active_clients({ bufnr = event.buf })
+        local lsp_clients = vim.lsp.get_clients({ bufnr = event.buf })
         if #lsp_clients == 0 then
           return
         end
