@@ -1,5 +1,7 @@
-local augroup = vim.api.nvim_create_augroup   -- Create/get autocommand group
-local autocmd = vim.api.nvim_create_autocmd   -- Create autocommand
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+local doautocmd = vim.api.nvim_exec_autocmds
+
 local lsp = require("utils.lsp")
 local loclist = require("utils.loclist")
 local user_grp = augroup("UserGroup", { clear = true })
@@ -113,6 +115,32 @@ autocmd("BufWinEnter", {
   desc = "Load folds and cursor",
   pattern = "?*",
   command = "silent! loadview",
+  group = user_grp,
+})
+
+autocmd({ "WinEnter", "BufEnter", "FocusGained", "InsertLeave" }, {
+	desc = "Change visuals in focused window",
+	pattern = "*",
+  callback = function()
+    if vim.opt_local.number:get() then
+      vim.opt_local.relativenumber = true
+    end
+    vim.opt_local.cursorline = true
+    doautocmd("User", { pattern = "FocusGained" })
+  end,
+  group = user_grp,
+})
+
+autocmd({ "WinLeave", "BufLeave", "FocusLost", "InsertEnter" }, {
+	desc = "Change visuals in unfocused window",
+	pattern = "*",
+  callback = function()
+    if vim.opt_local.number:get() then
+      vim.opt_local.relativenumber = false
+    end
+    vim.opt_local.cursorline = false
+    doautocmd("User", { pattern = "FocusLost" })
+  end,
   group = user_grp,
 })
 
