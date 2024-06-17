@@ -1,9 +1,15 @@
 return {
   { -- treesitter
     "nvim-treesitter/nvim-treesitter",
+    version = false, -- last release is way too old and doesn't work on Windows
     build = ":TSUpdate",
     event = "LazyFile",
     cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
+    init = function(plugin)
+      -- Copied from LazyVim, performance improvement
+      require("lazy.core.loader").add_to_rtp(plugin)
+      require("nvim-treesitter.query_predicates")
+    end,
     keys = {
       { "<CR>", desc = "Increment selection" },
       { "<BS>", desc = "Shrink selection", mode = "x" },
@@ -26,11 +32,12 @@ return {
         "vimdoc",
         "yaml",
       },
-      auto_install = true,
+      -- auto_install = true,
       sync_install = false,
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
+        -- disable = { "vimdoc" },
       },
       indent = {
         enable = true,
