@@ -13,7 +13,7 @@ return {
   { -- mini.starter
     "echasnovski/mini.starter",
     event = "VimEnter",
-    enabled = false,
+    enabled = true,
     cond = function()   -- only if nvim started without arguments
       return vim.fn.argc() == 0
     end,
