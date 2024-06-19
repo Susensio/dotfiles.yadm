@@ -118,7 +118,12 @@ autocmd("BufWinEnter", {
   group = user_grp,
 })
 
-autocmd({ "WinEnter", "BufEnter", "FocusGained", "InsertLeave" }, {
+autocmd({
+  "WinEnter",
+  "BufEnter",
+  "FocusGained",
+  -- "InsertLeave"
+}, {
 	desc = "Change visuals in focused window",
 	pattern = "*",
   callback = function()
@@ -131,7 +136,12 @@ autocmd({ "WinEnter", "BufEnter", "FocusGained", "InsertLeave" }, {
   group = user_grp,
 })
 
-autocmd({ "WinLeave", "BufLeave", "FocusLost", "InsertEnter" }, {
+autocmd({
+  "WinLeave",
+  "BufLeave",
+  "FocusLost",
+  -- "InsertEnter"
+}, {
 	desc = "Change visuals in unfocused window",
 	pattern = "*",
   callback = function()
