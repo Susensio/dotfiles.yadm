@@ -183,6 +183,8 @@ map("x", "gc",
   end,
   { desc = "Comment selection", expr = true }
 )
+-- https://www.reddit.com/r/neovim/comments/1deudx7/comment/l8er9vg/
+map('x', 'gC', ':normal gcc<CR>', { desc = 'Invert comments' })
 
 -- Select last pasted text
 map("n", "gp", "`[v`]", { desc = "Reselect last pasted text" })
@@ -260,7 +262,7 @@ map("n", "]d", function()
 require("utils.lsp").on_attach(
   function(client, bufnr)
     local function lsp_map(mode, lhs, rhs, capability, opts)
-      if capability ~= nil and client.server_capabilities[capability] == nil then
+      if capability == nil or not client.supports_method("textDocument/"..capability) then
         return
       end
       local options = vim.tbl_extend("keep", { buffer = bufnr }, opts)
@@ -268,14 +270,14 @@ require("utils.lsp").on_attach(
     end
 
 
-    lsp_map("n", "K", vim.lsp.buf.hover, "hoverProvider", { desc = "Hover" })
-    lsp_map("i", "<C-k>", vim.lsp.buf.signature_help, "signatureHelpProvider", { desc = "Signature Help" })
-    lsp_map("n", "gd", vim.lsp.buf.definition, "definitionProvider", { desc = "Goto Definition (LSP)" })
-    lsp_map("n", "gD", vim.lsp.buf.declaration, "declarationProvider", { desc = "Goto Declaration (LSP)" })
-    lsp_map("n", "gr", vim.lsp.buf.references, "referencesProvider", { desc = "Goto References (LSP)" })
-    lsp_map("n", "<leader>cn", vim.lsp.buf.rename, "renameProvider", { desc = "Rename (LSP)" })
-    lsp_map("n", "<leader>cr", vim.lsp.buf.code_action, "codeActionProvider", { desc = "Code Action" })
-    lsp_map({ "n", "x" }, "<leader>cf", vim.lsp.buf.format, "documentFormattingProvider", { desc = "Format Code" })
+    lsp_map("n", "K", vim.lsp.buf.hover, "hover", { desc = "Hover" })
+    lsp_map("i", "<C-k>", vim.lsp.buf.signature_help, "signatureHelp", { desc = "Signature Help" })
+    lsp_map("n", "gd", vim.lsp.buf.definition, "definition", { desc = "Goto Definition (LSP)" })
+    lsp_map("n", "gD", vim.lsp.buf.declaration, "declaration", { desc = "Goto Declaration (LSP)" })
+    lsp_map("n", "gr", vim.lsp.buf.references, "references", { desc = "Goto References (LSP)" })
+    lsp_map("n", "<leader>cn", vim.lsp.buf.rename, "rename", { desc = "Rename (LSP)" })
+    lsp_map("n", "<leader>cr", vim.lsp.buf.code_action, "codeAction", { desc = "Code Action" })
+    lsp_map({ "n", "x" }, "<leader>cf", vim.lsp.buf.format, "documentFormatting", { desc = "Format Code" })
   end,
   { desc = "LSP keymaps" }
 )
