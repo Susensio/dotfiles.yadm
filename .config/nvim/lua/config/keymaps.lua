@@ -206,10 +206,6 @@ map("n", "]l", "<CMD>lnext<CR>", { desc = "Location next" })
 map("n", "[t", vim.cmd.tabprevious, { desc = "Tab previous" })
 map("n", "]t", vim.cmd.tabnext, { desc = "Tab next" })
 
-map("n", "]g", "g;", { desc = "Change next" })
-map("n", "[g", "g,", { desc = "Change previous" })
-
-
 --[[ DIAGNOSTICS ]]
 map("n", "<leader>ud",
   function()
@@ -377,10 +373,6 @@ map("n", "S", function()
   if vim.fn.getline(".") == "" then return '"_S' end
   return "S"
 end, { expr = true })
--- No yank alternatives (like helix)
--- map("n", "<M-c>", '"_c', { desc = "Change selection, without yanking" })
--- map("n", "<M-d>", '"_d', { desc = "Delete selection, without yanking" })
-
 
 -- [[ ABBREVIATIONS ]] --
 local abbrs = {
