@@ -45,25 +45,25 @@ return {
       -- resize
       vim.keymap.set(
         { "", "!" },
-        "<M-C-h>",
+        "<M-H>",
         function() require("tmux").resize_left() end,
         { desc = "Resize towards left" }
       )
       vim.keymap.set(
         { "", "!" },
-        "<M-C-l>",
+        "<M-L>",
         function() require("tmux").resize_right() end,
         { desc = "Resize towards right" }
       )
       vim.keymap.set(
         { "", "!" },
-        "<M-C-k>",
+        "<M-K>",
         function() require("tmux").resize_top() end,
         { desc = "Resize towards top" }
       )
       vim.keymap.set(
         { "", "!" },
-        "<M-C-j>",
+        "<M-J>",
         function() require("tmux").resize_bottom() end,
         { desc = "Resize towards bottom" }
       )
