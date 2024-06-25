@@ -17,13 +17,7 @@ abbr --add vi vim
 
 abbr --add l ll
 
-# taskwarrior
-# abbr --add t task
-# abbr --add ta task add
-# abbr --add ti taski
-# abbr --add tap --set-cursor 'task add project:%'
-# todoist
-abbr --add q --set-cursor 'tod -q "%"'
+abbr --add g git
 
 abbr --add lg lazygit
 abbr --add lzd lazydocker
