@@ -2,7 +2,7 @@ return {
   { -- guess-indent
     "nmac427/guess-indent.nvim",
     config = true,
-    event = { "BufReadPost", "BufNewFile" },
+    event = "LazyFile",
     cmd = "GuessIndent",
   },
 
