@@ -2,18 +2,6 @@ return {
   { -- mini.clue
     "echasnovski/mini.clue",
     event = "VeryLazy",
-    -- keys = {
-    --   { "<leader>", mode = { "n", "x" } },
-    --   { "<C-x>",    mode = "i" },
-    --   { "g",        mode = { "n", "x" } },
-    --   { '"',        mode = { "n", "x" } },
-    --   { "`",        mode = { "n", "x" } },
-    --   { "<C-w>",    mode = "n" },
-    --   { "z",        mode = { "n", "x" } },
-    --   { "]",        mode = "n" },
-    --   { "[",        mode = "n" },
-    --   { "s",        mode = { "n", "x" } },
-    -- },
     init = function()
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "markdown",
@@ -38,16 +26,16 @@ return {
         { mode = "x", keys = "g" },
 
         -- Marks
-        { mode = "n", keys = '"' },
         { mode = "n", keys = "`" },
-        { mode = "x", keys = '"' },
         { mode = "x", keys = "`" },
+        { mode = "n", keys = "'" },
+        { mode = "x", keys = "'" },
 
         -- Registers
-        -- { mode = "n", keys = """ },
-        -- { mode = "x", keys = """ },
-        -- { mode = "i", keys = "<C-r>" },
-        -- { mode = "c", keys = "<C-r>" },
+        { mode = "n", keys = '"' },
+        { mode = "x", keys = '"' },
+        { mode = "i", keys = "<C-r>" },
+        { mode = "c", keys = "<C-r>" },
 
         -- Window commands
         { mode = "n", keys = "<C-w>" },
@@ -59,10 +47,6 @@ return {
         -- bracketed
         { mode = "n", keys = "]" },
         { mode = "n", keys = "[" },
-
-        -- -- surround
-        -- { mode = "n", keys = "s" },
-        -- { mode = "x", keys = "s" },
       },
 
       clues = {
@@ -79,7 +63,7 @@ return {
 
       window = {
         config = {
-          width = 50,
+          width = 80,
         },
       },
     },
@@ -90,47 +74,13 @@ return {
         miniclue.gen_clues.builtin_completion(),
         miniclue.gen_clues.g(),
         miniclue.gen_clues.marks(),
-        -- miniclue.gen_clues.registers({
-        --   show_contents = true
-        -- }),
+        miniclue.gen_clues.registers({
+          show_contents = true
+        }),
         miniclue.gen_clues.windows(),
         miniclue.gen_clues.z(),
       })
       miniclue.setup(opts)
     end,
   },
-
-  { -- registers
-    "tversteeg/registers.nvim",
-    main = "registers",
-    cmd = "Registers",
-    keys = {
-      { '"',    mode = { "n", "v" } },
-      { "<C-R>", mode = "i" }
-    },
-    opts = function(plugin, _)
-      local registers = require(plugin.main)
-      local delay = 0.5
-      return {
-        bind_keys = {
-          normal = registers.show_window({ delay = delay, mode = "motion" }),
-          visual = registers.show_window({ delay = delay, mode = "motion" }),
-          insert = registers.show_window({ delay = delay, mode = "insert" }),
-        },
-        window = {
-          border = "single",
-        },
-        -- show_register_types = false,
-        symbols = { -- add spacing between register name and value
-          register_type_charwise = " ",
-          register_type_linewise = " ",
-          register_type_blockwise = " ",
-        },
-        -- do not preview register in buffer
-        events = {
-          on_register_highlighted = false,
-        },
-      }
-    end,
-  }
 }
