@@ -61,6 +61,11 @@ return {
           augend.date.alias["%m/%d"],
           augend.date.alias["%H:%M"],
           augend.constant.new({
+            elements = { "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL" },
+            word = true,
+            cyclic = false,
+          }),
+          augend.constant.new({
             elements = { "trace", "debug", "info", "success", "warning", "error", "critical" },
             word = true,
             cyclic = false,
