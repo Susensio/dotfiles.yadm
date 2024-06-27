@@ -28,10 +28,10 @@ return {
         -- [']'] = { action = 'close', pair = '[]', neigh_pattern = '[^\\].' },
         -- ['}'] = { action = 'close', pair = '{}', neigh_pattern = '[^\\].' },
 
-        -- add third quote without fourth
-        ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\"].', register = { cr = false } },
-        ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[^%a\\'].", register = { cr = false } },
-        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\`].', register = { cr = false } },
+        -- add third quote without fourth, only close if continued by alphanumeric
+        ['"'] = { action = 'closeopen', pair = '""', neigh_pattern = '[^\\"][^%w]', register = { cr = false } },
+        ["'"] = { action = 'closeopen', pair = "''", neigh_pattern = "[^%a\\'][^%w]", register = { cr = false } },
+        ['`'] = { action = 'closeopen', pair = '``', neigh_pattern = '[^\\`][^%w]', register = { cr = false } },
 
         -- add double space inside other brackets
         -- https://github.com/echasnovski/mini.nvim/issues/10
