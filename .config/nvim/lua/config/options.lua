@@ -136,11 +136,14 @@ set.iskeyword:append("-")                     -- Treat dash as a word character
 set.jumpoptions = "view"                      -- Avoid scrolling when switching buffer
 set.wrapscan = true                           -- Searches wrap around the end of the file
 
--- Disable new line comment. This is configured on filetype, so it must be changed after
+-- Configure new line comment. This is set on filetype, so it must be changed after
 autocmd("Filetype", {
   pattern = "*",
   desc = "Disable New Line Comment",
-  callback = function() vim.opt_local.formatoptions:remove("o") end,
+  callback = function()
+      vim.opt_local.formatoptions:remove("o") -- Do not continue comments on new line <o>
+      vim.opt_local.formatoptions:append("r") -- Insert comment after hitting <Enter>
+   end,
   group = augroup("FormatOptions", { clear = true }),
 })
 
