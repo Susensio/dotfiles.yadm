@@ -11,3 +11,4 @@ git:
     colorArg: always
     pager: "delta --dark --paging=never"
 promptToReturnFromSubprocess: false
+notARepository: quit
