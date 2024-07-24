@@ -60,17 +60,33 @@ return {
         "pylsp-rope",
       })
       lsp.pylsp.setup({
-        -- These should be automatically installed by mason-lspconfig
-        plugins = {
-          "flake8-pyproject",
-          "python-lsp-isort",
-        },
+        -- -- These should be automatically installed by mason-lspconfig
+        -- plugins = {
+        --   "flake8-pyproject",
+        --   "python-lsp-isort",
+        -- },
         settings = {
           pylsp = {
             plugins = {
               flake8 = {
                 enabled = true,
+                maxLineLength = 99,
+                extendSelect = 'B950',   -- add 10% margin to maxLineLength
+                extendIgnore = "E501,E204,E701",
+                maxComplexity = 12,
               },
+              autopep8 = {
+                enabled = true,
+                lineLength = 99,
+                ignore = "E701",  -- multiple statements on one line
+              },
+
+              isort = {
+                enabled = true,
+                lineLength = 99,
+              },
+
+              -- Disable in favor of flake8
               pycodestyle = {
                 enabled = false,
               },
@@ -80,20 +96,14 @@ return {
               pyflakes = {
                 enabled = false,
               },
-
               yapf = {
                 enabled = false,
               },
-              autopep8 = {
-                enabled = true,
-              },
 
-              isort = {
+              rope_autoimport = {
                 enabled = true,
+                memory = true,
               },
-              -- rope_autoimport = {
-              --   enabled = true,
-              -- },
               pylsp_rope = {
                 rename = {
                   enabled = true,
