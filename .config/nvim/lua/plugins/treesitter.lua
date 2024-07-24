@@ -37,7 +37,7 @@ return {
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
-        -- disable = { "vimdoc" },
+        disable = { "dockerfile" },
       },
       indent = {
         enable = true,
