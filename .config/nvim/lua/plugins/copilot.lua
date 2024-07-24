@@ -38,7 +38,7 @@ return {
       vim.keymap.set("i", "<C-l>", function()
         local suggestion = require("copilot.suggestion")
         if suggestion.is_visible() then
-          suggestion.accept()
+          suggestion.accept_line()
         else
           suggestion.next()
         end
