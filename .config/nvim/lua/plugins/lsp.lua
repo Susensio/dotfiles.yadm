@@ -1,17 +1,17 @@
 local on_attach = require("utils.lsp").on_attach
 
 -- Set lsp float window name
-on_attach(function()
-  local open_floating_preview = vim.lsp.util.open_floating_preview
-  vim.lsp.util.open_floating_preview = function(...)
-    local bufnr, winnr = open_floating_preview(...)
-    vim.api.nvim_buf_set_name(bufnr, "LSP preview")
-    vim.keymap.set("n", "<Esc>", function()
-      vim.api.nvim_win_close(winnr, true)
-    end, { buffer = bufnr })
-    return bufnr, winnr
-  end
-end, { once = true, desc = "Set lsp float window name" })
+-- on_attach(function()
+--   local open_floating_preview = vim.lsp.util.open_floating_preview
+--   vim.lsp.util.open_floating_preview = function(...)
+--     local bufnr, winnr = open_floating_preview(...)
+--     vim.api.nvim_buf_set_name(bufnr, "LSP preview")
+--     vim.keymap.set("n", "<Esc>", function()
+--       vim.api.nvim_win_close(winnr, true)
+--     end, { buffer = bufnr })
+--     return bufnr, winnr
+--   end
+-- end, { once = true, desc = "Set lsp float window name" })
 
 -- TODO: use native mason when 2.0 is released
 local function pylsp_add_plugins(plugins)
@@ -35,7 +35,6 @@ return {
     event = "LazyFile",
     dependencies = {
       "williamboman/mason-lspconfig.nvim",
-      { "folke/neodev.nvim", config = true }
     },
     cmd = { "LspInfo", "LspStart", "LspStop", "LspRestart" },
     config = function(plugin, opts)
@@ -115,5 +114,11 @@ return {
         },
       })
     end
+  },
+
+  { -- lazydev
+    "folke/lazydev.nvim",
+    ft = "lua",
+    config = true,
   },
 }

@@ -22,6 +22,34 @@ return {
       },
    },
 
+   { -- blame
+      "FabijanZulj/blame.nvim",
+      event = "LazyFile",
+      cmd = "BlameToggle",
+      init = function()
+         vim.keymap.set(
+            "n",
+            "<leader>ub",
+            function()
+               local blame = require("blame")
+               local log = require("utils.log")
+               vim.cmd("BlameToggle virtual")
+               vim.print("Blame is open: " .. tostring(blame.is_open()))
+               -- log.toggle("git blame", blame.is_open())
+            end,
+            { desc = "Toggle git blame" }
+         )
+      end,
+      config = true,
+   },
+
+   { -- mini.git
+      "echasnovski/mini-git",
+      main = "mini.git",
+      event = "LazyFile",
+      opts = {},
+   },
+
    { -- baredot
       "ejrichards/baredot.nvim",
       event = {

@@ -69,17 +69,19 @@ return {
         sections = {
           -- lualine_c = { { "mode", color = { gui = "bold" } } },
           lualine_a = {
-            -- {
-            --   "filetype",
-            --   icon_only = true,
-            --   padding = { left = 1, right = 0 },
-            -- },
+            {
+              "filetype",
+              icon_only = true,
+              colored = false,
+              padding = { left = 1, right = 0 },
+            },
             {
               "filename",
               newfile_status = true,
-              path = 1,
+              path = 0,
               symbols = { newfile = "[N]" },
               separator = { right = "◤", },
+              padding = { left = 0, right = 1 },
             },
           },
           lualine_b = {

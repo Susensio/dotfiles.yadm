@@ -15,6 +15,12 @@ return {
 
       vim.keymap.set(
         { "n" },
+        "<leader>v",
+        "<cmd>Pick visit_paths<CR>",
+        { desc = "Search files" }
+      )
+      vim.keymap.set(
+        { "n" },
         "<leader>f",
         "<cmd>Pick frecency tool='fd'<CR>",
         { desc = "Search files" }
