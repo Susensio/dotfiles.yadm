@@ -20,6 +20,7 @@ function M.load_on_nested_events(plugin, events)
   })
 end
 
+---Execute a function when a plugin is loaded, or immediately if it is already loaded.
 ---@param name string
 ---@param fn fun(name:string)
 function M.on_load(name, fn)
@@ -40,6 +41,7 @@ function M.on_load(name, fn)
   end
 end
 
+---Load a plugin lazily when another plugin is loaded.
 ---@param plugin LazyPlugin
 ---@param dependency string
 function M.load_on_load(plugin, dependency)
