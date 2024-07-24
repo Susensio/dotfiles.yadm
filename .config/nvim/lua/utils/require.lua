@@ -19,17 +19,4 @@ function M.safe(module)
   end
 end
 
--- From TJDevries
--- https://github.com/tjdevries/lazy-require.nvim
-function M.lazy(module)
-  return setmetatable({}, {
-    __index = function(_, key)
-      return require(module)[key]
-    end,
-    __newindex = function(_, key, value)
-      require(module)[key] = value
-    end,
-  })
-end
-
 return M
