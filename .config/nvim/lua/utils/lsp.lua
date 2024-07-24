@@ -4,7 +4,7 @@ local M = {}
 --- @param opts? table {once = boolean, desc = string}
 function M.on_attach(fun, opts)
   vim.api.nvim_create_autocmd("LspAttach", {
-    group = vim.api.nvim_create_augroup("UserLspConfig", {clear=false}),
+    group = vim.api.nvim_create_augroup("UserLspConfig", { clear = false }),
     callback = function(event)
       if not (event.data and event.data.client_id) then
         return
