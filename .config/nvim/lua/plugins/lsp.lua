@@ -57,6 +57,7 @@ return {
         "flake8-builtins",
         "pep8-naming",
         "pylsp-rope",
+        "pylsp-mypy",
       })
       lsp.pylsp.setup({
         -- -- These should be automatically installed by mason-lspconfig
@@ -85,11 +86,18 @@ return {
                 lineLength = 99,
               },
 
+              mypy = {
+                enabled = true,
+                live_mode = false,
+                dmypy = true,
+              },
+
+              mccabe = {
+                enabled = true,
+              },
+
               -- Disable in favor of flake8
               pycodestyle = {
-                enabled = false,
-              },
-              mccabe = {
                 enabled = false,
               },
               pyflakes = {
