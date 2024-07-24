@@ -9,14 +9,10 @@ return {
     },
     cmd = "Pick",
     lazy = true,
-    init = function()
-      -- vim.keymap.set(
-      --   { "n" },
-      --   "<leader>f",
-      --   "<cmd>Pick files tool='fd'<CR>",
-      --   -- "<cmd>Pick files<CR>",
-      --   { desc = "Search files" }
-      -- )
+    init = function(plugin)
+      -- Use mini pick instead of builtin select
+      vim.ui.select = require('lazy-require').require_on_exported_call(plugin.main).ui_select
+
       vim.keymap.set(
         { "n" },
         "<leader>f",
@@ -93,9 +89,6 @@ return {
     },
     config = function(_, opts)
       require("mini.pick").setup(opts)
-
-      -- Use mini pick instead of builtin select
-      vim.ui.select = MiniPick.ui_select
 
       -- MiniPick.registry.frecency = function()
       --   local items = MiniVisits.list_paths()
