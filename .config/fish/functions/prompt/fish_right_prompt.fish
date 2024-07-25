@@ -35,27 +35,22 @@ end
 
 function _venv_name
   set -l venv_name
+  set -l venv_folder (basename "$VIRTUAL_ENV")
+  set -l VENV_DIR_NAMES env .env venv .venv
+  set -l ROOT_VENV "$XDG_DATA_HOME/venv"
 
-  if test "$VIRTUAL_ENV" = "$XDG_DATA_HOME/venv"
+  if test "$VIRTUAL_ENV" = "$ROOT_VENV"
     set venv_name "/venv"
-  else if test (basename "$VIRTUAL_ENV") = ".venv"
+  else if contains $venv_folder $VENV_DIR_NAMES
     set -l parent (dirname "$VIRTUAL_ENV")
     # if pwd is inside parent, shorten
     if test $parent = (pwd) || string match -q "$parent/*" (pwd)
-      set venv_name ".venv"
+      set venv_name "$venv_folder"
     else
-      set venv_name (basename "$parent")"/.venv"
-    end
-  else if test (basename "$VIRTUAL_ENV") = "venv"
-    set -l parent (dirname "$VIRTUAL_ENV")
-    # if pwd is inside parent, shorten
-    if test $parent = (pwd) || string match -q "$parent/*" (pwd)
-      set venv_name "venv"
-    else
-      set venv_name (basename "$parent")"/venv"
+      set venv_name (basename "$parent")/"$venv_volder"
     end
   else
-    set -l venv_name "venv:"(basename "$VIRTUAL_ENV")
+    set venv_name "venv:"(basename "$VIRTUAL_ENV")
   end
   echo -n $venv_name
 end

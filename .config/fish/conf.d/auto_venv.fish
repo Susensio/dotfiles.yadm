@@ -17,10 +17,10 @@ function _auto_source_venv --on-variable PWD --description "Activate/Deactivate 
     set stopdir "/"
   end
 
-  set VENV_DIR_NAMES env .env venv .venv
+  set -l VENV_DIR_NAMES env .env venv .venv
 
   # Find the closest virtualenv starting from the current directory.
-  set cwd (pwd -P)
+  set -l cwd (pwd -P)
   while true
 
     # Find a virtual environment in the directory
@@ -43,9 +43,9 @@ function _auto_source_venv --on-variable PWD --description "Activate/Deactivate 
   # No virtualenv found
 
   # If virtualenv activated but not found nearby, deactivate.
-  if test -n "$VIRTUAL_ENV"
-    deactivate
-  end
+  # if test -n "$VIRTUAL_ENV"
+  #   deactivate
+  # end
 end
 
 _auto_source_venv
