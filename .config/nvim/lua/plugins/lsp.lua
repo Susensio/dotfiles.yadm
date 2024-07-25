@@ -1,4 +1,4 @@
-local on_attach = require("utils.lsp").on_attach
+-- local on_attach = require("utils.lsp").on_attach
 
 -- Set lsp float window name
 -- on_attach(function()
@@ -60,10 +60,14 @@ return {
         "pylsp-mypy",
       })
       local pylsp_mypy_overrides = { }
-      table.insert(pylsp_mypy_overrides, "--install-types")
-      table.insert(pylsp_mypy_overrides, "--non-interactive")
+      if vim.env.VIRTUAL_ENV ~= nil then
+        pylsp_mypy_overrides = { "--python-executable", vim.env.VIRTUAL_ENV .. "/bin/python" }
+      end
+
+      table.insert(pylsp_mypy_overrides, "--disable-error-code=import-untyped")
 
       table.insert(pylsp_mypy_overrides, true)
+
       lsp.pylsp.setup({
         -- -- These should be automatically installed by mason-lspconfig
         -- plugins = {
@@ -91,7 +95,7 @@ return {
                 lineLength = 99,
               },
 
-              mypy = {
+              pylsp_mypy = {
                 enabled = true,
                 live_mode = false,
                 dmypy = true,
