@@ -59,6 +59,11 @@ return {
         "pylsp-rope",
         "pylsp-mypy",
       })
+      local pylsp_mypy_overrides = { }
+      table.insert(pylsp_mypy_overrides, "--install-types")
+      table.insert(pylsp_mypy_overrides, "--non-interactive")
+
+      table.insert(pylsp_mypy_overrides, true)
       lsp.pylsp.setup({
         -- -- These should be automatically installed by mason-lspconfig
         -- plugins = {
@@ -90,6 +95,7 @@ return {
                 enabled = true,
                 live_mode = false,
                 dmypy = true,
+                overrides = pylsp_mypy_overrides,
               },
 
               mccabe = {
