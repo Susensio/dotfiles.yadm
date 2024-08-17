@@ -18,9 +18,6 @@ export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 
 export _JAVA_OPTIONS="-Djava.util.prefs.userRoot=$XDG_CONFIG_HOME/java"
 
-# wget
-export WGETRC="$XDG_CONFIG_HOME/wgetrc"
-
 export ICEAUTHORITY="$XDG_CACHE_HOME/ICEauthority"
 
 export SQLITE_HISTORY="$XDG_DATA_HOME/sqlite_history"
