@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Display script usage information.
+display_help() {
+    echo "Usage: $0 <folder>"
+    echo ""
+    echo "Find the last file in a folder."
+}
+
+# Function to get the last file in a folder.
+main() {
+    [[ -d "$1" ]] || { echo "Error: $1 is not a directory." >&2; exit 1; }
+    local folder="$1"
+    local last_file
+    local last_time=0
+
+    for filename in "$folder"/*; do
+      when=$(stat -c '%Y' "$filename")
+      if [ $when -gt $last_time ]; then
+        last_time=$when
+        last_file="$filename"
+      fi
+    done
+
+    echo "$last_file"
+}
+
+# If no arguments, or the user specifies '-h' or '--help', display help.
+if [ "$#" -lt 1 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+    display_help
+    exit 0
+fi
+
+main "$@"
