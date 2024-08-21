@@ -1,17 +1,41 @@
+local parsers = {
+  "bash",
+  "c",
+  "comment",
+  "dockerfile",
+  "fish",
+  "gitcommit",
+  "gitignore",
+  "lua",
+  "python",
+  "query",
+  "regex",
+  "vim",
+  "vimdoc",
+  "yaml",
+}
+
+local is_headless = #vim.api.nvim_list_uis() == 0
+
 return {
   { -- treesitter
     "nvim-treesitter/nvim-treesitter",
     version = false, -- last release is way too old and doesn't work on Windows
     build = function()
-      local is_headless = #vim.api.nvim_list_uis() == 0
       if is_headless then
         require("nvim-treesitter.install").update({ with_sync = true })()
       else
         require("nvim-treesitter.install").update({ with_sync = false })()
       end
     end,
-    event = "LazyFile",
-    cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
+    event = { "LazyFile", "VeryLazy" },
+    lazy = vim.fn.argc(-1) == 0, -- load treesitter early when opening a file from the cmdline
+    cmd = {
+      "TSInstall",
+      "TSUpdate",
+      "TSInstallSync",
+      "TSUpdateSync",
+    },
     init = function(plugin)
       -- Copied from LazyVim, performance improvement
       require("lazy.core.loader").add_to_rtp(plugin)
@@ -23,24 +47,9 @@ return {
     },
     opts = {
       -- ensure_installed = "all",
-      ensure_installed =  {
-        "bash",
-        "c",
-        "comment",
-        "dockerfile",
-        "fish",
-        "gitcommit",
-        "gitignore",
-        "lua",
-        "python",
-        "query",
-        "regex",
-        "vim",
-        "vimdoc",
-        "yaml",
-      },
+      ensure_installed = parsers,
       -- auto_install = true,
-      sync_install = false,
+      sync_install = is_headless,
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
