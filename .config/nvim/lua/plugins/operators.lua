@@ -10,7 +10,16 @@ return {
   { -- mini.operators
     "echasnovski/mini.operators",
     init = function(plugin)
-      vim.keymap.set("n", "S", "s$", { noremap = true })
+      vim.keymap.set("n", "S",
+        function()
+          require("mini.operators").replace()
+          return "g@$"
+        end,
+        {
+          expr = true,
+          replace_keycodes = false,
+          desc = "Replace until EOL"
+        })
     end,
     keys = {
       { mode = { "n", "x" }, "g=", desc = "Evaluate" },
