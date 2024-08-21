@@ -2,7 +2,14 @@ return {
   { -- treesitter
     "nvim-treesitter/nvim-treesitter",
     version = false, -- last release is way too old and doesn't work on Windows
-    build = ":TSUpdate",
+    build = function()
+      local is_headless = #vim.api.nvim_list_uis() == 0
+      if is_headless then
+        require("nvim-treesitter.install").update({ with_sync = true })()
+      else
+        require("nvim-treesitter.install").update({ with_sync = false })()
+      end
+    end,
     event = "LazyFile",
     cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
     init = function(plugin)
