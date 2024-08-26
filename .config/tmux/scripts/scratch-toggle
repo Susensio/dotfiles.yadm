@@ -9,11 +9,11 @@ if [[ -z $TMUX ]]; then
   echo "ERROR: this should only be used inside tmux" >&2 && exit 1
 fi
 
-if [[ $# -ne 1 ]]; then
-  echo "ERROR: either --global or --session are needed" >&2 && exit 1
-fi
+# if [[ $# -ne 1 ]]; then
+#   echo "ERROR: either --global or --session are needed" >&2 && exit 1
+# fi
 
-if [[ $1 == '--global' ]]; then
+if [[ "$1" == '--global' ]]; then
   scope="global"
 else
   scope="session"
@@ -35,7 +35,7 @@ if [[ $scope == "global" ]]; then
 
   # parent is server
   parent_id='$-1'
-  parent_opt="-s"
+  parent_opt="-g"
   # fires when zero non-hidden sesions
   parent_hook_condition='#{==:#{S:#{?@hidden,,#S}},}'
 else
