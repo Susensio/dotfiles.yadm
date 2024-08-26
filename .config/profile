@@ -26,7 +26,7 @@ export LESS="--incsearch -XRF --mouse --wheel-lines=3"
 export MANPAGER="sh -c 'col -bx | sed s/‐/-/g | bat --language man --plain'"
 export MANROFFOPT="-c"
 # add user man pages
-export MANPATH="$MANPATH:$XDG_DATA_HOME/man"
+export MANPATH="$XDG_DATA_HOME/man:"
 
 # Source profile.d files
 profile_d="$XDG_CONFIG_HOME/profile.d"
