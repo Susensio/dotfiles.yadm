@@ -6,7 +6,7 @@ set -o pipefail
 ### ROOT SPACE
 
 etc_bashrc_file="/etc/bash.bashrc"
-etc_bashrcd_folder="/etc/bash/bashrc.d"
+etc_bashrcd_folder="/etc/bashrc.d"
 etc_bashrc_xdg="${etc_bashrcd_folder}/xdg.sh"
 etc_profiled_folder="/etc/profile.d"
 etc_profile_xdg="${etc_profiled_folder}/bash_xdg.sh"
