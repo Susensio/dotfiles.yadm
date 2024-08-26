@@ -24,6 +24,8 @@ copy_to_clipboard() {
 
   case "$(get_system)" in
     wayland)
+      printf '%s' "$data" | xsel -i --"$SELECTION"
+      return 0
       if [ "$SELECTION" == "clipboard" ]; then
         printf '%s' "$data" | wl-copy
       else
@@ -43,6 +45,8 @@ copy_to_clipboard() {
 paste_from_clipboard() {
   case "$(get_system)" in
     wayland)
+      xsel -o --"$SELECTION"
+      return 0
       if [ "$SELECTION" == "clipboard" ]; then
         wl-paste --no-newline
       else
