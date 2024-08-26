@@ -20,14 +20,4 @@
   - KeyPress:
     - [Alt_L, XF86_AudioLowerVolume]
     - click
-- Rule:
-  - Test: 'False'
-  - Execute: [pactl, set-sink-volume, '@DEFAULT_SINK@', +2%]
-  - Execute: [pactl, set-sink-volume, '@DEFAULT_SINK@', -2%]
-  - KeyPress:
-    - [Shift_L, XF86_AudioLowerVolume]
-    - click
-  - KeyPress:
-    - [Shift_L, XF86_AudioRaiseVolume]
-    - click
 ...
