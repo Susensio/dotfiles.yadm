@@ -1,2 +1,6 @@
 [advice]
 	addIgnoredFile = false
+[gui]
+        displayuntracked = false
+[pull]
+        rebase = true
