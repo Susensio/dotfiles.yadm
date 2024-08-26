@@ -70,6 +70,12 @@ return {
           -- lualine_c = { { "mode", color = { gui = "bold" } } },
           lualine_a = {
             {
+              "filetype",
+              colored = true,
+              icon_only = true,
+              padding = { left = 1, right = 0 },
+            },
+            {
               "filename",
               newfile_status = true,
               path = 1,
@@ -134,11 +140,21 @@ return {
               },
             },
           },
-          lualine_y = { "filetype" },
+          lualine_y = {
+            {
+              "progress",
+            },
+          },
           lualine_z = { "mode" },
         },
         inactive_sections = {
           lualine_a = {
+            {
+              "filetype",
+              colored = false,
+              icon_only = true,
+              padding = { left = 1, right = 0 },
+            },
             {
               "filename",
               newfile_status = true,
@@ -153,20 +169,6 @@ return {
           lualine_y = {},
           lualine_z = {},
         },
-        -- winbar = {
-        --   lualine_z = {
-        --     {
-        --       "filename"
-        --     },
-        --   },
-        -- },
-        -- inactive_winbar = {
-        --   lualine_y = {
-        --     {
-        --       "filename"
-        --     },
-        --   },
-        -- },
         extensions = {
           "lazy",
           "mason",
