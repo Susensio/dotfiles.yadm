@@ -1,0 +1,21 @@
+#!/bin/bash
+cin_config=${XDG_CONFIG_HOME:-$HOME/.config}/cinnamon
+cin_data=${XDG_DATA_HOME:-$HOME/.local/share}/cinnamon
+
+echo "Loading Cinnamon dconf settings..." >&2
+dconf load /org/cinnamon/ < ${cin_config}/dconf
+
+for kind in applets desklets extensions themes; do
+  while read -r id; do
+    if [ ! -d ${cin_data}/${kind}/${id} ]; then
+      echo "Installing ${kind} ${id}..." >&2
+      wget -q https://cinnamon-spices.linuxmint.com/files/${kind}/${id}.zip -O /tmp/${id}.zip \
+        && unzip /tmp/${id}.zip -d ${cin_data}/${kind} \
+        && rm /tmp/${id}.zip
+    else
+      echo "Already installed ${kind} ${id}" >&2
+    fi
+  done < ${cin_config}/installed/$kind
+done
+
+echo "Cinnamon settings loaded" >&2
