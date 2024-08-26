@@ -6,7 +6,7 @@ bind \cx 'test -z "$(commandline)" && echo -n $fish_killring[1] | fish_clipboard
 
 # Accept suggestions like nvim copilot
 bind \ce forward-word
-# NOT WORKING, waiting for issue https://github.com/fish-shell/fish-shell/issues/10580
+# NOT WORKING, waiting for issue https://github.com/fish-shell/fish-shell/issues/10580 (rust)
 # bind \cl 'if test "$(commandline --current-buffer)" = "$(commandline --cut-at-cursor)";
 #     tput reset; clear; commandline -f repaint;
 # else;
