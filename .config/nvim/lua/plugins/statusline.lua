@@ -70,18 +70,12 @@ return {
           -- lualine_c = { { "mode", color = { gui = "bold" } } },
           lualine_a = {
             {
-              "filetype",
-              icon_only = true,
-              colored = false,
-              padding = { left = 1, right = 0 },
-            },
-            {
               "filename",
               newfile_status = true,
-              path = 0,
+              path = 1,
               symbols = { newfile = "[N]" },
               separator = { right = "◤", },
-              padding = { left = 0, right = 1 },
+              -- padding = { left = 0, right = 1 },
             },
           },
           lualine_b = {
@@ -111,20 +105,6 @@ return {
               function()
                 return require('lsp-progress').progress()
               end,
-              -- hide = { "copilot" },
-              -- display_components = {
-              --   "spinner"
-              -- },
-              -- separators = {
-              --   spinner = {
-              --     post = " LSP",
-              --   },
-              -- },
-              -- timer = {
-              --   spinner = 500,
-              --   lsp_client_name_enddelay = 500,
-              -- },
-              -- spinner_symbols = require("copilot-lualine.spinners").dots_negative
             },
             {
               require("lazy.status").updates,
@@ -155,42 +135,23 @@ return {
             },
           },
           lualine_y = { "filetype" },
-          lualine_z = {
-            "mode",
-            -- {
-            --   "progress",
-            --   color = { gui = "" },
-            -- },
-            -- { "location" }
-          },
-          -- lualine_z = { { "location" , color = { gui = "bold" } } },
+          lualine_z = { "mode" },
         },
         inactive_sections = {
-          -- lualine_a = { { "mode" , color = { gui = "bold" } } },
-          -- lualine_b = {"branch", "diff", "diagnostics"},
           lualine_a = {
-            -- {
-            --   "filetype",
-            --   icon_only = true,
-            --   padding = { left = 1, right = 0 },
-            -- },
             {
               "filename",
               newfile_status = true,
               path = 1,
               symbols = { newfile = "[N]" },
               separator = { right = "◤", },
-            }
+            },
           },
           lualine_b = {},
           lualine_c = {},
           lualine_x = {},
           lualine_y = {},
           lualine_z = {},
-          -- lualine_y = { "filetype" },
-          -- lualine_z = { "mode" },
-          -- lualine_y = {"progress"},
-          -- lualine_z = {"location"},
         },
         -- winbar = {
         --   lualine_z = {
@@ -207,7 +168,6 @@ return {
         --   },
         -- },
         extensions = {
-          -- "nvim-tree",
           "lazy",
           "mason",
           "man",
