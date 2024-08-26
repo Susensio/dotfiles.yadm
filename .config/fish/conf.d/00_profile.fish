@@ -27,7 +27,7 @@ function _source -d "Translate export, path additions and subsequent sources fro
   end
 end
 
-# if status is-login
-_source $HOME/.profile
-_source ~/.config/profile
-# end
+if status is-login
+  _source $HOME/.profile
+  _source ~/.config/profile
+end
