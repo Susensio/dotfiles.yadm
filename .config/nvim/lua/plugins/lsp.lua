@@ -64,6 +64,9 @@ return {
         pylsp_mypy_overrides = { "--python-executable", vim.env.VIRTUAL_ENV .. "/bin/python" }
       end
 
+      table.insert(pylsp_mypy_overrides, "--install-types")
+      table.insert(pylsp_mypy_overrides, "--non-interactive")
+
       table.insert(pylsp_mypy_overrides, "--disable-error-code=import-untyped")
 
       table.insert(pylsp_mypy_overrides, true)
