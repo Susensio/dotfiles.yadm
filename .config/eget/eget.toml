@@ -1,0 +1,5 @@
+[global]
+target = "~/.local/bin"
+
+["ianthehenry/sd"]
+download_source = true
