@@ -263,6 +263,11 @@
                 "name": "SpicesUpdate@claudiux",
                 "isunprotected": true,
                 "requestnewdownload": false
+            },
+            {
+                "name": "ThemeRefresh@JosephM",
+                "isunprotected": true,
+                "requestnewdownload": false
             }
         ]
     },
@@ -281,7 +286,7 @@
         "default": false,
         "description": "Check regularly whether your desklets are up to date",
         "tooltip": "If desklets updates do not concern you, uncheck this box.",
-        "value": true
+        "value": false
     },
     "check_new_desklets": {
         "type": "switch",
@@ -327,13 +332,7 @@
         ],
         "default": [],
         "show-buttons": false,
-        "value": [
-            {
-                "name": "system-monitor-graph@rcassani",
-                "isunprotected": true,
-                "requestnewdownload": false
-            }
-        ]
+        "value": []
     },
     "btn_cs_desklets": {
         "type": "button",
@@ -342,7 +341,7 @@
     },
     "was_empty_desklets": {
         "type": "generic",
-        "value": false,
+        "value": true,
         "default": false
     },
     "check_extensions": {
@@ -424,7 +423,7 @@
         "default": false,
         "description": "Check regularly whether your themes are up to date",
         "tooltip": "If themes updates do not concern you, uncheck this box.",
-        "value": false
+        "value": true
     },
     "check_new_themes": {
         "type": "switch",
@@ -485,7 +484,7 @@
     },
     "was_empty_themes": {
         "type": "generic",
-        "value": true,
+        "value": false,
         "default": false
     },
     "check_actions": {
@@ -572,7 +571,7 @@
     "general_next_check_date": {
         "type": "generic",
         "default": 0,
-        "value": 1724663037
+        "value": 1724777107
     },
     "general_warning": {
         "type": "switch",

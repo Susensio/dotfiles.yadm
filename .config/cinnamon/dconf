@@ -1,19 +1,19 @@
 [/]
 alttab-switcher-delay=100
 desklet-snap-interval=25
-enabled-applets=['panel2:center:0:menu@cinnamon.org:0', 'panel1:right:2:notifications@cinnamon.org:5', 'panel1:right:6:printers@cinnamon.org:6', 'panel1:right:7:removable-drives@cinnamon.org:7', 'panel1:right:8:keyboard@cinnamon.org:8', 'panel1:right:10:network@cinnamon.org:10', 'panel1:right:11:sound@cinnamon.org:11', 'panel1:center:0:calendar@cinnamon.org:13', 'panel1:right:12:sessionManager@scollins:15', 'panel1:right:5:gpaste-reloaded@feuerfuchs.eu:31', 'panel1:right:4:xapp-status@cinnamon.org:36', 'panel1:right:0:collapsible-systray@feuerfuchs.eu:42', 'panel1:left:0:workspace-switcher@cinnamon.org:47', 'panel2:center:1:separator@cinnamon.org:49', 'panel2:center:2:grouped-window-list@cinnamon.org:51', 'panel1:right:3:SpicesUpdate@claudiux:52', 'panel1:right:9:qredshift@quintao:53']
+enabled-applets=['panel2:center:0:menu@cinnamon.org:0', 'panel1:right:3:notifications@cinnamon.org:5', 'panel1:right:6:printers@cinnamon.org:6', 'panel1:right:5:removable-drives@cinnamon.org:7', 'panel1:right:9:keyboard@cinnamon.org:8', 'panel1:right:12:network@cinnamon.org:10', 'panel1:right:13:sound@cinnamon.org:11', 'panel1:center:0:calendar@cinnamon.org:13', 'panel1:right:14:sessionManager@scollins:15', 'panel1:right:8:gpaste-reloaded@feuerfuchs.eu:31', 'panel1:right:11:xapp-status@cinnamon.org:36', 'panel1:right:2:collapsible-systray@feuerfuchs.eu:42', 'panel1:left:0:workspace-switcher@cinnamon.org:47', 'panel2:center:1:separator@cinnamon.org:49', 'panel2:center:2:grouped-window-list@cinnamon.org:51', 'panel1:right:4:SpicesUpdate@claudiux:52', 'panel1:right:10:qredshift@quintao:53']
 enabled-desklets=@as []
 enabled-extensions=['cinnamon-maximus@fmete', 'smart-panel@mohammad-sn']
-hotcorner-layout=['scale:false:0', 'scale:false:0', 'scale:false:0', 'desktop:false:0']
-next-applet-id=54
-next-desklet-id=3
+hotcorner-layout=['scale:true:0', 'scale:false:0', 'scale:false:0', 'desktop:false:0']
+next-applet-id=58
+next-desklet-id=4
 panel-edit-mode=false
-panel-zone-icon-sizes='[{"panelId":1,"left":22,"center":-1,"right":16},{"left":0,"center":0,"right":0,"panelId":2}]'
+panel-zone-icon-sizes='[{"panelId": 1, "left": 22, "center": -1, "right": 16}, {"left": 0, "center": 0, "right": 0, "panelId": 2}]'
 panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 26, "right": 16}, {"left": 28, "center": 28, "right": 28, "panelId": 2}]'
 panel-zone-text-sizes='[{"panelId": 1, "left": 11.0, "center": 11, "right": 0}, {"left": 0, "center": 0, "right": 0, "panelId": 2}]'
 panels-autohide=['1:false', '2:intel']
 panels-enabled=['1:0:top', '2:0:bottom']
-panels-height=['1:28', '2:50']
+panels-height=['1:28', '2:60']
 panels-hide-delay=['1:0', '2:0']
 panels-show-delay=['1:0', '2:0']
 window-effect-speed=1
@@ -80,6 +80,7 @@ autorun-never=false
 [desktop/notifications]
 display-notifications=true
 notification-duration=4
+notification-screen-display='primary-screen'
 
 [desktop/peripherals/keyboard]
 delay=uint32 500
@@ -89,7 +90,7 @@ repeat-interval=uint32 30
 [desktop/peripherals/mouse]
 double-click=400
 drag-threshold=8
-speed=0.0
+speed=0.90000000000000002
 
 [desktop/peripherals/touchpad]
 speed=0.0
@@ -103,7 +104,7 @@ event-sounds=false
 [desktop/wm/preferences]
 button-layout=':minimize,maximize,close'
 min-window-opacity=30
-num-workspaces=4
+num-workspaces=5
 workspace-names=@as []
 
 [gestures]
@@ -123,6 +124,7 @@ tap-3='MEDIA_PLAY_PAUSE::end'
 
 [muffin]
 draggable-border-width=10
+experimental-features=['scale-monitor-framebuffer', 'x11-randr-fractional-scaling']
 tile-maximize=true
 
 [settings-daemon/peripherals/keyboard]
@@ -130,6 +132,9 @@ numlock-state='on'
 
 [settings-daemon/plugins/xsettings]
 hinting='slight'
+
+[sounds]
+tile-enabled=false
 
 [theme]
 name='Mint-Y-Darker'

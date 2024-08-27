@@ -224,7 +224,7 @@
         "units": "K",
         "step": 5,
         "description": "Temperature",
-        "value": 5900
+        "value": 6500
     },
     "dayBrightness": {
         "type": "spinbutton",

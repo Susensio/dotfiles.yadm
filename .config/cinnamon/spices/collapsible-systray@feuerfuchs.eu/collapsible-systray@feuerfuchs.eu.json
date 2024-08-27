@@ -68,7 +68,7 @@
         "type": "checkbox",
         "default": false,
         "description": "Expand on hover",
-        "value": true
+        "value": false
     },
     "expand-on-hover-delay": {
         "type": "spinbutton",
@@ -161,7 +161,7 @@
         "step": 1,
         "units": "px",
         "description": "Padding of tray icons",
-        "value": 5
+        "value": 5.0
     },
     "icon-visibility-list": {
         "type": "generic",
