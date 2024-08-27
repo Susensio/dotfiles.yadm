@@ -4,7 +4,7 @@ dconf dump /org/cinnamon/ > ${XDG_CONFIG_HOME:-$HOME/.config}/cinnamon/dconf
 
 for kind in applets desklets extensions themes; do
   echo "Dumping installed ${kind}..." >&2
-  find ${XDG_DATA_HOME:-$HOME/.local/share}/cinnamon/$kind -mindepth 1 -maxdepth 1 -type d | xargs -r -n1 basename > ${XDG_CONFIG_HOME:-$HOME/.config}/cinnamon/installed/$kind
+  find ${XDG_DATA_HOME:-$HOME/.local/share}/cinnamon/$kind -mindepth 1 -maxdepth 1 -type d | xargs -r -n1 basename | sort > ${XDG_CONFIG_HOME:-$HOME/.config}/cinnamon/installed/$kind
 done
 
 echo "Cinnamon settings dumped" >&2
