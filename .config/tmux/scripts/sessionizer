@@ -62,7 +62,7 @@ list_zoxide() {
 }
 
 list_projects() {
-  find ~/Projects ~/workspace -mindepth 1 -maxdepth 1 -type d 2>/dev/null
+  find ~/Projects ~/Workspace  ~/workspace -mindepth 1 -maxdepth 1 -type d 2>/dev/null
 }
 
 list_pwd() {
