@@ -48,7 +48,7 @@ return {
     opts = {
       -- ensure_installed = "all",
       ensure_installed = parsers,
-      -- auto_install = true,
+      auto_install = true,
       sync_install = is_headless,
       highlight = {
         enable = true,
