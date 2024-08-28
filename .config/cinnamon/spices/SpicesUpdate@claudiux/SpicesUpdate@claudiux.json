@@ -245,7 +245,22 @@
                 "requestnewdownload": false
             },
             {
+                "name": "cpu-monitor-text@gnemonix",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "gpaste-reloaded@feuerfuchs.eu",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
+                "name": "ioDisk@ctrlesc",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
+                "name": "mem-monitor-text@datanom.net",
                 "isunprotected": true,
                 "requestnewdownload": false
             },
@@ -268,6 +283,11 @@
                 "name": "ThemeRefresh@JosephM",
                 "isunprotected": true,
                 "requestnewdownload": false
+            },
+            {
+                "name": "vitals@susensio",
+                "isunprotected": true,
+                "requestnewdownload": false
             }
         ]
     },
@@ -286,7 +306,7 @@
         "default": false,
         "description": "Check regularly whether your desklets are up to date",
         "tooltip": "If desklets updates do not concern you, uncheck this box.",
-        "value": false
+        "value": true
     },
     "check_new_desklets": {
         "type": "switch",
@@ -332,7 +352,13 @@
         ],
         "default": [],
         "show-buttons": false,
-        "value": []
+        "value": [
+            {
+                "name": "system-monitor-graph@rcassani",
+                "isunprotected": true,
+                "requestnewdownload": false
+            }
+        ]
     },
     "btn_cs_desklets": {
         "type": "button",
@@ -341,7 +367,7 @@
     },
     "was_empty_desklets": {
         "type": "generic",
-        "value": true,
+        "value": false,
         "default": false
     },
     "check_extensions": {
@@ -571,7 +597,7 @@
     "general_next_check_date": {
         "type": "generic",
         "default": 0,
-        "value": 1724777107
+        "value": 1724842969
     },
     "general_warning": {
         "type": "switch",

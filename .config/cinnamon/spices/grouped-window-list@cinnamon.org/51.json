@@ -131,7 +131,7 @@
             "Cycle apps": 2,
             "Cycle windows": 3
         },
-        "value": 1
+        "value": 2
     },
     "left-click-action": {
         "type": "combobox",
@@ -153,7 +153,7 @@
             "Launch new app instance": 2,
             "Close last focused window in group": 3
         },
-        "value": 3
+        "value": 2
     },
     "pinned-apps": {
         "type": "generic",
@@ -172,7 +172,7 @@
         "type": "checkbox",
         "default": true,
         "description": "Group windows by application",
-        "value": false
+        "value": true
     },
     "show-all-workspaces": {
         "type": "checkbox",
@@ -207,7 +207,7 @@
         "type": "keybinding",
         "default": "<Super>grave",
         "description": "Global hotkey to show the order of apps",
-        "value": "<Super>grave"
+        "value": "::"
     },
     "show-apps-order-timeout": {
         "type": "spinbutton",
@@ -253,7 +253,7 @@
         "type": "checkbox",
         "default": false,
         "description": "Cycle windows on mouse wheel scroll",
-        "value": false
+        "value": true
     },
     "show-thumbnails": {
         "type": "checkbox",
