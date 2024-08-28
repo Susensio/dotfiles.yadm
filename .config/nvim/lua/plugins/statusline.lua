@@ -144,6 +144,12 @@ return {
             {
               "progress",
             },
+            { -- total number of lines
+              function()
+                return "/" .. vim.fn.line("$")
+              end,
+              padding = { left = 0, right = 1 },
+            },
           },
           lualine_z = { "mode" },
         },
