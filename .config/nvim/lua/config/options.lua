@@ -84,11 +84,25 @@ lsp.on_attach(
       virtual_text = {
         severity = { min = vim.diagnostic.severity.WARN },
         format = function(diagnostic)
+          local MIN_WIDTH = 15
+          local MAX_WIDTH = 80
           local first_line = diagnostic.message:gmatch("[^\n]*")()
           -- BUG: this fails if the first sentence has a dot inside quotes
-          local first_sentence = string.match(first_line, "(.-[^%.]%. )") or first_line
-          local first_lhs = string.match(first_sentence, "(.-): ") or first_sentence
-          return first_lhs
+          local patterns = {
+            "(.-[^%.]%. )",   -- first sentence
+            "(.-): ",         -- first lhs
+          }
+          local result = first_line
+          while #first_line > MAX_WIDTH do
+            -- pop the first pattern
+            local pattern = table.remove(patterns, 1)
+            if not pattern then break end
+            local reduced = result:match(pattern) or result
+            if #reduced > MIN_WIDTH then
+              result = reduced
+            end
+          end
+          return result
         end
       },
       severity_sort = true,
