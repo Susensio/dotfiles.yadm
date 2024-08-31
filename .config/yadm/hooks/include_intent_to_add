@@ -1,8 +1,11 @@
 #!/bin/sh
 git_cmd="/usr/bin/git --git-dir=${YADM_HOOK_REPO} --work-tree=${YADM_HOOK_WORK}"
 
+CURRENT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PARENT_DIR="$(dirname "$CURRENT_DIR")"
+
 # Second, add possible new files
-include="${XDG_CONFIG_HOME:-$HOME/.config}/yadm/include"
+include="${PARENT_DIR}/include"
 # If such config file exists
 [ -r "$include" ] && cat "$include" |
   # environment variable substitution
