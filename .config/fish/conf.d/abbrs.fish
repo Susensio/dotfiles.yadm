@@ -20,6 +20,9 @@ abbr --add l ll
 abbr --add g git
 
 abbr --add lg lazygit
+abbr --add ly lazyyadm
+abbr --add lc lazycidm
+
 abbr --add lzd lazydocker
 
 abbr --add y yadm
