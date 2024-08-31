@@ -3,4 +3,3 @@ $XDG_CONFIG_HOME/tmux/**
 $XDG_CONFIG_HOME/nvim/**
 $XDG_CONFIG_HOME/yadm/**
 $XDG_CONFIG_HOME/fish/*/**
-$XDG_CONFIG_HOME/cinnamon/**
