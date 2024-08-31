@@ -1,11 +1,15 @@
 local parsers = {
+  "arduino",
   "bash",
   "c",
+  "c_sharp",
+  "css",
   "comment",
   "dockerfile",
   "fish",
   "gitcommit",
   "gitignore",
+  "javascript",
   "lua",
   "python",
   "query",
@@ -13,6 +17,7 @@ local parsers = {
   "vim",
   "vimdoc",
   "yaml",
+  "xml",
 }
 
 local is_headless = #vim.api.nvim_list_uis() == 0
@@ -46,7 +51,6 @@ return {
       { "<BS>", desc = "Shrink selection", mode = "x" },
     },
     opts = {
-      -- ensure_installed = "all",
       ensure_installed = parsers,
       auto_install = true,
       sync_install = is_headless,
