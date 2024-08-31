@@ -3,7 +3,7 @@ function fish_right_prompt -d "Write out the right prompt"
   set -lx last_status $status
   set -l max_shlvl 1
   if test -n "$TMUX" || test "$TERM_PROGRAM" = "vscode"
-    set max_shlvl 2
+    set max_shlvl (math $max_shlvl + 1)
   end
 
   # Print git info
