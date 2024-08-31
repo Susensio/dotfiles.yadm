@@ -386,12 +386,14 @@ for lhs, rhs in pairs(abbrs) do
   map("ca", lhs, rhs, { desc = "Abbreviation for " .. rhs })
 end
 
+-- [[ TERMINAL ]] --
+map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- [[ OTHERS ]] --
 map("n", "<Leader>!", cmd "!%:p", { desc = "Execute current file" })
 
 -- This is not working well because the file is no reloaded
-map("ca", "w!!", "w !sudo tee % > /dev/null", { desc = "Write as sudo", silent = true })
+map("ca", "w!!", ":execute ':silent w !sudo tee %:p:S > /dev/null' | :edit!", { desc = "Write as sudo", silent = true })
 
 -- [[ FIXES ]] --
 -- wildoptions menu (:edit) correction for vertical horizontal navigation
