@@ -258,9 +258,6 @@ map("n", "]d", function()
 require("utils.lsp").on_attach(
   function(client, bufnr)
     local function lsp_map(mode, lhs, rhs, capability, opts)
-      if capability == nil or not client.supports_method("textDocument/"..capability) then
-        return
-      end
       local options = vim.tbl_extend("keep", { buffer = bufnr }, opts)
       map(mode, lhs, rhs, options)
     end
