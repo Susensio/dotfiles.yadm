@@ -154,33 +154,12 @@ autocmd({
   group = user_grp,
 })
 
--- fails with C
--- autocmd("FocusLost", {
---   desc = "Escape insert mode on focus lost",
---   pattern = "*",
---   callback = function()
---     if vim.fn.mode() == "i" then
---       vim.cmd("stopinsert")
---     end
---   end,
---   group = user_grp,
--- })
--- -- only highlight current line on focused window
--- autocmd({ "VimEnter", "WinEnter", "BufWinEnter", "FocusGained" }, {
---   desc = "Only highlight current line on focused window",
---   pattern = "*",
---   callback = function()
---     vim.opt_local.cursorline = true
---     vim.opt_local.relativenumber = true
---   end,
---   group = user_grp,
--- })
--- autocmd({ "WinLeave", "BufWinLeave", "FocusLost" }, {
---   desc = "Remove highlight current line on unfocused window",
---   pattern = "*",
---   callback = function()
---     vim.opt_local.cursorline = false
---     vim.opt_local.relativenumber = false
---   end,
---   group = user_grp,
--- })
+vim.api.nvim_create_autocmd('BufReadPost', {
+  group = user_grp,
+  pattern = { '*' },
+  callback = function()
+    -- Sometimes buffer names become absolute paths and that messes up the
+    -- name in the tabline.
+    vim.cmd.lcd('.')
+  end,
+})
