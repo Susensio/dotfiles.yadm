@@ -25,6 +25,7 @@ local is_headless = #vim.api.nvim_list_uis() == 0
 return {
   { -- treesitter
     "nvim-treesitter/nvim-treesitter",
+    enabled = true,
     version = false, -- last release is way too old and doesn't work on Windows
     build = function()
       if is_headless then
@@ -57,7 +58,10 @@ return {
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
-        disable = { "dockerfile" },
+        disable = {
+          "dockerfile",
+          "diff",
+        },
       },
       indent = {
         enable = true,
