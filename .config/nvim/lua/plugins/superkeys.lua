@@ -1,8 +1,8 @@
 return {
-  { -- SuperKeys
-    "susensio/superkeys.nvim",
-    dev = true,
-    cmd = { "SuperKeys" },
-    config = true,
-  },
+   { -- SuperKeys
+      "susensio/superkeys.nvim",
+      dev = true,
+      cmd = { "SuperKeys" },
+      config = true,
+   },
 }

@@ -6,5 +6,5 @@ safe_require("config.commands")
 safe_require("config.autocmds")
 
 if not vim.g.vscode then
-  safe_require("config.lazy")
+   safe_require("config.lazy")
 end

@@ -1,5 +1,5 @@
 vim.filetype.add({
-  pattern = {
-    ["${XDG_CONFIG_HOME}/git/.+"] = "gitconfig",
-  }
+   pattern = {
+      ["${XDG_CONFIG_HOME}/git/.+"] = "gitconfig",
+   }
 })

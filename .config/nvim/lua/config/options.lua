@@ -41,97 +41,97 @@ set.foldlevel = 99                           -- Start with all folds open
 set.foldlevelstart = 99                      -- Start with all folds open
 set.list = true                              -- Show non printable characters
 set.listchars = {                            -- Define characters for non printable chars
-  tab = "» ",
-  trail = "·",
-  nbsp = "+",
-  eol = "↲",
+   tab = "» ",
+   trail = "·",
+   nbsp = "+",
+   eol = "↲",
 }
 set.fillchars = {
-  foldopen = "",
-  foldsep = " ",
-  foldclose = "",
+   foldopen = "",
+   foldsep = " ",
+   foldclose = "",
 }
 
 -- Special highlighting for root user
 if env.USER == "root" then
-  highlight(0, "LineNr", {ctermfg = "red"})
+   highlight(0, "LineNr", {ctermfg = "red"})
 else
-  highlight(0, "LineNr", {ctermfg = "grey"})
+   highlight(0, "LineNr", {ctermfg = "grey"})
 end
 
 -- LSP
 local lsp = require("utils.lsp")
 lsp.on_attach(
-  function(client, buffer)
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
-      vim.lsp.handlers.hover,
-      { border = "single" }
-    )
-    vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
-      vim.lsp.handlers.signature_help,
-      { border = "single" }
-    )
-  end,
-  { once = true, desc = "LSP hover and signature help borders" }
+   function(client, buffer)
+      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
+         vim.lsp.handlers.hover,
+         { border = "single" }
+      )
+      vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(
+         vim.lsp.handlers.signature_help,
+         { border = "single" }
+      )
+   end,
+   { once = true, desc = "LSP hover and signature help borders" }
 )
 
 -- Diagnostics
 set.updatetime = 1000                         -- User for CursorHold autocmd
 lsp.on_attach(
-  function(client, buffer)
-    vim.diagnostic.config({
-      update_on_insert = false,
-      virtual_text = {
-        severity = { min = vim.diagnostic.severity.WARN },
-        format = function(diagnostic)
-          local MIN_WIDTH = 15
-          local MAX_WIDTH = 80
-          local first_line = diagnostic.message:gmatch("[^\n]*")()
-          -- BUG: this fails if the first sentence has a dot inside quotes
-          local patterns = {
-            "(.-[^%.]%. )",   -- first sentence
-            "(.-): ",         -- first lhs
-          }
-          local result = first_line
-          while #first_line > MAX_WIDTH do
-            -- pop the first pattern
-            local pattern = table.remove(patterns, 1)
-            if not pattern then break end
-            local reduced = result:match(pattern) or result
-            if #reduced > MIN_WIDTH then
-              result = reduced
+   function(client, buffer)
+      vim.diagnostic.config({
+         update_on_insert = false,
+         virtual_text = {
+            severity = { min = vim.diagnostic.severity.WARN },
+            format = function(diagnostic)
+               local MIN_WIDTH = 15
+               local MAX_WIDTH = 80
+               local first_line = diagnostic.message:gmatch("[^\n]*")()
+               -- BUG: this fails if the first sentence has a dot inside quotes
+               local patterns = {
+                  "(.-[^%.]%. )",   -- first sentence
+                  "(.-): ",         -- first lhs
+               }
+               local result = first_line
+               while #first_line > MAX_WIDTH do
+                  -- pop the first pattern
+                  local pattern = table.remove(patterns, 1)
+                  if not pattern then break end
+                  local reduced = result:match(pattern) or result
+                  if #reduced > MIN_WIDTH then
+                     result = reduced
+                  end
+               end
+               return result
             end
-          end
-          return result
-        end
-      },
-      severity_sort = true,
-      float = {
-        border = "single",
-        focusable = false,
-        scope = "cursor",
-        close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-        header = false,
-        title_pos = "left",
-        prefix = " ",
-        suffix = " ",
-      },
-    })
-    -- Highlight line number instead of having icons in sign column
-    for _, diag in ipairs({ "Error", "Warn", "Info", "Hint" }) do
-      local name = "DiagnosticSign" .. diag
-      vim.fn.sign_define(name, {text = "", texthl = name, linehl = "", numhl = name,})
-    end
-  end,
-  { once = true, desc = "LSP diagnostic settings" }
+         },
+         severity_sort = true,
+         float = {
+            border = "single",
+            focusable = false,
+            scope = "cursor",
+            close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+            header = false,
+            title_pos = "left",
+            prefix = " ",
+            suffix = " ",
+         },
+      })
+      -- Highlight line number instead of having icons in sign column
+      for _, diag in ipairs({ "Error", "Warn", "Info", "Hint" }) do
+         local name = "DiagnosticSign" .. diag
+         vim.fn.sign_define(name, {text = "", texthl = name, linehl = "", numhl = name,})
+      end
+   end,
+   { once = true, desc = "LSP diagnostic settings" }
 )
 
 -- Completion
 -- set.completeopt:remove("preview")             -- Remove a strange preview window that appears on the bottom
 set.completeopt = {
-  "menu",     -- Show the popup menu
-  "menuone",  -- Show the popup menu even if there is only one match
-  "longest",  -- Automatically select the longest common text
+   "menu",     -- Show the popup menu
+   "menuone",  -- Show the popup menu even if there is only one match
+   "longest",  -- Automatically select the longest common text
 }
 
 -- BEHAVIOR SETTINGS: Tabs, scrolling, search, and special characters handling.
@@ -152,44 +152,44 @@ set.wrapscan = true                           -- Searches wrap around the end of
 
 -- Configure new line comment. This is set on filetype, so it must be changed after
 autocmd("Filetype", {
-  pattern = "*",
-  desc = "Disable New Line Comment",
-  callback = function()
+   pattern = "*",
+   desc = "Disable New Line Comment",
+   callback = function()
       vim.opt_local.formatoptions:remove("o") -- Do not continue comments on new line <o>
       vim.opt_local.formatoptions:append("r") -- Insert comment after hitting <Enter>
    end,
-  group = augroup("FormatOptions", { clear = true }),
+   group = augroup("FormatOptions", { clear = true }),
 })
 
 -- if ripgrep installed, use that as a grepper
 if vim.fn.executable("rg") then
-  set.grepprg = "rg --vimgrep --no-heading --smart-case"
-  set.grepformat = "%f:%l:%c:%m,%f:%l:%m"
+   set.grepprg = "rg --vimgrep --no-heading --smart-case"
+   set.grepformat = "%f:%l:%c:%m,%f:%l:%m"
 end
 
 -- Clipboard and Mouse Integration
 vim.keymap.set(
-  "v", "<LeftRelease>",
-  function()
-    set.eventignore = "TextYankPost"
-    vim.cmd.normal('"*ygv')
-    set.eventignore = ""
-    -- WHY do i have to select two times??
-    vim.cmd.normal('gv')
-  end,
-  { silent = true }
+   "v", "<LeftRelease>",
+   function()
+      set.eventignore = "TextYankPost"
+      vim.cmd.normal('"*ygv')
+      set.eventignore = ""
+      -- WHY do i have to select two times??
+      vim.cmd.normal('gv')
+   end,
+   { silent = true }
 )
 
 -- Configure clipboard with a user script
 vim.g.clipboard = {
-  name = "clipboard",
-  copy = {
-    ["+"] = {"clipboard", "copy", "--selection", "clipboard"},
-    ["*"] = {"clipboard", "copy", "--selection", "primary"}
-  },
-  paste = {
-    ["+"] = {"clipboard", "paste", "--selection", "clipboard"},
-    ["*"] = {"clipboard", "paste", "--selection", "primary"}
-  },
-  cache_enabled = 0
+   name = "clipboard",
+   copy = {
+      ["+"] = {"clipboard", "copy", "--selection", "clipboard"},
+      ["*"] = {"clipboard", "copy", "--selection", "primary"}
+   },
+   paste = {
+      ["+"] = {"clipboard", "paste", "--selection", "clipboard"},
+      ["*"] = {"clipboard", "paste", "--selection", "primary"}
+   },
+   cache_enabled = 0
 }
