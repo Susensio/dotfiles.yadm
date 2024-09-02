@@ -38,6 +38,12 @@ return {
         { desc = "Grep files" }
       )
       vim.keymap.set(
+        { "x" },
+        "<leader>g",
+        "<cmd>Pick grep pattern='<cword>' <CR>",
+        { desc = "Grep files" }
+      )
+      vim.keymap.set(
         { "n" },
         "<leader>h",
         "<cmd>Pick help<CR>",
@@ -95,16 +101,6 @@ return {
     },
     config = function(_, opts)
       require("mini.pick").setup(opts)
-
-      -- MiniPick.registry.frecency = function()
-      --   local items = MiniVisits.list_paths()
-      --   local source = {
-      --     name = "Files (MRU)",
-      --     items = items,
-      --   }
-      --   return MiniPick.builtin.files(nil, { source = source })
-      -- end
-
 
       MiniPick.registry.frecency = function()
         local inf = math.huge
