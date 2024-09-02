@@ -50,6 +50,8 @@ return {
         end
       })
 
+      lsp.csharp_ls.setup({})
+
       pylsp_add_plugins({
         "python-lsp-isort",
         "flake8-pyproject",
