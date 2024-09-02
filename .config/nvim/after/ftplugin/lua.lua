@@ -1,9 +1,9 @@
 -- try to move bewteen lazy plugin specs
 if vim.fn.expand('%:p'):find(vim.fn.stdpath("config").."/lua/plugins/") then
-   local function prev_plugin_start() vim.fn.search("^  {", "bW") end
-   local function next_plugin_start() vim.fn.search("^  {", "W") end
-   local function prev_plugin_end() vim.fn.search("^  }", "bW") end
-   local function next_plugin_end() vim.fn.search("^  }", "W") end
+   local function prev_plugin_start() vim.fn.search("^   {", "bW") end
+   local function next_plugin_start() vim.fn.search("^   {", "W") end
+   local function prev_plugin_end() vim.fn.search("^   }", "bW") end
+   local function next_plugin_end() vim.fn.search("^   }", "W") end
 
    vim.keymap.set(
       { "n", "x" },
@@ -40,10 +40,7 @@ if vim.fn.expand('%:p'):find(vim.fn.stdpath("config").."/lua/plugins/") then
          prev_plugin_start()
          vim.cmd("normal! 0V")
          next_plugin_end()
-         -- keep selecting as long as next line is empty
-         while vim.fn.getline(vim.fn.line('.')+1) == "" do
-            vim.api.nvim_win_set_cursor(0, {vim.fn.line('.')+1, 0})
-         end
+         vim.api.nvim_win_set_cursor(0, {vim.fn.nextnonblank(vim.fn.line('.')+1) - 1, 0})
       end,
       { desc = "Plugin next end", buffer = true }
    )
