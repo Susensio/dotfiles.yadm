@@ -36,7 +36,7 @@ return {
 
       -- Exchange text regions
       exchange = {
-        prefix = "gx",
+        prefix = "",
       },
 
       -- Multiply (duplicate) text
