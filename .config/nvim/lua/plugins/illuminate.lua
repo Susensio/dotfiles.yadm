@@ -22,7 +22,7 @@ return {
           require("illuminate").toggle()
           require("utils.log").toggle("illuminate", not require("illuminate").is_paused())
         end,
-        { desc = "Toggle autopairs" })
+        { desc = "Toggle illuminate" })
     end,
     config = function(plugin, opts)
       require("illuminate").configure(opts)
