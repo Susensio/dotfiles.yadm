@@ -30,17 +30,33 @@ if vim.fn.expand('%:p'):find(vim.fn.stdpath("config").."/lua/plugins/") then
     { desc = "Plugin next end", buffer = true }
   )
 
-  -- -- not working in visual mode..
-  -- vim.keymap.set(
-  --   { "o", "x" },
-  --   "ap",
-  --   ":<C-u>call " .. prev_plugin_start .. "<CR>" .. ":normal! 0V<CR>" .. ":call " .. next_plugin_end .. "<CR>",
-  --   { desc = "Plugin next end", buffer = true }
-  -- )
-  -- vim.keymap.set(
-  --   { "o", "x" },
-  --   "ip",
-  --   ":<C-u>call " .. prev_plugin_start .. "<CR>" .. ":normal! 0jV<CR>" .. ":call " .. next_plugin_end .. "<CR>k",
-  --   { desc = "Plugin next end", buffer = true }
-  -- )
+   -- text objects
+   vim.keymap.set(
+      { "o", "x" },
+      "ap",
+      function()
+         vim.cmd("normal! \28\14")
+         vim.cmd("normal! $")
+         prev_plugin_start()
+         vim.cmd("normal! 0V")
+         next_plugin_end()
+         -- keep selecting as long as next line is empty
+         while vim.fn.getline(vim.fn.line('.')+1) == "" do
+            vim.api.nvim_win_set_cursor(0, {vim.fn.line('.')+1, 0})
+         end
+      end,
+      { desc = "Plugin next end", buffer = true }
+   )
+   vim.keymap.set(
+      { "o", "x" },
+      "ip",
+      function()
+         vim.cmd('normal! \28\14')
+         vim.cmd("normal! $")
+         prev_plugin_start()
+         vim.cmd("normal! 0V")
+         next_plugin_end()
+      end,
+      { desc = "Plugin next end", buffer = true }
+   )
 end
