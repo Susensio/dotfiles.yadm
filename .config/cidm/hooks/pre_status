@@ -1,0 +1,6 @@
+#!/bin/sh
+CURRENT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# cinnamon stuff
+~/.config/cinnamon/dump 2>/dev/null
+~/.config/nemo/dump 2>/dev/null
