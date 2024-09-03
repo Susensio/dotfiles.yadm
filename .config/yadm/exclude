@@ -1,0 +1,8 @@
+/*
+!/.gitignore
+!/.config
+/.config/google-chrome
+/.config/libreoffice
+!/.local/share/yadm/archive
+!/.github
+!/bin
