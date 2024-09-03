@@ -46,6 +46,17 @@ return {
          -- Copied from LazyVim, performance improvement
          require("lazy.core.loader").add_to_rtp(plugin)
          require("nvim-treesitter.query_predicates")
+
+         -- Treesitter folding if parser is available
+         vim.api.nvim_create_autocmd({ "FileType" }, {
+            callback = function()
+               if require("nvim-treesitter.parsers").has_parser() then
+                  vim.opt.foldmethod = "expr"
+                  vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+               end
+            end,
+            group = vim.api.nvim_create_augroup("TreesitterFolding", {})
+         })
       end,
       keys = {
          { "<CR>", desc = "Increment selection" },
@@ -135,6 +146,9 @@ return {
       enabled = true,
       init = function(plugin)
          require("utils.lazy").load_on_load(plugin, "nvim-treesitter")
+         vim.keymap.set("n", "go", function()
+            require("treesitter-context").go_to_context(vim.v.count1)
+         end, { silent = true, desc = "Go to context (Outside)"})
       end,
       dependencies = { "nvim-treesitter/nvim-treesitter" },
       opts =  {

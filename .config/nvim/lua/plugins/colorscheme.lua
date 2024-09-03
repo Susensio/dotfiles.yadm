@@ -212,6 +212,8 @@ return {
             hl.CurSearch = { fg = palette.bg0, bg = palette.orange }
             hl.IncSearch = { fg = palette.bg0, bg = palette.orange }
 
+            hl.Folded = { fg = palette.grey1, bg = palette.bg_dim }
+
             hl.TSDefinitionUsage = { link = "CurrentWord" }
             hl.TSDefinition = { link = "CurrentWord" }
             hl.TSCurrentNode = { link = "CurrentWord" }
@@ -234,7 +236,6 @@ return {
          local everforest = require(plugin.main)
          everforest.setup(opts)
          everforest.load()
-         -- vim.cmd.colorscheme("everforest")
 
          -- HACK: export to global namespace
          local palette = require("everforest.colours").generate_palette(
