@@ -33,9 +33,9 @@ return {
       "neovim/nvim-lspconfig",
       main = "lspconfig",
       event = "LazyFile",
-      dependencies = {
-         "williamboman/mason-lspconfig.nvim",
-      },
+      -- dependencies = {
+      --    "williamboman/mason-lspconfig.nvim",
+      -- },
       cmd = { "LspInfo", "LspStart", "LspStop", "LspRestart" },
       config = function(plugin, opts)
          local lsp = require(plugin.main)

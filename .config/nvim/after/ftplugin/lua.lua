@@ -1,3 +1,7 @@
+vim.opt_local.tabstop = 3
+vim.opt_local.shiftwidth = 3
+vim.opt_local.softtabstop = 3
+
 -- try to move bewteen lazy plugin specs
 if vim.fn.expand('%:p'):find(vim.fn.stdpath("config").."/lua/plugins/") then
    local function prev_plugin_start() vim.fn.search("^   {", "bW") end
