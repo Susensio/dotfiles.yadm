@@ -270,7 +270,7 @@ require("utils.lsp").on_attach(
       lsp_map("n", "gd", vim.lsp.buf.definition, "definition", { desc = "Goto Definition (LSP)" })
       lsp_map("n", "gD", vim.lsp.buf.declaration, "declaration", { desc = "Goto Declaration (LSP)" })
       lsp_map("n", "gr", vim.lsp.buf.references, "references", { desc = "Goto References (LSP)" })
-      lsp_map("n", "<leader>cn", vim.lsp.buf.rename, "rename", { desc = "Rename (LSP)" })
+      lsp_map("n", "<leader>cn", require("utils.lazy").has('inc-rename.nvim') and ":IncRename " or vim.lsp.buf.rename, "rename", { desc = "Rename (LSP)" })
       lsp_map("n", "<leader>cr", vim.lsp.buf.code_action, "codeAction", { desc = "Code Action" })
       lsp_map({ "n", "x" }, "<leader>cf", vim.lsp.buf.format, "documentFormatting", { desc = "Format Code" })
    end,

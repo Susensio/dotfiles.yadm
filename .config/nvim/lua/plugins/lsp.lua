@@ -139,6 +139,13 @@ return {
       end
    },
 
+   { -- inc-rename
+      "smjonas/inc-rename.nvim",
+      event = "LazyFile",
+      cmd = "IncRename",
+      config = true,
+   },
+
    { -- lazydev
       "folke/lazydev.nvim",
       ft = "lua",

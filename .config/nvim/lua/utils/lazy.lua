@@ -50,4 +50,10 @@ function M.load_on_load(plugin, dependency)
    end)
 end
 
+---Check if a plugin is loaded.
+---@param plugin string
+function M.has(plugin)
+   return require("lazy.core.config").spec.plugins[plugin] ~= nil
+end
+
 return M

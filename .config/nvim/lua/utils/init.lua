@@ -65,10 +65,6 @@ function M.color_blend(color1, color2, percentage)
    return string.format("#%02x%02x%02x", r, g, b)
 end
 
-function M.has(plugin)
-   return require("lazy.core.config").spec.plugins[plugin] ~= nil
-end
-
 function M.refresh_statusline()
    local ok, plugin = pcall(require, "lualine")
    if ok then
