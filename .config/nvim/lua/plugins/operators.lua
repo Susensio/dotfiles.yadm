@@ -23,7 +23,7 @@ return {
       end,
       keys = {
          { mode = { "n", "x" }, "g=", desc = "Evaluate" },
-         { mode = { "n", "x" }, "gx", desc = "Exchange" },
+         -- { mode = { "n", "x" }, "gx", desc = "Exchange" },
          { mode = { "n", "x" }, "gm", desc = "Multiply" },
          { mode = { "n", "x" }, "s", desc = "Replace" },
 
