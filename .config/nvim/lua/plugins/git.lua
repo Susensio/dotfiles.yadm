@@ -33,14 +33,17 @@ return {
             function()
                local blame = require("blame")
                local log = require("utils.log")
-               vim.cmd("BlameToggle virtual")
-               vim.print("Blame is open: " .. tostring(blame.is_open()))
-               -- log.toggle("git blame", blame.is_open())
+               vim.cmd("BlameToggle window")
+               log.toggle("git blame", blame.is_open() == true)
             end,
             { desc = "Toggle git blame" }
          )
       end,
-      config = true,
+      opts = {
+         mappings = {
+            commit_info = "K",
+         }
+      }
    },
 
    { -- mini.git
