@@ -1,5 +1,5 @@
 #!/bin/bash
-# Get the most recently used tmux session
+# Get the most recently used tmux detached session
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
 
 target="$("$tmux_scripts"/ls --mru --nohidden --detached --id 2>/dev/null | head -n1)"

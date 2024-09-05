@@ -1,16 +1,52 @@
 #!/bin/bash
 # Attach to the first unattached session or start a new session
-#
-[[ -f ~/.profile ]] && source ~/.profile
-[[ -f ~/.config/profile ]] && source ~/.config/profile
 
-if [[ -z "$TMUX" ]]; then
+function usage(){
+  cat << EOF
+Usage: $(basename "$0") [OPTION]
+
+Attach to the most recent detached tmux session or start a new session.
+
+Options:
+  -c, --create  Always create a new session based on the current directory
+  -h, --help    Display this help and exit
+EOF
+}
+
+if [[ -n "$TMUX" ]]; then
+  echo "Already in tmux!"
+  exit 1
+fi
+
+# Usefull when attaching attaching from a terminal emulator,
+# and to distinguish from nemo "Open in Terminal" action
+CREATE=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|--create)
+      shift
+      CREATE=true
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+  esac
+done
+
+if [[ $CREATE == true ]]; then
+  PWD="$(pwd)"
+  if [[ "$PWD" == "$HOME" ]]; then
+    tmux new-session
+  else
+    # TODO: open new tab if session exists
+    $HOME/bin/sd/tmux/sessionizer "$PWD"
+  fi
+else
   mru="$($HOME/bin/sd/tmux/mru 2>/dev/null)"
   if [[ -n "$mru" ]]; then
     tmux attach -t "$mru"
   else
     tmux new-session
   fi
-else
-  echo "Already in tmux!"
 fi
