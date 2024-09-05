@@ -1,6 +1,8 @@
+[core]
+	excludesFile = /home/susensio/.config/yadm/exclude
 [advice]
-	addIgnoredFile = false
-[gui]
-        displayuntracked = false
+  addIgnoredFile = false
+[status]
+	showUntrackedFiles = no
 [pull]
-        rebase = true
+  rebase = true
