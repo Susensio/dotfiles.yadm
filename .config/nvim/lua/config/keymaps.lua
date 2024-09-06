@@ -17,7 +17,7 @@ vim.g.mapleader = " "
 --[[ MOVEMENT ]]
 --
 -- Harcore
-local hardcore = 1
+local hardcore = 0
 if hardcore >= 1 then
    -- Disable arrow keys in NORMAL and VISUAL mode
    map({ "n", "x" }, "<Up>", nil)
@@ -111,16 +111,18 @@ map("x", "<Leader>s", [["*ygv:<C-u>%s/\V<C-r>*//g<Left><Left>]],
 
 -- [[ INSERT and VISUAL ]] --
 -- Completion menu
-map("i", "<C-space>", "<C-x><C-o>", { desc = "Auto complete" })
+-- handled in mini.completion
+-- map("i", "<C-space>", "<C-x><C-o>", { desc = "Auto complete", silent = true })
 map("i", "<CR>",
    function()
       if vim.fn.pumvisible() == 1 then
-         return "<C-y>"
+         return vim.api.nvim_replace_termcodes('<C-y>', true, true, true)
       else
-         return "<CR>"
+         return require('mini.pairs').cr()
       end
    end,
    { desc = "Accept completion", expr = true })
+
 
 -- Indent and preserve selection
 map("x", "<", "<gv", { desc = "Indent left" })

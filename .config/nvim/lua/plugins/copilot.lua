@@ -16,7 +16,7 @@ return {
             end,
             { desc = "Toggle Copilot" }
          )
-         vim.keymap.set("i", "<C-l>", function()
+         vim.keymap.set("i", "<C-j>", function()
             local suggestion = require("copilot.suggestion")
             if suggestion.is_visible() then
                suggestion.accept_line()
@@ -28,12 +28,11 @@ return {
       opts = {
          suggestion = {
             enabled = true,
-            auto_trigger = true,
+            auto_trigger = false,
             keymap = {
-               accept_word = '<C-e>',  -- Like end-of-word
-               -- accept_line = '<C-l>',
-               accept = '<C-j>',
-
+               -- accept_word = '<C-e>',  -- Like end-of-word
+               accept_line = '<C-l>',
+               -- accept = '<C-j>',
             },
 
          },

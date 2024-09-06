@@ -128,12 +128,11 @@ lsp.on_attach(
 )
 
 -- Completion
--- set.completeopt:remove("preview")             -- Remove a strange preview window that appears on the bottom
 set.completeopt = {
-   "menu",     -- Show the popup menu
    "menuone",  -- Show the popup menu even if there is only one match
-   "longest",  -- Automatically select the longest common text
+   "longest",
 }
+set.shortmess:append("c")                     -- Do not show completion messages
 
 -- BEHAVIOR SETTINGS: Tabs, scrolling, search, and special characters handling.
 set.wrap = true                               -- Wrap long lines
