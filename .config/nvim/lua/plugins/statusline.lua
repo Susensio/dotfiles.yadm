@@ -180,6 +180,17 @@ return {
                "mason",
                "man",
                "quickfix",
+               {
+                  filetypes = { "Outline" },
+                  sections = {
+                     lualine_a = {
+                        {
+                           function() return "OUTLINE" end,
+                           separator = { right = "◤", },
+                        }
+                     },
+                  },
+               },
                -- {
                --   filetypes = { "minipick" },
                --   sections = {

@@ -3,17 +3,19 @@
 
 MODE="pipe"
 SELECTION="clipboard"
+DISPLAY="${DISPLAY:-:0}"
+export DISPLAY
 
 get_system() {
   if uname -r | grep -q -i wsl; then
     echo "wsl"
   elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
     echo "wayland"
-  elif [[ $XDG_SESSION_TYPE == "x11" ]]; then
+  else [[ $XDG_SESSION_TYPE == "x11" ]]
     echo "x11"
-  else
-    echo "Unsupported system" >&2
-    exit 1
+  # else
+  #   echo "Unsupported system" >&2
+  #   exit 1
   fi
 }
 

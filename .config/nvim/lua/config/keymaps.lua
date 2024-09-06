@@ -144,36 +144,6 @@ map("x", "K",
    end,
    { desc = "Move text up", expr = true, silent = true })
 
--- Add empty lines before and after cursor line
-local add_line = function(before)
-   local offset = 0
-   if before then
-      offset = -1
-   end
-   return function()
-      local lines = {}
-      for _ = 1, vim.v.count1 do
-         table.insert(lines, "")
-      end
-      local current = vim.fn.line(".")
-      vim.api.nvim_buf_set_lines(
-         0,
-         current + offset,
-         current + offset,
-         true,
-         lines
-      )
-   end
-end
-map_repeat('n', 'gO',
-   add_line(true),
-   { desc = "Add empty line before", expr = true }
-)
-map_repeat('n', 'go',
-   add_line(false),
-   { desc = "Add empty line after", expr = true }
-)
-
 
 map("x", "gc",
    function()
