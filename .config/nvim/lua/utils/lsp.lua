@@ -11,6 +11,9 @@ function M.on_attach(fun, opts)
          end
          local buffer = event.buf
          local client = vim.lsp.get_client_by_id(event.data.client_id)
+         if client ~= nil and client.name == "copilot" then
+            return
+         end
          fun(client, buffer)
       end,
       once = opts and opts.once == true,
