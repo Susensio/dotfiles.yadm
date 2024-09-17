@@ -3,3 +3,4 @@
 /.config/*
 !/.config/cinnamon
 !/.config/nemo
+!/.config/terminal

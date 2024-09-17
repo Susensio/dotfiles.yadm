@@ -1,3 +1,4 @@
 #!/bin/sh
 ~/.config/cinnamon/dump 2>/dev/null
 ~/.config/nemo/dump 2>/dev/null
+~/.config/terminal/dump 2>/dev/null
