@@ -1,0 +1,3 @@
+#!/bin/sh
+~/.config/cinnamon/load
+~/.config/nemo/load
