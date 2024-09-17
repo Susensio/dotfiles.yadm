@@ -1,4 +1,4 @@
 [core]
-	excludesFile = /home/susensio/.config/cidm/exclude
+	excludesFile = ~/.config/cidm/exclude
 [status]
 	showUntrackedFiles = normal

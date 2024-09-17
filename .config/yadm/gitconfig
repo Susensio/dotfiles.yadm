@@ -1,5 +1,5 @@
 [core]
-	excludesFile = /home/susensio/.config/yadm/exclude
+	excludesFile = ~/.config/yadm/exclude
 [advice]
   addIgnoredFile = false
 [status]
