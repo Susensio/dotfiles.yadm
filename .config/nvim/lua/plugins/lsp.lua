@@ -50,7 +50,12 @@ return {
             end
          })
 
-         -- lsp.csharp_ls.setup({})
+         lsp.csharp_ls.setup({
+            handlers = {
+               ["textDocument/definition"] = require('lazy-require').require_on_exported_call('csharpls_extended').handler,
+               ["textDocument/typeDefinition"] = require('lazy-require').require_on_exported_call('csharpls_extended').handler,
+            },
+         })
 
          pylsp_add_plugins({
             "python-lsp-isort",
@@ -137,6 +142,10 @@ return {
             },
          })
       end
+   },
+
+   { -- csharpls-extended-lsp
+      "Decodetalkers/csharpls-extended-lsp.nvim",
    },
 
    { -- inc-rename
