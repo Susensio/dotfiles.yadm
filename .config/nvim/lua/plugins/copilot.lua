@@ -19,7 +19,7 @@ return {
          vim.keymap.set("i", "<C-j>", function()
             local suggestion = require("copilot.suggestion")
             if suggestion.is_visible() then
-               suggestion.accept_line()
+               suggestion.accept()
             else
                suggestion.next()
             end
