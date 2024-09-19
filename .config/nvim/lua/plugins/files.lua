@@ -122,6 +122,7 @@ return {
          vim.cmd([[Neotree close]])
       end,
       opts = {
+         close_if_last_window = false,
          sources = {
             "filesystem",
             -- "buffers",
@@ -130,7 +131,10 @@ return {
          open_files_do_not_replace_types = { "terminal", "Trouble", "trouble", "qf", "Outline" },
          filesystem = {
             bind_to_cwd = true,
-            follow_current_file = { enabled = true },
+            follow_current_file = {
+               enabled = true,
+               leave_dirs_open = false,
+            },
             use_libuv_file_watcher = true,
          },
          window = {
