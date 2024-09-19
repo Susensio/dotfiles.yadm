@@ -157,12 +157,7 @@ return {
             --       expander_highlight = "NeoTreeExpander",
             --    },
             diagnostics = {
-               symbols = {
-                  error = "",
-                  warn = "",
-                  info = "",
-                  hint = "󰌵",
-               },
+               symbols = require("utils.symbols").diagnostics,
             },
             git_status = {
                symbols = {
