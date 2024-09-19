@@ -218,6 +218,7 @@ return {
             hl.TSDefinition = { link = "CurrentWord" }
             hl.TSCurrentNode = { link = "CurrentWord" }
 
+            hl.NeoTreeNormalNC = { link = "NormalNC" }
 
             hl.CurrentWord = { bg = palette.bg2 }
 

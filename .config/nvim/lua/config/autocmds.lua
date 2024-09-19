@@ -148,7 +148,12 @@ autocmd({
          if vim.opt_local.number:get() then
             vim.opt_local.relativenumber = false
          end
-         vim.opt_local.cursorline = false
+         -- not in neotree
+         if not vim.tbl_contains({
+            "neo-tree",
+         }, vim.bo.filetype) then
+            vim.opt_local.cursorline = false
+         end
          doautocmd("User", { pattern = "FocusLost" })
       end,
       group = user_grp,
