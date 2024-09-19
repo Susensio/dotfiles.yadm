@@ -26,8 +26,8 @@ copy_to_clipboard() {
 
   case "$(get_system)" in
     wayland)
-      printf '%s' "$data" | xsel -i --"$SELECTION"
-      return 0
+      # printf '%s' "$data" | xsel -i --"$SELECTION"
+      # return 0
       if [ "$SELECTION" == "clipboard" ]; then
         printf '%s' "$data" | wl-copy
       else
@@ -35,7 +35,7 @@ copy_to_clipboard() {
       fi
       ;;
     x11)
-      printf '%s' "$data" | xclip -selection "$SELECTION"
+      printf '%s' "$data" | xsel -i --"$SELECTION"
       ;;
     wsl)
       printf '%s' "$data" | /mnt/c/Windows/System32/clip.exe
@@ -47,8 +47,8 @@ copy_to_clipboard() {
 paste_from_clipboard() {
   case "$(get_system)" in
     wayland)
-      xsel -o --"$SELECTION"
-      return 0
+      # xsel -o --"$SELECTION"
+      # return 0
       if [ "$SELECTION" == "clipboard" ]; then
         wl-paste --no-newline
       else
@@ -56,7 +56,7 @@ paste_from_clipboard() {
       fi
       ;;
     x11)
-      xclip -selection "$SELECTION" -o
+      xsel -o --"$SELECTION"
       ;;
     wsl)
       powershell.exe -noprofile -c '[Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))'
