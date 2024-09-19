@@ -101,6 +101,12 @@ return {
                   },
                   {
                      "diagnostics",
+                     symbols = {
+                        error = " ",
+                        warn = " ",
+                        info = " ",
+                        hint = "󰌵 ",
+                     },
                      -- symbols = {error = "E", warn = "W", info = "I", hint = "H"},
                      cond = function() return vim.diagnostic.is_enabled({ bufnr=0 }) end,
                   }
@@ -180,6 +186,19 @@ return {
                "mason",
                "man",
                "quickfix",
+               -- "neo-tree",
+               {
+                  filetypes = { "neo-tree" },
+                  sections = {
+                     lualine_a = {
+                        {
+                           function() return "TREE" end,
+                           separator = { right = "◤", },
+                        }
+                     },
+                  },
+               },
+
                {
                   filetypes = { "Outline" },
                   sections = {
