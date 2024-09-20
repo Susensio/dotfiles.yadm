@@ -47,6 +47,7 @@ return {
          end
          vim.opt.showmode = false
 
+         vim.o.showtabline = 1
       end,
       opts = function()
 
@@ -174,6 +175,17 @@ return {
                lualine_x = {},
                lualine_y = {},
                lualine_z = {},
+            },
+            tabline = {
+               lualine_a = {
+                  {
+                     "tabs",
+                     mode = 2,
+                     show_modified_status = false,
+                     padding = 1,
+                     -- separator = { left = "◢", right = "◣ " },
+                  },
+               },
             },
             extensions = {
                "lazy",
@@ -363,7 +375,9 @@ return {
          end
          opts.options.theme = theme
 
+         local showtabline = vim.o.showtabline
          require(plugin.main).setup(opts)
+         vim.o.showtabline = showtabline
       end
    },
 
