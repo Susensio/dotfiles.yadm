@@ -51,8 +51,8 @@ return {
          vim.api.nvim_create_autocmd({ "FileType" }, {
             callback = function()
                if require("nvim-treesitter.parsers").has_parser() then
-                  vim.opt.foldmethod = "expr"
-                  vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                  vim.opt_local.foldmethod = "expr"
+                  vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
                end
             end,
             group = vim.api.nvim_create_augroup("TreesitterFolding", {})
