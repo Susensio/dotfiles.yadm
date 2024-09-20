@@ -199,9 +199,7 @@ return {
          colours_override = function(palette)
             palette.fg_dim = palette.fg
             palette.fg = "#D8D3BA"
-            local bg_dim = palette.bg_dim
-            palette.bg_dim = palette.bg0
-            palette.bg0 = bg_dim
+            palette.bg_dim = "#232A2E"
          end,
          on_highlights = function(hl, palette)
             local blend = require("utils").color_blend
