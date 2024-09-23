@@ -209,6 +209,7 @@ return {
             hl.Search = { fg = palette.bg1, bg = palette.yellow }
             hl.CurSearch = { fg = palette.bg0, bg = palette.orange }
             hl.IncSearch = { fg = palette.bg0, bg = palette.orange }
+            hl.CursorLineNr = { bg = palette.bg1 }
 
             hl.Folded = { fg = palette.grey1, bg = palette.bg_dim }
 
@@ -228,6 +229,8 @@ return {
             hl.DiagnosticVirtualTextWarn = { fg = blend(palette.yellow, palette.bg_dim, 0.5) }
             hl.DiagnosticVirtualTextInfo = { fg = blend(palette.blue, palette.bg_dim, 0.6) }
             hl.DiagnosticVirtualTextHint = { fg = blend(palette.green, palette.bg_dim, 0.6) }
+
+            -- hl.LspSignatureActiveParameter = { underline = true }
          end,
          diagnostic_text_highlight = false, -- only underline
       },
@@ -322,7 +325,6 @@ return {
          vim.cmd.colorscheme("catppuccin")
       end
    },
-
 
    { -- bamboo
       'ribru17/bamboo.nvim',
