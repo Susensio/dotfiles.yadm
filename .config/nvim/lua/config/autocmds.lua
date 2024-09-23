@@ -159,12 +159,22 @@ autocmd({
       group = user_grp,
    })
 
-vim.api.nvim_create_autocmd('BufReadPost', {
-   group = user_grp,
-   pattern = { '*' },
+-- vim.api.nvim_create_autocmd('BufReadPost', {
+--    group = user_grp,
+--    pattern = { '*' },
+--    callback = function()
+--       -- Sometimes buffer names become absolute paths and that messes up the
+--       -- name in the tabline.
+--       vim.cmd.lcd('.')
+--    end,
+-- })
+
+autocmd("QuitPre", {
+   desc = "Auto close some windows on exit",
    callback = function()
-      -- Sometimes buffer names become absolute paths and that messes up the
-      -- name in the tabline.
-      vim.cmd.lcd('.')
+      vim.cmd.cclose()
+      vim.cmd.lclose()
    end,
-})
+   group = user_grp,
+   }
+)
