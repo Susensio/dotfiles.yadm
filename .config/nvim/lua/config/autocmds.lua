@@ -178,3 +178,10 @@ autocmd("QuitPre", {
    group = user_grp,
    }
 )
+
+autocmd("WinClosed", {
+   desc = "Goto last window on close",
+   command = "wincmd p",
+   group = user_grp,
+   }
+)
