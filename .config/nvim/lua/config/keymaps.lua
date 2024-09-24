@@ -385,7 +385,7 @@ map('c', '<Right>', 'wildmenumode() ? "<Down>" : "<Right>"', { expr = true, repl
 --[[ DISABLED ]]
 --
 -- Disable command history `q:`, can still be accessed from command mode <Ctrl+R>
-map("n", "q:", nil)
+-- map("n", "q:", nil)
 -- map("n", "q/", nil)
 -- map("n", "q?", nil)
 
