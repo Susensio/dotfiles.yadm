@@ -30,7 +30,10 @@ return {
                   condition = { true, builtin.not_empty },
                   click = "v:lua.ScLa",
                },
-            }
+            },
+            ft_ignore = {
+               "neo-tree",
+            },
          }
       end,
    },
