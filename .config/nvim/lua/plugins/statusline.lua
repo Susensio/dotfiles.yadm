@@ -106,7 +106,11 @@ return {
                      cond = function() return vim.diagnostic.is_enabled({ bufnr=0 }) end,
                   }
                },
-               lualine_c = {},
+               lualine_c = {
+                  {
+                     "grapple",
+                  },
+               },
                lualine_x = {
                   {
                      function()
