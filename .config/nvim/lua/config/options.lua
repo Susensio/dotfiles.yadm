@@ -36,6 +36,7 @@ set.guicursor:append("i-ci-ve:ver25")        -- Insert mode vertical
 set.guicursor:append("i-ci-ve-c:blinkon700") -- Blink cursor in insert mode
 set.guicursor:append("i-ci-ve-c:iCursor")    -- Different color in insert mode
 set.guicursor:append("r-cr-o:hor20")
+set.foldcolumn = "1"
 set.foldmethod = "indent"                    -- Set fold method to indent
 set.foldtext = ""                            -- Disable fold text
 set.foldlevel = 99                           -- Start with all folds open
