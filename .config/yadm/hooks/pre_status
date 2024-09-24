@@ -1,8 +1,0 @@
-#!/bin/sh
-CURRENT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-# First, remove previously intent-to-added files or added and deleted
-"$CURRENT_DIR"/clean_intent_to_add
-
-# Second, add possible new files
-"$CURRENT_DIR"/include_intent_to_add

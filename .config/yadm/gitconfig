@@ -1,8 +1,8 @@
 [core]
-	excludesFile = ~/.config/yadm/exclude
+  excludesFile = ~/.config/yadm/exclude
 [advice]
   addIgnoredFile = false
 [status]
-	showUntrackedFiles = no
+  showUntrackedFiles = normal
 [pull]
   rebase = true

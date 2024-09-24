@@ -1,8 +1,13 @@
 /*
 !/.gitignore
 !/.config
-/.config/google-chrome
-/.config/libreoffice
+/.config/*
+!/.config/tmux/
+!/.config/nvim/
+!/.config/yadm/
+!/.config/cidm/
+!/.config/fish/
+!/.config/profile.d/
 !/.local/share/yadm/archive
 !/.github
 !/bin
