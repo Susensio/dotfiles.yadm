@@ -33,6 +33,7 @@ return {
             },
             ft_ignore = {
                "neo-tree",
+               "starter",
             },
          }
       end,
