@@ -79,7 +79,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 lsp.on_attach(
    function(client, buffer)
       -- BUG the first list is not being popullated
-      autocmd({ "DiagnosticChanged", "BufWinEnter" }, {
+      autocmd({ "DiagnosticChanged", "WinEnter", "BufEnter" }, {
          -- buffer = buffer,
          desc = "Put diagnostics on location list",
          callback = function(event)
@@ -174,6 +174,13 @@ autocmd("QuitPre", {
    callback = function()
       vim.cmd.cclose()
       vim.cmd.lclose()
+      -- check if command exists
+      if vim.fn.exists(":OutlineClose") == 2 then
+         vim.cmd({ cmd = "OutlineClose" })
+      end
+      if vim.fn.exists(":Neotree") == 2 then
+         vim.cmd({ cmd = "Neotree", args = { "close" } })
+      end
    end,
    group = user_grp,
    }
