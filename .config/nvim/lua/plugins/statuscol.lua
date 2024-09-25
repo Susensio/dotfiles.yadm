@@ -34,6 +34,7 @@ return {
             ft_ignore = {
                "neo-tree",
                "starter",
+               "Outline",
             },
          }
       end,
