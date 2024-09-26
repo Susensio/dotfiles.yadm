@@ -21,14 +21,14 @@ vim.g.do_filetype_lua = 1                     -- Use filetype.lua for filetype d
 set.spellsuggest:append("9")                  -- The maximum number of suggestions listed
 set.spelllang = "en,es_es"                    -- Set spell check language
 set.shell = "/usr/bin/bash"                   -- Avoid pluggin problems
-set.isfname:append("{,}")                  -- Include curly braces in file name (${VAR})
+set.isfname:append("{,}")                     -- Include curly braces in file name (${VAR})
 
 -- VISUAL SETTINGS: Theme, cursor appearance, line numbers, folding and text display.
 set.termguicolors = true                     -- Enable true color support
 set.background = "dark"                      -- Use a dark background
 set.number = true                            -- Show line numbers
 set.relativenumber = true                    -- Show relative line numbers
-set.signcolumn = "yes:1"                     -- Do not append an extra column for diagnostics
+set.signcolumn = "auto:1"                     -- Do not append an extra column for diagnostics
 set.cursorline = true                        -- Highlight the current line
 set.guicursor = ""
 set.guicursor:append("n-v-c-sm:block")       -- Block non insert mode
