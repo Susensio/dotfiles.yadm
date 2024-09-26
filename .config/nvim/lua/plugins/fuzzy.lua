@@ -22,7 +22,7 @@ return {
          vim.keymap.set(
             { "n" },
             "<leader>f",
-            "<cmd>Pick frecency tool='fd'<CR>",
+            "<cmd>Pick files tool='fd'<CR>",
             { desc = "Search files" }
          )
          vim.keymap.set(
