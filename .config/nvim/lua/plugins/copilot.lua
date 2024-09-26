@@ -28,7 +28,7 @@ return {
       opts = {
          suggestion = {
             enabled = true,
-            auto_trigger = false,
+            auto_trigger = true,
             keymap = {
                -- accept_word = '<C-e>',  -- Like end-of-word
                accept_line = '<C-l>',
