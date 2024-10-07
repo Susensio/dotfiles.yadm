@@ -150,6 +150,7 @@ set.hlsearch = true                           -- Do not highlight search results
 set.iskeyword:append("-")                     -- Treat dash as a word character
 set.jumpoptions = "view"                      -- Avoid scrolling when switching buffer
 set.wrapscan = true                           -- Searches wrap around the end of the file
+set.viewoptions = { "folds", "cursor" }
 
 -- Configure new line comment. This is set on filetype, so it must be changed after
 autocmd("Filetype", {
