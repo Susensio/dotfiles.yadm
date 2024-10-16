@@ -1,4 +1,11 @@
 return {
+   { -- mini.git
+      "echasnovski/mini-git",
+      main = "mini.git",
+      event = "LazyFile",
+      opts = {},
+   },
+
    { -- mini.diff
       "echasnovski/mini.diff",
       event = "LazyFile",
@@ -46,13 +53,6 @@ return {
       }
    },
 
-   { -- mini.git
-      "echasnovski/mini-git",
-      main = "mini.git",
-      event = "LazyFile",
-      opts = {},
-   },
-
    { -- baredot
       "ejrichards/baredot.nvim",
       event = {
@@ -66,4 +66,19 @@ return {
       }
    },
 
+   { -- diffview
+      "sindrets/diffview.nvim",
+      -- event = "LazyFile",
+      cmd = {
+         "DiffviewOpen",
+         "DiffviewFileHistory",
+      },
+      opts = {
+         view = {
+            merge_tool = {
+               layout = "diff4_mixed",
+            },
+         },
+      },
+   },
 }

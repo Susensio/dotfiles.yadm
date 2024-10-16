@@ -54,3 +54,7 @@
 
 [blame]
 	coloring = highlightRecent
+[merge]
+	tool = nvimdiff
+[mergetool "nvimdiff"]
+	cmd = nvim -n -c "DiffviewOpen" "$MERGE"
