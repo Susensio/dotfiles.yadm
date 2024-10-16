@@ -1,3 +1,9 @@
+local hl = function(name)
+   return function(text)
+      return "%#" .. name .. "#" .. text .. "%*"
+   end
+end
+
 return {
    { -- statuscol
       "luukvbaal/statuscol.nvim",
@@ -17,14 +23,10 @@ return {
                },
 
                {
-                  text = { builtin.foldfunc },
+                  text = { builtin.foldfunc, hl("FoldColumn") " " },
+                  hl = "FoldColumn",
                   click = "v:lua.ScFa",
                },
-               {
-                  text = { " " },
-                  hl = "FoldColumn"
-               },
-
                {
                   text = { builtin.lnumfunc, " " },
                   condition = { true, builtin.not_empty },
