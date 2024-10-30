@@ -9,6 +9,7 @@
 
 function _auto_source_venv --on-variable PWD --description "Activate/Deactivate virtualenv on directory change"
   status --is-command-substitution; and return
+  status --is-interactive; or return
 
   # Check if we are inside a git repository
   if git rev-parse --show-toplevel &>/dev/null
@@ -43,9 +44,33 @@ function _auto_source_venv --on-variable PWD --description "Activate/Deactivate 
   # No virtualenv found
 
   # If virtualenv activated but not found nearby, deactivate.
-  # if test -n "$VIRTUAL_ENV"
-  #   deactivate
-  # end
+  if test -n "$VIRTUAL_ENV"
+    if functions -q deactivate
+      deactivate
+    else
+      # This is copy-pasted from the original deactivate function, just in case it's missing.
+      if test -n "$_OLD_VIRTUAL_PATH"
+        set -gx PATH $_OLD_VIRTUAL_PATH
+        set -e _OLD_VIRTUAL_PATH
+      end
+      if test -n "$_OLD_VIRTUAL_PYTHONHOME"
+        set -gx PYTHONHOME $_OLD_VIRTUAL_PYTHONHOME
+        set -e _OLD_VIRTUAL_PYTHONHOME
+      end
+
+      if test -n "$_OLD_FISH_PROMPT_OVERRIDE"
+        set -e _OLD_FISH_PROMPT_OVERRIDE
+        if functions -q _old_fish_prompt
+          functions -e fish_prompt
+          functions -c _old_fish_prompt fish_prompt
+          functions -e _old_fish_prompt
+        end
+      end
+
+      set -e VIRTUAL_ENV
+      set -e VIRTUAL_ENV_PROMPT
+    end
+  end
 end
 
 _auto_source_venv
