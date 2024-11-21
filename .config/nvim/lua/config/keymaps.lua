@@ -115,7 +115,7 @@ map("x", "<Leader>s", [["*ygv:<C-u>%s/\V<C-r>*//g<Left><Left>]],
 -- map("i", "<C-space>", "<C-x><C-o>", { desc = "Auto complete", silent = true })
 map("i", "<CR>",
    function()
-      if vim.fn.pumvisible() == 1 then
+      if vim.fn.pumvisible() ~= 0 then
          return vim.api.nvim_replace_termcodes('<C-y>', true, true, true)
       else
          return require('mini.pairs').cr()
@@ -252,6 +252,7 @@ require("utils.lsp").on_attach(
    end,
    { desc = "LSP keymaps" }
 )
+map("n", "<C-W><C-]>", "<C-W><C-V><C-]>", { desc = "Open definition in vertical split" })
 
 
 --[[ SPLITS AND TABS ]]
@@ -348,6 +349,9 @@ map("n", "S", function()
    if vim.fn.getline(".") == "" then return '"_S' end
    return "S"
 end, { expr = true })
+
+-- [[ MOUSE ]]
+map("n", "<C-LeftMouse>", "gd", { desc = "Goto definition", remap = true })
 
 -- [[ ABBREVIATIONS ]] --
 local abbrs = {
