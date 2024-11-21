@@ -56,4 +56,13 @@ return {
          }
       },
    },
+
+   { -- mini.align
+      "echasnovski/mini.align",
+      keys = {
+         { mode = { "n", "x" }, "ga", desc = "Align" },
+         { mode = { "n", "x" }, "gA", desc = "Align" },
+      },
+      opts = {},
+   },
 }
