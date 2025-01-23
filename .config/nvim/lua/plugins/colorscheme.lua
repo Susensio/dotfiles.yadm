@@ -217,9 +217,11 @@ return {
             hl.TSDefinition = { link = "CurrentWord" }
             hl.TSCurrentNode = { link = "CurrentWord" }
 
+            hl.DiffText = { fg = palette.none, bg = palette.bg5 }
+
             hl.NeoTreeNormalNC = { link = "NormalNC" }
 
-            hl.CurrentWord = { bg = palette.bg2 }
+            hl.CurrentWord = { bg = palette.bg3 }
 
             hl.DiagnosticError = { fg = palette.red }
             hl.DiagnosticWarn = { fg = palette.yellow }
