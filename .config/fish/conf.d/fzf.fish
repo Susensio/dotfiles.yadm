@@ -41,5 +41,14 @@ bind \e\cv _fzf_search_variables_prepend
 
 
 # custom script that greps like inside neovim
-bind \cg '$HOME/bin/sd/fzf/rg; commandline -f repaint'
+function _fzf_search_grep
+  set -f file_paths_selected ($HOME/bin/sd/fzf/rg)
+
+  if test $status -eq 0
+    commandline --append $file_paths_selected
+  end
+  commandline --function repaint
+end
+bind \cg _fzf_search_grep
+# bind \cg '$HOME/bin/sd/fzf/rg; commandline -f repaint'
 # bind \e\cv "commandline --append '\$'; $_fzf_search_vars_command"

@@ -37,6 +37,7 @@ return {
          { "AndreM222/copilot-lualine", dev = false },
       },
       init = function()
+         vim.opt.winbar = " "
          vim.g.lualine_laststatus = vim.o.laststatus
          if vim.fn.argc(-1) > 0 then
             -- set an empty statusline till lualine loads
@@ -50,7 +51,8 @@ return {
          vim.o.showtabline = 1
       end,
       opts = function()
-
+         local colors = _G.palette
+         local palette = colors.raw
          return {
             options = {
                icons_enabled = true,
@@ -62,28 +64,30 @@ return {
                   -- "minifiles",
                   -- "minipick",
                },
-               globalstatus = false,
+               globalstatus = true,
                refresh = {
                   statusline = 500,
                },
             },
             sections = {
-               -- lualine_c = { { "mode", color = { gui = "bold" } } },
                lualine_a = {
                   {
-                     "filetype",
-                     colored = true,
-                     icon_only = true,
-                     padding = { left = 1, right = 0 },
+                     "mode",
                   },
-                  {
-                     "filename",
-                     newfile_status = true,
-                     path = 1,
-                     symbols = { newfile = "[N]" },
-                     separator = { right = "◤", },
-                     -- padding = { left = 0, right = 1 },
-                  },
+                  -- {
+                  --    "filetype",
+                  --    colored = true,
+                  --    icon_only = true,
+                  --    padding = { left = 1, right = 0 },
+                  -- },
+                  -- {
+                  --    "filename",
+                  --    newfile_status = true,
+                  --    path = 1,
+                  --    symbols = { newfile = "[N]" },
+                  --    separator = { right = "◤", },
+                  --    padding = { left = 0, right = 1 },
+                  -- },
                },
                lualine_b = {
                   "branch",
@@ -100,13 +104,13 @@ return {
                      end,
                      padding = { left = 0, right = 1 },
                   },
+               },
+               lualine_c = {
                   {
                      "diagnostics",
                      symbols = require("utils.symbols").spaced.diagnostics,
                      cond = function() return vim.diagnostic.is_enabled({ bufnr=0 }) end,
-                  }
-               },
-               lualine_c = {
+                  },
                   {
                      "grapple",
                   },
@@ -117,12 +121,15 @@ return {
                         return require('lsp-progress').progress()
                      end,
                   },
+                  -- {
+                  --    "searchcount",
+                  -- },
                   {
                      require("lazy.status").updates,
                      cond = require("lazy.status").has_updates,
                      color = { fg = (function()
                         local default = "#ff9e64"
-                        local success, cs_orange = pcall(function() return _G.palette.orange end)
+                        local success, cs_orange = pcall(function() return colors.orange end)
                         return success and cs_orange or default
                      end)() },     -- palette set from colorscheme
                   },
@@ -132,14 +139,14 @@ return {
                      symbols = {
                         status = {
                            hl = {
-                              enabled = _G.palette.green,
-                              sleep = _G.palette.darkwhite,
-                              disabled = _G.palette.lightgrey,
-                              warning = _G.palette.orange,
-                              unknown = _G.palette.red,
+                              enabled = colors.green,
+                              sleep = colors.darkwhite,
+                              disabled = colors.lightgrey,
+                              warning = colors.orange,
+                              unknown = colors.red,
                            },
                         },
-                        spinner_color = _G.palette.green,
+                        spinner_color = colors.green,
                         -- spinners = {" "},
                         spinners = {" "},
                      },
@@ -156,9 +163,54 @@ return {
                      padding = { left = 0, right = 1 },
                   },
                },
-               lualine_z = { "mode" },
+               lualine_z = {
+                  -- { "mode" },
+               },
             },
-            inactive_sections = {
+            -- inactive_sections = {
+            --    lualine_a = {
+            --       {
+            --          "filetype",
+            --          colored = false,
+            --          icon_only = true,
+            --          padding = { left = 1, right = 0 },
+            --       },
+            --       {
+            --          "filename",
+            --          newfile_status = true,
+            --          path = 1,
+            --          symbols = { newfile = "[N]" },
+            --          separator = { right = "◤", },
+            --          padding = { left = 0, right = 1 },
+            --       },
+            --    },
+            --    lualine_b = {},
+            --    lualine_c = {},
+            --    lualine_x = {},
+            --    lualine_y = {},
+            --    lualine_z = {},
+            -- },
+            winbar = {
+               lualine_a = {
+                  {
+                     "filetype",
+                     colored = true,
+                     icon_only = true,
+                     padding = { left = 1, right = 0 },
+                     color = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+                  },
+                  {
+                     "filename",
+                     newfile_status = true,
+                     path = 1,
+                     symbols = { newfile = "[N]" },
+                     separator = { right = "◣", },
+                     -- padding = { left = 0, right = 1 },
+                     color = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+                  },
+               },
+            },
+            inactive_winbar = {
                lualine_a = {
                   {
                      "filetype",
@@ -171,20 +223,15 @@ return {
                      newfile_status = true,
                      path = 1,
                      symbols = { newfile = "[N]" },
-                     separator = { right = "◤", },
+                     separator = { right = "◣", },
                   },
                },
-               lualine_b = {},
-               lualine_c = {},
-               lualine_x = {},
-               lualine_y = {},
-               lualine_z = {},
             },
             tabline = {
                lualine_a = {
                   {
                      "tabs",
-                     mode = 2,
+                     mode = 0,
                      show_modified_status = false,
                      padding = 1,
                      -- separator = { left = "◢", right = "◣ " },
@@ -294,89 +341,59 @@ return {
 
          ---@type string|table
          local theme = "auto"
-         if vim.g.colors_name == "monokai_pro" then
-            local colors = _G.palette
-            theme = {
-               normal = {
-                  a = { bg = colors.blue, fg = colors.darkgrey, gui = "bold" },
-                  b = { bg = colors.grey, fg = colors.blue },
-                  c = { bg = colors.darkgrey, fg = colors.white},
-               },
-               insert = {
-                  a = { bg = colors.green, fg = colors.darkgrey, gui = "bold" },
-                  b = { bg = colors.grey, fg = colors.green },
-                  c = { bg = colors.darkgrey, fg = colors.white},
-               },
-               replace = {
-                  a = { bg = colors.red, fg = colors.darkgrey, gui = "bold" },
-                  b = { bg = colors.grey, fg = colors.red },
-                  c = { bg = colors.darkgrey, fg = colors.white},
-               },
-               visual = {
-                  a = { bg = colors.purple, fg = colors.darkgrey, gui = "bold" },
-                  b = { bg = colors.grey, fg = colors.purple },
-                  c = { bg = colors.darkgrey, fg = colors.white},
-               },
-               command = {
-                  a = { bg = colors.yellow, fg = colors.darkgrey, gui = "bold" },
-                  b = { bg = colors.grey, fg = colors.yellow },
-                  c = { bg = colors.darkgrey, fg = colors.white},
-               },
-               inactive = {
-                  a = { bg = colors.darkgrey, fg = colors.lightgrey, gui = "bold" },
-                  b = { bg = colors.darkgrey, fg = colors.lightgrey },
-                  c = { bg = colors.darkgrey, fg = colors.lightgrey },
-               },
-            }
-         elseif vim.g.colors_name == "everforest" then
-            theme = "everforest"
-            local colors = _G.palette
-            local palette = colors.raw
-            theme = {
-               normal = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.green, fg = palette.bg0, gui = "bold" },
-               },
-               insert = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.blue, fg = palette.bg0, gui = "bold" },
-               },
-               visual = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.red, fg = palette.bg0, gui = "bold" },
-               },
-               replace = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.orange, fg = palette.bg0, gui = "bold" },
-               },
-               command = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.yellow, fg = palette.bg0, gui = "bold" },
-               },
-               terminal = {
-                  a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.fg },
-                  c = { bg = nil, fg = palette.grey2 },
-                  z = { bg = palette.purple, fg = palette.bg0, gui = "bold" },
-               },
-               inactive = {
-                  a = { bg = palette.grey0, fg = palette.bg0, gui = "bold" },
-                  b = { bg = palette.bg3, fg = palette.grey1 },
-                  c = { bg = palette.bg_dim, fg = palette.grey1 },
-                  z = { bg = palette.grey0, fg = palette.bg1, gui = "bold" },
-               },
-            }
-         end
+         -- theme = "everforest"
+         local colors = _G.palette
+         local palette = colors.raw
+         theme = {
+            normal = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.green, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.green, fg = palette.bg0, gui = "bold" },
+            },
+            insert = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.blue, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.blue, fg = palette.bg0, gui = "bold" },
+            },
+            visual = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.red, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.red, fg = palette.bg0, gui = "bold" },
+            },
+            replace = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.orange, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.orange, fg = palette.bg0, gui = "bold" },
+            },
+            command = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.yellow, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.yellow, fg = palette.bg0, gui = "bold" },
+            },
+            terminal = {
+               -- a = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+               a = { bg = palette.purple, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.fg },
+               c = { bg = nil, fg = palette.grey2 },
+               z = { bg = palette.purple, fg = palette.bg0, gui = "bold" },
+            },
+            inactive = {
+               a = { bg = palette.grey0, fg = palette.bg0, gui = "bold" },
+               b = { bg = palette.bg3, fg = palette.grey1 },
+               c = { bg = palette.bg_dim, fg = palette.grey1 },
+               z = { bg = palette.grey0, fg = palette.bg1, gui = "bold" },
+            },
+         }
          opts.options.theme = theme
 
          local showtabline = vim.o.showtabline
@@ -385,21 +402,67 @@ return {
       end
    },
 
-
    { -- incline
       "b0o/incline.nvim",
+      main = "incline",
       enabled = false,
       version = false,
       event = "VeryLazy",
       opts = {
+         render = function(props)
+            local colors = _G.palette
+            local palette = colors.raw
+
+            local bufname = vim.api.nvim_buf_get_name(props.buf)
+            local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(bufname)
+
+
+            local res = bufname ~= "" and vim.fn.fnamemodify(bufname, ":~:.") or "[No Name]"
+
+            if vim.bo[props.buf].modified then
+               res = res .. " [+]"
+            end
+
+            if bufname ~= "" and vim.bo[props.buf].buftype == ""  and vim.fn.filereadable(bufname) == 0 then
+               res = res .. " [New]"
+            end
+
+            if vim.bo[props.buf].readonly or vim.bo[props.buf].modifiable == false then
+               res = res .. " [-]"
+            end
+
+            local bg = props.focused and palette.fg or palette.grey0
+            local fg = palette.bg0
+
+            return {
+               ft_icon and { " "..ft_icon, guifg = ft_color, guibg = bg } or "",
+               { " "..res.." ", gui = "bold", guibg = bg, guifg = fg },
+               { "◤", guifg = bg, gui = "NONE" },
+            }
+         end,
          hide = {
             focused_win = false,
-            only_win = "count_ignored",
+            -- only_win = "count_ignored",
+         },
+         highlight = {
+            groups = {
+               InclineNormal = "Normal",
+               InclineNormalNC = "NormalNC",
+            },
          },
          window = {
             overlap = {
                borders = true,
             },
+            margin = {
+               horizontal = 0,
+               vertical = 1,
+            },
+            padding = 0,
+            placement = {
+               horizontal = "left",
+               vertical = "bottom",
+            }
          },
       },
    }
