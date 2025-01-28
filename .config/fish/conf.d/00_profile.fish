@@ -27,7 +27,14 @@ function _source -d "Translate export, path additions and subsequent sources fro
   end
 end
 
+set -gx fisher_path $(fallback $XDG_DATA_HOME $HOME/.local/share)/fish/fisher
+set fish_function_path $fish_function_path[1] $fisher_path/functions $fish_function_path[2..-1]
+set fish_complete_path $fish_complete_path[1] $fisher_path/completions $fish_complete_path[2..-1]
+
 if status is-login
-  _source $HOME/.profile
-  _source ~/.config/profile
+  if functions -q fenv
+    fenv source (fallback $XDG_CONFIG_HOME $HOME/.config)/profile
+  else
+    exec "bash -l -c 'exec fish -i'"
+  end
 end

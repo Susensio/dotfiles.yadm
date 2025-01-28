@@ -6,3 +6,4 @@ kentork/fish-comp
 susensio/zoxide.fish
 acomagu/fish-async-prompt
 susensio/fish-osc133
+oh-my-fish/plugin-foreign-env
