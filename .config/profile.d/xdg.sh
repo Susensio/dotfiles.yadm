@@ -9,6 +9,9 @@ export VIMINIT='let $MYVIMRC = !has("nvim") ? "$XDG_CONFIG_HOME/vim/vimrc" : "$X
 # vscode
 export VSCODE_EXTENSIONS="$XDG_DATA_HOME/code/extensions"
 
+# docker
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+
 # ansible
 export ANSIBLE_HOME="$XDG_CONFIG_HOME/ansible"
 export ANSIBLE_GALAXY_CACHE_DIR="$XDG_CACHE_HOME/ansible/galaxy_cache"
@@ -43,3 +46,13 @@ export TEXMFVAR="$XDG_CACHE_HOME/texlive/texmf-var"
 export TEXMFCONFIG="$XDG_CONFIG_HOME/texlive/texmf-config"
 
 export COOCKIECUTTER_CONFIG="$XDG_CONFIG_HOME/cookiecutter.yaml"
+
+# X11
+export ERRFILE="$XDG_CACHE_HOME/X11/xsession-errors"
+
+export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
+
+# go
+export GOPATH="$XDG_DATA_HOME"/go
+export GOBIN="$HOME/.local/bin"
+export GOMODCACHE="$XDG_CACHE_HOME"/go/mod
