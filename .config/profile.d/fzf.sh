@@ -22,7 +22,7 @@ export FZF_DEFAULT_OPTS='--cycle '\
 '--bind "ctrl-y:execute-silent(printf {} | clipboard copy)" '\
 '--bind "ctrl-V:transform-query(echo -n {q}; clipboard paste)" '\
 '--bind "ctrl-w:backward-kill-word" '\
-'--color=fg:#9da9a0,fg+:#e4e1cd,bg:#1e2326,bg+:#1e2326,hl:underline:#a7c080,hl+:underline:#a7c080,spinner:#e69875,header:#a7c080,info:#dbbc7f,pointer:#e69e80,marker:#e69875,prompt:#dbbc7f'
+'--color=fg:#9da9a0,fg+:#e4e1cd,bg:#181C1E,bg+:#181C1E,hl:underline:#a7c080,hl+:underline:#a7c080,spinner:#e69875,header:#a7c080,info:#dbbc7f,pointer:#e69e80,marker:#e69875,prompt:#dbbc7f'
 
 export FZF_PREVIEW="--preview='preview {}'"
 # # used on fish function that launchs fzf-tmux
