@@ -31,7 +31,7 @@ return {
 
    { -- blame
       "FabijanZulj/blame.nvim",
-      event = "LazyFile",
+      -- event = "LazyFile",
       cmd = "BlameToggle",
       init = function()
          vim.keymap.set(

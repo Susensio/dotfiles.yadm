@@ -328,7 +328,7 @@ return {
       end
    },
 
-   { -- bamboo
+   { -- Bamboo
       'ribru17/bamboo.nvim',
       enabled = false,
       lazy = false,
@@ -348,4 +348,12 @@ return {
          require('bamboo').load()
       end,
    },
+
+   {
+      "echasnovski/mini.icons",
+      config = function(plugin, opts)
+         require("mini.icons").setup(opts)
+         MiniIcons.mock_nvim_web_devicons()
+      end,
+   }
 }

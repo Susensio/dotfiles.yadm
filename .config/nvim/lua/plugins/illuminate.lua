@@ -12,17 +12,18 @@ return {
          filetypes_denylist = {
             "Lazy",
             "minifiles",
+            "oil",
          }
       },
       init = function()
          -- vim.keymap.set("n", "<C-n>", require("illuminate").goto_next_reference, { desc = "Next Reference" })
          -- vim.keymap.set("n", "<C-p>", require("illuminate").goto_prev_reference, { desc = "Prev Reference" })
-         vim.keymap.set("n", "<leader>ui",
+         vim.keymap.set("n", "<leader>uw",
             function()
                require("illuminate").toggle()
-               require("utils.log").toggle("illuminate", not require("illuminate").is_paused())
+               require("utils.log").toggle("word illuminate", not require("illuminate").is_paused())
             end,
-            { desc = "Toggle illuminate" })
+            { desc = "Toggle word illuminate" })
       end,
       config = function(plugin, opts)
          require("illuminate").configure(opts)

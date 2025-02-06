@@ -41,6 +41,7 @@ return {
 
    { -- spider
       "chrisgrieser/nvim-spider",
+      enabled = false,
       event = "VeryLazy",
       init = function()
          vim.keymap.set(

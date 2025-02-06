@@ -36,10 +36,8 @@ return {
          vim.keymap.set("i", "<CR>",
             function()
                if vim.fn.pumvisible() ~= 0 then
-                  vim.print("pumvisible")
                   return vim.api.nvim_replace_termcodes('<C-y>', true, true, true)
                else
-                  vim.print("nopum")
                   return require('mini.pairs').cr()
                end
             end,

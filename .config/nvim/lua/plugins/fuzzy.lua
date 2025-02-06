@@ -27,6 +27,12 @@ return {
          )
          vim.keymap.set(
             { "n" },
+            "<leader>r",
+            "<cmd>Pick frecency tool='fd'<CR>",
+            { desc = "Search recent files" }
+         )
+         vim.keymap.set(
+            { "n" },
             "<leader>b",
             "<cmd>Pick buffers<CR>",
             { desc = "Search buffers" }
@@ -76,7 +82,7 @@ return {
          -- )
          vim.keymap.set(
             { "n" },
-            "<leader>r",
+            "<leader>R",
             '<cmd>Pick resume<CR>',
             { desc = "Search resume" }
          )
@@ -105,6 +111,8 @@ return {
          MiniPick.registry.frecency = function()
             local inf = math.huge
 
+            local sort = require("mini.visits").gen_sort.z()
+
             local visit_paths = MiniVisits.list_paths()
             -- relative paths
             visit_paths = vim.tbl_map(function(path) return vim.fn.fnamemodify(path, ":.") end, visit_paths)
@@ -120,9 +128,9 @@ return {
                source = {
                   name = "Files (MRU)",
                   match = function(stritems, indices, query)
-                     local filtered = MiniPick.default_match(stritems, indices, query, true) or {}
+                     local filtered = MiniPick.default_match(stritems, indices, query, { sync = true }) or {}
 
-                     table.sort(filtered,
+                     sort(filtered,
                         function(item1, item2)
                            local path1 = stritems[item1]
                            local path2 = stritems[item2]

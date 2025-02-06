@@ -4,7 +4,7 @@ return {
       enabled = false,
       event = { "VimEnter */*,.*", "BufNew */*,.*" },
       dependencies = {
-         "nvim-tree/nvim-web-devicons",
+         "echasnovski/mini.icons",
       },
       opts = {
          mappings = {
@@ -105,7 +105,7 @@ return {
       branch = "v3.x",
       dependencies = {
          "nvim-lua/plenary.nvim",
-         "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+         "echasnovski/mini.icons", -- not strictly required, but recommended
          "MunifTanjim/nui.nvim",
       },
       cmd = "Neotree",
@@ -133,7 +133,7 @@ return {
             bind_to_cwd = true,
             follow_current_file = {
                enabled = true,
-               leave_dirs_open = true,
+               leave_dirs_open = false,
             },
             use_libuv_file_watcher = true,
          },
@@ -202,7 +202,7 @@ return {
       main = 'oil',
       enabled = true,
       lazy = false,  -- https://github.com/stevearc/oil.nvim/issues/300#issuecomment-2002968183
-      dependencies = { "nvim-tree/nvim-web-devicons" },
+      dependencies = { "echasnovski/mini.icons" },
       cmd = { "Oil" },
       init = function(plugin)
          vim.keymap.set("n", "-", "<cmd>Oil<CR>", { desc = "Open parent directory" })
@@ -218,6 +218,11 @@ return {
             -- "permissions",
          },
          delete_to_trash = true,
+         lsp_file_methods = {
+            enabled = true,
+            timeout_ms = 5000,
+            autosave_changes = false,
+         },
          skip_confirm_for_simple_edits = true,
          prompt_save_on_select_new_entry = false,
          view_options = {

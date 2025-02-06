@@ -17,17 +17,17 @@ autocmd("TextYankPost", {
    group = user_grp,
 })
 
-autocmd("BufWritePre", {
-   desc = "Remove trailing whitespace on save",
-   callback = function()
-      -- Save cursor position to later restore
-      local curpos = vim.api.nvim_win_get_cursor(0)
-      -- Search and replace trailing whitespace
-      vim.cmd([[keeppatterns %s/\s\+$//e]])
-      vim.api.nvim_win_set_cursor(0, curpos)
-   end,
-   group = user_grp,
-})
+-- autocmd("BufWritePre", {
+--    desc = "Remove trailing whitespace on save",
+--    callback = function()
+--       -- Save cursor position to later restore
+--       local curpos = vim.api.nvim_win_get_cursor(0)
+--       -- Search and replace trailing whitespace
+--       vim.cmd([[keeppatterns %s/\s\+$//e]])
+--       vim.api.nvim_win_set_cursor(0, curpos)
+--    end,
+--    group = user_grp,
+-- })
 
 autocmd("BufWinEnter", {
    desc = "Open help window in a vertical split if it fits better",
@@ -53,7 +53,7 @@ autocmd("BufWinEnter", {
    group = user_grp,
 })
 
-vim.api.nvim_create_autocmd({ "VimResized" }, {
+autocmd({ "VimResized" }, {
    desc = "Resize splits if window got resized",
    group = user_grp,
    callback = function()
@@ -63,7 +63,7 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
    end,
 })
 
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+autocmd({ "BufWritePre" }, {
    desc = "Auto create dir when saving a file, in case some intermediate directory does not exist",
    group = user_grp,
    callback = function(event)
@@ -186,9 +186,10 @@ autocmd("QuitPre", {
    }
 )
 
-autocmd("WinClosed", {
-   desc = "Goto last window on close",
-   command = "wincmd p",
-   group = user_grp,
-   }
-)
+-- autocmd("WinClosed", {
+--    callback = function()
+--       vim.cmd("wincmd p")
+--    end,
+--    group = user_grp,
+--    }
+-- )

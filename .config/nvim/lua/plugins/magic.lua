@@ -14,6 +14,18 @@ return {
       cmd = "Bang",
    },
 
+   { --bigfile
+      "pteroctopus/faster.nvim",
+      lazy = false,
+      opts = {
+         behaviours = {
+            bigfile = {
+               filesize = 5,
+            },
+         },
+      },
+   },
+
    -- { -- mini.trailspace
    --   "echasnovski/mini.trailspace",
    --   enabled = true,

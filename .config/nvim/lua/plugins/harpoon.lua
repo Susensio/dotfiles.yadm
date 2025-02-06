@@ -14,7 +14,7 @@ return {
         vim.keymap.set("n", "<leader>5", "<cmd>Grapple select index=5<cr>", { desc = "Select fifth tag" })
       end,
       dependencies = {
-         { "nvim-tree/nvim-web-devicons", lazy = true }
+         { "echasnovski/mini.icons" }
       },
       event = "VeryLazy",
    }
