@@ -1,8 +1,4 @@
-local hl = function(name)
-   return function(text)
-      return "%#" .. name .. "#" .. text .. "%*"
-   end
-end
+local hl = require("utils").highlight
 
 return {
    { -- statuscol

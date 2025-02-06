@@ -12,7 +12,7 @@ return {
             function()
                require("copilot.suggestion").toggle_auto_trigger()
                require("utils").refresh_statusline()
-               require("utils.log").toggle("copilot", not vim.b.copilot_suggestion_auto_trigger)
+               require("utils.log").toggle("copilot", vim.b.copilot_suggestion_auto_trigger)
             end,
             { desc = "Toggle Copilot" }
          )

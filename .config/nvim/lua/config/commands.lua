@@ -58,12 +58,13 @@ require("utils.lsp").on_attach(
 command(
    "LspCapabilities",
    function(ctx)
-      local clients = vim.lsp.get_active_clients()
+      local clients = vim.lsp.get_clients()
       clients = vim.tbl_filter(function(client)
          return client.name ~= "copilot"
       end, clients)
 
       for _, client in ipairs(clients) do
+         vim.print("Client: "..client.name)
          vim.print(client.server_capabilities)
       end
    end,

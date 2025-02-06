@@ -13,6 +13,12 @@ function M.highlight_update(ns, name, opts)
    vim.api.nvim_set_hl(ns_id, name, hl)
 end
 
+function M.highlight(name)
+   return function(text)
+      return "%#" .. name .. "#" .. text .. "%*"
+   end
+end
+
 function M.is_visual_selection_empty()
    -- works even without exiting visual mode
    if vim.fn.mode() == 'V' then

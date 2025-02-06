@@ -232,6 +232,20 @@ return {
             hl.DiagnosticVirtualTextInfo = { fg = blend(palette.blue, palette.bg_dim, 0.6) }
             hl.DiagnosticVirtualTextHint = { fg = blend(palette.green, palette.bg_dim, 0.6) }
 
+            local palete_inv = require("everforest.colours").generate_palette(
+               { background = "hard", colours_override = function() end },
+               "light"
+            )
+            hl.MiniIconsAzureInv = { fg = palete_inv.blue, bg = palete_inv.none }
+            hl.MiniIconsBlueInv = { fg = palete_inv.blue, bg = palete_inv.none }
+            hl.MiniIconsCyanInv = { fg = palete_inv.aqua, bg = palete_inv.none }
+            hl.MiniIconsGreenInv = { fg = palete_inv.green, bg = palete_inv.none }
+            hl.MiniIconsGreyInv = { fg = palete_inv.grey2, bg = palete_inv.none }
+            hl.MiniIconsOrangeInv = { fg = palete_inv.orange, bg = palete_inv.none }
+            hl.MiniIconsPurpleInv = { fg = palete_inv.purple, bg = palete_inv.none }
+            hl.MiniIconsRedInv = { fg = palete_inv.red, bg = palete_inv.none }
+            hl.MiniIconsYellowInv = { fg = palete_inv.yellow, bg = palete_inv.none }
+
             -- hl.LspSignatureActiveParameter = { underline = true }
          end,
          diagnostic_text_highlight = false, -- only underline
@@ -328,7 +342,7 @@ return {
       end
    },
 
-   { -- bamboo
+   { -- Bamboo
       'ribru17/bamboo.nvim',
       enabled = false,
       lazy = false,
@@ -348,4 +362,12 @@ return {
          require('bamboo').load()
       end,
    },
+
+   {
+      "echasnovski/mini.icons",
+      config = function(plugin, opts)
+         require("mini.icons").setup(opts)
+         MiniIcons.mock_nvim_web_devicons()
+      end,
+   }
 }

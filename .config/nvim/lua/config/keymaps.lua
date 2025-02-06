@@ -9,9 +9,7 @@ local cmd = function(cmd)
 end
 
 --[[ LEADER ]]
---
 map({ "n", "v" }, "<Space>", nil)
-vim.g.mapleader = " "
 
 
 --[[ MOVEMENT ]]
@@ -179,7 +177,7 @@ map("n", "[t", vim.cmd.tabprevious, { desc = "Tab previous" })
 map("n", "]t", vim.cmd.tabnext, { desc = "Tab next" })
 
 --[[ DIAGNOSTICS ]]
-map("n", "<leader>ud",
+map("n", "<leader>uD",
    function()
       -- in case focus is in loclist
       local curr_win = vim.fn.getloclist(0, { all = 1 }).winid or vim.api.nvim_get_current_win()
@@ -196,7 +194,7 @@ map("n", "<leader>ud",
    end,
    { desc = "Toggle diagnostics" })
 
-map("n", "<leader>cd", function()
+map("n", "<leader>ud", function()
    local is_visible = require("utils.loclist").is_visible()
    if not is_visible then
       vim.diagnostic.setloclist({ open = true })
@@ -213,7 +211,7 @@ map("n", "<leader>cd", function()
       vim.cmd.lclose()
       vim.api.nvim_exec_autocmds("CursorMoved", {})
    end
-end, { desc = "Open diagnostics list" })
+end, { desc = "Toggle diagnostics list" })
 
 map("n", "[d", function()
    local diagnostics = vim.diagnostic.get(0)
@@ -249,6 +247,16 @@ require("utils.lsp").on_attach(
       lsp_map("n", "<leader>cn", require("utils.lazy").has('inc-rename.nvim') and ":IncRename " or vim.lsp.buf.rename, "rename", { desc = "Rename (LSP)" })
       lsp_map("n", "<leader>cr", vim.lsp.buf.code_action, "codeAction", { desc = "Code Action" })
       lsp_map({ "n", "x" }, "<leader>cf", vim.lsp.buf.format, "documentFormatting", { desc = "Format Code" })
+      lsp_map(
+         "n",
+         "<leader>ui",
+         function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({0}),{0})
+            require("utils.log").toggle("inlay hints", vim.lsp.inlay_hint.is_enabled({0}))
+         end,
+         nil,
+         { desc = "Toggle inlay hints" }
+      )
    end,
    { desc = "LSP keymaps" }
 )

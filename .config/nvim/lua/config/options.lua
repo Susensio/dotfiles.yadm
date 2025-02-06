@@ -24,25 +24,26 @@ set.shell = "/usr/bin/bash"                   -- Avoid pluggin problems
 set.isfname:append("{,}")                     -- Include curly braces in file name (${VAR})
 
 -- VISUAL SETTINGS: Theme, cursor appearance, line numbers, folding and text display.
-set.termguicolors = true                     -- Enable true color support
-set.background = "dark"                      -- Use a dark background
-set.number = true                            -- Show line numbers
-set.relativenumber = true                    -- Show relative line numbers
-set.signcolumn = "auto:1"                     -- Do not append an extra column for diagnostics
-set.cursorline = true                        -- Highlight the current line
+set.termguicolors = true                      -- Enable true color support
+set.background = "dark"                       -- Use a dark background
+set.number = true                             -- Show line numbers
+set.relativenumber = true                     -- Show relative line numbers
+set.signcolumn = "yes:1"                      -- Do not append an extra column for diagnostics
+set.cursorline = true                         -- Highlight the current line
 set.guicursor = ""
-set.guicursor:append("n-v-c-sm:block")       -- Block non insert mode
-set.guicursor:append("i-ci-ve:ver25")        -- Insert mode vertical
-set.guicursor:append("i-ci-ve-c:blinkon700") -- Blink cursor in insert mode
-set.guicursor:append("i-ci-ve-c:iCursor")    -- Different color in insert mode
+set.guicursor:append("n-v-c-sm:block")        -- Block non insert mode
+set.guicursor:append("i-ci-ve:ver25")         -- Insert mode vertical
+set.guicursor:append("i-ci-ve-c:blinkon700")  -- Blink cursor in insert mode
+set.guicursor:append("i-ci-ve-c:iCursor")     -- Different color in insert mode
 set.guicursor:append("r-cr-o:hor20")
 set.foldcolumn = "1"
-set.foldmethod = "indent"                    -- Set fold method to indent
-set.foldtext = ""                            -- Disable fold text
-set.foldlevel = 99                           -- Start with all folds open
-set.foldlevelstart = 99                      -- Start with all folds open
-set.list = true                              -- Show non printable characters
-set.listchars = {                            -- Define characters for non printable chars
+set.foldmethod = "indent"                     -- Set fold method to indent
+set.foldtext = ""                             -- Disable fold text
+set.foldlevel = 99                            -- Start with all folds open
+set.foldnestmax = 5                           -- Maximum fold nesting
+set.foldlevelstart = 99                       -- Start with all folds open
+set.list = true                               -- Show non printable characters
+set.listchars = {                             -- Define characters for non printable chars
    tab = "» ",
    trail = "·",
    nbsp = "+",
@@ -52,13 +53,12 @@ set.fillchars = {
    foldopen = "",
    foldsep = " ",
    foldclose = "",
+   diff = " ",
 }
 
 -- Special highlighting for root user
 if env.USER == "root" then
-   highlight(0, "LineNr", {ctermfg = "red"})
-else
-   highlight(0, "LineNr", {ctermfg = "grey"})
+   highlight(0, "CursorLineNr", {ctermfg = "red"})
 end
 
 -- LSP
@@ -77,62 +77,77 @@ lsp.on_attach(
    { once = true, desc = "LSP hover and signature help borders" }
 )
 
--- Diagnostics
-set.updatetime = 1000                         -- User for CursorHold autocmd
-lsp.on_attach(
-   function(client, buffer)
-      vim.diagnostic.config({
-         update_on_insert = false,
-         virtual_text = {
-            severity = { min = vim.diagnostic.severity.WARN },
-            format = function(diagnostic)
-               local MIN_WIDTH = 15
-               local MAX_WIDTH = 80
-               local first_line = diagnostic.message:gmatch("[^\n]*")()
-               -- BUG: this fails if the first sentence has a dot inside quotes
-               local patterns = {
-                  "(.-[^%.]%. )",   -- first sentence
-                  "(.-): ",         -- first lhs
-               }
-               local result = first_line
-               while #first_line > MAX_WIDTH do
-                  -- pop the first pattern
-                  local pattern = table.remove(patterns, 1)
-                  if not pattern then break end
-                  local reduced = result:match(pattern) or result
-                  if #reduced > MIN_WIDTH then
-                     result = reduced
-                  end
-               end
-               return result
-            end
-         },
-         severity_sort = true,
-         float = {
-            border = "single",
-            focusable = false,
-            scope = "cursor",
-            close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-            header = false,
-            title_pos = "left",
-            prefix = " ",
-            suffix = " ",
-         },
-      })
-      -- Highlight line number instead of having icons in sign column
-      for _, diag in ipairs({ "Error", "Warn", "Info", "Hint" }) do
-         local name = "DiagnosticSign" .. diag
-         vim.fn.sign_define(name, {text = "", texthl = name, linehl = "", numhl = name,})
+vim.lsp.inlay_hint.enable(false)
+vim.api.nvim_create_autocmd("InsertEnter", {
+   desc = "Disable lsp.inlay_hint when in insert mode",
+   callback = function(args)
+      local filter = { bufnr = args.buf }
+      local inlay_hint = vim.lsp.inlay_hint
+      if inlay_hint.is_enabled(filter) then
+         inlay_hint.enable(false, filter)
+         vim.api.nvim_create_autocmd("InsertLeave", {
+            once = true,
+            desc = "Re-enable lsp.inlay_hint when leaving insert mode",
+            callback = function()
+               inlay_hint.enable(true, filter)
+            end,
+         })
       end
    end,
-   { once = true, desc = "LSP diagnostic settings" }
-)
+})
+
+-- Diagnostics
+set.updatetime = 1000                         -- User for CursorHold autocmd
+vim.diagnostic.config({
+   update_on_insert = false,
+   virtual_text = {
+      severity = { min = vim.diagnostic.severity.WARN },
+      format = function(diagnostic)
+         local MIN_WIDTH = 15
+         local MAX_WIDTH = 80
+         local first_line = diagnostic.message:gmatch("[^\n]*")()
+         -- BUG: this fails if the first sentence has a dot inside quotes
+         local patterns = {
+            "(.-[^%.]%. )",   -- first sentence
+            "(.-): ",         -- first lhs
+         }
+         local result = first_line
+         while #first_line > MAX_WIDTH do
+            -- pop the first pattern
+            local pattern = table.remove(patterns, 1)
+            if not pattern then break end
+            local reduced = result:match(pattern) or result
+            if #reduced > MIN_WIDTH then
+               result = reduced
+            end
+         end
+         return result
+      end
+   },
+   severity_sort = true,
+   float = {
+      border = "single",
+      focusable = false,
+      scope = "cursor",
+      close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+      header = false,
+      title_pos = "left",
+      prefix = " ",
+      suffix = " ",
+      source = "if_many",
+   },
+})
+-- Highlight line number instead of having icons in sign column
+for _, diag in ipairs({ "Error", "Warn", "Info", "Hint" }) do
+   local name = "DiagnosticSign" .. diag
+   vim.fn.sign_define(name, {text = "", texthl = name, linehl = "", numhl = name,})
+end
 
 -- Completion
-set.completeopt = {
-   "menuone",  -- Show the popup menu even if there is only one match
-   "longest",
-}
+-- set.completeopt = {
+--    "menuone",  -- Show the popup menu even if there is only one match
+--    -- "longest",
+-- }
 set.shortmess:append("c")                     -- Do not show completion messages
 
 -- BEHAVIOR SETTINGS: Tabs, scrolling, search, and special characters handling.

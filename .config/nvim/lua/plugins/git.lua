@@ -31,7 +31,7 @@ return {
 
    { -- blame
       "FabijanZulj/blame.nvim",
-      event = "LazyFile",
+      -- event = "LazyFile",
       cmd = "BlameToggle",
       init = function()
          vim.keymap.set(
@@ -63,6 +63,7 @@ return {
       opts = {
          git_dir = "$XDG_DATA_HOME/yadm/repo.git",
          git_work_tree = "$HOME",
+         disable_pattern = "^%.git$",
       }
    },
 

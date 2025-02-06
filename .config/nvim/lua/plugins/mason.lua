@@ -18,4 +18,18 @@ return {
          automatic_installation = true,
       },
    },
+
+   { -- mason-nvim-lint
+      "rshkarin/mason-nvim-lint",
+      init = function(plugin)
+         require("utils.lazy").load_on_load(plugin, "nvim-lint")
+      end,
+      dependencies = {
+         "williamboman/mason.nvim",
+         "mfussenegger/nvim-lint",
+      },
+      opts = {
+         automatic_installation = true,
+      }
+   },
 }

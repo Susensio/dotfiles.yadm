@@ -76,7 +76,10 @@ return {
          },
          indent = {
             enable = true,
-            disable = { "yaml" },
+            disable = {
+               "yaml",
+               "toml",
+            },
          },
          incremental_selection = {
             enable = true,

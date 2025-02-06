@@ -45,4 +45,18 @@ function M.on_rename(from, to)
    end
 end
 
+M.code_action = setmetatable({}, {
+  __index = function(_, action)
+    return function()
+      vim.lsp.buf.code_action({
+        apply = true,
+        context = {
+          only = { action },
+          diagnostics = {},
+        },
+      })
+    end
+  end,
+})
+
 return M

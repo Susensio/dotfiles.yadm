@@ -14,6 +14,27 @@ return {
       cmd = "Bang",
    },
 
+   { --bigfile
+      "pteroctopus/faster.nvim",
+      lazy = false,
+      opts = {
+         behaviours = {
+            bigfile = {
+               filesize = 5,
+            },
+         },
+      },
+   },
+
+   { --spellfile
+      "cuducos/spellfile.nvim",
+      event = "SpellFileMissing",
+      config = function()
+         require("spellfile_nvim").load_file("es_es")
+      end,
+      -- lazy = false,
+   }
+
    -- { -- mini.trailspace
    --   "echasnovski/mini.trailspace",
    --   enabled = true,

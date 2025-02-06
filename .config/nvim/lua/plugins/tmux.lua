@@ -11,6 +11,7 @@ return {
             function()
                vim.cmd.stopinsert()
                require("tmux").move_left()
+               require("lualine").refresh()
             end,
             { desc = "Move to left split" }
          )
@@ -20,6 +21,7 @@ return {
             function()
                vim.cmd.stopinsert()
                require("tmux").move_right()
+               require("lualine").refresh()
             end,
             { desc = "Move to right split" }
          )
@@ -29,6 +31,7 @@ return {
             function()
                vim.cmd.stopinsert()
                require("tmux").move_top()
+               require("lualine").refresh()
             end,
             { desc = "Move to top split" }
          )
@@ -38,6 +41,7 @@ return {
             function()
                vim.cmd.stopinsert()
                require("tmux").move_bottom()
+               require("lualine").refresh()
             end,
             { desc = "Move to bottom split" }
          )

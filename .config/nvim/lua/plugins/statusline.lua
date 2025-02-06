@@ -32,12 +32,15 @@ return {
       event = "VeryLazy",
       enabled = true,
       dependencies = {
-         "nvim-tree/nvim-web-devicons",
+         "echasnovski/mini.icons",
          "linrongbin16/lsp-progress.nvim",
-         { "AndreM222/copilot-lualine", dev = false },
+         {
+            "Susensio/copilot-lualine",
+            branch = "bugfix/is-sleep-logic"
+         },
       },
       init = function()
-         vim.opt.winbar = " "
+         vim.o.winbar = " "
          vim.g.lualine_laststatus = vim.o.laststatus
          if vim.fn.argc(-1) > 0 then
             -- set an empty statusline till lualine loads
@@ -53,18 +56,55 @@ return {
       opts = function()
          local colors = _G.palette
          local palette = colors.raw
+
+         local mini_filetype = require("lualine.components.filetype"):extend()
+         function mini_filetype:apply_icon()
+            local icon, icon_highlight_group = MiniIcons.get("file", vim.fn.expand("%:t"))
+            if icon == nil then
+               icon, icon_highlight_group = MiniIcons.get("filetype", vim.bo.filetype)
+            end
+            icon_highlight_group = icon_highlight_group .. 'Inv'
+            if self.options.colored then
+               -- icon = require("utils").highlight(icon_highlight_group)(icon)
+               local highlight_color = require("lualine.utils.utils").extract_highlight_colors(icon_highlight_group, 'fg')
+               if highlight_color then
+                  local default_highlight = self:get_default_hl()
+                  local icon_highlight = self.icon_hl_cache[highlight_color]
+                  if not icon_highlight or not require("lualine.highlight").highlight_exists(icon_highlight.name .. '_normal') then
+                     icon_highlight = self:create_hl({ fg = highlight_color }, icon_highlight_group)
+                     self.icon_hl_cache[highlight_color] = icon_highlight
+                  end
+
+                  icon = self:format_hl(icon_highlight) .. icon .. default_highlight
+               end
+            end
+            icon = icon .. " "
+            if self.options.icon_only then
+               self.status = icon
+            else
+               self.status = icon .. self.status
+            end
+         end
+
          return {
             options = {
                icons_enabled = true,
                -- theme = "auto",
                section_separators = { left = "", right = "" },
                component_separators = { left = "", right = "" },
-               disabled_filetypes = { "starter" },
+               -- component_separators = { left = "◢", right = "◣ " },
+               disabled_filetypes = {
+                  "starter",
+                  winbar = {
+                     "qf",
+                  }
+               },
                ignore_focus = {
                   -- "minifiles",
                   -- "minipick",
                },
                globalstatus = true,
+               always_show_tabline = false,
                refresh = {
                   statusline = 500,
                },
@@ -154,6 +194,21 @@ return {
                },
                lualine_y = {
                   {
+                     "encoding",
+                     -- cond = function()
+                     --    return vim.bo.fileencoding ~= "utf-8"
+                     -- end,
+                  },
+                  {
+                     "fileformat",
+                     cond = function()
+                        return vim.bo.fileformat ~= "unix"
+                     end,
+                     padding = { left = 0, right = 2 },
+                  },
+               },
+               lualine_z = {
+                  {
                      "progress",
                   },
                   { -- total number of lines
@@ -162,8 +217,6 @@ return {
                      end,
                      padding = { left = 0, right = 1 },
                   },
-               },
-               lualine_z = {
                   -- { "mode" },
                },
             },
@@ -193,11 +246,13 @@ return {
             winbar = {
                lualine_a = {
                   {
-                     "filetype",
+                     mini_filetype,
                      colored = true,
                      icon_only = true,
                      padding = { left = 1, right = 0 },
-                     color = { bg = palette.fg, fg = palette.bg0, gui = "bold" },
+                     color = function()
+                        return { bg = palette.fg, fg = palette.bg0, gui = "bold" }
+                     end,
                   },
                   {
                      "filename",
@@ -213,7 +268,7 @@ return {
             inactive_winbar = {
                lualine_a = {
                   {
-                     "filetype",
+                     mini_filetype,
                      colored = false,
                      icon_only = true,
                      padding = { left = 1, right = 0 },
@@ -234,7 +289,8 @@ return {
                      mode = 0,
                      show_modified_status = false,
                      padding = 1,
-                     -- separator = { left = "◢", right = "◣ " },
+                     -- component_separators = { left = " ", right = " " },
+                     -- separator = { left = "◢", right = "◣" },
                   },
                },
             },
@@ -294,50 +350,51 @@ return {
                --   },
                -- },
                -- "oil",
-               {
-                  filetypes = { "oil" },
-                  sections = {
-                     -- lualine_b = { 'branch' },
-                     -- lualine_b = {
-                     --   -- {
-                     --   --   -- 'branch',
-                     --   --   function()
-                     --   --     -- local cache = {}
-                     --   --
-                     --   --     local ok, oil = pcall(require, 'oil')
-                     --   --     if ok then
-                     --   --       local current_dir = oil.get_current_dir()
-                     --   --       local gb_module = require('lualine.components.branch.git_branch')
-                     --   --       local git_dir = gb_module.find_git_dir(current_dir)
-                     --   --       return "todo..."
-                     --   --     else
-                     --   --       return ''
-                     --   --     end
-                     --   --   end,
-                     --   --   icon = ''
-                     --   -- },
-                     -- },
-                     lualine_a = {
-                        {
-                           function()
-                              local ok, oil = pcall(require, 'oil')
-                              if ok then
-                                 return vim.fn.fnamemodify(oil.get_current_dir() or '', ":~")
-                              else
-                                 return ''
-                              end
-                           end,
-                           separator = { right = "◤", },
-                        }
-                     },
-                     lualine_z = { 'mode' },
-                  },
-               },
+               -- {
+               --    filetypes = { "oil" },
+               --    sections = {
+               --       -- lualine_b = { 'branch' },
+               --       -- lualine_b = {
+               --       --   -- {
+               --       --   --   -- 'branch',
+               --       --   --   function()
+               --       --   --     -- local cache = {}
+               --       --   --
+               --       --   --     local ok, oil = pcall(require, 'oil')
+               --       --   --     if ok then
+               --       --   --       local current_dir = oil.get_current_dir()
+               --       --   --       local gb_module = require('lualine.components.branch.git_branch')
+               --       --   --       local git_dir = gb_module.find_git_dir(current_dir)
+               --       --   --       return "todo..."
+               --       --   --     else
+               --       --   --       return ''
+               --       --   --     end
+               --       --   --   end,
+               --       --   --   icon = ''
+               --       --   -- },
+               --       -- },
+               --       lualine_a = {
+               --          {
+               --             function()
+               --                local ok, oil = pcall(require, 'oil')
+               --                if ok then
+               --                   return vim.fn.fnamemodify(oil.get_current_dir() or '', ":~")
+               --                else
+               --                   return ''
+               --                end
+               --             end,
+               --             separator = { right = "◤", },
+               --          }
+               --       },
+               --       lualine_z = { 'mode' },
+               --    },
+               -- },
             },
          }
       end,
       config = function(plugin, opts)
          vim.o.laststatus = vim.g.lualine_laststatus
+         vim.o.winbar = ""
 
          ---@type string|table
          local theme = "auto"
@@ -396,74 +453,74 @@ return {
          }
          opts.options.theme = theme
 
-         local showtabline = vim.o.showtabline
+         -- local showtabline = vim.o.showtabline
          require(plugin.main).setup(opts)
-         vim.o.showtabline = showtabline
+         -- vim.o.showtabline = showtabline
       end
    },
 
-   { -- incline
-      "b0o/incline.nvim",
-      main = "incline",
-      enabled = false,
-      version = false,
-      event = "VeryLazy",
-      opts = {
-         render = function(props)
-            local colors = _G.palette
-            local palette = colors.raw
-
-            local bufname = vim.api.nvim_buf_get_name(props.buf)
-            local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(bufname)
-
-
-            local res = bufname ~= "" and vim.fn.fnamemodify(bufname, ":~:.") or "[No Name]"
-
-            if vim.bo[props.buf].modified then
-               res = res .. " [+]"
-            end
-
-            if bufname ~= "" and vim.bo[props.buf].buftype == ""  and vim.fn.filereadable(bufname) == 0 then
-               res = res .. " [New]"
-            end
-
-            if vim.bo[props.buf].readonly or vim.bo[props.buf].modifiable == false then
-               res = res .. " [-]"
-            end
-
-            local bg = props.focused and palette.fg or palette.grey0
-            local fg = palette.bg0
-
-            return {
-               ft_icon and { " "..ft_icon, guifg = ft_color, guibg = bg } or "",
-               { " "..res.." ", gui = "bold", guibg = bg, guifg = fg },
-               { "◤", guifg = bg, gui = "NONE" },
-            }
-         end,
-         hide = {
-            focused_win = false,
-            -- only_win = "count_ignored",
-         },
-         highlight = {
-            groups = {
-               InclineNormal = "Normal",
-               InclineNormalNC = "NormalNC",
-            },
-         },
-         window = {
-            overlap = {
-               borders = true,
-            },
-            margin = {
-               horizontal = 0,
-               vertical = 1,
-            },
-            padding = 0,
-            placement = {
-               horizontal = "left",
-               vertical = "bottom",
-            }
-         },
-      },
-   }
+   -- { -- incline
+   --    "b0o/incline.nvim",
+   --    main = "incline",
+   --    enabled = false,
+   --    version = false,
+   --    event = "VeryLazy",
+   --    opts = {
+   --       render = function(props)
+   --          local colors = _G.palette
+   --          local palette = colors.raw
+   --
+   --          local bufname = vim.api.nvim_buf_get_name(props.buf)
+   --          local ft_icon, ft_color = require("nvim-web-devicons").get_icon_color(bufname)
+   --
+   --
+   --          local res = bufname ~= "" and vim.fn.fnamemodify(bufname, ":~:.") or "[No Name]"
+   --
+   --          if vim.bo[props.buf].modified then
+   --             res = res .. " [+]"
+   --          end
+   --
+   --          if bufname ~= "" and vim.bo[props.buf].buftype == ""  and vim.fn.filereadable(bufname) == 0 then
+   --             res = res .. " [New]"
+   --          end
+   --
+   --          if vim.bo[props.buf].readonly or vim.bo[props.buf].modifiable == false then
+   --             res = res .. " [-]"
+   --          end
+   --
+   --          local bg = props.focused and palette.fg or palette.grey0
+   --          local fg = palette.bg0
+   --
+   --          return {
+   --             ft_icon and { " "..ft_icon, guifg = ft_color, guibg = bg } or "",
+   --             { " "..res.." ", gui = "bold", guibg = bg, guifg = fg },
+   --             { "◤", guifg = bg, gui = "NONE" },
+   --          }
+   --       end,
+   --       hide = {
+   --          focused_win = false,
+   --          -- only_win = "count_ignored",
+   --       },
+   --       highlight = {
+   --          groups = {
+   --             InclineNormal = "Normal",
+   --             InclineNormalNC = "NormalNC",
+   --          },
+   --       },
+   --       window = {
+   --          overlap = {
+   --             borders = true,
+   --          },
+   --          margin = {
+   --             horizontal = 0,
+   --             vertical = 1,
+   --          },
+   --          padding = 0,
+   --          placement = {
+   --             horizontal = "left",
+   --             vertical = "bottom",
+   --          }
+   --       },
+   --    },
+   -- }
 }
