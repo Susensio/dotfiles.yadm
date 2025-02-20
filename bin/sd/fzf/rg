@@ -13,8 +13,8 @@ declare -Ar COLORS=(
 )
 # Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
 rm -f /tmp/rg-fzf-{r,f}
-HEADER="${COLORS[BOLD]}Enter${COLORS[OFF]}=edit"
-HEADER+=" ${COLORS[BOLD]}ALT-Enter${COLORS[OFF]}=insert"
+HEADER="${COLORS[BOLD]}Enter${COLORS[OFF]}=insert"
+# HEADER+=" ${COLORS[BOLD]}ALT-Enter${COLORS[OFF]}=insert"
 HEADER+=" ${COLORS[BOLD]}CTRL-F${COLORS[OFF]}=fzf"
 HEADER+=" ${COLORS[BOLD]}CTRL-G${COLORS[OFF]}=grep"
 
@@ -30,8 +30,9 @@ INITIAL_QUERY="${*:-}"
   --header "$HEADER" \
   --delimiter : \
   --preview 'bat --color=always {1} --highlight-line {2}' \
-  --bind "alt-enter:become(echo {1})" \
-  --bind "enter:become(nvim {1} +{2})"
+  --bind "enter:become(echo {1})"
+  # --bind "alt-enter:become(echo {1})" \
+  # --bind "enter:become(nvim {1} +{2})"
   # --bind "alt-enter:abort+become(nvim {1} +{2})"
   # \
   # | xargs -d':' -r bash -c 'nvim "$0" +$1'

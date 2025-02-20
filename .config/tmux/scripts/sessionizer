@@ -29,7 +29,7 @@ if [[ -n $cache ]] && [[ -f "$cache_file" ]]; then
 fi
 
 tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
-zoxide_max=50
+zoxide_max=100
 sep=$'\x1f'
 
 
