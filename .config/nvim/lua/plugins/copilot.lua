@@ -32,7 +32,7 @@ return {
             keymap = {
                -- accept_word = '<C-e>',  -- Like end-of-word
                accept_line = '<C-l>',
-               -- accept = '<C-j>',
+               accept = false,
             },
 
          },

@@ -3,3 +3,6 @@ target = "~/.local/bin"
 
 ["ianthehenry/sd"]
 download_source = true
+
+["sxyazi/yazi"]
+asset_filters = ["gnu"]

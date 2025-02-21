@@ -7,6 +7,7 @@
 !/.config/yadm/
 !/.config/cidm/
 !/.config/fish/
+!/.config/eget/
 !/.config/profile.d/
 !/.local/share/yadm/archive
 !/.github
