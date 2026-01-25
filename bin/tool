@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# Wraps mise to install global tools with apt interface
+set -euo pipefail
+
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+BIN_HOME="${HOME}/.local/bin"
+MAN_HOME="${XDG_DATA_HOME}/man"
+FISH_COMPLETIONS="${XDG_DATA_HOME}/fish/vendor_completions.d"
+MISE_HOME="${XDG_DATA_HOME}/mise"
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") COMMAND [ARGS...]
+Manage global tools using mise.
+Commands:
+  install [TOOL@VERSION]...  Install one or more global tools
+  remove [TOOL]...           Remove one or more global tools
+  list                       List installed global tools
+EOF
+}
+
+# Parser helper
+extract_tool_names() {
+  local tools=()
+  for arg in "$@"; do
+    # Skip flags
+    if [[ "$arg" != -* ]]; then
+      # Strip version (@...) to get just the name
+      tools+=("${arg%%@*}")
+    fi
+  done
+  echo "${tools[@]}"
+}
+
+find_bins() {
+  local tool bin_path
+  tool="$1"
+  bin_path="$(mise bin-paths "$tool")"
+  find -L "$bin_path" -type f -executable
+}
+
+find_manpages() {
+  local tool_path="$1"
+
+  find -L "$tool_path" -type f -name "*.[1-9]" | while read -r manpage; do
+    if [[ "$(file -bL --mime-type "$manpage")" = text/* ]]; then
+      echo "$manpage"
+    fi
+  done
+}
+
+find_fish_completion() {
+  bin="$1"
+  tool_path="$2"
+  find -L "$tool_path" -type f -name "$(basename "$bin").fish"
+}
+
+install() {
+  mise use --global "$@"
+
+  for tool in $(extract_tool_names "$@"); do
+    # Remove possible old symlinks first
+    unlink "$tool"
+    symlink "$tool"
+  done
+}
+
+symlink() {
+  local tool tool_path
+  tool="$1"
+  tool_path="$(mise where "$tool")"
+
+  find_bins "$tool" | while read -r bin; do
+    local bin_link
+    bin_link="$BIN_HOME/$(basename "$bin")"
+
+    # Create bin symlink (idempotent), fails if already exists and points elsewhere
+    [[ "$bin_link" -ef "$bin" ]] || ln -sv "$bin" "$bin_link"
+
+    # Create fish completion symlink if it exists
+    local fish_completion
+    fish_completion="$(find_fish_completion "$bin" "$tool_path")"
+    if [[ -f "$fish_completion" ]]; then
+      mkdir -p "$FISH_COMPLETIONS"
+      ln -sfv "$fish_completion" "$FISH_COMPLETIONS/"
+    fi
+  done
+  
+  find_manpages "$tool_path" | while read -r manpage; do
+    local section target_dir
+    section="${manpage##*.}"
+    [[ "$section" =~ ^[1-9]$ ]] || exit 1
+    target_dir="${MAN_HOME}/man${section}"
+    mkdir -p "$target_dir"
+    ln -sfv "$manpage" "$target_dir/"
+  done
+}
+
+remove() {
+  local tool tool_path
+  mise unuse --global --yes "$@"
+  for tool in "$@"; do
+    unlink "$tool"
+  done
+}
+
+unlink() {
+  local tool tool_path
+  tool="$1"
+  tool_path="$(mise where "$tool")"
+  # Must go to parent dir to remove other versions
+  unlink_dir "$(dirname "$tool_path")"
+}
+
+unlink_dir() {
+  local dir="$1"
+  # Clean up old symlinks that point to directory
+  find "$BIN_HOME/" -type l -lname "${dir}/*" -delete
+  find "$MAN_HOME/" -type l -lname "${dir}/*" -delete
+  find "$FISH_COMPLETIONS/" -type l -lname "${dir}/*" -delete
+}
+
+fix() {
+  unlink_dir "$MISE_HOME"
+  for tool in $(mise ls --global --installed --json | jq -r 'keys.[]'); do
+    symlink "$tool"
+  done
+}
+
+upgrade() {
+  mise upgrade --global "$@"
+}
+
+list() {
+  mise ls --global --installed "$@"
+}
+
+main() {
+  local cmd="$1"
+  shift || true
+
+  case "$cmd" in
+    install) install "$@" ;;
+    remove) remove "$@" ;;
+    upgrade) upgrade "$@" ;;
+    list) mise ls --global "$@" ;;
+    fix) fix ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+# Only run main if this script is executed, not sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi

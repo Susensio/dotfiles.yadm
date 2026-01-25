@@ -1,0 +1,11 @@
+[tools]
+fd = "latest"
+fzf = { version = "latest", postinstall = 'wget -q "https://raw.githubusercontent.com/junegunn/fzf/refs/tags/v$MISE_TOOL_VERSION/man/man1/$MISE_TOOL_NAME.1" -P "$MISE_TOOL_INSTALL_PATH"' }
+gemini = "latest"
+node = "lts"
+ripgrep = "latest"
+usage = "latest"
+yadm = { version = "latest", postinstall = 'wget -q "https://raw.githubusercontent.com/yadm-dev/yadm/refs/tags/$MISE_TOOL_VERSION/$MISE_TOOL_NAME.1" -P "$MISE_TOOL_INSTALL_PATH"' }
+
+[settings]
+experimental = true
