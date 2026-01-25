@@ -16,8 +16,8 @@ return {
          }
       },
       init = function()
-         -- vim.keymap.set("n", "<C-n>", require("illuminate").goto_next_reference, { desc = "Next Reference" })
-         -- vim.keymap.set("n", "<C-p>", require("illuminate").goto_prev_reference, { desc = "Prev Reference" })
+         vim.keymap.set("n", "<C-n>", require("illuminate").goto_next_reference, { desc = "Next Reference" })
+         vim.keymap.set("n", "<C-p>", require("illuminate").goto_prev_reference, { desc = "Prev Reference" })
          vim.keymap.set("n", "<leader>uw",
             function()
                require("illuminate").toggle()

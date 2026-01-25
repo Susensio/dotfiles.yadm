@@ -30,9 +30,9 @@ return {
             enabled = true,
             auto_trigger = true,
             keymap = {
-               -- accept_word = '<C-e>',  -- Like end-of-word
+               accept_word = '<C-Right>',  -- Like end-of-word
                accept_line = '<C-l>',
-               -- accept = '<C-j>',
+               accept = false,
             },
 
          },
