@@ -1,0 +1,4 @@
+# General dependencies
+curl
+git
+jq

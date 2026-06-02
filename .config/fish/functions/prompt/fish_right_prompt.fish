@@ -1,92 +1,27 @@
 function fish_right_prompt -d "Write out the right prompt"
-  set -l elements
-  set -lx last_status $status
-  set -l max_shlvl 1
-  if test -n "$TMUX" || test "$TERM_PROGRAM" = "vscode"
-    set max_shlvl (math $max_shlvl + 1)
-  end
+    set --local THRESHOLD 1000 # ms
+    set -l last_pipestatus $pipestatus
 
-  # Print git info
-  set --append elements (string trim -l (fish_git_prompt))
+    # Gather components
+    set -l components
 
-  # Print venv
-  if test -n "$VIRTUAL_ENV"
-    set --append elements '('(set_color blue)(_venv_name)(set_color normal)')'
-  end
-
-  # Duration of last command
-  set --local threshold 1000 # ms
-  if test $CMD_DURATION -gt $threshold && test $status_generation -gt 0
-    set --append elements (_format_cmd_duration)
-  end
-
-  # Background jobs indicator
-  if test (jobs | count) -gt 0
-    set --append elements (set_color --bold cyan)"●"(set_color normal)
-  end
-
-  # Print a fork symbol when in a subshell
-  if test $SHLVL -gt $max_shlvl
-    set --append elements (set_color --bold yellow)"⑂"(set_color normal)
-  end
-
-  echo -n (string join ' ' $elements)
-end
-
-function _venv_name
-  set -l venv_name
-  set -l venv_folder (basename "$VIRTUAL_ENV")
-  set -l VENV_DIR_NAMES env .env venv .venv
-  set -l ROOT_VENV "$XDG_DATA_HOME/venv"
-
-  if test "$VIRTUAL_ENV" = "$ROOT_VENV"
-    set venv_name "/venv"
-  else if contains $venv_folder $VENV_DIR_NAMES
-    set -l parent (dirname "$VIRTUAL_ENV")
-    # if pwd is inside parent, shorten
-    if test $parent = (pwd) || string match -q "$parent/*" (pwd)
-      set venv_name "$venv_folder"
-    else
-      set venv_name (basename "$parent")/"$venv_volder"
+    # Transient info next to the cursor
+    if not __prompt_is_final $argv
+        set -a components (__prompt_git)
+        set -a components (__prompt_venv)
+        set -a components (__prompt_job)
+        set -a components (__prompt_subshell)
     end
-  else
-    set venv_name "venv:"(basename "$VIRTUAL_ENV")
-  end
-  echo -n $venv_name
-end
 
-# https://github.com/jichu4n/fish-command-timer
-function _format_cmd_duration
-  set -l unit_color (set_color 999)
-  set -l num_color (set_color --bold brwhite)
-  set -l normal (set_color normal)
+    # # Sticky last command info
+    # if __prompt_is_fresh
+    #     set -a components (__prompt_timer)
+    #     set -a components (__prompt_status $last_pipestatus)
+    # end
 
-  set -l SEC 1000
-  set -l MIN 60000
-  set -l HOUR 3600000
+    string join --no-empty ' ' $components
 
-  set -l hours (math --scale=0 "$CMD_DURATION / $HOUR")
-  set -l mins (math --scale=0 "$CMD_DURATION % $HOUR / $MIN")
-
-  set -l millis 0
-  if test $hours -eq 0; and test $mins -eq 0
-    set millis 1
-  end
-  set -l secs (math --scale="$millis" "$CMD_DURATION % $MIN / $SEC")
-
-  set -l out
-  if test $hours -gt 0
-    set --append out {$num_color}{$hours}{$normal}{$unit_color}"h"{$normal}
-  end
-  if test $mins -gt 0
-    set --append out {$num_color}{$mins}{$normal}{$unit_color}"m"{$normal}
-  end
-  set --append out {$num_color}{$secs}{$normal}{$unit_color}"s"{$normal}
-
-  echo -n "["(string join '' $out)"]"
-end
-
-# https://github.com/acomagu/fish-async-prompt?tab=readme-ov-file#loading-indicator
-function fish_git_prompt_loading_indicator -a last_prompt
-    echo -n (set_color brblack)(uncolor "$last_prompt")(set_color normal)
+    if __prompt_is_final $argv
+        set --global __last_status_generation $status_generation
+    end
 end

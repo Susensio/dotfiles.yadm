@@ -5,50 +5,68 @@ MODE="pipe"
 SELECTION="clipboard"
 DISPLAY="${DISPLAY:-:0}"
 export DISPLAY
+FALLBACK_FILE="${XDG_RUNTIME_DIR:-/tmp}/clipboard_${USER:-shared}"
 
 get_system() {
-  if uname -r | grep -q -i wsl; then
+  if uname -r | grep -q -i "microsoft"; then
     echo "wsl"
-  elif [[ $XDG_SESSION_TYPE == "wayland" ]]; then
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "macos"
+  elif [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
     echo "wayland"
-  else [[ $XDG_SESSION_TYPE == "x11" ]]
+  elif [[ "$XDG_SESSION_TYPE" == "x11" ]] || [[ -n "$DISPLAY" ]]; then
     echo "x11"
-  # else
-  #   echo "Unsupported system" >&2
-  #   exit 1
+  elif [[ -n "$TMUX" ]]; then
+    echo "tmux"
+  else
+    echo "fallback"
   fi
 }
 
 # Copying function
 copy_to_clipboard() {
-  local data
-  IFS='' read -d '' -r data
+  local system
+  system=$(get_system)
 
-  case "$(get_system)" in
+  case "$system" in
     wayland)
-      # printf '%s' "$data" | xsel -i --"$SELECTION"
-      # return 0
       if [ "$SELECTION" == "clipboard" ]; then
-        printf '%s' "$data" | wl-copy
+        wl-copy
       else
-        printf '%s' "$data" | wl-copy --primary
+        wl-copy --primary
       fi
       ;;
     x11)
-      printf '%s' "$data" | xsel -i --"$SELECTION"
+      xsel -i --"$SELECTION"
       ;;
     wsl)
-      printf '%s' "$data" | /mnt/c/Windows/System32/clip.exe
+      /mnt/c/Windows/System32/clip.exe
+      ;;
+    macos)
+      pbcopy
+      ;;
+    tmux)
+      tmux load-buffer -
+      ;;
+    fallback)
+      rm -f "$FALLBACK_FILE"
+      cat > "$FALLBACK_FILE"
+      chmod 600 "$FALLBACK_FILE"
+      ;;
+    *)
+      echo "Error: Unsupported or unknown system: $system" >&2
+      exit 1
       ;;
   esac
 }
 
 # Pasting function
 paste_from_clipboard() {
-  case "$(get_system)" in
+  local system
+  system=$(get_system)
+
+  case "$system" in
     wayland)
-      # xsel -o --"$SELECTION"
-      # return 0
       if [ "$SELECTION" == "clipboard" ]; then
         wl-paste --no-newline
       else
@@ -61,20 +79,35 @@ paste_from_clipboard() {
     wsl)
       powershell.exe -noprofile -c '[Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))'
       ;;
+    macos)
+      pbpaste
+      ;;
+    tmux)
+      tmux save-buffer -
+      ;;
+    fallback)
+      if [[ -f "$FALLBACK_FILE" ]]; then
+        cat "$FALLBACK_FILE"
+      fi
+      ;;
+    *)
+      echo "Error: Unsupported or unknown system: $system" >&2
+      exit 1
+      ;;
   esac
 }
 
 # Parse command line arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    copy|paste)
+    copy | paste)
       MODE=$1
       shift
       ;;
-    -s|--selection)
+    -s | --selection)
       shift
       case "$1" in
-        "clipboard"|"primary")
+        "clipboard" | "primary")
           SELECTION="$1"
           ;;
         *)
@@ -109,4 +142,5 @@ case $MODE in
   *)
     echo "ERROR: No command provided" >&2
     exit 1
+    ;;
 esac

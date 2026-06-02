@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+sed -E '
+    # Strip whitespaces and newlines (added later)
+    s/^[[:space:]]*//;
+    s/[[:space:]]*$//;
+    /^$/d;
+
+    # Prepend newline before [section] (except first line `1!`)
+    /^\[/ { 1! s/^/\n/; }
+
+    # Normalize spacing around `=`
+    /=/ s/[[:space:]]*=[[:space:]]*/ = /;
+
+    # Reindent
+    /^\[/b;    # not sections
+    /^[#;]/b;  # nor comments
+    s/^/\t/;
+'

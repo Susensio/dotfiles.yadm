@@ -1,8 +1,6 @@
-[pull]
-	ff = only
-
 [user]
 	name = Saúl Nogueras
+	email = susensio@gmail.com
 
 [init]
 	defaultBranch = master
@@ -17,44 +15,32 @@
 	last = log -1 HEAD --stat
 	cm = commit -m
 	big = !git rev-list --objects --all | \
-					git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | \
-					sed -n 's/^blob //p' | \
-					sort --numeric-sort --key=2 | \
-					cut -c 1-12,41- | \
-					numfmt --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
+	git cat-file --batch-check = '%(objecttype) %(objectname) %(objectsize) %(rest)' | \
+	sed -n 's/^blob //p' | \
+	sort --numeric-sort --key = 2 | \
+	cut -c 1-12,41- | \
+	numfmt --field = 2 --to=iec-i --suffix=B --padding=7 --round=nearest
 	blob = log --raw --all --find-object
 
-[credential]
-	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
-
-[include]
-	path = config.local
-	path = config.host
-	path = config.delta
-
-[filter "lfs"]
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-
 [credential "https://github.com"]
-	helper =
-	helper = !/usr/bin/gh auth git-credential
+	helper = !gh auth git-credential
 
 [credential "https://gist.github.com"]
-	helper =
-	helper = !/usr/bin/gh auth git-credential
+	helper = !gh auth git-credential
 
 [push]
 	autoSetupRemote = true
+
+[pull]
+	ff = only
 
 [rebase]
 	autoStash = true
 
 [blame]
 	coloring = highlightRecent
-[merge]
-	tool = nvimdiff
-[mergetool "nvimdiff"]
-	cmd = nvim -n -c "DiffviewOpen" "$MERGE"
+
+[include]
+	path = config.local
+	path = delta.config
+	path = lfs.config

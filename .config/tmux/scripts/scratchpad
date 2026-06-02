@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+SUFFIX="_scratchpad"
+current_socket="$(tmux display -pF "#{b:socket_path}")"
+
+# Toggle
+if [[ "$current_socket" == *$SUFFIX ]]; then
+  tmux detach
+  exit 0
+fi
+
+scratch_socket=${current_socket}${SUFFIX}
+scratchpad() { tmux -L "$scratch_socket" "$@"; }
+
+current_client="$(tmux -L "$current_socket" display -pF "#{client_tty}")"
+current_session_id="$(tmux -L "$current_socket" display -pF "#{session_id}")"
+scratch_window_name="main"
+
+action="toggle"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    clean | toggle) action="$1"; shift ;;
+    -c | --client) current_client="$2"; shift 2 ;;
+    -s | --session) current_session_id="$2"; shift 2 ;;
+    -n | --name) scratch_window_name="$2"; shift 2 ;;
+    *) break ;;
+  esac
+done
+
+command=("$@")
+
+scratch_session_name="$(echo "$current_session_id" | tr '$' '_')"
+
+if [[ "$action" == "clean" ]]; then
+  scratchpad kill-session -t "=$scratch_session_name"
+  exit 0
+fi
+
+scratch_session_target="=$scratch_session_name"
+scratch_window_target="=$scratch_session_name:=$scratch_window_name"
+
+if ! scratchpad has -t "$scratch_session_target" &>/dev/null; then
+  scratchpad new-session -d -s "$scratch_session_name" -n "$scratch_window_name" -e "TMUX_PARENT=$TMUX" "${command[@]}"
+elif ! scratchpad has -t "$scratch_window_target" &>/dev/null; then
+  scratchpad new-window -d -t "$scratch_session_target" -n "$scratch_window_name" "${command[@]}"
+fi
+
+tmux -L "$current_socket" popup -c "$current_client" -w 80% -h 85% -E -b rounded -T "Scratchpad $scratch_window_name" \
+  "tmux -L '$scratch_socket' attach -t '$scratch_window_target'"

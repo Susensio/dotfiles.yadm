@@ -1,0 +1,217 @@
+#!/usr/bin/env bash
+# Sync global tools to ~/.local/ either manually or via a global postinstall hook.
+set -e
+
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+SEP=$'\x1f'
+MISE_HOME=${XDG_DATA_HOME:-$HOME/.local/share}/mise
+
+declare -A TARGET_DIRS=(
+  [BIN]=${HOME}/.local/bin
+  [MAN]=${XDG_DATA_HOME:-$HOME/.local/share}/man
+  [FISH_VENDOR_COMPLETIONS]=${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d
+  [NODE_MODULES]=${XDG_LIB_HOME:-$HOME/.local/lib}/node_modules
+)
+
+# ------------------------------------------------------------------------------
+# PRE-FLIGHT & INFRASTRUCTURE
+# ------------------------------------------------------------------------------
+
+# Stop if called from a local project
+check_execution_context() {
+  local original_cmd=${BASH_SOURCE[0]}
+  local current_pid=$PPID
+  while [ "$current_pid" -gt 1 ]; do
+    local cmd
+    cmd=$(ps -o args= -p "$current_pid")
+    if [[ "$cmd" == *"mise"* ]]; then
+      original_cmd=$cmd
+      break
+    fi
+    current_pid=$(ps -o ppid= -p "$current_pid" | tr -d ' ')
+  done
+
+  [[ "$original_cmd" =~ --global|-g[[:space:]]|system-install ]]
+}
+
+setup_target_dirs() {
+  mkdir --parents "${TARGET_DIRS[@]}"
+}
+
+prune_broken_links() {
+  find "${TARGET_DIRS[@]}" -xtype l -lname "*/$(basename "$MISE_HOME")/*" -printf "removed '%p'\n" -delete
+}
+
+# ------------------------------------------------------------------------------
+# DATA HELPERS AND UTILS
+# ------------------------------------------------------------------------------
+
+list_links() {
+  find "${TARGET_DIRS[@]}" -type l -lname "*/$(basename "$MISE_HOME")/*" -printf "%p -> %l\n"
+}
+
+get_installed_tools() {
+  # Normalize JSON input based on execution context
+  if [[ -n "$MISE_INSTALLED_TOOLS" ]]; then
+    echo "$MISE_INSTALLED_TOOLS" | jq --compact-output '.[]'
+    return 0
+  fi
+  mise list --installed --global --json |
+    jq --compact-output 'to_entries | map({name: .key, version: .value[].version}) | .[]'
+}
+
+init_tool_context() {
+  local tool_json=$1
+  tool=()
+
+  tool[name]=$(echo "$tool_json" | jq --raw-output '.name')
+  tool[version]=$(echo "$tool_json" | jq --raw-output '.version')
+  tool[spec]="${tool[name]}@${tool[version]}"
+  tool[path]=$(mise where "${tool[spec]}")
+  tool[info]=$(mise tool "${tool[name]}" --json 2>/dev/null)
+
+  tool[backend]=$(echo "${tool[info]}" | jq --raw-output '.backend')
+  tool[repo]=""
+  if [[ "${tool[backend]}" == @(aqua|github):* ]]; then
+    tool[repo]="${tool[backend]#*:}"
+  fi
+}
+
+symlink() {
+  local args=("$@")
+  local real="${args[-2]}"
+  local alias="${args[-1]}"
+  local flags=("${args[@]::${#args[@]}-2}")
+
+  if [[ ! -e "$alias" || "$real" -nt "$alias" ]]; then
+    ln --symbolic --relative --force --verbose "${flags[@]}" "$real" "$alias"
+  fi
+}
+
+# ------------------------------------------------------------------------------
+# CORE TOOL PROCESSING
+# ------------------------------------------------------------------------------
+
+process_extra_assets() {
+  local extra_assets=()
+  readarray -t extra_assets < <(echo "${tool[info]}" | jq -r '.tool_options.extra_assets[]?')
+
+  for asset in "${extra_assets[@]}"; do
+    local url
+    url=$(MISE_TOOL_NAME="${tool[name]}" MISE_TOOL_VERSION="${tool[version]}" \
+      envsubst '$MISE_TOOL_NAME $MISE_TOOL_VERSION' <<<"$asset")
+
+    local scheme repo tag_prefix path
+    IFS=$SEP read -r scheme repo tag_prefix path < <(echo "$url" |
+      sed -E "s|^([a-z]+):\/\/(([^:@]+):)?((v?)@)?(.*)$|\1${SEP}\3${SEP}\5${SEP}\6|")
+
+    case "$scheme" in
+      raw) url="https://raw.githubusercontent.com/${repo:-${tool[repo]}}/refs/tags/${tag_prefix}${tool[version]}/${path}" ;;
+      release) url="https://github.com/${repo:-${tool[repo]}}/releases/download/${tag_prefix}${tool[version]}/${path}" ;;
+    esac
+    echo "$url"
+
+    local filename=$(basename "$url")
+    if [[ "$filename" == *.tar.gz ]]; then
+      local download_dir=${XDG_CACHE_HOME:-$HOME/.cache}/mise/${tool[name]}
+      local download_target=${download_dir}/$filename
+      if [[ ! -f "$download_target" ]]; then
+        mkdir -p "$download_dir"
+        wget --no-verbose --timestamping "$url" -P "$download_dir"
+        tar -xzi --file "$download_target" --directory "${tool[path]}"
+      fi
+    elif [[ ! -f "${tool[path]}/${filename}" ]]; then
+      wget --no-verbose --timestamping "$url" -P "${tool[path]}"
+    fi
+  done
+}
+
+generate_completions() {
+  # Vendor sometimes ship `completions.fish` instead of `$tool_name.fish`
+  local found_completions=()
+  readarray -t found_completions < <(find -L "${tool[path]}" -maxdepth 1 -type f -name "completion.fish")
+  if [[ "${#found_completions[@]}" -eq 1 ]]; then
+    local found_completion=${found_completions[0]}
+    symlink "$found_completion" "$(dirname "$found_completion")/${tool[name]}.fish"
+  fi
+
+  local gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
+  [[ -z "$gen_completions" ]] && return 0
+
+  local tool_main_bin=$(find "${tool[path]}" -name "${tool[name]}" -executable -print -quit)
+  [[ -z "$tool_main_bin" ]] && return 0
+
+  local completion_target="${tool[path]}/${tool[name]}.fish"
+  if [[ ! -f "$completion_target" || "$tool_main_bin" -nt "$completion_target" ]]; then
+    $tool_main_bin "$gen_completions" >"$completion_target"
+  fi
+}
+
+link_tool_assets() {
+  local tool_binaries=()
+  readarray -t tool_binaries < <(find -L "$(mise bin-paths "${tool[spec]}")" -maxdepth 1 \
+    -type f -executable 2>/dev/null)
+
+  for bin in "${tool_binaries[@]}"; do
+    local bin_name=$(basename "$bin")
+    symlink "$bin" "${TARGET_DIRS[BIN]}/"
+
+    local fish_completion=$(find -L "${tool[path]}" -type f -name "${bin_name}.fish" -print -quit 2>/dev/null)
+    if [[ -n "$fish_completion" ]]; then
+      symlink "$fish_completion" "${TARGET_DIRS[FISH_VENDOR_COMPLETIONS]}/"
+    fi
+
+    local tool_manpages=()
+    readarray -t tool_manpages < <(find -L "${tool[path]}" -type f \
+      \( -name "$bin_name.[1-9]" -o -name "$bin_name-*.[1-9]" \) 2>/dev/null)
+    for manpage in "${tool_manpages[@]}"; do
+      local man_section=${manpage##*.}
+      local man_dir=${TARGET_DIRS[MAN]}/man$man_section
+      mkdir --parents "$man_dir"
+      symlink "$manpage" "${man_dir}/"
+    done
+    mandb --user-db --quiet
+  done
+}
+
+link_node_modules() {
+  local node_modules_dir=${tool[path]}/lib/node_modules
+  [[ ! -d "$node_modules_dir" ]] && return 0
+
+  local node_modules=()
+  readarray -t node_modules < <(find -L "$node_modules_dir" -mindepth 1 -maxdepth 1 -type d)
+  for node_module in "${node_modules[@]}"; do
+    local node_module_target=${TARGET_DIRS[NODE_MODULES]}/$(basename "$node_module")
+    symlink --no-dereference "$node_module" "$node_module_target"
+  done
+}
+
+# ------------------------------------------------------------------------------
+# ENTRY POINT
+# ------------------------------------------------------------------------------
+
+main() {
+  check_execution_context || exit 0
+
+  [[ "${1:-}" == '--list-links' ]] && { list_links; exit 0; }
+
+  prune_broken_links
+  [[ "${1:-}" == '--only-prune' ]] && exit 0
+
+  setup_target_dirs
+
+  local -A tool
+  local tools=()
+  readarray -t tools < <(get_installed_tools)
+  for tool_json in "${tools[@]}"; do
+    init_tool_context "$tool_json"
+
+    process_extra_assets
+    generate_completions
+    link_tool_assets
+    link_node_modules
+  done
+}
+
+main "$@"

@@ -1,2 +1,0 @@
-#!/bin/bash
-gpg --decrypt --output - $1 | gpg --import

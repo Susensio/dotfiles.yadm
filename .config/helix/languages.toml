@@ -1,0 +1,67 @@
+[[language]]
+name = "ini"
+file-types = [
+  "ini",
+  "desktop",
+  { glob = "mimeapps.list" },
+  { glob = ".editorconfig" },
+  { glob = ".npmrc" },
+  "properties",
+  "cfg",
+  "directory",
+  # Custom appends
+  { glob = "plank/themes/*.theme" },
+]
+
+[[language]]
+name = "bash"
+file-types = [
+  "sh",
+  "bash",
+  { glob = ".bash*" },
+  { glob = ".profile" },
+  { glob = ".xprofile" },
+  { glob = ".xsession*" },
+  # Custom appends
+  { glob = ".config/profile" },
+  { glob = ".config/bash/*" },
+]
+
+[language-server.bash-language-server.config.bashIde.shfmt]
+caseIndent = true
+
+[[language]]
+name = "tmux"
+scope = "source.tmux"
+comment-token = "#"
+file-types = [
+  ".tmux",
+  { glob = "tmux/*.conf" },
+  { glob = "tmux/conf.d/*.conf" },
+]
+
+[[grammar]]
+name = "tmux"
+source = { git = "https://github.com/Freed-Wu/tree-sitter-tmux", rev = "main" }
+
+[[language]]
+name = "nu"
+formatter = { command = "nufmt", args = [ "--stdin" ] }
+indent = { tab-width = 4, unit = "    " }
+
+[language-server.taplo]
+config = {}
+
+[[language]]
+name = "git-config"
+file-types = [
+  "gitconfig",
+  { glob = ".gitmodules" },
+  { glob = ".gitconfig" },
+  { glob = ".git/config" },
+  { glob = ".config/git/config" },
+  # Custom appends
+  { glob = ".config/git/*.config" },
+]
+formatter = { command = "gitconfig-fmt" }
+auto-format = true

@@ -1,0 +1,9 @@
+[tools]
+"cargo:https://github.com/nushell/nufmt" = "latest"
+"npm:bash-language-server" = "latest"
+"npm:fish-lsp" = "latest"
+ruff = { version = "latest", gen_completions = "generate-shell-completion fish" }
+shellcheck = "latest"
+shfmt = "latest"
+taplo = { version = "latest", filter_bins = "taplo", gen_completions = "completions fish" }
+ty = { version = "latest", gen_completions = "generate-shell-completion fish" }

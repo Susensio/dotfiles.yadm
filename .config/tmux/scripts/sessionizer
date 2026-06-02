@@ -1,205 +1,147 @@
 #!/usr/bin/env bash
-# Open and switch tmux sessions with fzf selector
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+# exec 2> /tmp/tmux-sessionizer.log
 
-# Get first argument if it exists
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --cache)
-      cache=true
-      shift
-      PID=$1
-      shift
-      ;;
-    *)
-      query="$(realpath "$1")"
-      if ! [[ -d $query ]]; then
-        echo "ERROR: $query is not a valid directory" >&2 && exit 1
-      fi
-      shift
-      ;;
-  esac
-done
+# --- Configuration ---
+TMUX_SCRIPTS="${XDG_CONFIG_HOME:-$HOME/.config}/tmux/scripts"
+SEP=$'\x1f'
+LOOKUP_PATHS=($HOME/Projects ${XDG_CONFIG_HOME:-$HOME/.config})
 
-PID="${PID:-$$}"
-cache_file="/tmp/sessionizer-$PID"
+declare -A ICONS=(
+  [NEW]="󰄱 "
+  [TMUX]=" "
+  [DIR]=" "
+  [PROJECT]="󰊢 "
+  [CONFIG]=" "
+  [CODE]=" "
+)
 
-if [[ -n $cache ]] && [[ -f "$cache_file" ]]; then
-  cat "$cache_file"
-  exit 0
-fi
-
-tmux_scripts="$XDG_CONFIG_HOME/tmux/scripts"
-zoxide_max=100
-sep=$'\x1f'
-
-
-# The input table should be a tab delimited with fields:
-# {1} ID|~|_
-# {2} PATH
-# {3} PRETTY_NAME
-
-prepend() { while read -r line; do printf "%s\t%s\n" "$1" "$line"; done; }
-append() { while read -r line; do printf "%s\t%s\n" "$line" "$1"; done; }
-
-
-blank_icon="󰄱"
-blank_session(){
-  echo "~${sep}${HOME}${sep}${blank_icon} +New session"
-}
-
-tmux_icon=""
-list_sessions(){
-  # sorted by mru, but current session last
-  sessions=$("$tmux_scripts/ls" --nohidden --mru \
-    -F "#{session_id}${sep}#{session_path}${sep}${tmux_icon} [#{session_name}]")
-  # Move current session to the end
-  echo "$sessions" | tail -n +2
-  echo "$sessions" | head -n 1
-}
-
-list_zoxide() {
-  zoxide query --exclude "$HOME" --list | head -n $zoxide_max
-}
-
-list_projects() {
-  find ~/Projects ~/Workspace  ~/workspace -mindepth 1 -maxdepth 1 -type d 2>/dev/null
-}
-
-list_pwd() {
-  pwd="$(test -n "$TMUX" && tmux display -pF '#{pane_current_path}' || echo "$PWD")"
-  echo "$pwd"
-  find "$pwd" -mindepth 1 -maxdepth 1 -type d
-}
-
-shorten_path() {
-  echo "${1//^$HOME/~}"
-}
-full_path() {
-  echo "${1//^~/$HOME}"
-}
-
-directory_icon=""
-code_icon=""
-git_icon="󰊢"
-config_icon=""
-
-get_icon() {
-  path="$1"
-  case "$path" in
-    $HOME/.config* )
-      echo "$config_icon"
-      ;;
-    $HOME/Projects* )
-      echo "$git_icon"
-      ;;
-    $HOME/bin* )
-      echo "$code_icon"
-      ;;
-    /*)
-      echo "$directory_icon"
-      ;;
-    *)
-      exit 1
-      ;;
-  esac
-}
-
-format_directories() {
-    while read -r path; do \
-      echo -e "_${sep}$path${sep}$(get_icon "$path") $(shorten_path "$path")"
-    done
-}
-list_directories() {
-  # print fast for responsivenes (these are always first)
-  list_zoxide
-
-  # now filter the remaining
-  comm -13 <(list_zoxide | sort) <( { list_projects && list_pwd ; } | sort )
-}
-
-list_all() {
-  # sort: https://stackoverflow.com/a/20639730/4623227
-
-  blank_session
-  list_sessions
-  list_directories | format_directories
-}
-
-
-# cached for perfodmance, list is reloaded on first keystroke to remove "new session"
-if [[ -z $cache ]]; then
-  list_all | tail -n +2 > "$cache_file" &
-fi
-
-
-# Only interactive if not argument provided
-if [[ -z $query ]]; then
-  preview="test {1} != '_' && $tmux_scripts/preview-tree {1} || exa --color always --tree --git-ignore --level=3 {2}"
-  result=$(
-    list_all | \
-      fzf-tmux-auto \
-        --no-sort \
-        --filepath-word \
-        --delimiter="$sep" \
-        --scheme=path \
-        --with-nth=3 \
-        --preview="$preview" \
-        --print-query \
-        --query="$query" \
-        --bind="tab:transform-query(echo {3} | cut -c5-)" \
-        --bind="change:reload($tmux_scripts/sessionizer --cache $PID)" \
-        # --bind="tab:transform-query(echo {3} | cut -c5-)+reload(find {q} -mindepth 1 -maxdepth 1 -type d 2>/dev/null)"
+# --- Data Helpers ---
+to_row() {
+  local row=(
+    "$1" # kind
+    "$2" # session_id
+    "$3" # session_name
+    "$4" # session_path
+    "$5" # fzf_display
   )
+  local IFS="$SEP"
+  echo "${row[*]}"
+}
 
-  # split result
-  mapfile -t lines <<< "$result"
-  query="${lines[0]}"
-  selected="${lines[1]}"
-fi
+path_to_row() {
+  local path=$1
+  local short_path="${path##*/}" # vastly faster than basename
 
+  case "$path" in
+    $HOME/.config/*) kind="CONFIG" ;;
+    "$HOME/bin" | $HOME/bin/*) kind="CODE" ;;
+    $HOME/Projects/*) kind="PROJECT" ;;
+    *) kind="DIR" ;;
+  esac
+  local icon=${ICONS[$kind]}
 
-if [[ -z $query ]] && [[ -z $selected ]]; then
-  exit 0
-fi
+  to_row "$kind" "" "$kind $short_path" "$path" "$icon ${path/#$HOME/\~}"
+}
 
-if [[ -n $query ]] && [[ -z $selected ]]; then
-  query_path="$(full_path "$query")"
-  if ! [[ -d $query_path ]]; then
-    echo "ERROR: $query_path is not a valid directory" >&2 && exit 1
-  fi
-  selected="_$sep$query_path$sep"
-fi
+parse_row() {
+  # IFS=$SEP read -r kind session_id session_name session_pretty_name session_path fzf_display <<<"$1"
+  IFS=$SEP read -r kind session_id session_name session_path fzf_display <<<"$1"
+}
 
-# split selected
-IFS="$sep" read -r id path _ <<< "$selected"
+# --- Source Gathering ---
+list_sources() {
+  to_row "NEW" "" "" "$HOME" "${ICONS[NEW]} +New session"
 
-# new session
-if [[ $id == '~' ]]; then
-  id="$(tmux new-session -d -c "$path")"
-fi
-# directory selected
-if [[ $id == '_' ]]; then
-  icon=$(get_icon "$path")
-  session_name="$icon $(basename "$path" | tr '.' '_')"
-  if tmux has-session -t "=$session_name" 2>/dev/null; then
-    id="$(tmux ls -f "#{==:#{session_name},$session_name}" -F '#{session_id}')"
-  else
-    # Possible startup script
-    if [[ -e $path/.t ]]; then
-      id="$(tmux new-session -d -s "$session_name" -c "$path" -PF '#{session_id}' "$path/.t ; $SHELL")"
-    else
-      id="$(tmux new-session -d -s "$session_name" -c "$path" -PF '#{session_id}')"
+  local session_row_format=$(to_row "SESSION" "#{session_id}" "#{session_name}" "#{session_path}" "${ICONS[TMUX]} #{?@session_pretty_name,#{@session_pretty_name},#S}")
+
+  # 1. Sessions sorted by recent activity
+  {
+    sessions=$("${TMUX_SCRIPTS}/ls" --mru -F "$session_row_format" 2>/dev/null)
+    if [[ -n "$sessions" ]]; then
+      # Current session go last
+      echo "$sessions" | tail -n +2
+      echo "$sessions" | head -n 1
     fi
-    zoxide add "$path"
-    # Possible startup script
-    # if [[ -e $path/.t ]]; then
-    #   tmux send-keys -t "$id" "exec $path/.t '$id'; $SHELL" ENTER
-    # fi
-  fi
+    # }
+    {
+      # 2. Zoxide MRU folders
+      zoxide query --list | head -n 50
+
+      # 3. Defined lookup dirs
+      find "${LOOKUP_PATHS[@]}" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
+
+      # 4. Current directory and its subfolders
+      local current_path=$(test -n "${TMUX:-}" && tmux display -pF '#{pane_current_path}' || echo "$PWD")
+      echo "$current_path"
+      find "$current_path" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
+    } | awk '!seen[$0]++' | while read -r path; do
+      path_to_row "$path"
+    done
+  } | awk -W interactive -F"$SEP" '!seen[$3]++'
+}
+
+if [[ "${1:-}" == "--list" ]]; then
+  # Print the list without `New session`, used to remove first session when something was kindd.
+  list_sources | tail -n +2
+  exit
 fi
 
-if [[ -n "$TMUX" ]]; then
-  tmux switch -t "$id"
+# Can be used without interaction
+if [[ -n "${1:-}" ]]; then
+  selection=$(path_to_row "$1")
 else
-  tmux attach -t "$id"
+  # Avoid nested popups
+  if [[ -n "${TMUX_PARENT:-}" ]]; then
+    tmux detach
+    export TMUX=$TMUX_PARENT
+  fi
+
+  preview_cmd="[[ {1} == 'NEW' ]] && exit || [[ {1} == 'SESSION' ]] && ${TMUX_SCRIPTS}/preview-session {2} || eza --color=always --icons --tree --level=2 --git-ignore -- {4}"
+
+  selection=$(
+    list_sources | fzf \
+      --delimiter="$SEP" \
+      --with-nth=-1 \
+      --no-sort \
+      --scheme=path \
+      --preview="$preview_cmd" \
+      --bind="change:reload-sync(${TMUX_SCRIPTS}/sessionizer --list)+unbind(change)"
+  )
+fi
+
+[[ -z "$selection" ]] && exit
+
+parse_row "$selection"
+
+case "$kind" in
+  NEW)
+    target_session=$(tmux new-session -d -P -F "#{session_id}")
+    ;;
+  SESSION)
+    target_session="$session_id"
+    ;;
+  *)
+    icon=${ICONS[$kind]}
+    short_session_name=$(basename "$session_path")
+
+    session_name="${kind} $(echo "$short_session_name" | tr '.' '_')"
+    session_pretty_name="${icon}${short_session_name}"
+
+    if tmux has-session -t "=$session_name" 2>/dev/null; then
+      target_session="$(tmux list-sessions -f "#{==:#{session_name},$session_name}" -F '#{session_id}')"
+    else
+      target_session=$(tmux new-session -d -s "$session_name" -c "$session_path" -P -F "#{session_id}")
+      tmux set-option -t "$target_session" '@session_pretty_name' "${session_pretty_name}"
+      zoxide add "$session_path"
+    fi
+    ;;
+esac
+
+# --- Execution ---
+if [[ -n "$TMUX" ]]; then
+  tmux switch-client -t "$target_session"
+else
+  tmux attach-session -t "$target_session"
 fi

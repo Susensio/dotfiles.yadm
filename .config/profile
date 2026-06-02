@@ -1,47 +1,15 @@
-# Safe idempotent prepend to path
-function add_path {
-  if [ -d "$1" ]; then
-    PATH=${PATH//":$1:"/:} #delete all instances in the middle
-    PATH=${PATH/%":$1"/} #delete any instance at the end
-    PATH=${PATH/#"$1:"/} #delete any instance at the beginning
-    PATH="$1${PATH:+":$PATH"}" #prepend $1 or if $PATH is empty set to $1
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+  # include bashrc if it exists
+  if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/bash/bashrc" ]; then
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/bash/bashrc"
   fi
-}
-
-# XDG Base Directory specification
-export XDG_CONFIG_HOME=$HOME/.config
-export XDG_CACHE_HOME=$HOME/.cache
-export XDG_DATA_HOME=$HOME/.local/share
-export XDG_STATE_HOME=$HOME/.local/state
-
-# This could be needed before sourcing
-add_path "$HOME/.local/bin"
-
-export EDITOR="$(command -v nvim || command -v vim)"
-export PAGER="less"
-export LESS="--incsearch -XRF --mouse --wheel-lines=3"
-#
-# Colorize man pages with bat
-# substitute non-breaking hyphen for easy search
-export MANPAGER="sh -c 'col -bx | sed s/‐/-/g | bat --language man --plain'"
-export MANROFFOPT="-c"
-# add user man pages
-export MANPATH="$XDG_DATA_HOME/man:"
-
-# Source profile.d files
-profile_d="$XDG_CONFIG_HOME/profile.d"
-if [ -d "$profile_d" ]; then
-  for file in "$profile_d"/*.sh; do
-    source "$file"
-  done
 fi
 
-# Source secrets
-profile_secrets="$XDG_CONFIG_HOME/profile.secrets"
-if [ -f "$profile_secrets" ]; then
-  source "$profile_secrets"
+# Import environment variables defined in ~/.config/environment.d/*.conf
+# only if NOT in a graphical environment (TTY, SSH)
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -v systemctl >/dev/null; then
+  set -a
+  source <(systemctl --user show-environment)
+  set +a
 fi
-
-# Ensure priority
-add_path "$HOME/.local/bin"
-add_path "$HOME/bin"

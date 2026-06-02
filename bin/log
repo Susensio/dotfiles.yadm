@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+log_debug() { [[ -n "${DEBUG:-}" ]] && echo -e "[\e[35mDEBUG\e[0m] $*" >&2 || true; }
+log_info() { echo -e "[\e[34mINFO\e[0m] $*" >&2; }
+log_warn() { echo -e "[\e[33mWARN\e[0m] $*" >&2; }
+log_error() { echo -e "[\e[31mERROR\e[0m] $*" >&2; }
+log_success() { echo -e "[\e[32mSUCCESS\e[0m] $*" >&2; }
+
+log() {
+  local level="$1"
+  shift
+
+  case "$level" in
+    debug) log_debug "$*" ;;
+    info) log_info "$*" ;;
+    warn) log_warn "$*" ;;
+    error) log_error "$*" ;;
+    success) log_success "$*" ;;
+    *) log_error "Unknown log level: '$level'. Message was: $*"
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  log "$@"
+fi

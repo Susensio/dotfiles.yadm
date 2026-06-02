@@ -1,11 +1,38 @@
 [tools]
+bat = "latest"
+delta = { version = "latest", extra_assets = [
+  "raw://etc/completion/completion.fish",
+] }
+eza = { version = "latest", extra_assets = [
+  "release://v@completions-$MISE_TOOL_VERSION.tar.gz",
+  "release://v@man-$MISE_TOOL_VERSION.tar.gz",
+] }
 fd = "latest"
-fzf = { version = "latest", postinstall = 'wget -q "https://raw.githubusercontent.com/junegunn/fzf/refs/tags/v$MISE_TOOL_VERSION/man/man1/$MISE_TOOL_NAME.1" -P "$MISE_TOOL_INSTALL_PATH"' }
-gemini = "latest"
-node = "lts"
+fzf = { version = "latest", extra_assets = [
+  "raw://v@man/man1/fzf.1",
+] }
+gemini-cli = "latest"
+gh = "latest"
+"github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
+glow = "latest"
+helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
+lazygit = "latest"
+node = "latest"
+"pipx:howdoi" = "latest"
 ripgrep = "latest"
+rust = "latest"
+tmux = { version = "latest", extra_assets = [
+  "raw://tmux/tmux:tmux.1",
+] }
 usage = "latest"
-yadm = { version = "latest", postinstall = 'wget -q "https://raw.githubusercontent.com/yadm-dev/yadm/refs/tags/$MISE_TOOL_VERSION/$MISE_TOOL_NAME.1" -P "$MISE_TOOL_INSTALL_PATH"' }
+uv = "latest"
+zoxide = "latest"
+
+[hooks]
+postinstall = { task = "system-install" }
 
 [settings]
 experimental = true
+
+[settings.github]
+use_git_credentials = true

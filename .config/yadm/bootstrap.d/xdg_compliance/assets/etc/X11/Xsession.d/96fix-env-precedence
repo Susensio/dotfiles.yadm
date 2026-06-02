@@ -1,0 +1,30 @@
+# This script counteracts the harmful "pinning" effects of the standard
+# /etc/X11/Xsession.d/95dbus_update-activation-env script.
+#
+# Systemd manages two environment layers:
+# 1. Static Layer: Loaded from `environment.d` generators. This is our 
+#    intended "Source of Truth" for hot-reloads.
+# 2. Dynamic Layer: Modified at runtime via `systemctl set-environment` 
+#    or `dbus-update-activation-environment --systemd --all` (Script 95).
+#
+# THE PROBLEM: Dynamic overrides ALWAYS take precedence over the static layer.
+# Script 95 pushes the entire X session environment into the dynamic layer, 
+# which "pins" variables in memory. Consequently, any subsequent changes to 
+# `environment.d` files will be MASKED by these dynamic overrides even after 
+# a `systemctl --user daemon-reload`.
+#
+# THE FIX: This script identifies all variables managed by the static layer 
+# (via the environment.d generator) and unsets them from the dynamic layer 
+# using `systemctl --user unset-environment`.
+#
+# This restores the proper hierarchy where the hot-reloadable `environment.d` 
+# files have the final say.
+
+GEN="/usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator"
+
+# Ensure generator exists and user manager is reachable
+[[ -x "$GEN" ]] || exit 0
+systemctl --user show-environment >/dev/null 2>&1 || exit 0
+
+VARS=($("$GEN" | cut -d= -f1))
+[[ ${#VARS[@]} -gt 0 ]] && systemctl --user unset-environment "${VARS[@]}"

@@ -1,2 +1,0 @@
-#!/bin/bash
-yadm --yadm-dir "${XDG_CONFIG_HOME:-$HOME/.config}/cidm" --yadm-data "${XDG_DATA_HOME:-$HOME/.local/share}/cidm" "$@"

@@ -1,2 +1,4 @@
-# No python venv prompt
-set -gx VIRTUAL_ENV_DISABLE_PROMPT 1
+# Import systemd user environment variables into Fish
+if status is-login && type -q systemctl
+    _env_pull
+end
