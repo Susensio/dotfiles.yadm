@@ -92,6 +92,9 @@ These scripts perform the initial "surgical" moves and configuration:
 *   **XAuthority:** Moved to `/var/run/lightdm/` (via `lightdm.conf`) to avoid `.Xauthority` in `$HOME`.
 *   **Sudo:** Disables the `~/.sudo_as_admin_successful` flag.
 
+### Known Exception: `~/.xsession-errors`
+Unfixable in userspace: LightDM writes it internally, compiled into the daemon (`strings /usr/sbin/lightdm` shows the literal path), before our `session-wrapper` (`/usr/sbin/lightdm-session`, not `/etc/X11/Xsession`) even runs. No env var, patch, or symlink reaches it. Longstanding upstream request, unaddressed: [canonical/lightdm#95](https://github.com/canonical/lightdm/issues/95). Not self-truncating — worth an occasional manual check.
+
 ## 7. Hot-Reloading (`env_reload`)
 The `env_reload` function is the manual "Sync Now" button. It:
 1.  Unsets dynamic overrides to prevent pinning (`_env_unpin`).

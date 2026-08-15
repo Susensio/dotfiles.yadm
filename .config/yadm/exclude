@@ -5,6 +5,7 @@
 !/.config/git/
 !/.config/bat/
 !/.config/tmux/
+!/.config/keyd/
 !/.config/nvim/
 !/.config/helix/
 !/.config/yadm/
@@ -12,6 +13,7 @@
 !/.config/fish/
 !/.config/mise/
 !/.config/environment.d/
+!/.config/docs/
 !/.config/*.md
 !/.local/share/yadm/archive
 !/.github
