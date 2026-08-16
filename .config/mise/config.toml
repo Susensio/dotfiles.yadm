@@ -1,5 +1,6 @@
 [tools]
 bat = "latest"
+claude = "latest"
 delta = { version = "latest", extra_assets = [
   "raw://etc/completion/completion.fish",
 ] }
@@ -11,11 +12,12 @@ fd = "latest"
 fzf = { version = "latest", extra_assets = [
   "raw://v@man/man1/fzf.1",
 ] }
-gemini-cli = "latest"
 gh = "latest"
+"github:google-antigravity/antigravity-cli" = { version = "latest", rename_exe = "agy" }
 "github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
 glow = "latest"
 helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
+herdr = { version = "latest", gen_completions = "completion fish" }
 lazygit = "latest"
 node = "latest"
 "pipx:howdoi" = "latest"
