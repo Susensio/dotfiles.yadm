@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+man -k . |
+  fzf --nth 1 --accept-nth 2,1 --height=100% |
+  tr -d '()' |
+  xargs -r man

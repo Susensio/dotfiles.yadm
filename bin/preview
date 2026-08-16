@@ -2,47 +2,46 @@
 IFS=$'\n'
 # Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
 ## Script arguments
-FILE_PATH="${1}" # Full path of the highlighted file
-FILE_PATH="$(echo $FILE_PATH | sed "s|~|$HOME|g")"
+file_path=$(echo $1 | sed "s|~|$HOME|g")
+line_number=${2:-}
 
-PV_WIDTH="${2}" # Width of the preview pane (number of fitting characters)
-if [ -z "${PV_WIDTH}" ]; then
-  [ -n "${FZF_PREVIEW_COLUMNS}" ] &&
-    PV_WIDTH="$((FZF_PREVIEW_COLUMNS - 2))" ||
-    PV_WIDTH="$(tput cols)"
-fi
+[ -n "${FZF_PREVIEW_COLUMNS}" ] &&
+  pv_width="$((FZF_PREVIEW_COLUMNS - 2))" ||
+  pv_width=$(tput cols)
+[ -n "${FZF_PREVIEW_LINES}" ] &&
+  pv_height="$((FZF_PREVIEW_LINES - 2))" ||
+  pv_height=$(tput lines)
 
-PV_HEIGHT="${3}" # Height of the preview pane (number of fitting characters)
-if [ -z "${PV_HEIGHT}" ]; then
-  [ -n "${FZF_PREVIEW_LINES}" ] &&
-    PV_HEIGHT="$((FZF_PREVIEW_LINES - 2))" ||
-    PV_HEIGHT="$(tput lines)"
-fi
+file_extension=$(echo "${file_path##*.}" | tr '[:upper:]' '[:lower:]')
 
-FILE_EXTENSION="${FILE_PATH##*.}"
-FILE_EXTENSION_LOWER="$(printf "%s" "${FILE_EXTENSION}" | tr '[:upper:]' '[:lower:]')"
+mimetype=$(file --dereference --brief --mime-type -- "$file_path")
 
-MIMETYPE="$(file --dereference --brief --mime-type -- "$FILE_PATH")"
-
-case "$MIMETYPE" in
-  */directory) eza --all --color=always --icons -- "$FILE_PATH" ;;
-  image/*) chafa "$FILE_PATH" -s "$PV_WIDTH"x"$PV_HEIGHT" ;;
-  */pdf) pdftotext "$FILE_PATH" - ;;
+case "$mimetype" in
+  */directory) eza --tree --level=2 --git-ignore --color=always --icons -- "$file_path" ;;
+  image/*) chafa "$file_path" -s "$pv_width"x"$pv_height" ;;
+  */pdf) pdftotext "$file_path" - ;;
   text/* | */xml | application/json)
-    bat --color=always --style=plain --line-range=:500 \
-      --paging=never --terminal-width="$PV_WIDTH" \
-      "$FILE_PATH"
+    # bat --color=always --style=plain --line-range=:500 \
+    #   --paging=never --terminal-width="$pv_width" \
+    #   "$file_path"
+    scope=--line-range=:500
+    [[ -n "$line_number" ]] && scope=--highlight-line=$line_number
+
+    bat --color=always --style=plain --paging=never \
+      --terminal-width=$pv_width "$scope" \
+      "$file_path"
     ;;
   *)
-    case "$FILE_EXTENSION_LOWER" in
-      tar*) tar tf "$FILE_PATH" ;;
-      zip) unzip -l "$FILE_PATH" ;;
-      rar) unrar l "$FILE_PATH" ;;
-      7z) 7z l "$FILE_PATH" ;;
+    case "$file_extension" in
+      tar*) tar tf "$file_path" ;;
+      zip) unzip -l "$file_path" ;;
+      rar) unrar l "$file_path" ;;
+      7z) 7z l "$file_path" ;;
       *)
         echo '----- File Type Classification -----'
-        file --dereference --brief -- "$FILE_PATH" |
-          fold --spaces --width="$PV_WIDTH"
+        file --dereference --brief -- "$file_path"
+        # file --dereference --brief -- "$file_path" |
+        #   fold --spaces --width="$pv_width"
         ;;
     esac
     ;;
