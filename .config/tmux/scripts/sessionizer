@@ -30,6 +30,11 @@ to_row() {
   echo "${row[*]}"
 }
 
+session_name_for_dir() {
+  local kind=$1 name=$2
+  session_name="${kind} ${name//./_}" # tmux disallows '.' in session names
+}
+
 path_to_row() {
   local path=$1
   local short_path="${path##*/}" # vastly faster than basename
@@ -41,12 +46,12 @@ path_to_row() {
     *) kind="DIR" ;;
   esac
   local icon=${ICONS[$kind]}
+  session_name_for_dir "$kind" "$short_path"
 
-  to_row "$kind" "" "$kind $short_path" "$path" "$icon ${path/#$HOME/\~}"
+  to_row "$kind" "" "$session_name" "$path" "$icon ${path/#$HOME/\~}"
 }
 
 parse_row() {
-  # IFS=$SEP read -r kind session_id session_name session_pretty_name session_path fzf_display <<<"$1"
   IFS=$SEP read -r kind session_id session_name session_path fzf_display <<<"$1"
 }
 
@@ -60,11 +65,10 @@ list_sources() {
   {
     sessions=$("${TMUX_SCRIPTS}/ls" --mru -F "$session_row_format" 2>/dev/null)
     if [[ -n "$sessions" ]]; then
-      # Current session go last
+      # Current session goes last
       echo "$sessions" | tail -n +2
       echo "$sessions" | head -n 1
     fi
-    # }
     {
       # 2. Zoxide MRU folders
       zoxide query --list | head -n 50
@@ -76,14 +80,17 @@ list_sources() {
       local current_path=$(test -n "${TMUX:-}" && tmux display -pF '#{pane_current_path}' || echo "$PWD")
       echo "$current_path"
       find "$current_path" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
-    } | awk '!seen[$0]++' | while read -r path; do
+    } | while read -r path; do
       path_to_row "$path"
     done
+  # Dedups on session_name (field 3) -- works for paths too, since
+  # path_to_row is deterministic: same path always yields the same name.
   } | awk -W interactive -F"$SEP" '!seen[$3]++'
 }
 
 if [[ "${1:-}" == "--list" ]]; then
-  # Print the list without `New session`, used to remove first session when something was kindd.
+  # Powers the fzf `change` reload below: drops "+New session" so it can't
+  # surface as a fuzzy match once the user starts typing a query.
   list_sources | tail -n +2
   exit
 fi
@@ -92,13 +99,19 @@ fi
 if [[ -n "${1:-}" ]]; then
   selection=$(path_to_row "$1")
 else
-  # Avoid nested popups
+  # Avoid nested popups. TMUX_PARENT is set by scripts/scratchpad when it
+  # launches a popup session, so we can detach and re-target its parent
+  # client instead of opening a popup inside a popup.
   if [[ -n "${TMUX_PARENT:-}" ]]; then
     tmux detach
     export TMUX=$TMUX_PARENT
   fi
 
-  preview_cmd="[[ {1} == 'NEW' ]] && exit || [[ {1} == 'SESSION' ]] && ${TMUX_SCRIPTS}/preview-session {2} || eza --color=always --icons --tree --level=2 --git-ignore -- {4}"
+  # fzf field refs below are positional -- keep in sync with to_row()'s order.
+  F_KIND=1
+  F_SESSION_ID=2
+  F_SESSION_PATH=4
+  preview_cmd="[[ {$F_KIND} == 'NEW' ]] && exit || [[ {$F_KIND} == 'SESSION' ]] && ${TMUX_SCRIPTS}/preview-session {$F_SESSION_ID} || eza --color=always --icons --tree --level=2 --git-ignore -- {$F_SESSION_PATH}"
 
   selection=$(
     list_sources | fzf \
@@ -126,13 +139,14 @@ case "$kind" in
     icon=${ICONS[$kind]}
     short_session_name=$(basename "$session_path")
 
-    session_name="${kind} $(echo "$short_session_name" | tr '.' '_')"
+    session_name_for_dir "$kind" "$short_session_name"
     session_pretty_name="${icon}${short_session_name}"
 
     if tmux has-session -t "=$session_name" 2>/dev/null; then
       target_session="$(tmux list-sessions -f "#{==:#{session_name},$session_name}" -F '#{session_id}')"
     else
       target_session=$(tmux new-session -d -s "$session_name" -c "$session_path" -P -F "#{session_id}")
+      # Lets the status bar show icons without putting them in the (typeable) session name.
       tmux set-option -t "$target_session" '@session_pretty_name' "${session_pretty_name}"
       zoxide add "$session_path"
     fi
@@ -140,7 +154,7 @@ case "$kind" in
 esac
 
 # --- Execution ---
-if [[ -n "$TMUX" ]]; then
+if [[ -n "${TMUX:-}" ]]; then
   tmux switch-client -t "$target_session"
 else
   tmux attach-session -t "$target_session"

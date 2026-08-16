@@ -3,7 +3,7 @@
 session_path=$(tmux display -p '#{session_path}')
 
 case "$session_path" in
-  $HOME/.config/* | $home/bin)
+  $HOME/.config/* | $HOME/bin)
     lazygit \
       --work-tree "$HOME" \
       --git-dir "$HOME/.local/share/yadm/repo.git"

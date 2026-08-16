@@ -5,19 +5,9 @@ set -eu
 SUFFIX="_scratchpad"
 current_socket="$(tmux display -pF "#{b:socket_path}")"
 
-# Toggle
-if [[ "$current_socket" == *$SUFFIX ]]; then
-  tmux detach
-  exit 0
-fi
-
-scratch_socket=${current_socket}${SUFFIX}
-scratchpad() { tmux -L "$scratch_socket" "$@"; }
-
-current_client="$(tmux -L "$current_socket" display -pF "#{client_tty}")"
-current_session_id="$(tmux -L "$current_socket" display -pF "#{session_id}")"
+current_client=""
+current_session_id=""
 scratch_window_name="main"
-
 action="toggle"
 
 while [[ $# -gt 0 ]]; do
@@ -32,12 +22,42 @@ done
 
 command=("$@")
 
-scratch_session_name="$(echo "$current_session_id" | tr '$' '_')"
-
-if [[ "$action" == "clean" ]]; then
-  scratchpad kill-session -t "=$scratch_session_name"
+# Toggle off: we're inside a scratchpad popup already, so close it.
+# A bare `detach` makes tmux resolve an ambient "current client", which
+# fails with "no current client" whenever that can't be determined
+# unambiguously. The key binding already tells us the invoking client, so
+# prefer that; fall back to the ambient client only if we weren't told one
+# (or it went stale), and never let a failed detach spill a raw tmux error
+# into the popup -- the worst case is the popup staying open.
+if [[ "$current_socket" == *$SUFFIX ]]; then
+  { [[ -n "$current_client" ]] && tmux detach -t "$current_client" 2>/dev/null; } ||
+    tmux detach 2>/dev/null ||
+    true
   exit 0
 fi
+
+scratch_socket=${current_socket}${SUFFIX}
+scratchpad() { tmux -L "$scratch_socket" "$@"; }
+
+# clean is fired from the session-closed hook, which may run with no client
+# attached at all, so it must not depend on live client/session lookups --
+# only on the --session id the hook passes explicitly. Bail if we weren't
+# given one: `kill-session -t ""` kills the *current* session, so an empty
+# target here would destroy an unrelated scratchpad. The "=" prefix below
+# also guards this; both are deliberate.
+if [[ "$action" == "clean" ]]; then
+  [[ -n "$current_session_id" ]] || exit 0
+  scratch_session_name="$(echo "$current_session_id" | tr '$' '_')"
+  # Most sessions never opened a scratchpad, so "session not found" is the
+  # normal case for this hook, not an error worth reporting.
+  scratchpad kill-session -t "=$scratch_session_name" 2>/dev/null || true
+  exit 0
+fi
+
+[[ -n "$current_client" ]] || current_client="$(tmux -L "$current_socket" display -pF "#{client_tty}")"
+[[ -n "$current_session_id" ]] || current_session_id="$(tmux -L "$current_socket" display -pF "#{session_id}")"
+
+scratch_session_name="$(echo "$current_session_id" | tr '$' '_')"
 
 scratch_session_target="=$scratch_session_name"
 scratch_window_target="=$scratch_session_name:=$scratch_window_name"
