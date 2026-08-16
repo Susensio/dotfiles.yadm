@@ -11,6 +11,11 @@ XDG config repo for `~/.config`, managed with yadm.
 - Any script here that shells out to `tmux` (fish functions included) must
   isolate test runs against an explicit `-L <socket>` throwaway server -- never
   a bare `tmux` call in a test, it can hit the live session.
+- Fan out along config domains -- `tmux`, `fish`, `nvim`, `mise`, `keyd` -- that
+  is the seam that actually divides this repo. Not layers, not phases.
+- tmux behavior or visuals worth verifying go to the `tmux-tester` agent, which
+  owns the throwaway-server isolation. No sibling testers for domains with no
+  isolation harness yet -- generalize when a second one earns it.
 - Architecturally significant decisions about this setup -- tool or library
   choice, a structural change, a reversal of a prior decision -- belong in
   `docs/adr/` via the `adr` skill. Not auto-memory, not a comment.
