@@ -10,6 +10,6 @@ fi
 # only if NOT in a graphical environment (TTY, SSH)
 if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -v systemctl >/dev/null; then
   set -a
-  source <(systemctl --user show-environment)
+  eval "$(systemctl --user show-environment)"
   set +a
 fi
