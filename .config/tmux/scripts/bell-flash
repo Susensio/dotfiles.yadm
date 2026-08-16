@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# alert-bell hook (31_visual.conf). $1 = #{session_attached} of the bell's
+# session -- skip if attached, since bell-action already rang it there.
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+attached="${1:-0}"
+[[ "$attached" != "0" ]] && exit 0
+
+while IFS= read -r tty; do
+  [[ -n "$tty" ]] || continue
+  printf '\a' > "$tty" 2>/dev/null
+  tmux refresh-client -S -t "$tty" 2>/dev/null
+done < <(tmux list-clients -F '#{client_tty}')
+
+exit 0

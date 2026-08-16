@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Popup menu of windows with a pending bell, in detached sessions. Bound to
+# MouseUp1Control7 (22_mouse.conf), which the [range=control|7] tag on
+# BELL_TRAY's icon (31_visual.conf) fires on click.
+#
+# Bells are window-scoped in tmux (window_bell_flag) -- there's no per-pane
+# bell -- so windows, not sessions, are the right granularity to list.
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+SEP=$'\x1f'
+
+mapfile -t rows < <(tmux list-windows -a \
+  -f '#{&&:#{==:#{session_attached},0},#{window_bell_flag}}' \
+  -F "#{window_id}${SEP}[#{session_name}] #{window_index}:#{window_name}")
+
+[[ ${#rows[@]} -eq 0 ]] && exit 0
+
+# -O: a mouse-opened menu closes on button-up if nothing's selected yet --
+# keep it open. -M: handle mouse clicks on items -- only auto-on for a menu
+# opened directly by a mouse binding, which this isn't (it's a detached
+# script). -x R -y S: bottom right, next to the status line, where the icon
+# lives -- geometry-based anchors, unlike "M" (mouse position) they don't
+# depend on click context this detached script has already lost.
+args=(-O -M -x R -y S -T " Notifications ")
+for row in "${rows[@]}"; do
+  id="${row%%"$SEP"*}"
+  label="${row#*"$SEP"}"
+  args+=("$label" "" "switch-client -t '$id'")
+done
+
+exec tmux display-menu "${args[@]}"

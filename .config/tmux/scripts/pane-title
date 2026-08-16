@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Full pane-border text: icon (via scripts/icon) + running command + whatever
+# extra the title says, once the command name is stripped back out of it.
+#
+# The title's command name is only stripped from an edge ("hx: main.rs" ->
+# "main.rs", "main.rs - hx" -> "main.rs") -- if it's not at the start or end
+# we leave the title untouched, since a coincidental mid-string match (e.g.
+# claude's own "* task summary" title) can't be told apart from a real one.
+#
+# Uses literal (non-regex) bash matching throughout so command names with
+# regex-special characters (g++, c++...) can't corrupt the match.
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+shopt -s extglob
+
+cmd="${1:-}"
+title="${2:-}"
+sep="${3:- }"
+
+icon="$("$(dirname "$0")/icon" "$cmd" 2>/dev/null || true)"
+
+cleaned=""
+if [[ -n "$title" ]]; then
+  cleaned="$title"
+  if [[ -n "$cmd" ]]; then
+    if [[ "$title" == "$cmd"* ]]; then
+      rest="${title#"$cmd"}"
+      cleaned="${rest##+([:_ -])}"
+    elif [[ "$title" == *"$cmd" ]]; then
+      rest="${title%"$cmd"}"
+      cleaned="${rest%%+([:_ -])}"
+    fi
+  fi
+fi
+
+out="$icon"
+[[ -n "$out" && -n "$cmd" ]] && out+=" "
+out+="$cmd"
+[[ -n "$cleaned" ]] && out+="${sep}${cleaned}"
+
+printf '%s' "$out"

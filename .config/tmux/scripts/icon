@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+
+cmd="${1:-}"
+icons_csv="${XDG_CONFIG_HOME:-$HOME/.config}/icons.csv"
+
+[[ -z "$cmd" || ! -f "$icons_csv" ]] && exit 0
+
+awk -F',' -v cmd="$cmd" '$1 == cmd { print $2; exit }' "$icons_csv"
