@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Reloads tmux.conf, but only after it has proved itself on a throwaway server.
+# rationale: docs/adr/0017-validate-tmux-config-on-a-throwaway-server-before.md
+#
+# Output is what run-shell shows the user, so it stays empty unless something
+# went wrong; stderr is folded in by the alias (`run '... 2>&1'`), since tmux
+# discards a job's stderr.
+#
+# Also reloads the paired main/scratchpad server (see scripts/scratchpad).
+set -u
+
+CONFIG_DIR="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+CONFIG="$CONFIG_DIR/tmux.conf"
+DRY_SOCKET="reload-check-$$"
+socket_path=""
+
+SUFFIX="_scratchpad"
+current_socket="$(tmux display -pF "#{b:socket_path}")"
+main_socket="${current_socket%"$SUFFIX"}"
+if [[ "$current_socket" == *"$SUFFIX" ]]; then
+  paired_socket="$main_socket"
+else
+  paired_socket="${current_socket}${SUFFIX}"
+fi
+
+dry() { env -u TMUX tmux -L "$DRY_SOCKET" "$@"; }
+
+# kill-server leaves the socket file behind, so the path is read while the
+# server is up and unlinked here. A trap, because a dry run that dies partway
+# through should still not litter /tmp.
+cleanup() {
+  dry kill-server 2>/dev/null
+  [[ -n "$socket_path" ]] && rm -f "$socket_path"
+}
+trap cleanup EXIT
+
+notify() { tmux -L "$main_socket" notify "$1"; }
+
+report() {
+  printf '%s\n' "$1"
+  notify "$2"
+  exit 0
+}
+
+source_into() {
+  local errors
+  errors="$(env -u TMUX tmux -L "$1" source-file "$CONFIG" 2>&1)"
+  [[ -z "$errors" ]] || report "$errors" "$2"
+}
+
+# Started without a config, so that sourcing it is a single step whose errors
+# can be read back, and holding a `sleep` rather than a shell: none of the
+# user's shell startup runs, and the server gives up on its own if this script
+# never gets as far as killing it.
+dry -f /dev/null new-session -d "sleep 30" || exit 0
+socket_path="$(dry display-message -p '#{socket_path}')"
+
+source_into "$DRY_SOCKET" "Config not reloaded: errors detected"
+
+# The live server carries state the dry-run one didn't, so it can still error.
+source_into "$current_socket" "Config reloaded with errors"
+
+# has-session, unlike most subcommands, won't spawn a server if none exists.
+if tmux -L "$paired_socket" has-session 2>/dev/null; then
+  source_into "$paired_socket" "Config reloaded, but paired server had errors"
+fi
+
+notify "Config reloaded!"

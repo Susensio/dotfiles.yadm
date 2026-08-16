@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""Which-key menu for tmux modal key tables.
+
+Usage: which-key <table> <client>   — armed by the alias in conf.d/15_aliases.conf
+
+Two sources decide what the menu shows:
+
+  conf.d/*.conf  order and grouping. Blank lines already in the config become
+                 the rules between groups.
+  list-keys      truth. A declared binding is shown only if it is bound;
+                 anything bound but undeclared is appended at the end.
+
+Entering a chain costs DELAY idle seconds. After that the client is in menu
+mode and every further table is drawn as soon as its key is pressed.
+
+Drawing, sizing, positioning and key capture are display-menu's job. Requires
+tmux 3.7. Every failure path exits 0: run-shell reports a nonzero exit as an
+error, and a menu that failed to draw is not worth a nag. DEBUG=1 raises the
+traceback instead.
+
+rationale: docs/adr/0013-build-which-key-menus-from-config-order-and-list-k.md
+"""
+
+import getopt
+import os
+import pathlib
+import shlex
+import subprocess
+import sys
+import time
+
+SELF = pathlib.Path(__file__).resolve()
+CONFIG_DIR = SELF.parent.parent
+SEP = "\x1f"  # list-keys field separator, safe inside notes and commands
+DELAY = 1  # idle seconds before the first menu of a chain
+ENTRY = "prefix"  # the table C-Space enters, so reaching it is a new chain
+FLAG = "@wk_menu"  # holds the client whose menu is up: it is in menu mode
+BREAK = None  # a row with this instead of a key is a rule between groups
+REPEATS = "\u27f3"  # marks a -r binding; "(hold)" would read as a second key
+# Right edge of the client. Plain -x R gives the active pane's edge instead.
+RIGHT = "#{e|-:#{client_width},#{popup_width}}"
+
+
+def tmux(*args):
+    """Run a tmux command; return its output, or None if it failed."""
+    done = subprocess.run(("tmux",) + args, capture_output=True, text=True)
+    return done.stdout if done.returncode == 0 else None
+
+
+def quote(text):
+    """Text as a tmux argument: quoted, escaped, and with formats defused."""
+    return '"%s"' % defuse(text).replace("\\", "\\\\").replace('"', '\\"')
+
+
+def defuse(text):
+    """Menu names and commands are formats; keep #{...} in a note literal."""
+    return text.replace("#", "##")
+
+
+def config_lines():
+    """Lines of conf.d/*.conf, in source order, backslash continuations
+    joined so a binding is always a single line."""
+    for path in sorted((CONFIG_DIR / "conf.d").glob("*.conf")):
+        joined = ""
+        for line in path.read_text().splitlines():
+            joined += line.strip()
+            if joined.endswith("\\"):
+                joined = joined[:-1]
+            else:
+                yield joined
+                joined = ""
+
+
+def parse_bind(line):
+    """(table, key) for a `bind` line, or None if it cannot be read.
+
+    Only the table and key are used; list-keys supplies the rest. The
+    command is left unparsed: brace blocks, formats, and nesting pass
+    through untouched, since no line inside a block starts with `bind`.
+    """
+    try:
+        tokens = shlex.split(line, comments=False)[1:]
+    except ValueError:  # unbalanced quotes: leave this one to list-keys
+        return None
+    try:  # -n/-r take no value, -N/-T do — bundled or not (e.g. -rN "note")
+        opts, rest = getopt.getopt(tokens, "nrN:T:")
+    except getopt.GetoptError:  # unrecognized flag: leave this one to list-keys
+        return None
+
+    table = "prefix"
+    for flag, value in opts:
+        if flag == "-T":
+            table = value
+        elif flag == "-n":
+            table = "root"
+    # Whatever is left starts with the key; a lone "-" is a key, not a flag.
+    return (table, rest[0]) if rest else None
+
+
+def declared(table):
+    """The table's keys in config order, with BREAK where a rule goes.
+
+    Groups are separated by the blank lines in the config. A key declared twice
+    keeps its last position. A binding nested in %if or `if -F cond {…} {…}`
+    reads like any other line, so both branches contribute order -- but only
+    the branch that ran is shown, since list-keys decides what exists.
+    """
+    items, pending = [], False
+    for line in config_lines():
+        if not line:
+            pending = True  # a blank line already separates groups
+            continue
+        if not line.startswith(("bind ", "bind-key ")):
+            continue  # comments and everything else leave the break pending
+        binding = parse_bind(line)
+        if not binding:
+            continue
+        if binding[0] != table:
+            pending = False  # that blank line separated some other table
+            continue
+        key = binding[1]
+        items = [item for item in items if item != key]
+        if pending:
+            items.append(BREAK)
+            pending = False
+        items.append(key)
+    return items
+
+
+def bound(table):
+    """{key: (note, command, repeat)} for what is bound right now."""
+    listing = tmux("list-keys", "-N", "-a", "-T", table, "-F", SEP.join(
+        ("#{key_string}", "#{key_note}", "#{key_command}", "#{key_repeat}")))
+    keys = {}
+    for line in (listing or "").splitlines():
+        key, note, command, repeat = line.split(SEP)
+        keys[key] = (note, command, repeat == "1")
+    return keys
+
+
+def rows(table):
+    """(key, description, repeat, command) to show, BREAK where a rule goes."""
+    live = bound(table)
+    order, listed, pending = [], set(), False
+
+    for key in declared(table):
+        if key is BREAK:
+            pending = True
+        elif key in live and key not in listed:  # else: unbound, or shown once
+            listed.add(key)
+            if pending and order:  # never open the menu with a rule
+                order.append(BREAK)
+            pending = False
+            order.append(key)
+
+    undeclared = sorted(set(live) - listed)
+    if undeclared and order:
+        order.append(BREAK)
+
+    def entry(key):
+        note, command, repeat = live[key]
+        return key, note or command, repeat, command
+
+    return [(BREAK, "", False, "") if key is BREAK else entry(key)
+            for key in order + undeclared]
+
+
+def chosen(table, client, key, repeat, command):
+    """What a menu entry runs: re-enter the table, then trigger the binding.
+
+    Re-entering matters because the menu outlives the table -- a -r key holds
+    the client for repeat-time only, and a key sent into root reaches the pane.
+    Ordinary keys are replayed, leaving compound (\\;-chained) bindings to
+    tmux's own dispatch; a -r key runs its command instead, since dispatching
+    it would arm the repeat state, in which the next non-repeat key is skipped.
+    It also redraws its menu -- nothing else would bring it back.
+    """
+    enter = f"switch-client -c {quote(client)} -T {quote(table)}"
+    if not repeat:
+        return f"{enter} ; send-keys -K -c {quote(client)} -- {quote(key)}"
+    return (f"{enter} ; {defuse(command)} ; "
+            f"run -b {quote(f'{SELF} {table} {client} 2>&1')}")
+
+
+def menu(table, client):
+    """display-menu arguments: name, key and command for each entry."""
+    entries = rows(table)
+    if not entries:
+        return []
+    # Repeatable rows are padded so their marker lines up with the key column.
+    column = max(len(text) for key, text, *_ in entries if key is not BREAK)
+
+    arguments = []
+    for key, description, repeat, command in entries:
+        if key is BREAK:
+            arguments.append("")  # an empty name draws a rule
+            continue
+        if repeat:
+            description = f"{description.ljust(column)} {REPEATS}"
+        arguments += [defuse(description), key,
+                      chosen(table, client, key, repeat, command)]
+    # Without this, Escape closes the menu but leaves the client in the
+    # table. An unbound key normally drops back to root instead.
+    return arguments + ["", "Cancel", "Escape",
+                        f"switch-client -c {quote(client)} -T root ; set -gu {FLAG}"]
+
+
+def state(client, format):
+    """A format expanded for the client, or "" if it has gone away."""
+    return (tmux("display-message", "-p", "-c", client, format) or "").strip()
+
+
+def main(args):
+    if len(args) != 2:
+        return
+    table, client = args
+    # C-Space is the only way in, so ENTRY means a new chain: whatever menu
+    # mode the last one ended in is over.
+    if table == ENTRY:
+        tmux("set", "-gu", FLAG)
+    if state(client, "#{%s}" % FLAG) != client:
+        time.sleep(DELAY)  # not in menu mode yet, so this menu is still earned
+    # A keypress before the idle delay elapsed has left the table.
+    if state(client, "#{client_key_table}") != table:
+        return
+    arguments = menu(table, client)
+    if arguments:
+        # Set before drawing, since display-menu blocks until the menu is
+        # dismissed -- by which time the next key has already read the flag.
+        tmux("set", "-g", FLAG, client)
+        tmux("display-menu", "-c", client, "-T", f" {table.upper()}... ",
+             "-x", RIGHT, "-y", "S", *arguments)
+
+
+if __name__ == "__main__":
+    try:
+        main(sys.argv[1:])
+    except Exception:
+        if os.environ.get("DEBUG"):
+            raise
+    sys.exit(0)
