@@ -84,7 +84,10 @@ symlink() {
   local alias="${args[-1]}"
   local flags=("${args[@]::${#args[@]}-2}")
 
-  if [[ ! -e "$alias" || "$real" -nt "$alias" ]]; then
+  local target="$alias"
+  [[ -d "$alias" ]] && target="${alias%/}/$(basename "$real")"
+
+  if [[ ! -e "$target" || "$real" -nt "$target" ]]; then
     ln --symbolic --relative --force --verbose "${flags[@]}" "$real" "$alias"
   fi
 }
@@ -112,7 +115,8 @@ process_extra_assets() {
     esac
     echo "$url"
 
-    local filename=$(basename "$url")
+    local filename
+    filename=$(basename "$url")
     if [[ "$filename" == *.tar.gz ]]; then
       local download_dir=${XDG_CACHE_HOME:-$HOME/.cache}/mise/${tool[name]}
       local download_target=${download_dir}/$filename
@@ -136,10 +140,12 @@ generate_completions() {
     symlink "$found_completion" "$(dirname "$found_completion")/${tool[name]}.fish"
   fi
 
-  local gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
+  local gen_completions
+  gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
   [[ -z "$gen_completions" ]] && return 0
 
-  local tool_main_bin=$(find "${tool[path]}" -name "${tool[name]}" -executable -print -quit)
+  local tool_main_bin
+  tool_main_bin=$(find "${tool[path]}" -name "${tool[name]}" -executable -print -quit)
   [[ -z "$tool_main_bin" ]] && return 0
 
   local completion_target="${tool[path]}/${tool[name]}.fish"
@@ -154,10 +160,12 @@ link_tool_assets() {
     -type f -executable 2>/dev/null)
 
   for bin in "${tool_binaries[@]}"; do
-    local bin_name=$(basename "$bin")
+    local bin_name
+    bin_name=$(basename "$bin")
     symlink "$bin" "${TARGET_DIRS[BIN]}/"
 
-    local fish_completion=$(find -L "${tool[path]}" -type f -name "${bin_name}.fish" -print -quit 2>/dev/null)
+    local fish_completion
+    fish_completion=$(find -L "${tool[path]}" -type f -name "${bin_name}.fish" -print -quit 2>/dev/null)
     if [[ -n "$fish_completion" ]]; then
       symlink "$fish_completion" "${TARGET_DIRS[FISH_VENDOR_COMPLETIONS]}/"
     fi
@@ -171,8 +179,8 @@ link_tool_assets() {
       mkdir --parents "$man_dir"
       symlink "$manpage" "${man_dir}/"
     done
-    mandb --user-db --quiet
   done
+  mandb --user-db --quiet
 }
 
 link_node_modules() {
