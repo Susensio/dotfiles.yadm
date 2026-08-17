@@ -8,12 +8,11 @@ description: Use when drafting a bug report or feature request to file upstream 
 Drafts issues for filing against any GitHub repo, in the user's (Susensio)
 own voice, ready to review, and never files anything itself.
 
-If reproducing the bug requires running the tool live, check whether that
-project has its own test-isolation skill or convention before running
-anything — e.g. tmux work always goes through `tmux-helper`'s throwaway
-`-L <socket>` server rules, never the live session. Don't hardcode a
-per-tool mapping here: the relevant skill's own trigger picks it up once the
-task involves that tool.
+If reproducing the bug requires running the tool live, check whether the project
+declares a testing skill for that domain and follow it — it owns the isolation
+protocol. If none is declared, reproduce against something you created and can
+throw away, never the user's live state. No per-tool mapping belongs here: the
+relevant skill's own trigger picks it up once the task involves that tool.
 
 ## 0. Never submit directly (non-negotiable)
 

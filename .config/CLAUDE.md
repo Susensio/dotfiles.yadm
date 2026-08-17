@@ -29,6 +29,10 @@ XDG config repo for `~/.config`, managed with yadm.
   Consequences of an ADR, like `.xsession-errors` in ADR-0004.
 - Anything broken with no single line to mark, or worth tracking to closure,
   goes to `gh issue create --repo Susensio/dotfiles.yadm`.
+- Commit messages here are capitalized imperative, no trailing period, naming the
+  domain touched -- `Fix tmux bugs`, `Add fish fenv`. No conventional-commit
+  prefixes. Stage by explicit path; this tree carries in-flight edits across
+  several config domains at once.
 
 ## tmux/
 

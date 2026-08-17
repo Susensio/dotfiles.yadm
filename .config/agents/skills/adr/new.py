@@ -11,7 +11,19 @@ import re
 import sys
 from pathlib import Path
 
-ADR_DIR = Path.cwd() / "docs" / "adr"
+
+def find_adr_dir() -> Path:
+    # Walk up for an existing docs/adr so the script runs from any subdirectory.
+    # Not git rev-parse: under yadm the worktree root is $HOME, not the config dir.
+    cwd = Path.cwd()
+    for base in (cwd, *cwd.parents):
+        candidate = base / "docs" / "adr"
+        if candidate.is_dir():
+            return candidate
+    return cwd / "docs" / "adr"
+
+
+ADR_DIR = find_adr_dir()
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
 
 
