@@ -34,6 +34,10 @@ failure.*
   invocation, including the parts this task will not use.
 - `settings*.json` parse (`jq .`). A malformed file is dropped whole, taking
   every permission and hook in it.
+- No agent `tools:`/`disallowedTools:` entry uses a specifier other than
+  `Agent(...)` or `mcp__*` — R13. `Bash(cmd:*)` there is silently stripped to
+  plain `Bash`, so the line reads as a restriction and grants everything. Ask the
+  agent what tools it has rather than trusting the file or the agent listing.
 - Harness files in a repo: tracked, or deliberately ignored?
   `git ls-files --error-unmatch` and `git check-ignore -v`. Untracked and
   un-ignored is one `git clean` from gone.

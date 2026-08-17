@@ -127,3 +127,33 @@ working until it has been run the way an agent will run it.
 
 *Failure it prevents:* `gh`-dependent skills that pass by hand and fail for every
 subagent, indistinguishably from the tool being broken.
+
+## R13. A read-only agent is enforced by `disallowedTools`, a hook, and its prompt.
+
+Not by a permission mode, and not by a tool specifier. Both of those were tested
+and neither works:
+
+- `permissionMode: plan` does **not** stop a subagent writing or deleting through
+  Bash. A probe in plan mode wrote, read back and deleted files in the repository
+  working tree with nothing objecting.
+- `tools: Bash(ls:*)` is **silently stripped to plain `Bash`**. The probe ran
+  `echo` fine and reported its own tools as `Bash, Read`. It fails open: the
+  frontmatter reads like a restriction and grants everything. Only `Agent(...)`
+  and `mcp__*` specifiers are documented for this field.
+
+What does work, in order:
+
+1. `disallowedTools: Write, Edit` -- applied before `tools:` is resolved, so it
+   beats it. Removes the built-in file tools.
+2. A `PreToolUse` hook in the agent's or skill's own frontmatter, inspecting the
+   Bash command and exiting 2. This is the only per-agent mechanism with teeth;
+   tool lists control *which tools*, hooks control *which uses of a tool*.
+3. The body. State the contract in the first paragraph. A probe agent refused to
+   mutate the repo on its instructions alone, with nothing mechanical stopping
+   it -- the prompt is doing more work here than the frontmatter.
+
+The session sandbox is real enforcement but session-wide, and it allowlists the
+working directory, so it does not separate a read-only agent from its caller.
+
+*Failure it prevents:* believing an agent is read-only because its frontmatter
+says something that was never parsed.
