@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PREFIX=tmuxtest
+
+usage() {
+    cat <<'EOF'
+tmux-test — throwaway tmux servers that cannot touch the user's live session.
+
+  spawn <config>                          start a server on a fresh socket, print its name
+  window <sock> <cmd>...                  window whose panes report those command names
+  eval <sock> <format> [target]           expand a format string and print the result
+  kill <sock>                             kill the server and remove its socket
+  sweep                                   kill every leftover tmux-test server
+
+  nested-spawn <config> [w] [h]           spawn an inner+outer pair, outer watching
+                                           inner via attach; prints "<inner> <outer>"
+  nested-run <inner> <outer> <args>...    run a tmux command against inner (the
+                                           thing under test: popups, splits, ...)
+  nested-capture <inner> <outer> [target] capture-pane on outer (default target o),
+                                           formatted for reading (cat -A | nl -ba)
+  nested-eval <inner> <outer> <fmt> [t]   expand a format read from outer (e.g.
+                                           #{cursor_flag} while a popup is open)
+  nested-kill <inner> <outer>             kill both servers and remove their sockets
+
+Every subcommand passes -L explicitly, so nothing here can reach $TMUX. The
+nested-* commands only ever operate on sockets they generated themselves
+(named "${PREFIX}_inner_..." / "${PREFIX}_outer_...") — passing any other
+name is refused.
+
+Which pane gets which command is not guaranteed -- splitting reorders them.
+Test on the set of commands present in a window, not on pane position.
+
+Compose them to A/B a format across scenarios:
+
+  s=$(tmux-test spawn conf.d/31_visual.conf)
+  w=$(tmux-test window "$s" nvim git)
+  tmux-test eval "$s" '#{E:automatic-rename-format}' "$w"
+  tmux-test kill "$s"
+EOF
+}
+
+socket_path() { echo "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$1"; }
+
+# Keyed on the socket, not the pid, so kill/sweep can find it later.
+fakebin_path() { echo "${TMPDIR:-/tmp}/tmux-test-fakebin.$1"; }
+
+# A test script inherits $TMUX from the pane it runs in; without this, any tmux
+# call that lost its -L would fall through to the user's live server.
+unset TMUX
+
+cmd_spawn() {
+    local config=${1:?usage: spawn <config>}
+    [ -f "$config" ] || { echo "no such config: $config" >&2; exit 1; }
+    local sock="${PREFIX}_$$_${RANDOM}"
+    tmux -L "$sock" -f "$config" new-session -d -s test
+    echo "$sock"
+}
+
+# Commands are typed into the shell rather than passed to new-window: under a
+# fish default-shell the argument form leaves pane_current_command reporting
+# "fish", so command-detection rules silently fail to match.
+cmd_window() {
+    local sock=${1:?usage: window <sock> <cmd>...}; shift
+    [ $# -gt 0 ] || { echo "window needs at least one command name" >&2; exit 1; }
+
+    local fakebin
+    fakebin=$(fakebin_path "$sock")
+    mkdir -p "$fakebin"
+    local name
+    for name in "$@"; do ln -sf /bin/sleep "$fakebin/$name"; done
+
+    local win i
+    win=$(tmux -L "$sock" new-window -P -F '#{window_index}' -d)
+    for ((i = 1; i < $#; i++)); do
+        tmux -L "$sock" split-window -d -t "$win"
+    done
+
+    # Pane ids, not indices: pane-base-index varies with the config under test.
+    local -a panes
+    mapfile -t panes < <(tmux -L "$sock" list-panes -t "$win" -F '#{pane_id}')
+
+    sleep 0.6
+    i=0
+    for name in "$@"; do
+        tmux -L "$sock" send-keys -t "${panes[$i]}" "exec $fakebin/$name 3000" Enter
+        i=$((i + 1))
+    done
+    sleep 1.2
+    echo "$win"
+}
+
+cmd_eval() {
+    local sock=${1:?usage: eval <sock> <format> [target]}
+    local fmt=${2:?usage: eval <sock> <format> [target]}
+    local target=${3:-}
+    if [ -n "$target" ]; then
+        tmux -L "$sock" display-message -p -t "$target" "$fmt"
+    else
+        tmux -L "$sock" display-message -p "$fmt"
+    fi
+}
+
+cmd_kill() {
+    local sock=${1:?usage: kill <sock>}
+    case "$sock" in
+        "${PREFIX}"_*) ;;
+        *) echo "refusing to kill '$sock': not a tmux-test socket" >&2; exit 1 ;;
+    esac
+    tmux -L "$sock" kill-server 2>/dev/null || true
+    rm -f "$(socket_path "$sock")"
+    rm -rf "$(fakebin_path "$sock")"
+}
+
+require_nested_socket() {
+    local sock=$1 role=$2
+    case "$sock" in
+        "${PREFIX}_${role}_"*) ;;
+        *) echo "refusing '$sock': not a tmux-test $role socket" >&2; exit 1 ;;
+    esac
+}
+
+cmd_nested_spawn() {
+    local config=${1:?usage: nested-spawn <config> [width] [height]}
+    local w=${2:-100} h=${3:-24}
+    [ -f "$config" ] || { echo "no such config: $config" >&2; exit 1; }
+    local inner="${PREFIX}_inner_$$_${RANDOM}"
+    local outer="${PREFIX}_outer_$$_${RANDOM}"
+
+    tmux -L "$inner" -f /dev/null new-session -d -s t -x "$w" -y "$h"
+    local srcout
+    srcout=$(tmux -L "$inner" source-file "$config" 2>&1) || true
+    [ -n "$srcout" ] && echo "warning: sourcing $config produced output: $srcout" >&2
+
+    tmux -L "$outer" -f /dev/null new-session -d -s o -x "$w" -y "$h" \
+        "tmux -L $inner attach -t t"
+    sleep 1.5
+    echo "$inner $outer"
+}
+
+cmd_nested_run() {
+    local inner=${1:?usage: nested-run <inner> <outer> <tmux-args>...}
+    local outer=${2:?usage: nested-run <inner> <outer> <tmux-args>...}
+    shift 2
+    [ $# -gt 0 ] || { echo "nested-run needs a tmux command" >&2; exit 1; }
+    require_nested_socket "$inner" inner
+    require_nested_socket "$outer" outer
+    tmux -L "$inner" "$@"
+}
+
+cmd_nested_capture() {
+    local inner=${1:?usage: nested-capture <inner> <outer> [target]}
+    local outer=${2:?usage: nested-capture <inner> <outer> [target]}
+    local target=${3:-o}
+    require_nested_socket "$inner" inner
+    require_nested_socket "$outer" outer
+    tmux -L "$outer" capture-pane -p -t "$target" | cat -A | sed 's/\$$//' | nl -ba
+}
+
+cmd_nested_eval() {
+    local inner=${1:?usage: nested-eval <inner> <outer> <format> [target]}
+    local outer=${2:?usage: nested-eval <inner> <outer> <format> [target]}
+    local fmt=${3:?usage: nested-eval <inner> <outer> <format> [target]}
+    local target=${4:-o}
+    require_nested_socket "$inner" inner
+    require_nested_socket "$outer" outer
+    tmux -L "$outer" display-message -p -t "$target" "$fmt"
+}
+
+cmd_nested_kill() {
+    local inner=${1:?usage: nested-kill <inner> <outer>}
+    local outer=${2:?usage: nested-kill <inner> <outer>}
+    require_nested_socket "$inner" inner
+    require_nested_socket "$outer" outer
+    tmux -L "$inner" kill-server 2>/dev/null || true
+    tmux -L "$outer" kill-server 2>/dev/null || true
+    rm -f "$(socket_path "$inner")" "$(socket_path "$outer")"
+}
+
+cmd_sweep() {
+    local dir
+    dir="$(dirname "$(socket_path x)")"
+    [ -d "$dir" ] || return 0
+    local s
+    for s in "$dir/${PREFIX}"_*; do
+        [ -e "$s" ] || continue
+        tmux -L "$(basename "$s")" kill-server 2>/dev/null || true
+        rm -f "$s"
+    done
+    rm -rf "$(fakebin_path "${PREFIX}")"_*
+}
+
+case "${1:-}" in
+    spawn)          shift; cmd_spawn "$@" ;;
+    window)         shift; cmd_window "$@" ;;
+    eval)           shift; cmd_eval "$@" ;;
+    kill)           shift; cmd_kill "$@" ;;
+    sweep)          shift; cmd_sweep "$@" ;;
+    nested-spawn)   shift; cmd_nested_spawn "$@" ;;
+    nested-run)     shift; cmd_nested_run "$@" ;;
+    nested-capture) shift; cmd_nested_capture "$@" ;;
+    nested-eval)    shift; cmd_nested_eval "$@" ;;
+    nested-kill)    shift; cmd_nested_kill "$@" ;;
+    ""|-h|--help|help) usage ;;
+    *) echo "unknown subcommand: $1" >&2; usage >&2; exit 1 ;;
+esac

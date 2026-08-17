@@ -1,6 +1,6 @@
 # ADR-0021: Test tmux only on isolated throwaway servers
 
-Status: Accepted
+Status: Superseded by [ADR-0025](0025-split-tmux-skills-by-knowledge-vs-execution-and-ge.md)
 Date: 2026-08-07
 
 ## Context

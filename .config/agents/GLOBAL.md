@@ -1,0 +1,25 @@
+# General preferences
+
+- When reporting information to me, be extremely concise and sacrifice grammar for the sake of concision.
+- Before a debugging rabbit hole on confusing behavior in mature software I didn't write, check the project's issue tracker first instead of pure trial-and-error -- it has often already been explained, sometimes by a maintainer. Infer the resolution from the comments and close reason; some maintainers don't merge via GitHub, so a missing linked PR doesn't mean unfixed. Check which version the issue applies to and whether the fix shipped.
+- Scale verification effort to what a change can actually break. For edits that cannot alter behavior — comments, whitespace, docs — reading the diff *is* the verification: don't run the full test suite, reload the whole config, spin up throwaway servers, or build before/after harnesses to prove an inert change is inert. Ask "what could this plausibly break?" first, then check exactly that and stop. Reserve the heavy harness for changes that genuinely alter behavior, where it is warranted.
+- When shelling out via `Bash`, prefer faster/richer CLI tools over POSIX defaults where installed: `rg` over `grep`, `fd` over `find`, `jq` over ad hoc JSON parsing, `delta`/`bat` for diff or file preview. Applies to you and every subagent you delegate to.
+  - Check with `command -v <tool>` if unsure whether one is present; fall back silently to the POSIX default rather than failing a task over a missing convenience tool.
+  - Doesn't apply to the built-in `Grep`/`Glob` tools — those already run on fast backends.
+- Before spawning a subagent, pick the model by task shape, not task category:
+  - `haiku` for enumeration and retrieval over a large surface -- grepping transcripts, trawling logs, inventorying a tree. Reliable at finding and listing, weak at deciding.
+  - `sonnet` for self-contained implementation with a clear spec and an obvious way to verify it.
+  - Delegate the legwork, never the call. Anything whose output is a judgment -- ranking, trade-offs, what matters -- comes back to whoever is deciding.
+- Delegation buys context isolation and pays a cold start: the subagent re-derives everything from its prompt alone. Worth it for chunky self-contained work, a loss for a few-line edit. Gate on size and self-containment, not on whether it's "implementation".
+- Write every subagent prompt to stand alone, and require a distilled return -- findings and file paths, not raw output. Keeping the dump out of the caller's context is the point.
+- Forks inherit the caller's model and ignore a `model` override. For cheap work, spawn fresh rather than forking.
+- Comment sparingly, like someone who'll be annoyed at future-self for not understanding a quirk later. A comment earns its place only when something is genuinely non-obvious: a hidden constraint, a workaround for a specific bug. No header blocks explaining what a file does -- let names carry that. Favor terse fragments over full sentences -- drop articles/pronouns if meaning survives.
+- Word comments flat, declarative, impersonal:
+  - One idea per comment. If it needs an "and" or a colon to fit two, write two.
+  - Keep the why, drop the wrapper around it. "tmux's own dispatch handles compound bindings; re-parsing the command text would not" -- not "which is what saves this from...".
+  - No hedge words: "really", "already", "actually", "basically", "essentially".
+  - Docstrings lead with the shape of the return value, not "this function returns...".
+  - `BUG:` plus one bare sentence for a known defect.
+- In fish, prefer `if`/`end` blocks over `and`/`or` chaining for control flow.
+- Commit atomically: one concern per commit, each buildable and revertable on its own. If a turn's changes span multiple unrelated concerns, split into separate commits rather than bundling them because they landed in the same turn.
+- When I ask you to remember something, first work out where it belongs. If the project has its own harness — a CLAUDE.md/AGENTS.md, a skill, or similar — and the info fits there, put it there. Only fall back to the agent memory directory when it fits nowhere in the project's own files. Record it in one place; don't duplicate it across both.

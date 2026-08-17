@@ -14,7 +14,12 @@
 !/.config/mise/
 !/.config/environment.d/
 !/.config/docs/
+!/.config/agents/
 !/.config/*.md
+!/.config/.claude/
+/.config/.claude/*
+!/.config/.claude/skills/
+!/.config/.claude/settings.json
 !/.local/share/yadm/archive
 !/.github
 !/bin

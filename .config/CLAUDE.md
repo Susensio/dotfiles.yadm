@@ -13,9 +13,9 @@ XDG config repo for `~/.config`, managed with yadm.
   a bare `tmux` call in a test, it can hit the live session.
 - Fan out along config domains -- `tmux`, `fish`, `nvim`, `mise`, `keyd` -- that
   is the seam that actually divides this repo. Not layers, not phases.
-- tmux behavior or visuals worth verifying go to the `tmux-tester` agent, which
-  owns the throwaway-server isolation. No sibling testers for domains with no
-  isolation harness yet -- generalize when a second one earns it.
+- Anything worth verifying against a live process goes to the `tester` agent,
+  named with the domain's testing skill. The agent is a container; the isolation
+  protocol lives in the skill. For tmux that is `tmux-testing`.
 - Architecturally significant decisions about this setup -- tool or library
   choice, a structural change, a reversal of a prior decision -- belong in
   `docs/adr/` via the `adr` skill. Not auto-memory, not a comment.
@@ -32,9 +32,7 @@ XDG config repo for `~/.config`, managed with yadm.
 
 ## tmux/
 
-- Invoke the `tmux-helper` skill before any tmux work.
-- `tmux.conf` sources individual config files dynamically from the `conf.d/`
-  directory. Supporting scripts live in `scripts/` and must be executable.
-- Consult `man tmux` for unfamiliar options. Search upstream with
-  `gh search issues ... repo:tmux/tmux` and `gh issue view <n> --repo tmux/tmux`;
-  the maintainer (nicm) often explains the exact mechanism in the comments.
+- Invoke the `tmux-config` skill before any tmux work. It carries the reference
+  docs, the `conf.d/` layout, and the upstream-research routine.
+- Running anything against a server -- a binding, a format, a popup -- is
+  `tmux-testing`, via the `tester` agent. Never the live session.
