@@ -5,6 +5,13 @@ description: Records an architecturally significant decision as a numbered ADR i
 
 # Architecture Decision Record Protocol
 
+## Before deciding
+Run `rg -N '^Status: (.+)$' -r '$1' docs/adr/0*.md | sort` — one line per ADR in
+number order, filename and status. An `Accepted` ADR covering the same ground is
+binding: follow it, or supersede it deliberately (below). Never silently
+re-decide. `Superseded` is history, not current policy. Open a full ADR only when
+its filename looks relevant.
+
 ## When to write one
 Record a decision here when it changes how the system is built and would be expensive to rediscover later: choice of a library/framework/datastore, a structural boundary (service split, API shape), a reversal of a previous decision, or a constraint adopted for a non-obvious reason. Don't record routine implementation choices, naming, or anything reversible without cost — that's noise, not a decision worth an ADR.
 
@@ -18,11 +25,6 @@ Record a decision here when it changes how the system is built and would be expe
    `python3 .claude/skills/adr/new.py "<short title>" --supersedes <N>`
    This writes `Supersedes: ADR-<N>` into the new file and flips ADR-`<N>`'s status to `Superseded by ADR-<M>` — the old record stays, it just stops being current.
 
-## How to list them
 Titles are in the filenames, status is in each file. There is no index file to
-fall out of date:
-
-```sh
-rg -N '^Status: (.+)$' -r '$1' docs/adr/0*.md | sort   # all, with status
-rg -l '^Status: Superseded' docs/adr/0*.md             # just the dead ones
-```
+fall out of date. `rg -l '^Status: Superseded' docs/adr/0*.md` lists just the
+dead ones.

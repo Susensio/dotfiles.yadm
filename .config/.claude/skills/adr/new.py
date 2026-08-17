@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 
 ADR_DIR = Path.cwd() / "docs" / "adr"
-NUM_RE = re.compile(r"^(\d{4})-")
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
 
 
@@ -27,14 +26,18 @@ def existing_adrs() -> list[Path]:
     return sorted(ADR_DIR.glob("[0-9][0-9][0-9][0-9]-*.md"))
 
 
+def adr_number(path: Path) -> int:
+    # existing_adrs() globs four leading digits, so the prefix is always parseable
+    return int(path.name[:4])
+
+
 def next_number() -> int:
-    nums = [int(NUM_RE.match(p.name).group(1)) for p in existing_adrs()]
-    return max(nums, default=0) + 1
+    return max((adr_number(p) for p in existing_adrs()), default=0) + 1
 
 
 def find_adr(number: int) -> Path:
     for p in existing_adrs():
-        if int(NUM_RE.match(p.name).group(1)) == number:
+        if adr_number(p) == number:
             return p
     sys.exit(f"error: no ADR numbered {number:04d} found in {ADR_DIR}")
 
