@@ -136,10 +136,12 @@ and neither works:
 - `permissionMode: plan` does **not** stop a subagent writing or deleting through
   Bash. A probe in plan mode wrote, read back and deleted files in the repository
   working tree with nothing objecting.
-- `tools: Bash(ls:*)` is **silently stripped to plain `Bash`**. The probe ran
-  `echo` fine and reported its own tools as `Bash, Read`. It fails open: the
-  frontmatter reads like a restriction and grants everything. Only `Agent(...)`
-  and `mcp__*` specifiers are documented for this field.
+- **Every parenthesised specifier in `tools:` is silently stripped**, including
+  the documented `Agent(agent_type)` form. A probe declaring `Bash(ls:*)` ran
+  `echo` fine and reported `Bash, Read`; an agent declaring `Agent(tester)`
+  reported plain `Agent` with `subagent_type` an unconstrained string. Both fail
+  open: the line reads as a restriction and grants everything. Tested on
+  v2.1.223.
 
 What does work, in order:
 
