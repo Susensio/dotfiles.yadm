@@ -1,6 +1,9 @@
 ---
 name: audit-harness
 description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, or never loaded. Use after adding or moving agents, skills or context files, and when an agent ignores a rule you thought was in force.
+context: fork
+agent: auditor
+background: false
 ---
 
 # Harness audit
@@ -12,7 +15,9 @@ check below names the rules it tests. A finding that cannot name a rule or a
 concrete breakage is not a finding.
 
 Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's
-own `.claude/` and `CLAUDE.md`, and any nested `**/.claude/`.
+own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested
+`**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale
+one in a subpackage is still live.
 
 ## How to report a finding
 

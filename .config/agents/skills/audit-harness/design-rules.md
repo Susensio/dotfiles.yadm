@@ -4,6 +4,12 @@ Doctrine for building the harness. The audit in `SKILL.md` enforces these; this
 file says why they exist. A rule that cannot name the failure it prevents does
 not belong here.
 
+Each rule states the current conclusion and the failure it prevents, and stops
+there. The investigation that produced it -- what was probed, what the probe
+returned, which hypothesis died -- belongs in the commit that changed the rule,
+or in an ADR when a decision was reversed. Provenance read here on every audit
+costs more than it informs; `git log -p` still has it when the rule looks wrong.
+
 ## R1. Agents are containers. Skills are content.
 
 An agent is justified only by a container property: tool scoping (especially
@@ -64,25 +70,23 @@ through the back door.
 
 ## R7. The name follows the thing's nature, and invocability follows the name.
 
-Lowercase, hyphenated. Beyond that Anthropic documents no convention, so this one
-is ours:
+Lowercase, hyphenated. Beyond that the convention is ours:
 
-- **Agents are persons** -- `tester`, `auditor`. They do work on your behalf.
-- **Skills are knowledge or actions.** Knowledge takes a noun (`delegation`,
-  `tmux-config`) and sets `user-invocable: false`: there is nothing to invoke, it
-  is something Claude should know at the right moment. An action takes an
-  imperative (`audit-harness`, `report-issue`) and stays invocable both ways --
-  you can type it, and Claude can reach for it unprompted.
-- **Commands are a subset of skills.** `.claude/commands/foo.md` and
-  `.claude/skills/foo/SKILL.md` both produce `/foo`; the skill form adds
-  supporting files and invocation control. Write skills, not commands.
+- **Agents are persons** -- `tester`, `auditor`.
+- **Knowledge skills take a noun** -- `delegation`, `tmux-config` -- and set
+  `user-invocable: false`. There is nothing to invoke; it is something Claude
+  should know at the right moment.
+- **Action skills take an imperative** -- `audit-harness`, `report-issue` -- and
+  stay invocable both ways.
+
+Commands are a subset of skills and add nothing a skill lacks. Write skills.
 
 The pairing is checkable: a noun-named skill that is user-invocable, or an
 imperative-named one nothing can trigger, is misfiled.
 
 *Failure it prevents:* a knowledge skill cluttering the `/` menu with something
-nobody would ever type, and an action nobody can reach because its name reads
-like a topic.
+nobody would type, and an action nobody can reach because its name reads like a
+topic.
 
 ## R8. A description is a trigger, not a label; a body is instructions, not commentary.
 
@@ -133,34 +137,18 @@ working until it has been run the way an agent will run it.
 *Failure it prevents:* `gh`-dependent skills that pass by hand and fail for every
 subagent, indistinguishably from the tool being broken.
 
-## R13. A read-only agent is enforced by `disallowedTools`, a hook, and its prompt.
+## R13. A read-only agent is a convention it keeps, not a cage.
 
-Not by a permission mode, and not by a tool specifier. Both of those were tested
-and neither works:
+Two frontmatter mechanisms look like enforcement and are not (tested, v2.1.223):
+`permissionMode: plan` does not stop a subagent writing or deleting through Bash,
+and every parenthesised specifier in `tools:` is silently stripped to the bare
+tool -- including the documented `Agent(name)` form. Both fail open.
 
-- `permissionMode: plan` does **not** stop a subagent writing or deleting through
-  Bash. A probe in plan mode wrote, read back and deleted files in the repository
-  working tree with nothing objecting.
-- **Every parenthesised specifier in `tools:` is silently stripped**, including
-  the documented `Agent(agent_type)` form. A probe declaring `Bash(ls:*)` ran
-  `echo` fine and reported `Bash, Read`; an agent declaring `Agent(tester)`
-  reported plain `Agent` with `subagent_type` an unconstrained string. Both fail
-  open: the line reads as a restriction and grants everything. Tested on
-  v2.1.223.
-
-What does work, in order:
-
-1. `disallowedTools: Write, Edit` -- applied before `tools:` is resolved, so it
-   beats it. Removes the built-in file tools.
-2. A `PreToolUse` hook in the agent's or skill's own frontmatter, inspecting the
-   Bash command and exiting 2. This is the only per-agent mechanism with teeth;
-   tool lists control *which tools*, hooks control *which uses of a tool*.
-3. The body. State the contract in the first paragraph. A probe agent refused to
-   mutate the repo on its instructions alone, with nothing mechanical stopping
-   it -- the prompt is doing more work here than the frontmatter.
-
-The session sandbox is real enforcement but session-wide, and it allowlists the
-working directory, so it does not separate a read-only agent from its caller.
+So: set `disallowedTools: Write, Edit`, which removes the built-in file tools and
+nothing more, and state the contract in the body's first paragraph, naming the
+obvious loophole -- no shell redirect standing in for Write. Accept that the rest
+rests on the agent. The session sandbox is real enforcement but session-wide, so
+it cannot separate a read-only agent from its caller.
 
 *Failure it prevents:* believing an agent is read-only because its frontmatter
 says something that was never parsed.
