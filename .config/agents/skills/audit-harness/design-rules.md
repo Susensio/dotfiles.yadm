@@ -84,13 +84,18 @@ imperative-named one nothing can trigger, is misfiled.
 nobody would ever type, and an action nobody can reach because its name reads
 like a topic.
 
-## R8. A description is a trigger, not a label.
+## R8. A description is a trigger, not a label; a body is instructions, not commentary.
 
-What it does, then when to use it. For an agent, also what comes back. It is the
-only text loaded before the thing is chosen.
+The description says what it does, then when to use it, and for an agent what
+comes back. It is the only text loaded before the thing is chosen.
+
+The body states the rule and stops. An agent following an instruction does not
+need to know which mechanism failed to enforce it -- explanations of how the
+harness behaves belong in this file, not scattered through the things it governs.
 
 *Failure it prevents:* a skill that never fires because its description says what
-it is rather than when to reach for it.
+it is rather than when to reach for it; and agent bodies that grow into essays
+about the harness, paid for on every spawn.
 
 ## R9. Only skills load on demand.
 
