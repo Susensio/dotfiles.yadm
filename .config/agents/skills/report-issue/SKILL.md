@@ -57,10 +57,10 @@ repo currently has. Branch on what comes back:
 
 - `gh api repos/<owner>/<repo>/contents/CONTRIBUTING.md` (also try
   `.github/CONTRIBUTING.md`; skip this step on a 404 from both). Read
-  whatever checklist it gives — pre-issue requirements differ a lot per repo
-  (e.g. tmux/tmux requires reproducing on a Git-master build, checking its
-  `CHANGES` file, and checking `man tmux` first — that's tmux's own
-  CONTRIBUTING.md talking, not a rule to hardcode here).
+  whatever checklist it gives and follow it — pre-issue requirements differ a
+  lot per repo. Reproducing against a development build, reading a changelog for
+  an existing fix, and checking the manual are all common demands. Take them
+  from the repo's own file; none of them belong hardcoded here.
 - Always, regardless of whether CONTRIBUTING.md exists: search for a
   duplicate, `gh search issues -R <owner>/<repo> "<keywords>"`, and check
   `--author susensio` first — the user may have already reported this exact
@@ -70,17 +70,16 @@ repo currently has. Branch on what comes back:
 ## 4. Voice
 
 General traits live in `references/voice.md` — always apply these. If
-`references/past_issues/<repo>.md` exists (currently just `tmux.md`), it's
-the concrete authority for that specific repo and can layer conventions on
-top of the general voice (title/label schemes, how much log detail is
-typical there, etc.).
+`references/past_issues/<repo>.md` exists, it's the concrete authority for that
+specific repo and can layer conventions on top of the general voice (title/label
+schemes, how much log detail is typical there, etc.).
 
 If no such file exists yet and the user has filed to this repo before, seed
 one: `gh search issues --author susensio -R <owner>/<repo>`, pull a couple of
 hits with `gh issue view <n> --repo <owner>/<repo>`, and write them up in the
-same annotated format as `past_issues/tmux.md` (excerpt + a short note on
-what's notable about how it's written). No hits → don't manufacture a file,
-`voice.md` alone is enough.
+same annotated format as the files already in `past_issues/` (excerpt + a short
+note on what's notable about how it's written). No hits → don't manufacture a
+file, `voice.md` alone is enough.
 
 ## 5. Required-information block
 

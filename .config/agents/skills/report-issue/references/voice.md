@@ -2,8 +2,7 @@
 
 General traits of how Susensio writes GitHub issues, distilled from the
 corpus of past reports across repos (see `past_issues/<repo>.md` for the
-per-repo evidence, currently just `tmux.md`). These apply regardless of
-target repo. A repo-specific corpus file, if one exists, is the concrete
+per-repo evidence). These apply regardless of target repo. A repo-specific corpus file, if one exists, is the concrete
 authority and can layer conventions on top of this (e.g. a repo's own label
 or title scheme) — it never contradicts these defaults without reason.
 
