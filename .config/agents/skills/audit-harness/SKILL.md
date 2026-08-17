@@ -41,9 +41,13 @@ failure.*
   every permission and hook in it.
 - No agent `tools:`/`disallowedTools:` entry uses a parenthesised specifier —
   R13. `Bash(cmd:*)` and even the documented `Agent(name)` are silently stripped
-  to the bare tool, so the line reads as a restriction and grants everything. Ask
-  a spawned agent what tools it actually has; neither the file nor the agent
-  listing reports the effective grant.
+  to the bare tool, so the line reads as a restriction and grants everything.
+  Neither the file nor the agent listing reports the effective grant.
+- Confirm an effective grant by having a spawned agent **use** the tool, never by
+  asking it to list one. An agent's account of its own tools is generated text,
+  not a reading of the runtime: one declaring `Grep, Glob` reported neither and
+  used both. Withhold whatever would let it reach the answer another way, so an
+  absence means what it looks like.
 - Harness files in a repo: tracked, or deliberately ignored?
   `git ls-files --error-unmatch` and `git check-ignore -v`. Untracked and
   un-ignored is one `git clean` from gone.
