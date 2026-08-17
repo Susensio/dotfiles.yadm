@@ -45,6 +45,12 @@ unrelated one.
   behavior changes drastically.
 - **Conflicts**: before adding a binding or option, check it against tmux
   defaults and the existing `conf.d/` files.
+- **Colour**: tmux style directives (`fg=`, `bg=`) take explicit gruvbox hex from
+  `conf.d/30_gruvbox.conf`, which is the single source of truth -- tmux has no
+  concept of the terminal's ANSI theme to defer to. Scripts whose output prints
+  straight to the terminal use plain ANSI 16-colour escapes (`\e[31m`) instead:
+  the terminal emulator already implements gruvbox at that level, so hardcoding
+  hex there duplicates the palette and pins it in place.
 
 ## 4. Verifying a change
 

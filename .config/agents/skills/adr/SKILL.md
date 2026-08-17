@@ -15,6 +15,8 @@ its filename looks relevant.
 ## When to write one
 Record a decision here when it changes how the system is built and would be expensive to rediscover later: choice of a library/framework/datastore, a structural boundary (service split, API shape), a reversal of a previous decision, or a constraint adopted for a non-obvious reason. Don't record routine implementation choices, naming, or anything reversible without cost — that's noise, not a decision worth an ADR.
 
+The test is whether real alternatives were weighed. Adopting a documented, reversible setting because the tool's own docs say to — even one that reads as structural — is not a decision, it's a transcription: there is no discarded alternative for future-you to rediscover. Offer an ADR in that case rather than assuming one is warranted.
+
 ## How to write one
 1. Run `${CLAUDE_SKILL_DIR}/scripts/new.py "<title>" --slug "<short-slug>"` — prints the created file's path. It finds `docs/adr/` by walking up from wherever it is invoked, and creates it if the repo has none. `<title>` can be a full sentence and becomes the H1; `--slug` is 3-6 words naming the core decision and becomes the filename — pick it deliberately rather than letting the title get truncated into it.
 2. Fill in the three sections:
