@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Records an architecturally significant decision as a numbered ADR in docs/adr/. Judgment on when something is worth recording lives here; the mechanics (numbering, slugifying, supersede bookkeeping) live in new.py.
+description: Records an architecturally significant decision as a numbered ADR in docs/adr/, and checks what is already binding before a new one is made. Use right after a choice between real alternatives is settled or reversed — a library, a structural boundary, a constraint accepted for a non-obvious reason — and before settling one, so a prior decision is followed or superseded deliberately rather than silently re-litigated.
 ---
 
 # Architecture Decision Record Protocol
