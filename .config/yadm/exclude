@@ -17,9 +17,8 @@
 !/.config/agents/
 !/.config/*.md
 !/.config/.claude/
-/.config/.claude/*
-!/.config/.claude/skills/
-!/.config/.claude/settings.json
+/.config/.claude/settings.local.json
+.cc-writes/
 !/.local/share/yadm/archive
 !/.github
 !/bin
