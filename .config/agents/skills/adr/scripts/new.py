@@ -27,9 +27,14 @@ ADR_DIR = find_adr_dir()
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
 
 
-def slugify(title: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", title.strip().lower()).strip("-")
-    return slug[:50].rstrip("-")
+def slugify(text: str, max_len: int = 50) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.strip().lower()).strip("-")
+    if len(slug) <= max_len:
+        return slug
+    # cut at the last word boundary within max_len, not mid-word
+    truncated = slug[:max_len]
+    boundary = truncated.rfind("-")
+    return (truncated[:boundary] if boundary > 0 else truncated).rstrip("-")
 
 
 def existing_adrs() -> list[Path]:
@@ -65,12 +70,13 @@ def flip_to_superseded(old_path: Path, new_number: int, new_slug: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("title")
+    parser.add_argument("--slug", metavar="SLUG", help="short (3-6 word) filename slug; defaults to a truncated version of the title")
     parser.add_argument("--supersedes", type=int, metavar="N", help="ADR number this decision replaces")
     args = parser.parse_args()
 
     ADR_DIR.mkdir(parents=True, exist_ok=True)
     number = next_number()
-    slug = slugify(args.title)
+    slug = slugify(args.slug) if args.slug else slugify(args.title)
     if not slug:
         sys.exit("error: title produced an empty slug")
     path = ADR_DIR / f"{number:04d}-{slug}.md"
