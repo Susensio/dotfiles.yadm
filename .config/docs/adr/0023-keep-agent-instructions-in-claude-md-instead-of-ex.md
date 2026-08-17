@@ -1,6 +1,6 @@
 # ADR-0023: Keep agent instructions in CLAUDE.md instead of extracting an orchestrator
 
-Status: Accepted
+Status: Superseded by [ADR-0026](0026-place-harness-content-by-tier-and-load-cost.md)
 Date: 2026-08-15
 
 ## Context

@@ -23,6 +23,10 @@ skill the caller names, not welded into the agent body.
 *Failure it prevents:* a second domain wanting the same container has to clone
 the agent file, and the isolation protocol then exists twice, free to drift.
 
+A worked example naming a domain is fine -- `tester` cites tmux to front-load the
+never-touch-live-state warning. The rule bars *binding*, not illustration: a
+second domain must work without editing the agent.
+
 ## R3. Placement -- would this sentence be false in another project?
 
 Yes, project tier. No, user tier. When in doubt, go narrower: a rule wrongly kept

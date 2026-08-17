@@ -55,6 +55,11 @@ these.*
   to, run its cheapest real invocation the way an agent will: sandboxed. A tool
   that authenticates from a keyring or a socket works in a terminal and fails for
   every agent.
+  - Probe with a real call, not a status subcommand. `gh auth status` reports
+    failure while `gh search` succeeds, because they read different credentials.
+  - Denied paths appear inside the sandbox as `/dev/null` character devices, not
+    as missing files. Confirm any surprising file with the sandbox off before
+    reporting it.
 
 ## 4. Orphans
 
