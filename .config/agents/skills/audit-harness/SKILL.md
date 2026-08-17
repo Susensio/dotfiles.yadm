@@ -1,9 +1,6 @@
 ---
 name: audit-harness
 description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, or never loaded. Use after adding or moving agents, skills or context files, and when an agent ignores a rule you thought was in force.
-context: fork
-agent: auditor
-background: false
 ---
 
 # Harness audit
