@@ -5,7 +5,7 @@ Date: 2026-06-02
 
 ## Context
 
-The system patches from [ADR-0004](0004-enforce-xdg-compliance-by-patching-system-files.md)
+The system patches from [ADR-0004](0004-xdg-compliance-via-patching.md)
 live outside package management, so `apt` upgrades to `bash` or `lightdm`, or
 a fresh install, can revert them. Bootstrap has to be safe to run again at any
 time to restore that state, not just once on a new machine.

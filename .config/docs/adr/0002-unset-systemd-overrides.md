@@ -5,7 +5,7 @@ Date: 2026-06-02
 
 ## Context
 
-`environment.d` ([ADR-0001](0001-centralize-environment-variables-in-environment-d.md))
+`environment.d` ([ADR-0001](0001-centralize-environment-variables.md))
 is meant to be the single source of truth, but systemd merges two
 layers: static (generators/`environment.d`) and dynamic (D-Bus overrides via
 `systemctl set-environment`, and the Xsession push at script 95). The dynamic

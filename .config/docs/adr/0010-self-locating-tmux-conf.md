@@ -15,7 +15,7 @@ clone lives, without a hardcoded absolute path baked in anywhere.
 from there. `set-environment -ghF` sets `TMUX_CONFIG_DIR`, `TMUX_SCRIPTS_DIR`,
 and `BIN_HOME` from `#{d:current_file}`, then `source -F
 "#{TMUX_CONFIG_DIR}/conf.d/*.conf"` pulls in every topic file
-([ADR-0011](0011-give-each-tmux-topic-its-own-conf-d-file-and-keep.md)).
+([ADR-0011](0011-per-topic-tmux-conf-d-files.md)).
 
 ## Consequences
 

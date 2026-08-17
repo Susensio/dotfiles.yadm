@@ -2,7 +2,7 @@
 
 Status: Accepted
 Date: 2026-08-16
-Supersedes: [ADR-0021](0021-test-tmux-only-on-isolated-throwaway-servers.md)
+Supersedes: [ADR-0021](0021-test-tmux-on-throwaway-servers.md)
 
 ## Context
 

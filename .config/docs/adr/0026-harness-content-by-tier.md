@@ -2,7 +2,7 @@
 
 Status: Accepted
 Date: 2026-08-17
-Supersedes: [ADR-0023](0023-keep-agent-instructions-in-claude-md-instead-of-ex.md)
+Supersedes: [ADR-0023](0023-keep-instructions-in-claude-md.md)
 
 ## Context
 

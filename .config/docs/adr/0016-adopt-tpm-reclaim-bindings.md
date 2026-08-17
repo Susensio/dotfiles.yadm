@@ -28,7 +28,7 @@ table convention instead of TPM's bare prefix bindings. Costs: a plugin
 manager is carried for zero plugins right now — `90_plugins.conf` is empty,
 TPM manages only itself. The unbind block has an ordering dependency: it
 must stay after the `run` line, both file-internally and via
-[ADR-0011](0011-give-each-tmux-topic-its-own-conf-d-file-and-keep.md)'s
+[ADR-0011](0011-per-topic-tmux-conf-d-files.md)'s
 numeric `conf.d` ordering that keeps `99_tpm.conf` loading last — move
 either and the unbind silently stops working, since TPM would rebind those
 keys after the unbind ran.

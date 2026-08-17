@@ -18,7 +18,7 @@ tmux 3.7. Every failure path exits 0: run-shell reports a nonzero exit as an
 error, and a menu that failed to draw is not worth a nag. DEBUG=1 raises the
 traceback instead.
 
-rationale: docs/adr/0013-build-which-key-menus-from-config-order-and-list-k.md
+rationale: docs/adr/0013-which-key-menus-from-config.md
 """
 
 import getopt

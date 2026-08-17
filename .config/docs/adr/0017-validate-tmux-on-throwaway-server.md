@@ -19,7 +19,7 @@ started with `-f /dev/null` on its own `-L` socket, so it inherits nothing
 from the live config — and only sources it onto the live server if that dry
 run reports no errors. It also reloads the paired main/scratchpad server
 when one exists (see `scripts/scratchpad`,
-[ADR-0015](0015-keep-custom-sessionizer-and-scratchpad-instead-of.md)).
+[ADR-0015](0015-custom-sessionizer-and-scratchpad.md)).
 
 ## Consequences
 

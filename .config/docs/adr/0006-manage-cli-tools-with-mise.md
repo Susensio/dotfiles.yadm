@@ -19,7 +19,7 @@ options fill the gaps eget left: `extra_assets` fetches completions and man page
 not covered by a backend (delta, eza, fzf, helix's `languages.toml`, tmux),
 `gen_completions` runs a tool's own completion generator (herdr), `rename_exe` and
 `filter_bins` handle awkward upstream binary names. A `postinstall` hook runs the
-`system-install` task — see [ADR-0007](0007-link-mise-tools-into-xdg-directories-instead-of-pa.md).
+`system-install` task — see [ADR-0007](0007-link-mise-tools-into-xdg.md).
 
 ## Consequences
 

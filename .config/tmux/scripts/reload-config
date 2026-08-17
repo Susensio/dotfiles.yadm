@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Reloads tmux.conf, but only after it has proved itself on a throwaway server.
-# rationale: docs/adr/0017-validate-tmux-config-on-a-throwaway-server-before.md
+# rationale: docs/adr/0017-validate-tmux-on-throwaway-server.md
 #
 # Output is what run-shell shows the user, so it stays empty unless something
 # went wrong; stderr is folded in by the alias (`run '... 2>&1'`), since tmux

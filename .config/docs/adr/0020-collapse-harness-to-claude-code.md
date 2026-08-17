@@ -2,7 +2,7 @@
 
 Status: Accepted
 Date: 2026-08-15
-Supersedes: [ADR-0019](0019-share-agent-configuration-between-claude-code-and.md)
+Supersedes: [ADR-0019](0019-share-agent-config-claude-antigravity.md)
 
 ## Context
 

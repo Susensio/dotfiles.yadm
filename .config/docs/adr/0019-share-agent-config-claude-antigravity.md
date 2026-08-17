@@ -1,6 +1,6 @@
 # ADR-0019: Share agent configuration between Claude Code and Antigravity
 
-Status: Superseded by [ADR-0020](0020-collapse-the-agent-harness-to-claude-code-only.md)
+Status: Superseded by [ADR-0020](0020-collapse-harness-to-claude-code.md)
 Date: 2026-08-07
 
 ## Context

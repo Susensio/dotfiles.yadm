@@ -25,7 +25,7 @@ less to maintain, less that can break on plugin updates. Cascades: `lazygit/conf
 is now empty, since its `editPreset: nvim` and delta pager settings became
 redundant once git's own config is canonical; tmux copy mode now defaults to
 helix motion semantics, addressed in
-[ADR-0014](0014-keep-both-vim-and-helix-copy-mode-grammars.md). Costs: gives up
+[ADR-0014](0014-keep-vim-and-helix-copy-mode.md). Costs: gives up
 the neovim plugin ecosystem and years of tuning outright; helix's smaller config
 surface is also a less extensible one; muscle memory has to be retrained.
 

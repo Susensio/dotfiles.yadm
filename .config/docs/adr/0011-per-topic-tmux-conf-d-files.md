@@ -6,7 +6,7 @@ Date: 2026-08-07
 ## Context
 
 With `tmux.conf` glob-sourcing `conf.d/*.conf`
-([ADR-0010](0010-make-tmux-conf-self-locating-and-glob-source-conf.md)), a
+([ADR-0010](0010-self-locating-tmux-conf.md)), a
 growing set of options, bindings and hooks needed a rule for where to land,
 or unrelated settings pile into whatever file is already open.
 

@@ -5,7 +5,7 @@ Date: 2026-08-06
 
 ## Context
 
-Modal key tables ([ADR-0012](0012-replace-the-flat-tmux-prefix-map-with-modal-key-ta.md))
+Modal key tables ([ADR-0012](0012-modal-tmux-key-tables.md))
 need a hint menu per table. The `tmux-which-key` plugin was considered and
 rejected: it requires declaring every menu entry by hand in a separate file,
 so a binding can silently drift out of sync with its menu entry.

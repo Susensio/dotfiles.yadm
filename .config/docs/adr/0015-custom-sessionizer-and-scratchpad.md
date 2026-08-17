@@ -29,6 +29,6 @@ paired server on a `_scratchpad`-suffixed socket, passing the invoking client
 explicitly on detach — a bare `detach` resolves an ambient "current client"
 and fails with "no current client" when that can't be determined
 unambiguously. Keeping two servers means reloads and environment pushes must
-reach both (see [ADR-0017](0017-validate-tmux-config-on-a-throwaway-server-before.md)),
+reach both (see [ADR-0017](0017-validate-tmux-on-throwaway-server.md)),
 and the scripts carry undocumented coupling between how a row is named
 (`session_name_for_dir`) and how a session is later matched or created.

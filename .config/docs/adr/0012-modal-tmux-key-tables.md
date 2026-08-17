@@ -7,7 +7,7 @@ Date: 2026-08-06
 
 The prefix map had grown into a flat list of one-key-does-one-thing
 bindings. That does not scale and is not discoverable, and gives a
-which-key style hint menu ([ADR-0013](0013-build-which-key-menus-from-config-order-and-list-k.md))
+which-key style hint menu ([ADR-0013](0013-which-key-menus-from-config.md))
 nothing to group by.
 
 ## Decision

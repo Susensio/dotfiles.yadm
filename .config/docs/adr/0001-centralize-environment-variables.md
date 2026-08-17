@@ -28,6 +28,6 @@ the logic. Trade-off: `environment.d` syntax is strictly static `KEY=VALUE`,
 no shell logic, no command substitution, no conditionals, so anything dynamic
 has to live elsewhere (fish functions, etc.). It's also inert until a reload
 or relogin — generators only run at session start, not on file edit, which is
-the problem [ADR-0002](0002-unset-dynamic-systemd-overrides-to-keep-environmen.md)
+the problem [ADR-0002](0002-unset-systemd-overrides.md)
 addresses.
 
