@@ -1,5 +1,6 @@
 ---
 name: tmux-testing
+user-invocable: false
 description: Use when running anything against a tmux server — checking that tmux.conf or conf.d/*.conf loads, verifying a binding fires, expanding a format, or seeing what a popup or menu actually renders.
 ---
 

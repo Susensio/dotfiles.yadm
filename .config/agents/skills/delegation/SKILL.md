@@ -1,5 +1,6 @@
 ---
 name: delegation
+user-invocable: false
 description: Picks a subagent's model by task shape and decides whether the handoff pays for its cold start. Use before spawning any subagent, and when a task looks big enough to hand off but it is not obvious that it should be.
 ---
 

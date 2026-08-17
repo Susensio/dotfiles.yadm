@@ -62,13 +62,27 @@ domain comes from the caller instead.
 *Failure it prevents:* re-welding a generic container to one domain, undoing R2
 through the back door.
 
-## R7. Names are `<scope>-<noun>`, lowercase, hyphenated.
+## R7. The name follows the thing's nature, and invocability follows the name.
 
-Noun phrase when it fires on its own, verb-object when you type it. Scope first,
-so related things sort together. Anthropic documents no convention beyond
-"lowercase letters and hyphens" -- this one is ours.
+Lowercase, hyphenated. Beyond that Anthropic documents no convention, so this one
+is ours:
 
-*Failure it prevents:* nothing yet. This is taste, and it is labelled as taste.
+- **Agents are persons** -- `tester`, `auditor`. They do work on your behalf.
+- **Skills are knowledge or actions.** Knowledge takes a noun (`delegation`,
+  `tmux-config`) and sets `user-invocable: false`: there is nothing to invoke, it
+  is something Claude should know at the right moment. An action takes an
+  imperative (`audit-harness`, `report-issue`) and stays invocable both ways --
+  you can type it, and Claude can reach for it unprompted.
+- **Commands are a subset of skills.** `.claude/commands/foo.md` and
+  `.claude/skills/foo/SKILL.md` both produce `/foo`; the skill form adds
+  supporting files and invocation control. Write skills, not commands.
+
+The pairing is checkable: a noun-named skill that is user-invocable, or an
+imperative-named one nothing can trigger, is misfiled.
+
+*Failure it prevents:* a knowledge skill cluttering the `/` menu with something
+nobody would ever type, and an action nobody can reach because its name reads
+like a topic.
 
 ## R8. A description is a trigger, not a label.
 

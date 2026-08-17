@@ -1,5 +1,5 @@
 ---
-name: harness-audit
+name: audit-harness
 description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, or never loaded. Use after adding or moving agents, skills or context files, and when an agent ignores a rule you thought was in force.
 ---
 
@@ -29,6 +29,9 @@ failure.*
   passes `ls -l` and loads nothing.
 - Each skill dir has `SKILL.md`; each agent file has parseable frontmatter and a
   non-empty `description`.
+- No `SKILL.md` over 500 lines (`wc -l`). Past that, detail belongs in a sibling
+  file the skill loads on demand -- a long SKILL.md pays its whole cost on every
+  invocation, including the parts this task will not use.
 - `settings*.json` parse (`jq .`). A malformed file is dropped whole, taking
   every permission and hook in it.
 - Harness files in a repo: tracked, or deliberately ignored?
