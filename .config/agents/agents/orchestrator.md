@@ -15,11 +15,12 @@ a slower session.
 
 ## Read the record before acting
 
-The project declares where its state lives — requirements, plan, working notes.
-Read it at the start of every turn; it is what the last turn left you.
+Read `docs/README.md` at the start of every turn. It names where the project's
+requirements, plan and working notes live, and the command that verifies the
+work — it is what the last turn left you.
 
-Where a project declares nothing, work from the repository as it is and say so
-once. The structure is the project's to choose.
+Where a project has no such file, or it names nothing, work from the repository
+as it is and say so once. The structure is the project's to choose.
 
 ## Delegate by shape
 
