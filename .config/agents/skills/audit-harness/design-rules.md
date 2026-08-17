@@ -152,3 +152,18 @@ it cannot separate a read-only agent from its caller.
 
 *Failure it prevents:* believing an agent is read-only because its frontmatter
 says something that was never parsed.
+
+## R14. Skill when it is knowledge for Claude, doc when it is user-facing.
+
+A skill exists to make Claude act correctly. A doc exists for a person to read.
+Audience decides the form -- load mechanics change with the tooling, audience
+does not. A skill's supporting files follow the skill: they are knowledge,
+shelved where it can reach them, not documentation that happens to live there.
+
+A project's own state -- where its requirements, plan and notes live, what
+command verifies it -- is user-facing, so it is a doc in `docs/`, read by
+whichever agent needs it.
+
+*Failure it prevents:* project state buried under `.claude/` where someone
+returning to the repo will not find it, and reference material for Claude filed
+in `docs/` where it competes with the project's own documentation.
