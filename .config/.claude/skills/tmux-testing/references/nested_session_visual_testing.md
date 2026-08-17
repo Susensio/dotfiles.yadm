@@ -4,25 +4,25 @@ How to actually *see* what a tmux config change renders — popups, menus,
 cursor visibility, pane borders, layout — from a non-interactive shell,
 without a human attaching to a real terminal.
 
-## Use `scripts/tmux-test nested-*`, not raw commands
+## Use `${CLAUDE_SKILL_DIR}/scripts/tmux-test nested-*`, not raw commands
 
 `tmux-test` wraps this whole recipe: `nested-spawn`, `nested-run`,
 `nested-capture`, `nested-eval`, `nested-kill`. It only ever touches sockets
 it generated itself — passing anything else is refused — so it's the
-allow-listed entry point for `tmux-tester`. Read the rest of this doc for
+allow-listed entry point for `tester`. Read the rest of this doc for
 *why* each step exists and the gotchas below; drive it through the script
 rather than typing the raw `tmux -L inner/outer ...` commands by hand.
 
 ```bash
-pair=$(scripts/tmux-test nested-spawn tmux.conf 100 24)
+pair=$(${CLAUDE_SKILL_DIR}/scripts/tmux-test nested-spawn tmux.conf 100 24)
 inner=${pair% *}; outer=${pair#* }
 
-scripts/tmux-test nested-run "$inner" "$outer" \
+${CLAUDE_SKILL_DIR}/scripts/tmux-test nested-run "$inner" "$outer" \
     display-popup -T " Pane... " -x R -y S -w 20 -h 6 -E 'sleep 6' &
 sleep 1.5
-scripts/tmux-test nested-capture "$inner" "$outer"
+${CLAUDE_SKILL_DIR}/scripts/tmux-test nested-capture "$inner" "$outer"
 
-scripts/tmux-test nested-kill "$inner" "$outer"
+${CLAUDE_SKILL_DIR}/scripts/tmux-test nested-kill "$inner" "$outer"
 ```
 
 ## Ground rule: isolation is not optional

@@ -13,8 +13,8 @@ The user is very likely *inside* tmux right now — quite possibly the session
 this agent was launched from. Every test, experiment, or reproduction runs on
 its own throwaway server, fully isolated.
 
-`~/.config/.claude/skills/tmux-testing/scripts/tmux-test` implements the
-protocol in code, including the cleanup paths that are easy to forget.
+`${CLAUDE_SKILL_DIR}/scripts/tmux-test` implements the protocol in code,
+including the cleanup paths that are easy to forget.
 `tmux-test --help` lists the subcommands. Prefer it to hand-typed `tmux -L`
 commands: it passes `-L` on every invocation and refuses to operate on a socket
 it did not create.
