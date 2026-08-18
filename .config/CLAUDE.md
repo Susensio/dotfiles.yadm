@@ -2,6 +2,9 @@
 
 XDG config repo for `~/.config`, managed with yadm.
 
+- The yadm worktree root is `$HOME`, not this directory: `git rev-parse
+  --show-toplevel` returns `~`, so never derive a project root from it. Plain
+  `git` works from `.config`; from `~` or `~/bin`, use `yadm`.
 - Shell and environment questions -- a variable is unset, login vs interactive
   shells, the bash-to-fish relay, `environment.d`, hot reload -- are answered in
   `docs/ENVIRONMENT_ARCHITECTURE.md`. Read it before investigating the process
@@ -18,7 +21,7 @@ XDG config repo for `~/.config`, managed with yadm.
   protocol lives in the skill. For tmux that is `tmux-testing`.
 - Architecturally significant decisions about this setup -- tool or library
   choice, a structural change, a reversal of a prior decision -- belong in
-  `docs/adr/` via the `adr` skill. Not auto-memory, not a comment.
+  `.config/docs/adr/` via the `adr` skill. Not auto-memory, not a comment.
   `ENVIRONMENT_ARCHITECTURE.md` describes what the setup is now; ADRs record why
   it got that way.
 - Mark defects and unfinished work in place; there is no bugs file. `BUG:` plus
