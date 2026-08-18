@@ -12,19 +12,34 @@ import sys
 from pathlib import Path
 
 
-def find_adr_dir() -> Path:
+def find_adr_dir(init: bool, override: str | None = None) -> Path:
+    if override is not None:
+        path = Path(override).expanduser().resolve()
+        if not path.is_dir() and not init:
+            sys.exit(f"error: {path} does not exist. Pass --init to create it.")
+        return path
+
     # Walk up for an existing docs/adr so the script runs from any subdirectory.
-    # Not git rev-parse: under yadm the worktree root is $HOME, not the config dir.
+    # Deliberately not a VCS root: a worktree root is not always the directory
+    # the project's docs live under, and guessing wrong writes them somewhere
+    # nobody will look.
     cwd = Path.cwd()
     for base in (cwd, *cwd.parents):
         candidate = base / "docs" / "adr"
         if candidate.is_dir():
             return candidate
-    return cwd / "docs" / "adr"
+    if init:
+        return cwd / "docs" / "adr"
+    searched = " -> ".join(str(b) for b in (cwd, *cwd.parents))
+    sys.exit(
+        f"error: no docs/adr found. Looked in: {searched}\n"
+        f"       Run from inside the project that owns the records, or pass "
+        f"--init to start a new set at {cwd / 'docs' / 'adr'}."
+    )
 
 
-ADR_DIR = find_adr_dir()
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
+ADR_DIR: Path  # resolved in main() once --init is known
 
 
 def slugify(text: str, max_len: int = 50) -> str:
@@ -72,8 +87,12 @@ def main() -> None:
     parser.add_argument("title")
     parser.add_argument("--slug", metavar="SLUG", help="short (3-6 word) filename slug; defaults to a truncated version of the title")
     parser.add_argument("--supersedes", type=int, metavar="N", help="ADR number this decision replaces")
+    parser.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
+    parser.add_argument("--init", action="store_true", help="create the ADR directory; without it, a missing one is an error")
     args = parser.parse_args()
 
+    global ADR_DIR
+    ADR_DIR = find_adr_dir(args.init, args.dir)
     ADR_DIR.mkdir(parents=True, exist_ok=True)
     number = next_number()
     slug = slugify(args.slug) if args.slug else slugify(args.title)

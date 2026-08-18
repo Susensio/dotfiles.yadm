@@ -18,7 +18,7 @@ Record a decision here when it changes how the system is built and would be expe
 The test is whether real alternatives were weighed. Adopting a documented, reversible setting because the tool's own docs say to — even one that reads as structural — is not a decision, it's a transcription: there is no discarded alternative for future-you to rediscover. Offer an ADR in that case rather than assuming one is warranted.
 
 ## How to write one
-1. Run `${CLAUDE_SKILL_DIR}/new.py "<title>" --slug "<short-slug>"` — prints the created file's path. It finds `docs/adr/` by walking up from wherever it is invoked, and creates it if the repo has none. `<title>` can be a full sentence and becomes the H1; `--slug` is 3-6 words naming the core decision and becomes the filename — pick it deliberately rather than letting the title get truncated into it.
+1. Run `${CLAUDE_SKILL_DIR}/new.py "<title>" --slug "<short-slug>"` — prints the created file's path. It finds `docs/adr/` by walking up from wherever it is invoked. If there is none it stops and says where it looked, rather than starting a second set somewhere nobody reads. `--dir <path>` names the directory outright when the search would find the wrong one; `--init` creates it, for a project with no records yet. `<title>` can be a full sentence and becomes the H1; `--slug` is 3-6 words naming the core decision and becomes the filename — pick it deliberately rather than letting the title get truncated into it.
 2. Fill in the three sections:
    - **Context:** the situation and forces at play, stated neutrally (why this needed a decision at all).
    - **Decision:** what was decided, stated as a single clear sentence.
