@@ -1,7 +1,7 @@
 ---
 name: coding
 user-invocable: false
-description: How to write and change code here — what to check before adding any, and how to work through a failure instead of guessing at it. Use before writing or modifying code, and whenever a test, lint or type check fails.
+description: How code is written, read and commented here — what to check before adding any, how a comment earns its place, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
 ---
 
 # Coding
@@ -39,6 +39,25 @@ Work through these in order. Do not skip to a fix you cannot yet explain.
 
 If you cannot complete step 2, say so and ask a specific blocking question rather
 than iterating blindly.
+
+## Comments
+
+Comment sparingly, like someone who'll be annoyed at future-self for not
+understanding a quirk later. A comment earns its place only when something is
+genuinely non-obvious: a hidden constraint, a workaround for a specific bug. No
+header blocks explaining what a file does -- let names carry that. Favor terse
+fragments over full sentences -- drop articles and pronouns if meaning survives.
+
+Word them flat, declarative, impersonal:
+
+- One idea per comment. If it needs an "and" or a colon to fit two, write two.
+- Keep the why, drop the wrapper around it. "tmux's own dispatch handles compound
+  bindings; re-parsing the command text would not" -- not "which is what saves
+  this from...".
+- No hedge words: "really", "already", "actually", "basically", "essentially".
+- Docstrings lead with the shape of the return value, not "this function
+  returns...".
+- `BUG:` plus one bare sentence for a known defect.
 
 ## Scale the checking to the change
 
