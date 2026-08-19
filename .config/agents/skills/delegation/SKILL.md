@@ -14,8 +14,8 @@ Gate on size and self-containment, not on whether it is "implementation".
 
 ## Pick the model by task shape, not task category
 
-A named agent carries its own pin, so choosing the agent is choosing the model.
-What follows governs a generic spawn.
+An agent's frontmatter pins a default model, not a binding: the `model` argument overrides it, and a generic spawn has no pin at all.
+Match the model to the shape of the task whenever you are the one choosing.
 
 - `haiku` for enumeration and retrieval over a large surface -- grepping transcripts, trawling logs, inventorying a tree.
   Reliable at finding and listing, weak at deciding.
