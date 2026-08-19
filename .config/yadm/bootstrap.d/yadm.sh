@@ -36,3 +36,12 @@ ${BIN_HOME}/yadm gitconfig include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/ya
 # Do not pollute $HOME with github stuff
 ${BIN_HOME}/yadm -C $HOME sparse-checkout set --no-cone "/*" "!/README.md" "!/.github"
 
+# Let plain git work inside .config, for tooling that shells out to it and
+# cannot be told about yadm. Git refuses to track a path named .git, so this
+# pointer cannot live in the repo and has to be recreated per machine.
+CONFIG_GITFILE="${XDG_CONFIG_HOME:-${HOME}/.config}/.git"
+if [[ ! -e $CONFIG_GITFILE ]]; then
+  log_info "Pointing .config/.git at the yadm repo..."
+  printf 'gitdir: %s\n' "$(${BIN_HOME}/yadm rev-parse --absolute-git-dir)" >"$CONFIG_GITFILE"
+fi
+
