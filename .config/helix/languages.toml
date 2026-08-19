@@ -65,3 +65,8 @@ file-types = [
 ]
 formatter = { command = "gitconfig-fmt" }
 auto-format = true
+
+[[language]]
+name = "markdown"
+# Prose is broken by sentence, not by column, so lines run past the viewport.
+soft-wrap = { enable = true, wrap-indicator = "" }

@@ -1,9 +1,8 @@
 # Past issues corpus (Susensio, github.com/tmux/tmux)
 
-Repo-specific evidence backing `../voice.md`, and the concrete authority for
-tmux/tmux specifically. Pulled via `gh issue view <n> --repo tmux/tmux`.
-Re-run that if you need a comment thread or exact wording beyond what's
-excerpted here — do not treat this file as more current than the live issue.
+Repo-specific evidence backing `../voice.md`, and the concrete authority for tmux/tmux specifically.
+Pulled via `gh issue view <n> --repo tmux/tmux`.
+Re-run that if you need a comment thread or exact wording beyond what's excerpted here — do not treat this file as more current than the live issue.
 
 ## #4985 — Feature Request: Preserve originating context in hooks (closed)
 
@@ -79,9 +78,8 @@ If I don't `set -g prefix C-Space`, it works but some other things get messed up
 * Logs from tmux (relevant part): <details>...trimmed excerpt around the key press, not the full -vv capture...</details>
 ```
 
-Note the inline annotation `# <------ Problematic line` pointing straight at
-the offending config line. Logs present but hand-trimmed to the relevant
-window, wrapped in `<details>`.
+Note the inline annotation `# <------ Problematic line` pointing straight at the offending config line.
+Logs present but hand-trimmed to the relevant window, wrapped in `<details>`.
 
 ## #4012 — `previous-prompt -o` does not work on the same line (closed)
 
@@ -121,18 +119,12 @@ Linux unknown
 tmux-256color
 ```
 
-Note: split the repro into several small fenced steps rather than one block,
-because each step needed a comment explaining what to look at. Linked an
-asciinema recording instead of describing the visual behavior in prose.
-Required-information block was terse — one line each, no bullets, no logs
-even though `-vv` was used to build (this is not a crash, just a copy-mode
-behavior question).
+Note: split the repro into several small fenced steps rather than one block, because each step needed a comment explaining what to look at.
+Linked an asciinema recording instead of describing the visual behavior in prose.
+Required-information block was terse — one line each, no bullets, no logs even though `-vv` was used to build (this is not a crash, just a copy-mode behavior question).
 
-Maintainer thread: nicm explained the line-based grid model made the request
-infeasible as literally asked, then offered a workaround
-(`start-of-line` + `jump-forward`). Susensio thanked him, adapted it into a
-concrete keybinding, and closed out — didn't argue the point further once the
-maintainer explained the underlying constraint.
+Maintainer thread: nicm explained the line-based grid model made the request infeasible as literally asked, then offered a workaround (`start-of-line` + `jump-forward`).
+Susensio thanked him, adapted it into a concrete keybinding, and closed out — didn't argue the point further once the maintainer explained the underlying constraint.
 
 ## #3808 — Cannot use `#{session_path}` inside `automatic-rename-format` (closed)
 
@@ -158,20 +150,13 @@ logs for window renaming:
 ```
 ```
 
-Two short log snippets placed directly under the description, each captioned
-by what it's log *of* (`logs for display-message` vs `logs for window
-renaming`) — used to prove the two code paths diverge, not as a blanket
-attachment. Required-information block still present at the bottom inside
-`<details>`, no full `-vv` file. (Note: this one used `# Issue` instead of
-`### Issue description` — the template heading isn't followed to the letter
-every time, but the *content* — problem statement, repro, required info — always
-is. Prefer the literal template heading unless there's a similar reason to
-deviate.)
+Two short log snippets placed directly under the description, each captioned by what it's log *of* (`logs for display-message` vs `logs for window renaming`) — used to prove the two code paths diverge, not as a blanket attachment.
+Required-information block still present at the bottom inside `<details>`, no full `-vv` file.
+(Note: this one used `# Issue` instead of `### Issue description` — the template heading isn't followed to the letter every time, but the *content* — problem statement, repro, required info — always is.
+Prefer the literal template heading unless there's a similar reason to deviate.)
 
-Maintainer thread: nicm explained the root cause in one sentence
-(`automatic-rename` operates on a window, doesn't know its session) and
-attached a candidate diff. Issue closed without Susensio needing to reply —
-not every thread needs a reply once the explanation is complete.
+Maintainer thread: nicm explained the root cause in one sentence (`automatic-rename` operates on a window, doesn't know its session) and attached a candidate diff.
+Issue closed without Susensio needing to reply — not every thread needs a reply once the explanation is complete.
 
 ## #3776 — Server exited unexpectedly when `switch-client` from `pane-died` hook (closed)
 
@@ -229,24 +214,9 @@ Maybe there is another way of accomplishing what I'm after?
 </details>
 ```
 
-This is the only one of the five with full `-vv` log *files* attached (GitHub
-file-upload links, not pasted) — because it's a genuine crash, not a logic
-bug, and the maintainer needed the whole capture plus a backtrace. Three
-minimal repro variants shown side by side (crashes / doesn't crash / native
-option that isn't flexible enough) to isolate the trigger precisely, each
-one-line different from the last.
+This is the only one of the five with full `-vv` log *files* attached (GitHub file-upload links, not pasted) — because it's a genuine crash, not a logic bug, and the maintainer needed the whole capture plus a backtrace.
+Three minimal repro variants shown side by side (crashes / doesn't crash / native option that isn't flexible enough) to isolate the trigger precisely, each one-line different from the last.
 
-Follow-up thread is the longest of the five and shows the debugging-with-a-
-maintainer pattern in full: nicm couldn't reproduce, asked for a
-build-from-master check → Susensio confirmed still crashes → nicm asked for
-"is there a core, what's the backtrace" → Susensio didn't have one, asked
-"how can I debug this" → nicm pointed at the FAQ entry rather than
-re-explaining it inline → Susensio followed it, got a backtrace, iterated
-with nicm (`f 1`, `p *wp`) down to a one-line fix candidate → asked
-"Should I submit a PR for this?" rather than assuming → nicm said he'd apply
-it himself → applied upstream, thanked.
+Follow-up thread is the longest of the five and shows the debugging-with-a-maintainer pattern in full: nicm couldn't reproduce, asked for a build-from-master check → Susensio confirmed still crashes → nicm asked for "is there a core, what's the backtrace" → Susensio didn't have one, asked "how can I debug this" → nicm pointed at the FAQ entry rather than re-explaining it inline → Susensio followed it, got a backtrace, iterated with nicm (`f 1`, `p *wp`) down to a one-line fix candidate → asked "Should I submit a PR for this?" rather than assuming → nicm said he'd apply it himself → applied upstream, thanked.
 
-Pattern for follow-ups in general: quote the relevant fragment of the
-maintainer's message with `>`, answer precisely what was asked, don't pad,
-offer rather than assume when it comes to next steps (PRs, closing the
-issue).
+Pattern for follow-ups in general: quote the relevant fragment of the maintainer's message with `>`, answer precisely what was asked, don't pad, offer rather than assume when it comes to next steps (PRs, closing the issue).

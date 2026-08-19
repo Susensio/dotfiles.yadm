@@ -9,8 +9,9 @@ This is the root cause of most debugging pain.
 
 ### 1. `$VAR` — Expanded at **parse time** (when config is read)
 
-These are substituted **once**, the moment tmux reads the line. The value is
-baked in. If the variable doesn't exist yet, it becomes an empty string silently.
+These are substituted **once**, the moment tmux reads the line.
+The value is baked in.
+If the variable doesn't exist yet, it becomes an empty string silently.
 
 Sources for `$VAR`:
 - Shell environment inherited by the tmux server
@@ -27,14 +28,13 @@ display "$BAR"          # → display "world"    (already substituted)
 ```
 
 > [!IMPORTANT]
-> `$VAR` substitution happens **as the file is read, line by line**. If you
-> `set-environment` on line 5 and use `$VAR` on line 3, it won't work — line 3
-> was already parsed.
+> `$VAR` substitution happens **as the file is read, line by line**.
+> If you `set-environment` on line 5 and use `$VAR` on line 3, it won't work — line 3 was already parsed.
 
 ### 2. `#{format}` — Expanded at **runtime** (when the command executes)
 
-These are **live queries** evaluated every time the command runs. They can
-read session state, window state, pane state, options, and environment.
+These are **live queries** evaluated every time the command runs.
+They can read session state, window state, pane state, options, and environment.
 
 ```bash
 # This is evaluated fresh every time the status bar renders:
@@ -46,8 +46,8 @@ bind x display "#{pane_current_path}"
 
 ### 3. `%hidden VAR=value` — Available **only during config parsing**
 
-These exist purely for config-time `$VAR` expansion. They are not environment
-variables — child processes and `#{format}` can't see them.
+These exist purely for config-time `$VAR` expansion.
+They are not environment variables — child processes and `#{format}` can't see them.
 
 ```bash
 %hidden COLOR="#ff0000"
@@ -59,7 +59,8 @@ display "#{COLOR}"                # ❌ empty: formats can't see %hidden vars
 
 ## The Crucial Question: Which Commands Expand `#{}`?
 
-**Not all commands expand formats.** This is where most bugs come from.
+**Not all commands expand formats.**
+This is where most bugs come from.
 
 ### Always expand formats (in specific arguments):
 | Command | Which argument |
@@ -135,9 +136,7 @@ set-hook -ga pane-exited { if -F "#{&&:#{@auto_equalize},#{==:#{hook_window},#{w
 source -F "#{TMUX_CONFIG_DIR}/conf.d/*.conf"
 ```
 - `-F` expands `#{TMUX_CONFIG_DIR}` as a format (reads from environment)
-- The comment in your config explains why: `#{d:current_file}` is a format
-  that only works during parsing, so you first stored it in the environment
-  with `set-environment -ghF`, then retrieve it with `#{}` format expansion
+- The comment in your config explains why: `#{d:current_file}` is a format that only works during parsing, so you first stored it in the environment with `set-environment -ghF`, then retrieve it with `#{}` format expansion
 
 ---
 
@@ -166,9 +165,9 @@ display "$X"    # → "hello"       (double quotes allow it)
 bind x { display "$COLOR" }    # ❌ $COLOR is NOT expanded at parse time
 bind x display "$COLOR"        # ✅ $COLOR IS expanded at parse time
 ```
-Braces `{ }` create a command list that is stored **verbatim**. No `$VAR`
-expansion happens inside braces at parse time. Use `#{}` format expansion
-instead, or expand outside the braces.
+Braces `{ }` create a command list that is stored **verbatim**.
+No `$VAR` expansion happens inside braces at parse time.
+Use `#{}` format expansion instead, or expand outside the braces.
 
 ### Trap 4: `if` without `-F`
 ```bash
