@@ -3,7 +3,8 @@
 XDG config repo for `~/.config`, managed with yadm.
 
 - The yadm worktree root is `$HOME`, not this directory: `git rev-parse --show-toplevel` returns `~`, so never derive a project root from it.
-  Plain `git` works from `.config`; from `~` or `~/bin`, use `yadm`.
+  Use `yadm` for every git operation, from any directory.
+  Plain `git` happens to work inside `.config` via an untracked pointer file that a fresh machine does not have until `yadm/bootstrap` recreates it.
 - Shell and environment questions -- a variable is unset, login vs interactive shells, the bash-to-fish relay, `environment.d`, hot reload -- are answered in `docs/ENVIRONMENT_ARCHITECTURE.md`.
   Read it before investigating the process tree by hand.
 - Fish functions live in `fish/functions/`.
