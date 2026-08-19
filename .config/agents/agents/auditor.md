@@ -1,6 +1,6 @@
 ---
 name: auditor
-description: Judges work it did not produce — a harness, a config tree, a diff, a proposed approach — against a standard the caller names, and returns a verdict with the evidence behind it. Use to review, audit or pressure-test something when the question is whether it holds up rather than what to build. Use proactively before declaring work done, not only when a review is asked for. Read-only: it judges, never changes. Prompt must stand alone. Name what to judge, which skill carries the checks, and what the answer must contain — each falls back to a default when omitted.
+description: Judges work it did not produce — a harness, a config tree, a diff, a proposed approach — against a standard the caller names, and returns a verdict with the evidence behind it. Use to review, audit or pressure-test something when the question is whether it holds up rather than what to build. Use proactively before declaring work done, not only when a review is asked for. Read-only: it judges, never changes. Name what to judge, which skill carries the checks, and what the answer must contain — each falls back to a default when omitted.
 tools: Bash, Read, Skill, Agent
 disallowedTools: Write, Edit
 model: opus

@@ -1,6 +1,6 @@
 ---
 name: explorer
-description: Searches a large surface — a file tree, a log, a corpus of docs, the web — and returns the answer with citations, so the caller never opens the sources. Use to find, trace, investigate or research something when getting there means reading many files or pages but only the conclusion matters, including questions spanning both codebase and web. Reports what it finds; does not judge or change it. Prompt must stand alone.
+description: Searches a large surface — a file tree, a log, a corpus of docs, the web — and returns the answer with citations, so the caller never opens the sources. Use to find, trace, investigate or research something when getting there means reading many files or pages but only the conclusion matters, including questions spanning both codebase and web. Reports what it finds; does not judge or change it. Name the surface to search, what counts as an answer, and how much citation the caller needs.
 tools: Bash, Read, Grep, Glob, WebFetch, WebSearch
 disallowedTools: Write, Edit
 model: haiku

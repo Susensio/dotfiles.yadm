@@ -1,6 +1,6 @@
 ---
 name: developer
-description: Implements one scoped change — a feature, a fix, a refactor — against a stated requirement, and returns the diff plus what verification showed, not a narrative. Does not decide what should be built. Prompt must stand alone and name what to build, which files are in scope, and how the result is checked.
+description: Implements one scoped change — a feature, a fix, a refactor — against a stated requirement, and returns the diff plus what verification showed, not a narrative. Does not decide what should be built. Name what to build, which files are in scope, and how the result is checked.
 tools: Bash, Read, Write, Edit, Grep, Glob, Skill
 skills:
   - coding
