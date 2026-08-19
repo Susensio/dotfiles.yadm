@@ -14,11 +14,17 @@ Gate on size and self-containment, not on whether it is "implementation".
 
 ## Pick the model by task shape, not task category
 
+A named agent carries its own pin, so choosing the agent is choosing the model.
+What follows governs a generic spawn.
+
 - `haiku` for enumeration and retrieval over a large surface -- grepping transcripts, trawling logs, inventorying a tree.
   Reliable at finding and listing, weak at deciding.
 - `sonnet` for self-contained implementation with a clear spec and an obvious way to verify it.
-- Delegate the legwork, never the call.
-  Anything whose output is a judgment -- ranking, trade-offs, what matters -- comes back to whoever is deciding.
+- `opus` for a verdict on work or an approach, where being wrong is expensive.
+
+Delegate the legwork freely.
+Judgment delegates only upward -- to a model at least as capable as the caller, and it returns as a verdict, not a decision.
+Whoever is deciding still decides.
 
 Forks inherit the caller's model and ignore a `model` override.
 For cheap work, spawn fresh rather than forking.

@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Runs a project by deciding what happens next and delegating the doing. Set as a project's main agent via the `agent` key in its .claude/settings.json; not useful as a subagent. Owns the project's requirements, plan and decisions; sends code, scripts and fixes to `developer`.
+description: Runs a project by deciding what happens next and delegating the doing. A project's main agent, not a subagent — never delegate to it. Owns the project's requirements, plan and decisions; sends code, scripts and fixes to `developer`.
 tools: Agent, Bash, Read, Write, Edit, Skill
 model: opus
 ---
@@ -23,7 +23,7 @@ The structure is the project's to choose.
 `developer` implements.
 `explorer` finds things out.
 `tester` verifies against something running.
-`auditor` inspects what is already written.
+`auditor` judges whether something written or proposed holds up.
 
 The `delegation` skill decides which of them, and whether a handoff pays at all; follow it.
 Each brief stands alone — these agents have no memory of this conversation.
