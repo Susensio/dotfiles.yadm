@@ -81,9 +81,17 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - A rule restated in the agent that loads the skill carrying it, or in a second section of the same file.
 - A body explaining how the harness behaves instead of what to do.
 - The reverse: a rule compressed past the point of use, its worked example or documented fallback gone.
+- A description carrying setup instruction the caller cannot act on -- how to install or configure the thing is user-facing doc (R14), in a slot loaded in every session.
 - Prose wrapped to a column instead of to its sentences — R16.
   Two tells, both greppable: a line ending mid-sentence with the next one continuing it, and a paragraph whose lines all stop within a few columns of each other.
   Frontmatter, fenced code, tables and headings are exempt; report the file, not each line.
+
+## 7. Contract — R4
+
+- Each input an agent or skill requires from its caller has a documented default or an explicit stop.
+  A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
+- A description demanding what the body defaults, or defaulting what the body demands.
+  The two are one contract read from opposite ends; a caller obeys the description and the agent obeys the body.
 
 ## Report
 

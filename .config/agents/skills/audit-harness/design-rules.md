@@ -82,6 +82,7 @@ An agent following an instruction does not need to know which mechanism failed t
 The two have different readers: the description is read by the caller choosing whether to reach for this at all, the body by the thing itself, executing.
 A fact that does both jobs belongs in both, worded for its reader -- a read-only agent advertises `Read-only: it judges, never changes` to the caller, and states the contract with its loopholes to itself (R13).
 Two readers, one copy each, is not the duplication R10 forbids.
+The exemption is per reader, not per file: two copies serving the same reader is R10, however far apart they sit.
 
 *Failure it prevents:* a skill that never fires because its description says what it is rather than when to reach for it; and agent bodies that grow into essays about the harness, paid for on every spawn.
 
@@ -115,14 +116,14 @@ A skill that shells out to one is not working until it has been run the way an a
 
 ## R13. A read-only agent is a convention it keeps, not a cage.
 
-Two frontmatter mechanisms look like enforcement and are not (tested, v2.1.223): `permissionMode: plan` does not stop a subagent writing or deleting through Bash, and every parenthesised specifier in `tools:` is silently stripped to the bare tool -- including the documented `Agent(name)` form.
-Both fail open.
+Three frontmatter mechanisms look binding and are not (tested, v2.1.223): `permissionMode: plan` does not stop a subagent writing or deleting through Bash; every parenthesised specifier in `tools:` is silently stripped to the bare tool, including the documented `Agent(name)` form; and `model:` is a default the caller's `model` argument overrides.
+The first two fail open.
 
 So: set `disallowedTools: Write, Edit`, and state the contract in the body's first paragraph, naming the obvious loophole -- no shell redirect standing in for Write.
 The rest rests on the agent.
 The session sandbox is real enforcement but session-wide, so it cannot separate a read-only agent from its caller.
 
-*Failure it prevents:* believing an agent is read-only because its frontmatter says something that was never parsed.
+*Failure it prevents:* believing an agent is read-only because its frontmatter says something that was never parsed, or that its model is fixed because the frontmatter names one.
 
 ## R14. Skill when it is knowledge for Claude, doc when it is user-facing.
 
