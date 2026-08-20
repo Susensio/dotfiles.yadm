@@ -179,3 +179,19 @@ Mechanize it and delete the prose; do not keep both.
 The audit holds what is left: what no mechanism can decide.
 
 *Failure it prevents:* R13's `disallowedTools` promise, which holds only while the agent reads it, where a `PreToolUse` deny would hold regardless.
+
+## R18. Enforcement sits at the fastest layer that can hold it.
+
+R17 says mechanize a decidable rule.
+This says where it lands.
+Fastest first: a `PreToolUse` hook that blocks before the edit, a `PostToolUse` hook that returns the violation, a pre-commit hook, CI, a reader.
+Each step down costs a turn, a push, or a review cycle before the agent learns it was wrong, and by then it has built on the mistake.
+
+A mechanism holds only where both are true:
+
+- **It survives the agent.** Where the cheapest fix for a failing check is editing the check, that is the fix that gets made.
+  The linter config, the hook scripts and the CI workflow are protected, or nothing is.
+- **Its message carries the fix.** An agent can skip a doc; it cannot skip the text a failing check prints.
+  That text names what to do instead, and the rule it came from.
+
+*Failure it prevents:* a convention enforced only in review, rediscovered from scratch by every agent that hits it -- and a rule an agent satisfies by turning the rule off.

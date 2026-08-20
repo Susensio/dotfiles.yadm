@@ -1,6 +1,6 @@
 ---
 name: audit-harness
-description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, or never loaded. Use after adding or moving agents, skills or context files, and when an agent ignores a rule you thought was in force.
+description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, never loaded, or stated as a rule with nothing enforcing it. Use after adding or moving agents, skills or context files, after changing a hook or a check, and when an agent ignores a rule you thought was in force.
 ---
 
 # Harness audit
@@ -13,6 +13,8 @@ Each check below names the rules it tests.
 A finding that cannot name a rule or a concrete breakage is not a finding.
 
 Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
+Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
+A rule is worth what the layer that catches it is worth (R18), so a harness cannot be judged from its prose alone.
 
 ## How to report a finding
 
@@ -92,6 +94,32 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
   A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
 - A description demanding what the body defaults, or defaulting what the body demands.
   The two are one contract read from opposite ends; a caller obeys the description and the agent obeys the body.
+
+## 8. Enforcement — R17, R18
+
+*Every other check asks what the harness says. This one asks what happens when an agent ignores it.*
+
+Only rules R17 calls decidable reach this section.
+"An agent never names a domain" and every rule about wording stay in prose because nothing else can hold them; reporting those as unenforced buries the findings that mean something.
+A harness governing no build has no ladder to climb -- say that once, and skip to the hook checks.
+
+- A decidable rule left in prose — R17, R18.
+  Name the mechanism, not the aspiration: the glob a `paths:` rule would carry, the `PreToolUse` matcher, the check a CI step would run.
+  Where naming it takes more than a line, the rule is not decidable after all and does not belong here.
+- **A hook that cannot speak.**
+  A `PostToolUse` hook printing to stdout and exiting 0 tells the model nothing: that stdout reaches the debug log, never the transcript (tested, v2.1.223).
+  Feedback needs `hookSpecificOutput.additionalContext` as JSON on stdout, or exit 2 to surface stderr.
+  Silent on success and silent on failure, the same shape as R13's frontmatter.
+- **A matcher that never fires.**
+  Check each `matcher` against the tool names it means to catch: one on `Edit` misses `Write`, and file edits made through the shell arrive as `Bash`.
+  Decide it by running the hook against a sample payload, not by reading the pattern.
+- **An enforcer the agent can edit.**
+  For each config a check reads -- linter, formatter, hook script, CI workflow -- name what stops an agent turning a red check green by editing it.
+  Nothing is the finding.
+- A message that reports the violation without the fix or the rule behind it — R18.
+- **The completion gate.**
+  Name what decides work is done.
+  Where that is the agent's own judgement, name the command that should decide it instead.
 
 ## Report
 
