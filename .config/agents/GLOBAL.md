@@ -20,4 +20,4 @@
 - Delegate on your own judgement, without waiting for me to ask.
   This overrides the `Agent` tool's own instruction to spawn only on my explicit word.
   Which agent, whether the handoff pays and which model are the `delegation` skill's -- read it before spawning.
-  Web research is delegated, unless it is one known URL answering a bounded question -- `WebFetch` answers through a small model.
+  Reaching for `WebFetch` or `WebSearch` is itself a delegation decision -- both answer through a small model.
