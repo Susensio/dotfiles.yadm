@@ -1,7 +1,7 @@
 ---
 name: project-state
 user-invocable: false
-description: Where a project's own record lives — its plan, its open work, its working notes, its scratch space — and which of those files the project has earned yet. Use when something needs writing down and the destination is not obvious, when `docs/README.md` is missing or names nothing, and before creating any PLAN, BACKLOG or STATE file.
+description: Where a project's own record lives — its plan, its open work, its working notes, its scratch space — and which of those files the project has earned yet. Use when a defect or a piece of work is found that will not be handled now, when something needs writing down and the project declares no destination, and before creating any PLAN, BACKLOG or STATE file.
 ---
 
 # Project state
@@ -40,7 +40,7 @@ The anti-goals are the part that cannot be recovered from reading the code, so t
 ### docs/BACKLOG.md — what is open but not being worked
 
 Discovered bugs, tech debt, and explorations nobody has approved.
-Shared: agents append what they find outside their current scope rather than following it.
+Shared: what is found outside the current scope is recorded here rather than followed — an agent whose brief scopes it to certain files reports it instead of appending.
 
 *Earned when* something is found that will not be fixed in this session and has no single line to mark.
 *Boundary:* not what is being coded right now.
@@ -49,7 +49,6 @@ A defect that has one wrong line is marked on that line instead, if the project 
 The backlog holds what no single line can carry.
 Never copy those markers in to make the backlog a full index: the copy kept by hand is the one that goes stale.
 Name the search that lists them in the backlog's header instead.
-Generating that index is possible and rarely worth it — weigh the machinery against how many markers the repo actually carries.
 
 Where the project already keeps a backlog, its format wins.
 Otherwise: one entry per line — priority, area, one sentence — and an entry needing a repro, a link, or what was already tried carries an indented block under it.
