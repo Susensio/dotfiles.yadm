@@ -15,6 +15,9 @@
 - Remembering something: it goes where the project's own harness already keeps that kind of fact -- a CLAUDE.md, a skill.
   Agent memory only when it fits nowhere else.
   One place, never both.
+- New Claude Code config -- a skill, rule, agent doc -- goes under `.config/agents/`, symlinked back into `~/.claude/`, matching `agents/`, `skills/`, `rules/` and this file.
+  A file that lives only under `~/.claude` sits outside the sandbox's cwd-scoped write allowlist and prompts for permission whenever `.config` isn't the working directory.
+  `~/.claude/settings.json` stays a real file, deliberately unsymlinked -- it's the permissions file, and prompting on every edit is the point.
 - Markdown prose breaks by sentence, one per line, never hard wrapped to a column.
   Frontmatter, fenced code, tables and headings stay verbatim.
 - Delegate on your own judgement, without waiting for me to ask.
