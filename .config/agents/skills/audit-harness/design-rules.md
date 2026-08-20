@@ -156,6 +156,8 @@ Keep:
 - The specific trap, named.
   "Stage by explicit path, never `git add .`" survives compression; "commit carefully" does not.
 - The reason, where the reason is what makes the rule applied correctly rather than merely agreed with.
+- The test, where the rule is behavioural and R17 has left it in prose.
+  "Every changed line traces to something the request asked for" can be applied to a diff; "make surgical changes" cannot be failed, so it is followed at random.
 
 *Failure it prevents:* on one side, bodies drifting into essays -- the rule wrapped in a paragraph about why it exists, paid on every spawn, in a file whose sibling exists to hold that paragraph.
 On the other, compression that strips the example or the fallback an agent needed and leaves a slogan it cannot act on.
