@@ -168,3 +168,12 @@ Verbatim regardless: YAML frontmatter, fenced code, tables, headings.
 A repo whose tracked markdown already holds to another convention keeps it (R4).
 
 *Failure it prevents:* a one-word edit reflowing a whole paragraph, so review sees a rewritten block and cannot tell which sentence actually changed -- and the same paragraph rewrapped to a different width by every agent that touches it.
+
+## R17. A check a machine can decide does not live in prose.
+
+Where a rule is mechanically decidable -- a name collision, a parenthesised specifier, a file that does not parse -- prose asking an agent to check it is the weakest available enforcement.
+Mechanize it and delete the prose; do not keep both.
+
+The audit holds what is left: what no mechanism can decide.
+
+*Failure it prevents:* R13's `disallowedTools` promise, which holds only while the agent reads it, where a `PreToolUse` deny would hold regardless.
