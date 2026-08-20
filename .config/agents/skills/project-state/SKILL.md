@@ -1,7 +1,7 @@
 ---
 name: project-state
 user-invocable: false
-description: Where a project's own record lives — its plan, its open work, its working notes, its scratch space — and which of those files the project has earned yet. Use when a defect or a piece of work is found that will not be handled now, when something needs writing down and the project declares no destination, and before creating any PLAN, BACKLOG or STATE file.
+description: Whether a project has earned a PLAN, BACKLOG or STATE file or a scratch directory yet, and what shape to give one when creating it. Use before creating any of them, and when something needs writing down and the project has no file that already holds it.
 ---
 
 # Project state
@@ -11,22 +11,18 @@ A project's record is written for a person to read, so it is a doc in `docs/`, n
 Adopt none of it on day one.
 Each file below names the condition that earns it.
 Until that condition is met the repository and its history are the record, and adding the file costs more than it holds.
+A file that is absent has not been earned yet; that is the only thing its absence means.
 
-## The pointer
-
-`docs/README.md` names where the project's requirements, plan and working notes live, and the command that verifies the work.
-It is the one file read to find the rest, so it holds pointers and nothing else.
-
-Missing, or naming nothing: work from the repository as it is and say so once.
-Never guess a layout from what happens to be on disk.
-
-Do not create it to hold a single line.
-A project with one plan file and no check command is better served by naming that file when asked.
+Once a file exists it speaks for itself, because it opens by stating what it holds.
+So nothing indexes these files and no pointer file lists them — read what is in `docs/`, and read a file before writing to it.
+A name is not a convention: `docs/BACKLOG.md` states in its own first lines what stays a marker in the code instead, which beats any assumption about what a backlog usually holds.
+This skill has nothing to add once the file is there.
 
 ## The record
 
-Each entry: what it holds, who writes it, and the boundary that stops it absorbing its neighbours.
-Names are defaults — where `docs/README.md` names a different location, that one wins.
+Each entry: what earns it, what it holds, and the boundary that stops it absorbing its neighbours.
+Names are defaults — where a project already keeps one of these somewhere else, that location wins, and its `CLAUDE.md` is where it says so.
+Creating one means writing that boundary into the file's own first lines.
 
 ### docs/PLAN.md — what is intended
 
