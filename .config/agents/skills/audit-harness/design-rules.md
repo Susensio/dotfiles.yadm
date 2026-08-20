@@ -109,6 +109,10 @@ Frontmatter looks binding and is not (tested, v2.1.223).
 `permissionMode: plan` does not stop a subagent writing or deleting through Bash; every parenthesised specifier in `tools:` is silently stripped to the bare tool, including the documented `Agent(name)` form; `model:` is a default the caller's `model` argument overrides; and `memory:` force-enables Read, Write and Edit.
 The first two fail open.
 
+Built-in availability is a separate trap.
+`Grep` and `Glob` are absent from the main session because an empty `tengu_non_deferrable_builtins` flag makes built-ins deferrable (anthropics/claude-code#86971), while a subagent that declares them gets them.
+A tool missing from the session's own list is therefore no evidence it is missing from an agent that asked for it -- stripping the pair once cost explorer its search tools.
+
 So a read-only agent is a convention it keeps, not a cage: set `disallowedTools: Write, Edit`, and state the contract in the body's first paragraph, naming the obvious loophole -- no shell redirect standing in for Write.
 The rest rests on the agent.
 The session sandbox is real enforcement but session-wide, so it cannot separate a read-only agent from its caller.
