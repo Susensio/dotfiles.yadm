@@ -26,6 +26,10 @@ XDG config repo for `~/.config`, managed with yadm.
   No conventional-commit prefixes.
   Stage by explicit path; this tree carries in-flight edits across several config domains at once.
 
+## agents/
+
+- New Claude Code config goes under `.config/agents/`, symlinked back into `~/.claude/`, like `agents/`, `skills/`, `rules/` and `GLOBAL.md`.
+
 ## tmux/
 
 - Invoke the `tmux-config` skill before any tmux work.
