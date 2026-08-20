@@ -48,7 +48,7 @@ Requiring `auditor` to establish its own scope rather than accept the caller's f
 Proactive triggering rests on the model choosing to fire it, so this is a probability where a server-side tool call would have been closer to a certainty.
 The same soft failure ADR-0026 accepted for the delegation skill, one level up: a review that does not happen rather than a wrong action.
 
-The `opus` pin raises the cost of every audit, and R13 records that a pin is a default the caller's `model` argument overrides — the cost is a tendency, not a guarantee, in either direction.
+The `opus` pin raises the cost of every audit, and R3 records that a pin is a default the caller's `model` argument overrides — the cost is a tendency, not a guarantee, in either direction.
 
 The trigger lives in the description at the user tier, so it fires in every project rather than this one.
 That is deliberate, and it means a project that does not want a proactive auditor has to say so.

@@ -28,7 +28,7 @@ The delegation policy moves out of `GLOBAL.md` into a `delegation` skill accordi
 
 A user-tier skill must work in a repo that has never seen it -- no pre-existing directory, no setup step -- and references project facts by generic phrase with a documented fallback, so a repo that declares nothing still behaves predictably.
 
-The full doctrine, twelve rules each naming the failure it prevents, lives in `agents/skills/harness-audit/design-rules.md`.
+The full doctrine, six rules each naming the failure it prevents, lives in `agents/skills/audit-harness/design-rules.md`.
 The audit beside it enforces them.
 
 ## Consequences
@@ -48,4 +48,4 @@ Cost: the delegation policy now fires on a description match rather than being u
 The failure is soft -- a worse model choice, not a wrong action -- but it is a probability where there was a certainty.
 
 The placement question is a judgment applied per file, with nothing enforcing it mechanically.
-`harness-audit` is the compensating control, and it only helps if it is actually run.
+`audit-harness` is the compensating control, and it only helps if it is actually run.

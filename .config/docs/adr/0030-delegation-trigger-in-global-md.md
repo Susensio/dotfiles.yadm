@@ -22,7 +22,7 @@ Nothing loads it in the case that matters: the turn where delegating was never c
 There the failure is not a worse model choice, it is no delegation at all, against an instruction that is present every turn.
 
 A rule in `.claude/rules/` without `paths:` looks like the third option, loading at session start and reaching no subagent.
-R9 already rejects it as a trap and says to write the glob or write CLAUDE.md, and there is no glob for "delegate more".
+R1 already rejects it as a trap and says to write the glob or write CLAUDE.md, and there is no glob for "delegate more".
 
 ## Decision
 
@@ -42,4 +42,4 @@ Routing stays out of `GLOBAL.md`: which agent to reach for is already in each ag
 
 Both brakes are plan- and version-dependent, and neither is contractual.
 The Opus one lifts on Sonnet, the Pro one on Max, and a release can move or drop either -- at which point these three lines pay rent for nothing.
-R9 in `design-rules.md` carries the exception and is where that re-check belongs, since the rules file is policy and this record is history.
+R1 in `design-rules.md` carries the exception and is where that re-check belongs, since the rules file is policy and this record is history.
