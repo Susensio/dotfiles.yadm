@@ -1,6 +1,6 @@
 ---
 name: audit-harness
-description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, never loaded, or stated as a rule with nothing enforcing it. Use after adding or moving agents, skills or context files, after changing a hook or a check, and when an agent ignores a rule you thought was in force.
+description: Audits the agent harness across the user and project tiers and reports what is broken, duplicated, never loaded, reachable from nothing, contradicted by another file, or stated as a rule with nothing enforcing it. Use after adding or moving agents, skills or context files, after changing a hook, a check or an agent's tool grant, and when an agent ignores a rule you thought was in force.
 ---
 
 # Harness audit
@@ -46,6 +46,8 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - The same agent or skill `name` in more than one tier.
   The nearer one wins silently; there is no merge and no warning.
 - Text byte-identical between a user-tier file and a project one.
+- Two files answering the same question differently — a default named twice, a fallback one grants and another forbids.
+  A divergent duplicate is still one fact in two slots: delete one, never reconcile them.
 - Two copies of a protocol that should have one home.
 
 ## 3. Dead references — R1
@@ -68,6 +70,9 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - Harness directories no loader reads -- anything outside `.claude/` and the user tier.
 - Files nothing references and nothing loads.
   Name the moment each is read; if there is no such moment, say so.
+- Reachability is transitive.
+  A skill referenced only from a file that nothing loads is as dead as one referenced nowhere, and the reference makes it look alive.
+  Trace each back to a cold session start: a description that fires, a name in a file that loads, or something a person would type.
 
 ## 5. Placement — R1
 
@@ -96,7 +101,34 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - A description demanding what the body defaults, or defaulting what the body demands.
   The two are one contract read from opposite ends; a caller obeys the description and the agent obeys the body.
 
-## 8. Enforcement — R3
+## 8. Wiring — R7
+
+*Check 3 asks whether what a file names exists. This one walks the graph it forms: what reaches what, in what order, and whether the path ever closes on itself.*
+
+A mismatch already priced as an accepted consequence is not a finding — check the project's decision records before reporting one.
+A rule knowingly left in a file that reaches every subagent, because a narrower placement would not fire in time, is a decision, not a defect.
+
+- **An instruction reaching an agent that cannot obey it.**
+  Cross every rule in `CLAUDE.md` and its imports, which reach each subagent with no opt-out, against the roster's `tools:` lists.
+  A delegation rule arriving at an agent holding no `Agent`, a web-research rule at one holding no `WebFetch`: it improvises around the gap and reports nothing.
+  The fix is a condition on the rule, or a grant.
+- **A handoff the grant does not support.**
+  Where one file tells an agent to spawn another, the named agent exists and the spawning one holds `Agent`.
+- **A scripted handoff with an incomplete brief.**
+  A file prescribing a spawn carries every input the target's description marks required — `tester` requires what counts as a pass.
+  Missing, the chain stalls one round-trip in, paid by the caller before any work starts (R4).
+- **Knowledge arriving after the decision it governs.**
+  A file whose description says to read it *before* X, triggered by X happening: by the time it loads, the choice it governs is made.
+  Either something present earlier carries the trigger, or the content moves to a slot that loads unconditionally.
+- **A cycle.**
+  Two files each naming the other as the thing to read first; an agent whose brief routes work back to the one that spawned it; a rule telling an agent to hand off the work it exists to do.
+  Nothing detects one at runtime — it spends turns, or stalls on a first step that never comes.
+  Report which end should be the entry.
+- **One concept under two names.**
+  Renaming reaches the file that was open and stops there.
+  The survivor is silent: an agent greps the name it was taught, finds nothing, and proceeds as though the thing does not exist.
+
+## 9. Enforcement — R3
 
 *Every other check asks what the harness says. This one asks what happens when an agent ignores it.*
 

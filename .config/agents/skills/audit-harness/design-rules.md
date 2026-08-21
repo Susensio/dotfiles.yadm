@@ -177,3 +177,23 @@ Write skills.
 The pairing is checkable: a noun-named skill that is user-invocable, or an imperative-named one nothing can trigger, is misfiled.
 
 *Failure it prevents:* a knowledge skill cluttering the `/` menu with something nobody would type, and an action nobody can reach because its name reads like a topic.
+
+## R7. An instruction reaches an agent that can act on it, in time to act on it.
+
+`CLAUDE.md` and its imports reach every subagent with no opt-out, and a skill reaches whoever invokes it, so an instruction lands on agents whose `tools:` list was never checked against it.
+An agent that cannot follow one works around it silently; nothing reports the gap.
+Either the rule names the condition under which it applies, so an agent outside that condition can tell it is outside, or the grant changes to match.
+
+Arrival time is half the test.
+Content that loads only once the decision it governs is being taken has not been delivered, however correct it is -- the trigger has to sit upstream of the choice, or the content has to load unconditionally (ADR-0030).
+
+A handoff is the same test read forward: the agent named exists, the agent doing the naming holds `Agent`, and the brief carries what the target's description demands (R4).
+Read forward far enough and the path can close on itself -- each of two files naming the other as the prerequisite, or an agent handing work back to the one that briefed it.
+A cycle costs turns rather than failing outright, so nothing surfaces it; one end has to be declared the entry.
+
+This is not R1 in another costume.
+R1 asks where a fact lives and catches the second copy; this asks whether the one copy landed somewhere it can be executed.
+A rule can sit in exactly the right slot and still reach an agent with no tool to obey it.
+
+*Failure it prevents:* every file valid, every reference resolving, and the chain dead anyway -- an agent briefed to fan out with no `Agent` tool, a research rule delivered to the agent that already holds the web tools and cannot hand anything on.
+And the slower version: one concept under two names, where the agent that learned the other name greps for it, finds nothing, and concludes the thing does not exist.
