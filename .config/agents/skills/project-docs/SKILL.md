@@ -1,10 +1,10 @@
 ---
-name: project-state
+name: project-docs
 user-invocable: false
 description: Whether a project has earned a PLAN, BACKLOG or STATE file or a scratch directory yet, and what shape to give one when creating it. Use before creating any of them, and when something needs writing down and the project has no file that already holds it.
 ---
 
-# Project state
+# Project docs
 
 A project's record is written for a person to read, so it is a doc in `docs/`, not a file under `.claude/`.
 
