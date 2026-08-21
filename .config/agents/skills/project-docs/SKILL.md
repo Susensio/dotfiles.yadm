@@ -36,7 +36,8 @@ The anti-goals are the part that cannot be recovered from reading the code, so t
 ### docs/BACKLOG.md — what is open but not being worked
 
 Discovered bugs, tech debt, and explorations nobody has approved.
-Shared: what is found outside the current scope is recorded here rather than followed — an agent whose brief scopes it to certain files reports it instead of appending.
+The main agent writes it, from its own work and from whatever a subagent reports as outside its scope.
+Subagents read it and do not append — an entry landing in a scoped diff breaks the single concern that diff was supposed to be, and reading it is what stops one repeating a dead end recorded here.
 
 *Earned when* something is found that will not be fixed in this session and has no single line to mark.
 *Boundary:* not what is being coded right now.
@@ -68,7 +69,8 @@ An entry that outgrows the block is a decision, not a backlog item.
 ### STATE.md — what is being worked right now
 
 The current objective, the live blocker, and the dead ends already tried.
-Agents own it.
+The main agent owns it, and nothing else writes it: a subagent has no next turn to leave notes for, and several running at once would clobber the file carrying the caller's continuity.
+What a subagent needs from it travels in the brief instead, which is why `delegation` makes "what was already tried" a named slot.
 Add it to whatever ignore file the project already uses before writing it, and wipe it when the work it describes is committed.
 
 *Earned when* a session has actually been lost and the reconstruction cost was felt.

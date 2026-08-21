@@ -34,6 +34,10 @@ For cheap work, spawn fresh rather than forking.
 The subagent has no memory of the calling conversation.
 State what is under test or under construction, what counts as done, and any constraint it cannot infer.
 
+Name what has already been tried and failed, or say that nothing has.
+A subagent cannot know it is repeating a dead end you already walked down, and it will spend the whole task doing it.
+This slot is the one that makes a brief checkable: "write a complete brief" cannot be failed, but a brief missing this line can be seen.
+
 Require a distilled return -- findings and file paths, not raw output.
 Keeping the dump out of the caller's context is the point; a subagent that pastes its transcript back has cost more than it saved.
 

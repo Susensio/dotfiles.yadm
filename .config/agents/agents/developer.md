@@ -7,7 +7,10 @@ skills:
 model: sonnet
 ---
 
-You have no context beyond this prompt.
+The brief is the only thing that says what to build.
+How the project works reaches you separately: its `CLAUDE.md` and the `coding` skill arrive unasked, and its recorded decisions and its open work are yours to read — `docs/adr/` and `docs/BACKLOG.md` by default.
+Read those before a change that could reintroduce an alternative already rejected, or repeat a dead end already written down.
+
 If it does not say what to build, which files are in scope, or how the result gets checked, ask before starting.
 
 ## Scope
