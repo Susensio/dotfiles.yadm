@@ -6,11 +6,12 @@ description: Records an architecturally significant decision as a numbered ADR i
 # Architecture Decision Record Protocol
 
 ## Before deciding
-Run `rg -N '^Status: (.+)$' -r '$1' docs/adr/0*.md | sort` — one line per ADR in number order, filename and status.
+Run `${CLAUDE_SKILL_DIR}/adr.py list` — one line per ADR in number order: number, status, title.
+A superseded record shows `-> <N>`, the number that replaced it, in place of its status.
 An `Accepted` ADR covering the same ground is binding: follow it, or supersede it deliberately (below).
 Never silently re-decide.
 `Superseded` is history, not current policy.
-Open a full ADR only when its filename looks relevant.
+Open a full ADR only when its title looks relevant.
 
 ## When to write one
 
@@ -22,20 +23,21 @@ Adopting a documented, reversible setting because the tool's own docs say to —
 Offer an ADR there rather than assuming one is warranted.
 
 ## How to write one
-1. Run `${CLAUDE_SKILL_DIR}/new.py "<title>" --slug "<short-slug>"` — prints the created file's path.
+1. Run `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>"` — prints the created file's path.
    It finds `docs/adr/` by walking up from wherever it is invoked.
    If there is none it stops and says where it looked, rather than starting a second set somewhere nobody reads.
    `--dir <path>` names the directory outright when the search would find the wrong one; `--init` creates it, for a project with no records yet.
    `<title>` can be a full sentence and becomes the H1; `--slug` is 3-6 words naming the core decision and becomes the filename — pick it deliberately rather than letting the title get truncated into it.
+   The title is the whole index, since it is what `list` prints: name the discarded alternative in it where there was one.
+   "Link mise tools into XDG directories instead of PATH shims" answers "did I already weigh PATH shims?" without the file being opened; the slug alone does not.
 2. Fill in the three sections:
    - **Context:** the situation and forces at play, stated neutrally (why this needed a decision at all).
    - **Decision:** what was decided, stated as a single clear sentence.
    - **Consequences:** what becomes easier or harder as a result — trade-offs, not just upside.
 3. Never edit an accepted ADR's Context/Decision/Consequences after the fact.
    If the decision changes, write a new ADR that supersedes it:
-   `${CLAUDE_SKILL_DIR}/new.py "<title>" --slug "<short-slug>" --supersedes <N>`
+   `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`
    This writes `Supersedes: [ADR-<N>](<file>)` into the new file and flips ADR-`<N>`'s status to `Superseded by [ADR-<M>](<file>)` — the old record stays, it just stops being current.
 
-Titles are in the filenames, status is in each file.
+Title and status live in each record and `list` reads them from there.
 There is no index file to fall out of date.
-`rg -l '^Status: Superseded' docs/adr/0*.md` lists just the dead ones.

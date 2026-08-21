@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Create a new ADR skeleton in docs/adr/.
+"""Create and list ADRs in docs/adr/.
 
 Usage:
-  new.py "<title>"
-  new.py "<title>" --supersedes 3
+  adr.py list
+  adr.py new "<title>"
+  adr.py new "<title>" --supersedes 3
 """
 import argparse
 import datetime
@@ -39,6 +40,8 @@ def find_adr_dir(init: bool, override: str | None = None) -> Path:
 
 
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
+TITLE_RE = re.compile(r"^# ADR-\d+:\s*(.+)$", re.MULTILINE)
+SUPERSEDED_BY_RE = re.compile(r"Superseded by \[ADR-(\d+)\]")
 ADR_DIR: Path  # resolved in main() once --init is known
 
 
@@ -82,17 +85,31 @@ def flip_to_superseded(old_path: Path, new_number: int, new_slug: str) -> None:
     old_path.write_text(STATUS_RE.sub(new_status, text, count=1))
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("title")
-    parser.add_argument("--slug", metavar="SLUG", help="short (3-6 word) filename slug; defaults to a truncated version of the title")
-    parser.add_argument("--supersedes", type=int, metavar="N", help="ADR number this decision replaces")
-    parser.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
-    parser.add_argument("--init", action="store_true", help="create the ADR directory; without it, a missing one is an error")
-    args = parser.parse_args()
+def cmd_list() -> None:
+    rows = []
+    for path in existing_adrs():
+        text = path.read_text()
+        status_match = STATUS_RE.search(text)
+        status = status_match.group(1).strip() if status_match else "no Status line"
+        # Superseded records carry a whole markdown link; the number is the part
+        # worth seeing in a list, and it doubles as the pointer to what replaced it.
+        superseded = SUPERSEDED_BY_RE.search(status)
+        if superseded:
+            status = f"-> {int(superseded.group(1)):04d}"
+        title_match = TITLE_RE.search(text)
+        # Fall back to the filename so a record with a malformed heading still lists.
+        title = title_match.group(1).strip() if title_match else f"({path.name})"
+        rows.append((adr_number(path), status, title))
 
-    global ADR_DIR
-    ADR_DIR = find_adr_dir(args.init, args.dir)
+    if not rows:
+        print(f"no ADRs in {ADR_DIR}")
+        return
+    width = max(len(status) for _, status, _ in rows)
+    for number, status, title in sorted(rows):
+        print(f"{number:04d}  {status:<{width}}  {title}")
+
+
+def cmd_new(args: argparse.Namespace) -> None:
     ADR_DIR.mkdir(parents=True, exist_ok=True)
     number = next_number()
     slug = slugify(args.slug) if args.slug else slugify(args.title)
@@ -114,6 +131,30 @@ def main() -> None:
         f"\n## Context\n\n\n## Decision\n\n\n## Consequences\n\n"
     )
     print(path)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_list = sub.add_parser("list", help="print every ADR as number, status and title")
+    p_list.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
+
+    p_new = sub.add_parser("new", help="create a new ADR skeleton")
+    p_new.add_argument("title")
+    p_new.add_argument("--slug", metavar="SLUG", help="short (3-6 word) filename slug; defaults to a truncated version of the title")
+    p_new.add_argument("--supersedes", type=int, metavar="N", help="ADR number this decision replaces")
+    p_new.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
+    p_new.add_argument("--init", action="store_true", help="create the ADR directory; without it, a missing one is an error")
+
+    args = parser.parse_args()
+
+    global ADR_DIR
+    ADR_DIR = find_adr_dir(getattr(args, "init", False), args.dir)
+    if args.command == "list":
+        cmd_list()
+    else:
+        cmd_new(args)
 
 
 if __name__ == "__main__":
