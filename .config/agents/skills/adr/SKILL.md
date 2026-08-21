@@ -32,7 +32,7 @@ Offer an ADR there rather than assuming one is warranted.
    "Link mise tools into XDG directories instead of PATH shims" answers "did I already weigh PATH shims?" without the file being opened; the slug alone does not.
 2. Fill in the three sections:
    - **Context:** the situation and forces at play, stated neutrally (why this needed a decision at all).
-   - **Decision:** what was decided, stated as a single clear sentence.
+   - **Decision:** what was decided.
    - **Consequences:** what becomes easier or harder as a result — trade-offs, not just upside.
 3. Never edit an accepted ADR's Context/Decision/Consequences after the fact.
    If the decision changes, write a new ADR that supersedes it:
