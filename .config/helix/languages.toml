@@ -66,7 +66,19 @@ file-types = [
 formatter = { command = "gitconfig-fmt" }
 auto-format = true
 
+# Style lives in biome.json, not here. Biome resolves it from the working
+# directory, so this formats to the conventions of wherever helix was started.
+# --stdin-file-path only tells biome which language it is being handed.
+[[language]]
+name = "json"
+formatter = { command = "biome", args = ["format", "--stdin-file-path=f.json"] }
+auto-format = true
+
+[[language]]
+name = "jsonc"
+formatter = { command = "biome", args = ["format", "--stdin-file-path=f.jsonc"] }
+auto-format = true
+
 [[language]]
 name = "markdown"
-# Prose is broken by sentence, not by column, so lines run past the viewport.
 soft-wrap = { enable = true, wrap-indicator = "" }
