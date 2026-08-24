@@ -39,10 +39,13 @@ The `skills:` field is the back door, since it injects a full SKILL.md at startu
 
 **Load cost decides skill against rule against `CLAUDE.md`.**
 `CLAUDE.md` and its imports reach every subagent with no opt-out; built-in `Explore` and `Plan` are the only agents that skip them, and that is not configurable.
-`.claude/rules/` splits on `paths:` (tested, v2.1.238): a rule carrying it loads only when a matching file is read, and does reach a subagent that reads one; a rule without it loads at session start and reaches no subagent at all.
-So a rule without `paths:` is a trap -- it costs main-session context and is absent from `developer`, the agent that writes the code it governs.
-The glob resolves against the project, so a rule never fires on a file outside that tree: the same rule that fired on a repo file stayed silent on a copy in `/tmp`.
-The published docs say an unscoped rule loads unconditionally and reaches subagents; at this tier it does not, so do not correct this line to match them without re-running the probe.
+`.claude/rules/` splits on `paths:` (tested, v2.1.238): a rule carrying it loads when a matching file is read, a rule without it loads at session start, and **both reach a subagent** -- the unscoped one always, the scoped one once the subagent reads a match.
+So the choice is context cost, not reach: an unscoped rule sits in every session from the first turn whether or not it applies, at both tiers.
+The glob resolves against the project; a matching file outside the tree did not fire the rule.
+
+A rule added mid-session splits the same way, and this is what makes the difference easy to mis-test: an unscoped rule is not picked up until the next session, while a scoped one loads the next time a matching file is read.
+Probe with a fresh session, never one already running.
+Under `claude -p` a scoped rule did not load at all, even after a matching file was read.
 Write the glob, or write `CLAUDE.md`.
 Between the remaining two, follow the trigger: a skill when deciding it applies takes judgement, a path-scoped rule when a path or extension decides it.
 A skill pays its whole cost on invocation, so past roughly 500 lines the detail belongs in a sibling file it loads on demand.
