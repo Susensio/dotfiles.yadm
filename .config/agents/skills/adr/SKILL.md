@@ -48,7 +48,10 @@ Offer an ADR rather than assuming one is warranted.
    - **Context:** the situation and forces at play, stated neutrally (why this needed a decision at all).
    - **Decision:** what was decided.
    - **Consequences:** what becomes easier or harder as a result — trade-offs, not just upside.
-3. Never edit an accepted ADR's Context/Decision/Consequences after the fact.
+3. Cite a skill or a doc by name, never by path — a name is a stable address, a path moves and the record cannot chase it.
+   Naming the `harness-design` skill survives that skill's file being moved; the path `agents/skills/audit-harness/design-rules.md` did not.
+4. Never edit an accepted ADR's Context/Decision/Consequences after the fact.
+   Immutability protects the decision from being re-decided, not its prose from being repaired: fixing a rotted pointer, a broken link or a typo changes no decision and is always allowed.
    If the decision changes, write a new ADR that supersedes it:
    `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`
    This writes `Supersedes: [ADR-<N>](<file>)` into the new file and flips ADR-`<N>`'s status to `Superseded by [ADR-<M>](<file>)` — the old record stays, it just stops being current.

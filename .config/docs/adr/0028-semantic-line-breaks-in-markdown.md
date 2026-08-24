@@ -25,8 +25,8 @@ It is one per-language setting, not a constraint.
 
 Markdown prose breaks at sentence boundaries — one sentence per line, never wrapped to a column — with YAML frontmatter, fenced code, tables and headings left verbatim, and `soft-wrap` enabled for markdown in helix so the long lines stay readable.
 
-The rule as current practice lives in `agents/skills/audit-harness/design-rules.md` as R2, enforced by a check in the audit beside it, with the always-loaded instruction in `GLOBAL.md`.
-That split follows [ADR-0026](0026-harness-content-by-tier.md): this record is the decision at a moment and does not change, `design-rules.md` is the policy that gets edited.
+The rule as current practice lives in the `harness-design` skill as R2, enforced by a check in the audit beside it, with the always-loaded instruction in `GLOBAL.md`.
+That split follows [ADR-0026](0026-harness-content-by-tier.md): this record is the decision at a moment and does not change, the `harness-design` skill is the policy that gets edited.
 Being a user-tier rule, R2 yields to a repo whose tracked markdown already holds to another convention.
 
 ## Consequences

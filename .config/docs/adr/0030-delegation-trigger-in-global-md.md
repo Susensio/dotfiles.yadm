@@ -42,4 +42,4 @@ Routing stays out of `GLOBAL.md`: which agent to reach for is already in each ag
 
 Both brakes are plan- and version-dependent, and neither is contractual.
 The Opus one lifts on Sonnet, the Pro one on Max, and a release can move or drop either -- at which point these three lines pay rent for nothing.
-R1 in `design-rules.md` carries the exception and is where that re-check belongs, since the rules file is policy and this record is history.
+R1 in the `harness-design` skill carries the exception and is where that re-check belongs, since the rules file is policy and this record is history.

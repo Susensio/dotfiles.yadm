@@ -28,7 +28,7 @@ The delegation policy moves out of `GLOBAL.md` into a `delegation` skill accordi
 
 A user-tier skill must work in a repo that has never seen it -- no pre-existing directory, no setup step -- and references project facts by generic phrase with a documented fallback, so a repo that declares nothing still behaves predictably.
 
-The full doctrine, six rules each naming the failure it prevents, lives in `agents/skills/audit-harness/design-rules.md`.
+The full doctrine, six rules each naming the failure it prevents, lives in the `harness-design` skill.
 The audit beside it enforces them.
 
 ## Consequences
@@ -40,7 +40,7 @@ Adding one reaches every project at once, which is what makes the tier worth hav
 `GLOBAL.md` drops from 25 lines to 18, and the delegation policy is absent from subagents rather than merely inert in them.
 ADR-0023's observation that the rules are also correct for a subagent that delegates further still holds -- subagents do get the Agent tool -- but a skill serves that case too.
 
-Doctrine now has two homes and the boundary needs watching: ADRs record a decision at a moment and are immutable, `design-rules.md` is current practice and gets edited.
+Doctrine now has two homes and the boundary needs watching: ADRs record a decision at a moment and are immutable, the `harness-design` skill is current practice and gets edited.
 The same split as ADR-0022 drew between `docs/adr/` and `ENVIRONMENT_ARCHITECTURE.md`, one level in.
 If the two disagree, the ADR is history and the rules file is policy.
 
