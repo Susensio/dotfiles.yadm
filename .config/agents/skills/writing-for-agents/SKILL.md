@@ -1,6 +1,6 @@
 ---
 name: writing-for-agents
-description: Writing documents for agents. Use when creating or editing skills, or modifying CLAUDE.md.
+description: How to write a document an agent reads — what belongs in a description versus a body, how to rank information so the load order matches the reading order, leading words, why prohibitions backfire, and what to cut. Use when writing or editing a skill, an agent definition, a path-scoped rule or a CLAUDE.md, and when a document is too long, too vague, or ignored by the agent it was written for.
 user-invocable: false
 ---
 

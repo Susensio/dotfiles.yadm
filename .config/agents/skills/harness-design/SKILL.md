@@ -15,7 +15,7 @@ Each rule states the current conclusion and the failure it prevents, and stops t
 The investigation behind it -- what was probed, which hypothesis died -- belongs in the commit that changed the rule, or in an ADR when a decision was reversed.
 Provenance read here on every audit costs more than it informs; `git log -p` still has it when the rule looks wrong.
 
-## R1. One fact, one slot.
+## R-one-slot. One fact, one slot.
 
 Every piece of harness content has one home, and which one follows from what the content is:
 
@@ -74,7 +74,7 @@ Three copies of one skill drifting apart, and a project agent silently shadowing
 Delegation policy shipped into every spawn, including the agents that cannot delegate -- and worse than the token cost, context files arrive under an injected reminder that this content may not be relevant and should not be acted on unless it clearly is, so an off-topic rule teaches the model to discount the rules sitting beside it.
 Project state buried under `.claude/` where someone returning to the repo will not find it, and a runbook copied into a skill body, where the copy the person does not read is the copy that goes stale.
 
-## R2. A description is a trigger, not a label; a body is instructions, not commentary.
+## R-trigger. A description is a trigger, not a label; a body is instructions, not commentary.
 
 The description says what it does, then when to use it, and for an agent what comes back.
 It is the only text loaded before the thing is chosen.
@@ -84,7 +84,7 @@ An agent following an instruction does not need to know which mechanism failed t
 
 The two have different readers: the description is read by the caller choosing whether to reach for this at all, the body by the thing itself, executing.
 A fact that does both jobs belongs in both, worded for its reader -- a read-only agent advertises `Read-only: it judges, never changes` to the caller, and states the contract with its loopholes to itself.
-That is the one copy per reader R1 allows; two copies serving the same reader is a duplicate, however far apart they sit.
+That is the one copy per reader R-one-slot allows; two copies serving the same reader is a duplicate, however far apart they sit.
 
 The rule itself gets worded as an instruction someone has to apply cold, without the file it describes in front of them.
 That is a higher floor than a comment sitting beside the code it explains -- compress toward it, do not arrive at it.
@@ -99,7 +99,7 @@ Cut:
 Keep:
 
 - The worked example that shows the shape of a right answer.
-- The concrete fallback and the named default, so a caller who supplied neither still lands somewhere known (R4).
+- The concrete fallback and the named default, so a caller who supplied neither still lands somewhere known (R-fallback).
 - The specific trap, named.
   "Stage by explicit path, never `git add .`" survives compression; "commit carefully" does not.
 - The reason, where the reason is what makes the rule applied correctly rather than merely agreed with.
@@ -109,7 +109,7 @@ Keep:
 Prose breaks at sentence boundaries -- never at a column, never only at the paragraph.
 A long sentence stays whole on its own line and the editor soft-wraps it; a short one gets its own line too.
 Verbatim regardless: YAML frontmatter, fenced code, tables, headings.
-A repo whose tracked markdown already holds to another convention keeps it (R4).
+A repo whose tracked markdown already holds to another convention keeps it (R-fallback).
 
 For document craft -- progressive disclosure, leading words, unambiguous completion bounds, and pruning no-ops -- consult the `writing-for-agents` skill.
 
@@ -117,7 +117,7 @@ For document craft -- progressive disclosure, leading words, unambiguous complet
 On the other side, compression that strips the example or the fallback an agent needed and leaves a slogan it cannot act on.
 And a one-word edit reflowing a whole paragraph, so review sees a rewritten block and cannot tell which sentence actually changed.
 
-## R3. Enforcement sits at the fastest layer that can hold it.
+## R-enforcement. Enforcement sits at the fastest layer that can hold it.
 
 Frontmatter looks binding and is not (tested, v2.1.223).
 `permissionMode: plan` does not stop a subagent writing or deleting through Bash; `Bash(cmd:*)` is silently stripped to the bare tool, as is `Agent(name)` in a subagent definition -- though on a main-thread agent (`claude --agent`) `Agent(name)` is enforced and a spawn outside the list fails (documented, not tested here); `model:` is a default the caller's `model` argument overrides; and `memory:` force-enables Read, Write and Edit.
@@ -151,7 +151,7 @@ The audit holds what is left: what no mechanism can decide.
 *Failure it prevents:* believing an agent is read-only because its frontmatter says something that was never parsed, or that its model is fixed because the frontmatter names one.
 A convention enforced only in review, rediscovered from scratch by every agent that hits it -- and a rule an agent satisfies by turning the rule off.
 
-## R4. Declare with fallback.
+## R-fallback. Declare with fallback.
 
 Reference project facts by generic phrase plus a documented default.
 A missing declaration yields a known fallback or an explicit stop, never a guess.
@@ -162,7 +162,7 @@ So a description must not demand what the body defaults, or default what the bod
 *Failure it prevents:* a generic skill dropped into a repo that declares nothing, improvising a convention instead of asking or defaulting.
 A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
 
-## R5. Verify under the sandbox, and stamp what you tested.
+## R-stamp. Verify under the sandbox, and stamp what you tested.
 
 Tools that read credentials from a keyring, a socket, or the session bus behave differently for an agent than for you.
 A skill that shells out to one is not working until it has been run the way an agent will run it.
@@ -176,7 +176,7 @@ A claim about runtime behaviour carries the version it was tested against -- `(t
 *Failure it prevents:* `gh`-dependent skills that pass by hand and fail for every subagent, indistinguishably from the tool being broken.
 And a runtime claim trusted long after the release that changed it, with nothing in the text to date it.
 
-## R6. The name follows the thing's nature, and invocability follows the name.
+## R-name. The name follows the thing's nature, and invocability follows the name.
 
 Lowercase, hyphenated.
 Beyond that:
@@ -193,7 +193,7 @@ The pairing is checkable: a noun-named skill that is user-invocable, or an imper
 
 *Failure it prevents:* a knowledge skill cluttering the `/` menu with something nobody would type, and an action nobody can reach because its name reads like a topic.
 
-## R7. An instruction reaches an agent that can act on it, in time to act on it.
+## R-in-time. An instruction reaches an agent that can act on it, in time to act on it.
 
 `CLAUDE.md` and its imports reach every subagent with no opt-out, and a skill reaches whoever invokes it, so an instruction lands on agents whose `tools:` list was never checked against it.
 An agent that cannot follow one works around it silently; nothing reports the gap.
@@ -202,12 +202,12 @@ Either the rule names the condition under which it applies, so an agent outside 
 Arrival time is half the test.
 Content that loads only once the decision it governs is being taken has not been delivered, however correct it is -- the trigger has to sit upstream of the choice, or the content has to load unconditionally (ADR-0030).
 
-A handoff is the same test read forward: the agent named exists, the agent doing the naming holds `Agent`, and the brief carries what the target's description demands (R4).
+A handoff is the same test read forward: the agent named exists, the agent doing the naming holds `Agent`, and the brief carries what the target's description demands (R-fallback).
 Read forward far enough and the path can close on itself -- each of two files naming the other as the prerequisite, or an agent handing work back to the one that briefed it.
 A cycle costs turns rather than failing outright, so nothing surfaces it; one end has to be declared the entry.
 
-This is not R1 in another costume.
-R1 asks where a fact lives and catches the second copy; this asks whether the one copy landed somewhere it can be executed.
+This is not R-one-slot in another costume.
+R-one-slot asks where a fact lives and catches the second copy; this asks whether the one copy landed somewhere it can be executed.
 A rule can sit in exactly the right slot and still reach an agent with no tool to obey it.
 
 *Failure it prevents:* every file valid, every reference resolving, and the chain dead anyway -- an agent briefed to fan out with no `Agent` tool, a research rule delivered to the agent that already holds the web tools and cannot hand anything on.

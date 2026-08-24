@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Stages and commits pending work as atomic commits — one concern each, staged by explicit path, in this repo's existing message style. Use when asked to commit changes here.
+description: Stages and commits pending work as atomic commits — one concern each, staged by explicit path, in whatever message style the repository's own history already uses. Use when asked to commit, or to split work that is already written into commits.
 ---
 
 # Git Commit Protocol

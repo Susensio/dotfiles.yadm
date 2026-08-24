@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Checks which earlier decisions are still binding, and records a new one as a numbered ADR in docs/adr/. Use FIRST, before weighing a choice between real alternatives — a library, a structural boundary, a constraint accepted for a non-obvious reason — because an accepted ADR on the same ground is binding and re-deciding it unknowingly is the failure this prevents. Use again once the choice is settled, reversed or superseded, to record it.
+description: Checks which earlier decisions are still binding, then records the new one as a numbered ADR in docs/adr/. Use at the START of weighing a choice between real alternatives — a library, a structural boundary, a constraint accepted for a non-obvious reason — because an accepted ADR on the same ground is binding, and unknowingly re-deciding it is what this prevents. Use at the END of that same choice, once it is settled or reversed, while what was weighed and discarded is still in reach.
 ---
 
 # Architecture Decision Record Protocol

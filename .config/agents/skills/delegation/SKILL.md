@@ -51,11 +51,15 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 
 Each brief stands alone -- these agents have no memory of the conversation that spawned them.
 
-## What comes back is a lead, not a finding
+## Take the verdict, check the aside
 
-A subagent's factual claim about how something behaves is unverified until you check it.
-It ran on a smaller model, or on a surface you cannot see, and a confident report is the same shape whether or not it is right.
-Verify anything you are about to act on or repeat, and say which half you verified when you pass it on.
+The verdict you commissioned is what you delegated for: take it.
+Re-running `tester`'s check yourself spends exactly the context the handoff saved, and a verdict arrives with the evidence that decided it, which is checkable without running anything again.
+An agent that executed the thing is a better witness to it than you are.
+
+What does not carry that weight is the claim picked up along the way -- a doc quoted, a capability asserted, a behaviour inferred rather than run.
+Nobody commissioned it, so nobody checked it, and it arrives in the same confident shape as the verdict beside it.
+That is a lead: verify it before it becomes a rule, or before you repeat it as yours.
 
 The claim to distrust most is the one that arrives already agreeing with you.
 

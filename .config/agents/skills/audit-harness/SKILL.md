@@ -14,7 +14,21 @@ A finding that cannot name a rule or a concrete breakage is not a finding.
 
 Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
 Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
-A rule is worth what the layer that catches it is worth (R3), so a harness cannot be judged from its prose alone.
+A rule is worth what the layer that catches it is worth (R-enforcement), so a harness cannot be judged from its prose alone.
+
+## Enumerate first
+
+Run this before any check. Its output is the corpus, and every check below reads that list rather than whatever files happened to get opened -- otherwise two runs audit two different harnesses and neither says which.
+
+```sh
+fd . ~/.config/agents --type f --type l          # user tier, as it is on disk
+fd '^(CLAUDE|AGENTS)\.md$' . --hidden --no-ignore
+fd . .claude --type f --hidden 2>/dev/null       # project tier, if present
+fd '^(settings.*\.json|\.pre-commit-config\.yaml|.*\.ya?ml)$' . --hidden --max-depth 3
+```
+
+State the count found at each root in the report.
+A root that yields nothing is a finding when the harness references it, and noise otherwise.
 
 ## How to report a finding
 
@@ -34,21 +48,24 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - Resolve every harness symlink (`readlink -f`).
   A link to an **empty directory** passes `ls -l` and loads nothing.
 - Each skill dir has `SKILL.md`; each agent file has parseable frontmatter and a non-empty `description`.
-- No `SKILL.md` over 500 lines (`wc -l`) — R1.
+- No skill's `description` exceeds 1536 characters, the per-entry cap past which it is truncated -- taking the trigger words with it, so the skill stays valid and stops firing.
+  The roster as a whole is budgeted at roughly 1% of the context window; when it overflows, descriptions are dropped starting with the least-invoked skill.
+  Sum them and report the total, because this is the one failure that arrives by growth rather than by edit.
+- No `SKILL.md` over 500 lines (`wc -l`) — R-one-slot.
 - `settings*.json` parse (`jq .`).
   A malformed file is dropped whole, taking every permission and hook in it.
-- No **subagent** `tools:`/`disallowedTools:` entry uses a parenthesised specifier — R3.
+- No **subagent** `tools:`/`disallowedTools:` entry uses a parenthesised specifier — R-enforcement.
   `Bash(cmd:*)` is stripped to the bare tool wherever it appears, and `Agent(name)` is stripped in a subagent definition, so the line reads as a restriction and grants everything.
   The exception is a main-thread agent (`claude --agent`), where `Agent(name)` is enforced and a spawn outside the list fails — flagging one there deletes a real restriction.
   Neither the file nor the agent listing reports the effective grant.
-- Confirm an effective grant by having a spawned agent **use** the tool, never by asking it to list one — R5.
-- Every claim about runtime behaviour names the version it was tested against — R5.
+- Confirm an effective grant by having a spawned agent **use** the tool, never by asking it to list one — R-stamp.
+- Every claim about runtime behaviour names the version it was tested against — R-stamp.
   A stamp well behind `claude --version` is a rule to re-probe, not one to trust.
 - Harness files in a repo: tracked, or deliberately ignored?
   `git ls-files --error-unmatch` and `git check-ignore -v`.
   Untracked and un-ignored is one `git clean` from gone.
 
-## 2. Duplication — R1
+## 2. Duplication — R-one-slot
 
 - The same `name` in more than one tier -- resolved in opposite directions depending on what it is, silently either way, with no merge and no warning.
   A **skill**: personal overrides project, so `~/.claude/skills/x` shadows the repo's own `x` and the project copy is the dead one.
@@ -58,14 +75,14 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
   A divergent duplicate is still one fact in two slots: delete one, never reconcile them.
 - Two copies of a protocol that should have one home.
 
-## 3. Dead references — R1
+## 3. Dead references — R-one-slot
 
 *The highest-yield check. Every failure this harness has actually had was one of these.*
 
 - Every skill, agent, path, command and script named in any harness file resolves.
   Include `${CLAUDE_SKILL_DIR}` paths and names in prose.
 - Skills reference their own scripts through `${CLAUDE_SKILL_DIR}`, not a bare or cwd-relative path.
-- **Liveness, under the sandbox** — R5.
+- **Liveness, under the sandbox** — R-stamp.
   For each external tool a skill shells out to, run its cheapest real invocation the way an agent will: sandboxed.
   A tool that authenticates from a keyring or a socket works in a terminal and fails for every agent.
   - Probe with a real call, not a status subcommand.
@@ -82,16 +99,16 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
   A skill referenced only from a file that nothing loads is as dead as one referenced nowhere, and the reference makes it look alive.
   Trace each back to a cold session start: a description that fires, a name in a file that loads, or something a person would type.
 
-## 5. Placement — R1
+## 5. Placement — R-one-slot
 
 - User-tier content naming one project's paths, stack or conventions.
 - Project content that would be true in any repo.
 - An agent whose value is only its prompt text, or that names a domain.
 - Content in a context file that should be a skill body or a path-scoped rule.
-- Any file under a `rules/` directory with no `paths:` in its frontmatter — R1.
+- Any file under a `rules/` directory with no `paths:` in its frontmatter — R-one-slot.
   It loads like CLAUDE.md but reaches no subagent, so a standard written there is absent from the agent it governs.
 
-## 6. Wording — R2, writing-for-agents
+## 6. Wording — R-trigger, writing-for-agents
 
 - A description that labels rather than triggers.
 - Context pointers carrying synonym sprawl or buried triggers instead of front-loaded trigger words.
@@ -100,19 +117,19 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - The reverse: a rule compressed past the point of use, its worked example or documented fallback gone.
 - An action skill step with a fuzzy completion bound inviting premature completion, rather than a checkable binary condition.
 - Steering solely by prohibition -- negative guardrails without an explicit positive target behavior.
-- A description carrying setup instruction the caller cannot act on -- how to install or configure the thing is user-facing doc (R1), in a slot loaded in every session.
-- Prose wrapped to a column instead of to its sentences — R2.
+- A description carrying setup instruction the caller cannot act on -- how to install or configure the thing is user-facing doc (R-one-slot), in a slot loaded in every session.
+- Prose wrapped to a column instead of to its sentences — R-trigger.
   Two tells, both greppable: a line ending mid-sentence with the next one continuing it, and a paragraph whose lines all stop within a few columns of each other.
   Frontmatter, fenced code, tables and headings are exempt; report the file, not each line.
 
-## 7. Contract — R4
+## 7. Contract — R-fallback
 
 - Each input an agent or skill requires from its caller has a documented default or an explicit stop.
   A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
 - A description demanding what the body defaults, or defaulting what the body demands.
   The two are one contract read from opposite ends; a caller obeys the description and the agent obeys the body.
 
-## 8. Wiring — R7
+## 8. Wiring — R-in-time
 
 *Check 3 asks whether what a file names exists. This one walks the graph it forms: what reaches what, in what order, and whether the path ever closes on itself.*
 
@@ -127,7 +144,7 @@ A rule knowingly left in a file that reaches every subagent, because a narrower 
   Where one file tells an agent to spawn another, the named agent exists and the spawning one holds `Agent`.
 - **A scripted handoff with an incomplete brief.**
   A file prescribing a spawn carries every input the target's description marks required — `tester` requires what counts as a pass.
-  Missing, the chain stalls one round-trip in, paid by the caller before any work starts (R4).
+  Missing, the chain stalls one round-trip in, paid by the caller before any work starts (R-fallback).
 - **Knowledge arriving after the decision it governs.**
   A file whose description says to read it *before* X, triggered by X happening: by the time it loads, the choice it governs is made.
   Either something present earlier carries the trigger, or the content moves to a slot that loads unconditionally.
@@ -139,28 +156,28 @@ A rule knowingly left in a file that reaches every subagent, because a narrower 
   Renaming reaches the file that was open and stops there.
   The survivor is silent: an agent greps the name it was taught, finds nothing, and proceeds as though the thing does not exist.
 
-## 9. Enforcement — R3
+## 9. Enforcement — R-enforcement
 
 *Every other check asks what the harness says. This one asks what happens when an agent ignores it.*
 
-Only rules R3 calls decidable reach this section.
+Only rules R-enforcement calls decidable reach this section.
 "An agent never names a domain" and every rule about wording stay in prose because nothing else can hold them; reporting those as unenforced buries the findings that mean something.
 A harness governing no build has no ladder to climb -- say that once, and skip to the hook checks.
 
-- A decidable rule left in prose — R3.
+- A decidable rule left in prose — R-enforcement.
   Name the mechanism, not the aspiration: the glob a `paths:` rule would carry, the `PreToolUse` matcher, the check a CI step would run.
   Where naming it takes more than a line, the rule is not decidable after all and does not belong here.
 - **A hook that cannot speak.**
   A `PostToolUse` hook printing to stdout and exiting 0 tells the model nothing: that stdout reaches the debug log, never the transcript (tested, v2.1.223).
   Feedback needs `hookSpecificOutput.additionalContext` as JSON on stdout, or exit 2 to surface stderr.
-  Silent on success and silent on failure, the same shape as the frontmatter R3 describes.
+  Silent on success and silent on failure, the same shape as the frontmatter R-enforcement describes.
 - **A matcher that never fires.**
   Check each `matcher` against the tool names it means to catch: one on `Edit` misses `Write`, and file edits made through the shell arrive as `Bash`.
   Decide it by running the hook against a sample payload, not by reading the pattern.
 - **An enforcer the agent can edit.**
   For each config a check reads -- linter, formatter, hook script, CI workflow -- name what stops an agent turning a red check green by editing it.
   Nothing is the finding.
-- A message that reports the violation without the fix or the rule behind it — R3.
+- A message that reports the violation without the fix or the rule behind it — R-enforcement.
 - **The completion gate.**
   Name what decides work is done.
   Where that is the agent's own judgement, name the command that should decide it instead.
@@ -179,9 +196,13 @@ A harness governing no build has no ladder to climb -- say that once, and skip t
 <everything past the tenth, one line each: <file:line> — <what's wrong>.
  Omit this heading only when there is nothing past the tenth>
 
-## Clean
-<which checks passed, one line>
+## Checks
+<every numbered check below, one line each, none omitted:
+ <n>. <name> — pass | fail (see Findings) | not-run: <why>>
 ```
+
+A check that could not be run reads exactly like one that passed unless it says so, which is the same silence this skill exists to break.
+`not-run` is a complete answer; a check quietly dropped is not.
 
 Deduplicate to root cause first.
 One dead symlink orphaning nine skills is one finding, not nine.
