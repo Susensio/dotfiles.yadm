@@ -39,8 +39,10 @@ The `skills:` field is the back door, since it injects a full SKILL.md at startu
 
 **Load cost decides skill against rule against `CLAUDE.md`.**
 `CLAUDE.md` and its imports reach every subagent with no opt-out; built-in `Explore` and `Plan` are the only agents that skip them, and that is not configurable.
-`.claude/rules/` splits on `paths:` (tested, v2.1.223): a rule carrying it loads only when a matching file is read, and does reach a subagent that reads one; a rule without it loads at session start and reaches no subagent at all.
+`.claude/rules/` splits on `paths:` (tested, v2.1.238): a rule carrying it loads only when a matching file is read, and does reach a subagent that reads one; a rule without it loads at session start and reaches no subagent at all.
 So a rule without `paths:` is a trap -- it costs main-session context and is absent from `developer`, the agent that writes the code it governs.
+The glob resolves against the project, so a rule never fires on a file outside that tree: the same rule that fired on a repo file stayed silent on a copy in `/tmp`.
+The published docs say an unscoped rule loads unconditionally and reaches subagents; at this tier it does not, so do not correct this line to match them without re-running the probe.
 Write the glob, or write `CLAUDE.md`.
 Between the remaining two, follow the trigger: a skill when deciding it applies takes judgement, a path-scoped rule when a path or extension decides it.
 A skill pays its whole cost on invocation, so past roughly 500 lines the detail belongs in a sibling file it loads on demand.
@@ -115,7 +117,7 @@ And a one-word edit reflowing a whole paragraph, so review sees a rewritten bloc
 ## R3. Enforcement sits at the fastest layer that can hold it.
 
 Frontmatter looks binding and is not (tested, v2.1.223).
-`permissionMode: plan` does not stop a subagent writing or deleting through Bash; every parenthesised specifier in `tools:` is silently stripped to the bare tool, including the documented `Agent(name)` form; `model:` is a default the caller's `model` argument overrides; and `memory:` force-enables Read, Write and Edit.
+`permissionMode: plan` does not stop a subagent writing or deleting through Bash; `Bash(cmd:*)` is silently stripped to the bare tool, as is `Agent(name)` in a subagent definition -- though on a main-thread agent (`claude --agent`) `Agent(name)` is enforced and a spawn outside the list fails (documented, not tested here); `model:` is a default the caller's `model` argument overrides; and `memory:` force-enables Read, Write and Edit.
 The first two fail open.
 
 Built-in availability is a separate trap.

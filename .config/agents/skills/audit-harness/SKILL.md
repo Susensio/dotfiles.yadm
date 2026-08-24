@@ -31,8 +31,9 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - No `SKILL.md` over 500 lines (`wc -l`) — R1.
 - `settings*.json` parse (`jq .`).
   A malformed file is dropped whole, taking every permission and hook in it.
-- No agent `tools:`/`disallowedTools:` entry uses a parenthesised specifier — R3.
-  `Bash(cmd:*)` and even the documented `Agent(name)` are silently stripped to the bare tool, so the line reads as a restriction and grants everything.
+- No **subagent** `tools:`/`disallowedTools:` entry uses a parenthesised specifier — R3.
+  `Bash(cmd:*)` is stripped to the bare tool wherever it appears, and `Agent(name)` is stripped in a subagent definition, so the line reads as a restriction and grants everything.
+  The exception is a main-thread agent (`claude --agent`), where `Agent(name)` is enforced and a spawn outside the list fails — flagging one there deletes a real restriction.
   Neither the file nor the agent listing reports the effective grant.
 - Confirm an effective grant by having a spawned agent **use** the tool, never by asking it to list one — R5.
 - Every claim about runtime behaviour names the version it was tested against — R5.
@@ -43,8 +44,9 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 
 ## 2. Duplication — R1
 
-- The same agent or skill `name` in more than one tier.
-  The nearer one wins silently; there is no merge and no warning.
+- The same `name` in more than one tier -- resolved in opposite directions depending on what it is, silently either way, with no merge and no warning.
+  A **skill**: personal overrides project, so `~/.claude/skills/x` shadows the repo's own `x` and the project copy is the dead one.
+  An **agent**: project overrides user, and among nested project directories the definition closest to the working directory wins.
 - Text byte-identical between a user-tier file and a project one.
 - Two files answering the same question differently — a default named twice, a fallback one grants and another forbids.
   A divergent duplicate is still one fact in two slots: delete one, never reconcile them.
