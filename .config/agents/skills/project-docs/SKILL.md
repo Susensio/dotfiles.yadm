@@ -97,3 +97,7 @@ Material that survives the task belongs in one of the files above, or is deleted
 **A procedure with two readers** — a deployment, a release, a test suite a person also runs by hand — is a doc in `docs/`, and the skill that fires on it points there.
 
 **A choice between real alternatives**, once settled or reversed, goes to the `adr` skill, which decides whether it is worth recording at all.
+
+**Never agent memory**, while anything above fits.
+It is unreviewable, invisible to everyone else working in the repository, and does not reach a subagent -- so a fact kept there is missing from whoever does the work next.
+One place, never both.

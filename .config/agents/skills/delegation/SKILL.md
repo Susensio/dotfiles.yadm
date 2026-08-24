@@ -9,16 +9,44 @@ description: Picks a subagent's model by task shape and decides whether the hand
 ## Does this pay?
 
 Delegation buys context isolation and pays a cold start: the subagent re-derives everything from its prompt alone.
-Worth it for chunky self-contained work, a loss for a few-line edit.
-Gate on size and self-containment, not on whether it is "implementation".
+Gate on footprint -- what the work leaves in the caller's context -- not on the size of the thinking, and not on whether it is "implementation".
+
+A mechanical rename across ten files is a loss to keep: the reasoning is nil, the diff output is not.
+A one-line fix in a file already open is a loss to send.
+Bulk output read once and never again -- a test failure, a build log, a directory crawl, a fetched page -- is the strongest signal there is.
+
+Re-decide mid-task when the estimate turns out wrong: work kept that has grown goes out at that point.
+The reads already done argue for handing off, not against it.
+
+Resuming a named agent costs no cold start, since it keeps its context.
+Resume when the follow-up needs what that agent learned and disk does not show; otherwise spawn fresh.
+
+The web cannot be sized before it arrives, so it splits on whether the question is bounded.
+`WebFetch` against a URL in hand, answering one named question, stays here.
+Anything where which pages hold the answer is still unknown goes to `explorer` -- a `WebSearch`, a claim needing two sources agreed against each other, an issue tracker read down to its resolution.
+Unclear cases go out.
+
+## Fanning out writers
+
+Readers parallelise freely.
+Writers do not: two agents editing one tree destroy each other's verification, one running the check while the other's half-finished edits sit on disk.
+Ordering the commits does not fix it.
+
+Writers that must run at once each get `isolation: worktree` at the spawn, per call -- the serial case is the common one and should not pay for it.
+Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (anthropics/claude-code#38287), so plan the return as part of the fan-out:
+
+- Scope them disjoint.
+  Two briefs reaching the same files means the work was never parallel.
+- Merge on return, not at the end of the session.
+- Merge one, then rebase the rest onto the updated base.
+- Reconciling goes out like any other work, carrying what each branch was for -- that is what decides a conflict, and it is in neither diff.
 
 ## Pick the model by task shape, not task category
 
-An agent's frontmatter pins a default model, not a binding: the `model` argument overrides it, and a generic spawn has no pin at all.
 Match the model to the shape of the task whenever you are the one choosing.
 
-- `haiku` for enumeration and retrieval over a large surface -- grepping transcripts, trawling logs, inventorying a tree.
-  Reliable at finding and listing, weak at deciding.
+- `haiku` for enumeration and retrieval over a large surface -- grepping transcripts, trawling logs, inventorying a tree -- and for transcription, where what to write is already settled and only applying it is left.
+  Reliable at finding, listing and copying, weak at deciding.
 - `sonnet` for self-contained implementation with a clear spec and an obvious way to verify it.
 - `opus` for a verdict on work or an approach, where being wrong is expensive.
 
@@ -26,8 +54,7 @@ Delegate the legwork freely.
 Judgment delegates only upward -- to a model at least as capable as the caller, and it returns as a verdict, not a decision.
 Whoever is deciding still decides.
 
-Forks inherit the caller's model and ignore a `model` override.
-For cheap work, spawn fresh rather than forking.
+Forks inherit the caller's model and ignore a `model` override, so spawn fresh for cheap work rather than forking.
 
 ## Write the prompt to stand alone
 
@@ -35,13 +62,17 @@ The subagent has no memory of the calling conversation.
 State what is under test or under construction, what counts as done, and any constraint it cannot infer.
 
 Name what has already been tried and failed, or say that nothing has.
-A subagent cannot know it is repeating a dead end you already walked down, and it will spend the whole task doing it.
-This slot is the one that makes a brief checkable: "write a complete brief" cannot be failed, but a brief missing this line can be seen.
+A subagent cannot know it is repeating a dead end already walked, and will spend the whole task doing it.
 
 Require a distilled return -- findings and file paths, not raw output.
-Keeping the dump out of the caller's context is the point; a subagent that pastes its transcript back has cost more than it saved.
+A subagent that pastes its transcript back has cost more than it saved.
+
+A young project makes briefs longer, not shorter: a mature repository tells a subagent what it needs through `CLAUDE.md` and its records, a two-day-old one tells it nothing.
+
+The second time the same fact goes into a brief, it has earned a line in `CLAUDE.md`.
+Propose that line and wait for the user to take it -- two tasks that happened to rhyme look identical to a convention from here, and a wrong one lands in every spawn from then on.
 
 ## Nesting
 
-A subagent can spawn its own subagents -- the Agent tool is in its toolset by default.
-Results from a grandchild are unreliable once the parent has finished, so keep a nested chain short and let each level return before the one above completes.
+Check an agent holds `Agent` before briefing it to fan out: an explicit `tools:` list grants only what it names (tested, v2.1.223), and an agent without it works serially rather than reporting that it cannot.
+A grandchild's results are unreliable once the parent has finished, so keep chains short and let each level return before the one above.

@@ -8,8 +8,8 @@ description: Audits the agent harness across the user and project tiers and repo
 Read-only.
 Report findings; change nothing unless asked afterwards.
 
-The doctrine these checks enforce is in [design-rules.md](design-rules.md).
-Each check below names the rules it tests.
+Load the `harness-design` skill first: it carries the doctrine these checks enforce, and the rule numbers below are its.
+Each check names the rules it tests.
 A finding that cannot name a rule or a concrete breakage is not a finding.
 
 Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
@@ -83,12 +83,15 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - Any file under a `rules/` directory with no `paths:` in its frontmatter — R1.
   It loads like CLAUDE.md but reaches no subagent, so a standard written there is absent from the agent it governs.
 
-## 6. Wording — R2
+## 6. Wording — R2, writing-for-agents
 
 - A description that labels rather than triggers.
+- Context pointers carrying synonym sprawl or buried triggers instead of front-loaded trigger words.
 - A rule restated in the agent that loads the skill carrying it, or in a second section of the same file.
 - A body explaining how the harness behaves instead of what to do.
 - The reverse: a rule compressed past the point of use, its worked example or documented fallback gone.
+- An action skill step with a fuzzy completion bound inviting premature completion, rather than a checkable binary condition.
+- Steering solely by prohibition -- negative guardrails without an explicit positive target behavior.
 - A description carrying setup instruction the caller cannot act on -- how to install or configure the thing is user-facing doc (R1), in a slot loaded in every session.
 - Prose wrapped to a column instead of to its sentences — R2.
   Two tells, both greppable: a line ending mid-sentence with the next one continuing it, and a paragraph whose lines all stop within a few columns of each other.

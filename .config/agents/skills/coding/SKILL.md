@@ -18,6 +18,11 @@ Check, in order:
 Build the minimal thing that satisfies the requirement.
 No speculative abstractions, no unused helpers, no packages beyond what step 2 justified.
 
+An abstraction earns its place from what varies between its callers, so check what actually varies.
+A parameter, field or return value that is identical at every call site is carrying nothing -- delete it and inline what it held.
+A function whose body only calls two others is not a layer.
+Where a caller works around the interface -- a lookup table to reach it, a value smuggled through a slot meant for something else -- the interface is wrong, not the caller.
+
 ## Verify against reality, not against the diff
 
 Pipeline and algorithmic logic gets run against real sample data before it counts as done.
@@ -63,7 +68,3 @@ Word them flat, declarative, impersonal:
 Ask what the change could plausibly break, check exactly that, and stop.
 An edit that cannot alter behaviour -- a comment, a docstring, whitespace -- is verified by reading the diff.
 Reserve the full suite, the throwaway server and the before/after harness for changes that genuinely alter behaviour.
-
-## Fish
-
-Control flow takes `if`/`end` blocks, not `and`/`or` chaining.
