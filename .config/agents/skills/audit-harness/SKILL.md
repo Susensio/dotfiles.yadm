@@ -8,9 +8,13 @@ description: Audits the agent harness across the user and project tiers and repo
 Read-only.
 Report findings; change nothing unless asked afterwards.
 
-Load the `harness-design` skill first: it carries the doctrine these checks enforce, and the rule numbers below are its.
+Load the `harness-design` skill first: it carries the doctrine these checks enforce, and the `R-` slugs below are its.
 Each check names the rules it tests.
 A finding that cannot name a rule or a concrete breakage is not a finding.
+
+The two files split by job, and keeping the split is what stops one drifting from the other.
+`harness-design` holds the reason a rule exists and the example that shows it.
+This file holds what to look for and the command that finds it, and cites the rule by slug instead of restating why it matters -- an explanation copied here is one that gets corrected in one file and not the other.
 
 Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
 Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
@@ -85,8 +89,7 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - **Liveness, under the sandbox** — R-stamp.
   For each external tool a skill shells out to, run its cheapest real invocation the way an agent will: sandboxed.
   A tool that authenticates from a keyring or a socket works in a terminal and fails for every agent.
-  - Probe with a real call, not a status subcommand.
-    `gh auth status` reports failure while `gh search` succeeds, because they read different credentials.
+  - Probe with a real call, not a status subcommand (R-stamp gives the `gh` case).
   - Denied paths appear inside the sandbox as `/dev/null` character devices, not as missing files.
     Confirm any surprising file with the sandbox off before reporting it.
 
@@ -124,10 +127,8 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 
 ## 7. Contract — R-fallback
 
-- Each input an agent or skill requires from its caller has a documented default or an explicit stop.
-  A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
-- A description demanding what the body defaults, or defaulting what the body demands.
-  The two are one contract read from opposite ends; a caller obeys the description and the agent obeys the body.
+- Each input an agent or skill requires from its caller has a documented default or an explicit stop, never "ask" alone.
+- A description that demands what the body defaults, or defaults what the body demands.
 
 ## 8. Wiring — R-in-time
 

@@ -51,18 +51,6 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 
 Each brief stands alone -- these agents have no memory of the conversation that spawned them.
 
-## Take the verdict, check the aside
-
-The verdict you commissioned is what you delegated for: take it.
-Re-running `tester`'s check yourself spends exactly the context the handoff saved, and a verdict arrives with the evidence that decided it, which is checkable without running anything again.
-An agent that executed the thing is a better witness to it than you are.
-
-What does not carry that weight is the claim picked up along the way -- a doc quoted, a capability asserted, a behaviour inferred rather than run.
-Nobody commissioned it, so nobody checked it, and it arrives in the same confident shape as the verdict beside it.
-That is a lead: verify it before it becomes a rule, or before you repeat it as yours.
-
-The claim to distrust most is the one that arrives already agreeing with you.
-
 ## Pick the model by task shape, not task category
 
 Match the model to the shape of the task whenever you are the one choosing.
@@ -88,6 +76,10 @@ A subagent cannot know it is repeating a dead end already walked, and will spend
 
 Require a distilled return -- findings and file paths, not raw output.
 A subagent that pastes its transcript back has cost more than it saved.
+
+Require it to mark what it ran apart from what it read.
+A claim it executed comes back with the evidence that decided it and is worth what the run is worth; a claim it inferred from a doc reads identically and is worth what the doc is worth.
+Asking for the line keeps the distinction free -- the agent already knows which it did, and the caller cannot tell afterwards without doing the work again.
 
 A young project makes briefs longer, not shorter: a mature repository tells a subagent what it needs through `CLAUDE.md` and its records, a two-day-old one tells it nothing.
 
