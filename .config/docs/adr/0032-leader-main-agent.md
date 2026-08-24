@@ -1,6 +1,6 @@
 # ADR-0032: Run every project through a leader main agent instead of the default session
 
-Status: Accepted
+Status: Superseded by [ADR-0033](0033-leader-for-projects-not-every-session.md)
 Date: 2026-08-24
 
 ## Context
