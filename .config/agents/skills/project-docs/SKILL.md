@@ -1,103 +1,45 @@
 ---
 name: project-docs
 user-invocable: false
-description: Whether a project has earned a PLAN, BACKLOG or STATE file or a scratch directory yet, and what shape to give one when creating it. Use before creating any of them, and when something needs writing down and the project has no file that already holds it.
+description: Where a project's own information goes — what is intended, what is open, what is being worked now, throwaway material, a settled decision — and whether the project has earned a file for it yet. Use when something needs writing down, before creating any of these files, and when picking up a project's existing record.
 ---
 
 # Project docs
 
 A project's record is written for a person to read, so it is a doc in `docs/`, not a file under `.claude/`.
 
-Adopt none of it on day one.
-Each file below names the condition that earns it.
-Until that condition is met the repository and its history are the record, and adding the file costs more than it holds.
-A file that is absent has not been earned yet; that is the only thing its absence means.
+## Where it goes
 
-Once a file exists it speaks for itself, because it opens by stating what it holds.
-So nothing indexes these files and no pointer file lists them — read what is in `docs/`, and read a file before writing to it.
-A name is not a convention: `docs/BACKLOG.md` states in its own first lines what stays a marker in the code instead, which beats any assumption about what a backlog usually holds.
-This skill has nothing to add once the file is there.
-
-## The record
-
-Each entry: what earns it, what it holds, and the boundary that stops it absorbing its neighbours.
-Names are defaults — where a project already keeps one of these somewhere else, that location wins, and its `CLAUDE.md` is where it says so.
-Creating one means writing that boundary into the file's own first lines.
-
-### docs/PLAN.md — what is intended
-
-Milestones, and the anti-goals that say what this project will deliberately not do.
-The user writes it; agents read it and do not edit it unasked.
-
-*Earned when* the work spans more sessions than one plan can be held in.
-*Boundary:* an architectural shift goes here, never into the backlog.
-The anti-goals are the part that cannot be recovered from reading the code, so they are the part worth writing first.
-
-### docs/BACKLOG.md — what is open but not being worked
-
-Discovered bugs, tech debt, and explorations nobody has approved.
-The main agent writes it, from its own work and from whatever a subagent reports as outside its scope.
-Subagents read it and do not append — an entry landing in a scoped diff breaks the single concern that diff was supposed to be, and reading it is what stops one repeating a dead end recorded here.
-
-*Earned when* something is found that will not be fixed in this session and has no single line to mark.
-*Boundary:* not what is being coded right now.
-
-A defect that has one wrong line is marked on that line instead, if the project marks defects in place.
-The backlog holds what no single line can carry.
-Never copy those markers in to make the backlog a full index: the copy kept by hand is the one that goes stale.
-Name the search that lists them in the backlog's header instead.
-
-Where the project already keeps a backlog, its format wins.
-Otherwise: one entry per line — priority, area, one sentence — and an entry needing a repro, a link, or what was already tried carries an indented block under it.
-
-```
-## Bugs
-- High | auth | Token refresh fails after 24h offline.
-  Only when the refresh lands during a clock skew of more than 60s.
-  Tried: widening the leeway window, no change.
-
-## Tech debt
-- Refactor | parser.ts | 1000 lines, split into strategies.
-
-## Explorations
-- Explore | state | Replace the store with a context provider?
-```
-
-`rg '^- '` still yields the flat list.
-An entry that outgrows the block is a decision, not a backlog item.
-
-### STATE.md — what is being worked right now
-
-The current objective, the live blocker, and the dead ends already tried.
-The main agent owns it, and nothing else writes it: a subagent has no next turn to leave notes for, and several running at once would clobber the file carrying the caller's continuity.
-What a subagent needs from it travels in the brief instead, which is why `delegation` makes "what was already tried" a named slot.
-Add it to whatever ignore file the project already uses before writing it, and wipe it when the work it describes is committed.
-
-*Earned when* a session has actually been lost and the reconstruction cost was felt.
-Not before.
-
-*Boundary:* the harness keeps its own task list, held per session rather than per repository (observed, v2.1.223).
-That list holds the steps.
-`STATE.md` holds only what would be expensive to reconstruct after the session ends — the blocker, and what was tried and failed.
-A `STATE.md` that reads as a copy of the task list is deleted, not reconciled: it will drift, and the copy that drifts is the one written by hand.
-
-### .scratch/ — working material
-
-Throwaway scripts, captured output, a dump being read once.
-Add it to whatever ignore file the project already uses before writing into it, and wipe it when the work that produced it is committed.
-
-*Earned when* the first temporary file is about to be written into the repository proper.
-It exists so that never happens.
-
-*Boundary:* nothing here is ever the source of truth.
-Material that survives the task belongs in one of the files above, or is deleted with the directory.
-
-## Routing what does not go in a file above
-
-**A procedure with two readers** — a deployment, a release, a test suite a person also runs by hand — is a doc in `docs/`, and the skill that fires on it points there.
-
-**A choice between real alternatives**, once settled or reversed, goes to the `adr` skill, which decides whether it is worth recording at all.
+| What you are holding | Where it goes |
+| --- | --- |
+| What is intended, and what this project deliberately will not do | `docs/PLAN.md` |
+| Open work nobody is on — a found bug, tech debt, an unapproved idea | `docs/BACKLOG.md` |
+| What is being worked right now — the objective, the live blocker, the dead ends already tried | `STATE.md` |
+| Throwaway material — a script, captured output, a dump read once | `.scratch/` |
+| A choice between real alternatives, once settled or reversed | the `adr` skill, which decides whether it is worth recording |
+| A procedure a person also runs by hand — a deployment, a release | a doc in `docs/`, and the skill that fires on it points there |
+| A defect with one wrong line to sit beside | that line, where the project marks defects in place |
 
 **Never agent memory**, while anything above fits.
-It is unreviewable, invisible to everyone else working in the repository, and does not reach a subagent -- so a fact kept there is missing from whoever does the work next.
+It is unreviewable, invisible to everyone else working in the repository, and does not reach a subagent — so a fact kept there is missing from whoever does the work next.
 One place, never both.
+
+## Earned, not adopted
+
+Adopt none of it on day one.
+Until a file's condition is met the repository and its history are the record, and adding the file costs more than it holds.
+A file that is absent has not been earned yet; that is the only thing its absence means.
+An empty one is worse than absent: it advertises a record that does not exist.
+
+Once a file exists it speaks for itself, because it opens by naming what it holds and what it excludes.
+One line does that; the format it uses is not the file's to explain.
+So nothing indexes these files and no pointer file lists them — read what is in `docs/`, and read a file before writing to it.
+
+Names are defaults.
+Where a project already keeps one of these somewhere else, that location wins, and its `CLAUDE.md` is where it says so.
+
+## Creating one
+
+`references/creating.md` carries what earns each file, the boundary line to write into it, and a worked example.
+Read it when you are about to create one, not before.
+This skill has nothing to add once the file is there.

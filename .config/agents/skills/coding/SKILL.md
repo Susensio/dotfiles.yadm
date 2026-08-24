@@ -1,7 +1,7 @@
 ---
 name: coding
 user-invocable: false
-description: How code is written, read and commented here — what to check before adding any, how a comment earns its place, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
+description: How code is written, read and commented here — what to check before adding any, how a comment earns its place, the check-and-fix loop that lands a change green, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
 ---
 
 # Coding
@@ -28,6 +28,15 @@ Where a caller works around the interface -- a lookup table to reach it, a value
 Pipeline and algorithmic logic gets run against real sample data before it counts as done.
 A change that only looks right is not finished, it is untested.
 
+## Land it green
+
+Implement, then run the project's checks cheapest first -- formatter and linter, then type checker, then tests.
+Fix what each reports before running the next: a type error read through a wall of lint noise costs more than the run it would have saved.
+Repeat the cycle until every check passes on the same pass.
+A change is done at the first clean run across all of them, not at the last edit.
+
+Where the project declares no check, say what went unverified rather than calling it done.
+
 ## When something fails
 
 Work through these in order.
@@ -45,6 +54,9 @@ Do not skip to a fix you cannot yet explain.
    Rerun the specific failure, then the full suite.
 
 If you cannot complete step 2, say so and ask a specific blocking question rather than iterating blindly.
+
+Once two attempts at the same failure have failed, stop and hand the code and the failure to `auditor` instead of trying a third variant.
+The third variant is where a plausible-looking change lands on top of an unexplained one, and a judge that did not write the code is the cheapest way out of a loop you are inside.
 
 ## Comments
 
