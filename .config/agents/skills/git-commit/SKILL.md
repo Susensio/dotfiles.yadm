@@ -22,6 +22,9 @@ description: Stages and commits pending work as atomic commits — one concern e
    Whatever the detour taught still has to land — in the file that governs it, or in an ADR — before the commits carrying it go.
 4. **Selective staging:** stage by explicit path.
    Never `git add .` — a working tree routinely carries unrelated in-flight edits.
+   Staging by path does not protect a dirty index: anything already staged before you arrived rides along on a bare `commit`.
+   Check `diff --cached --stat` for work that is not yours, and pass the same explicit paths to `commit` as well as to `add`.
+   `git add -A <dir>` also sweeps up untracked children — name them, or check what it staged before committing.
 5. **Message:** read `git log` first and match the existing history — its casing, its mood, and whether it uses conventional-commit prefixes.
    The repo's own record is authoritative; do not impose a convention it does not already follow.
    **Fallback:** a repo with no history, or too little to read a convention from, gets conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.

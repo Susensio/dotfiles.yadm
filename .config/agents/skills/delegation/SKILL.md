@@ -51,6 +51,14 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 
 Each brief stands alone -- these agents have no memory of the conversation that spawned them.
 
+## What comes back is a lead, not a finding
+
+A subagent's factual claim about how something behaves is unverified until you check it.
+It ran on a smaller model, or on a surface you cannot see, and a confident report is the same shape whether or not it is right.
+Verify anything you are about to act on or repeat, and say which half you verified when you pass it on.
+
+The claim to distrust most is the one that arrives already agreeing with you.
+
 ## Pick the model by task shape, not task category
 
 Match the model to the shape of the task whenever you are the one choosing.

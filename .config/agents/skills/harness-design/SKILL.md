@@ -127,7 +127,8 @@ Built-in availability is a separate trap.
 `Grep` and `Glob` are absent from the main session because an empty `tengu_non_deferrable_builtins` flag makes built-ins deferrable (anthropics/claude-code#86971), while a subagent that declares them gets them.
 A tool missing from the session's own list is therefore no evidence it is missing from an agent that asked for it -- stripping the pair once cost explorer its search tools.
 
-So a read-only agent is a convention it keeps, not a cage: set `disallowedTools: Write, Edit`, and state the contract in the body's first paragraph, naming the obvious loophole -- no shell redirect standing in for `Write`.
+So a read-only agent is a convention it keeps, not a cage: give it a `tools:` allowlist that omits `Write` and `Edit`, and state the contract in the body's first paragraph, naming the obvious loophole -- no shell redirect standing in for `Write`.
+Adding `disallowedTools: Write, Edit` beside such an allowlist removes nothing that was granted; it reads as a second guardrail and is none, which is worse than leaving the contract to the prose that does cover the loophole.
 The rest rests on the agent.
 The session sandbox is real enforcement but session-wide, so it cannot separate a read-only agent from its caller.
 For the same reason subagents get no memory: it is not shared with the main session, and knowledge worth reading is worth reviewing, so it belongs in a skill or a context file.
