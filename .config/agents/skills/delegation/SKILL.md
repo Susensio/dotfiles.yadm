@@ -1,7 +1,7 @@
 ---
 name: delegation
 user-invocable: false
-description: Picks a subagent's model by task shape and decides whether the handoff pays for its cold start. Use before spawning any subagent, and when a task looks big enough to hand off but it is not obvious that it should be.
+description: Names the subagents and what each is for, picks one by footprint and a model by task shape, and decides whether the handoff pays for its cold start. Use before spawning any subagent, when a task looks big enough to hand off but it is not obvious that it should be, and when you need to know which agents exist.
 ---
 
 # Delegation
@@ -40,6 +40,16 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 - Merge on return, not at the end of the session.
 - Merge one, then rebase the rest onto the updated base.
 - Reconciling goes out like any other work, carrying what each branch was for -- that is what decides a conflict, and it is in neither diff.
+
+## Pick the agent by footprint
+
+`developer` implements.
+`explorer` finds things out.
+`tester` verifies against something running.
+`auditor` judges whether something written or proposed holds up.
+`documenter` writes down what you already decided, across however many files it reaches.
+
+Each brief stands alone -- these agents have no memory of the conversation that spawned them.
 
 ## Pick the model by task shape, not task category
 

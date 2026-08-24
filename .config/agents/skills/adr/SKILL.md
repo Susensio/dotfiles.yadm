@@ -15,12 +15,26 @@ Open a full ADR only when its title looks relevant.
 
 ## When to write one
 
-Record a decision that changes how the system is built and would be expensive to rediscover later: a library/framework/datastore choice, a structural boundary (service split, API shape), a reversal of a previous decision, or a constraint adopted for a non-obvious reason.
-Not routine implementation choices, naming, or anything reversible without cost.
+A decision earns a record when the reason for it lives nowhere else — not in the diff, not in the config it produced, not in the tool's own docs.
 
-The test is whether real alternatives were weighed.
+Ask where that reason would otherwise sit.
+Reason with a line to sit beside goes there as a comment, and the comment is the better record: whoever next edits the line finds it, without knowing `docs/adr/` exists.
+Two lines and an upstream link beside the setting beat a file nobody opens.
+A comment also travels with the file it annotates, where an accepted ADR's path references rot and cannot be repaired.
+
+Anchor to where the reasoning would be re-derived, not to where the setting is typed.
+A fix often lands somewhere other than the place that was investigated, and it is the place investigated that gets guessed wrong a second time.
+
+An ADR is for reason with no single line to mark:
+- it spans files, or describes a shape rather than a line — one anchor is a comment, two or more is a shape;
+- it explains an absence, the thing deliberately not done that no line can carry;
+- it binds future changes, so its subject is not written yet — a standing policy or a repo-wide convention has no line to sit beside because that line does not exist.
+
+A rule that keeps being edited as it evolves belongs in the live rules file it governs, not in a record fixed at a moment.
+
+Swapping one tool for an equivalent is not a decision when the diff already shows why.
 Adopting a documented, reversible setting because the tool's own docs say to — even one that reads as structural — is transcription, not decision: there is no discarded alternative for future-you to rediscover.
-Offer an ADR there rather than assuming one is warranted.
+Offer an ADR rather than assuming one is warranted.
 
 ## How to write one
 1. Run `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>"` — prints the created file's path.

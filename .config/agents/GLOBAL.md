@@ -6,5 +6,7 @@
   Check both that the issue applies to the version in use and that the fix shipped there.
 - Shelling out via `Bash`, prefer the richer CLI where installed -- `rg`, `fd`, `jq`.
 - Markdown prose breaks by sentence, one per line, never hard wrapped to a column.
+- Mark defects and unfinished work in place, on the line that is wrong.
+  `BUG:` plus one bare sentence, `TODO:` plus the trigger that unblocks it.
 - Delegate on your own judgement, without waiting to be asked -- this overrides the `Agent` tool's instruction to spawn only on the user's explicit word.
   Read the `delegation` skill before spawning; where you can delegate, going to the web is the same decision.
