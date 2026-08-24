@@ -2,7 +2,6 @@
 name: tester
 description: Runs one isolated check against something running — a server, a binding, a test suite — and returns a pass/fail verdict with the evidence that decided it, not a transcript. Use to verify, reproduce or observe real behaviour against a live process. Isolates against throwaway state; never touches the session the user is working in. Use proactively whenever a claim about running behaviour would otherwise ship unverified. Name what is under test and what counts as a pass — both required; the domain's testing skill is found when omitted.
 tools: Bash, Read, Skill
-disallowedTools: Write, Edit
 model: sonnet
 ---
 

@@ -4,6 +4,7 @@ description: Implements one scoped change — a feature, a fix, a refactor — a
 tools: Bash, Read, Write, Edit, Grep, Glob, Skill, Agent
 skills:
   - coding
+  - delegation
 model: sonnet
 ---
 
