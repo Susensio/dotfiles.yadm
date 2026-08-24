@@ -1,7 +1,7 @@
 ---
 name: coding
 user-invocable: false
-description: How code is written, read and commented here — what to check before adding any, how a comment earns its place, the check-and-fix loop that lands a change green, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
+description: How code is written, read and commented here — what to check before adding any, the shape it takes once written, how a comment earns its place, the check-and-fix loop that lands a change green, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
 ---
 
 # Coding
@@ -22,6 +22,19 @@ An abstraction earns its place from what varies between its callers, so check wh
 A parameter, field or return value that is identical at every call site is carrying nothing -- delete it and inline what it held.
 A function whose body only calls two others is not a layer.
 Where a caller works around the interface -- a lookup table to reach it, a value smuggled through a slot meant for something else -- the interface is wrong, not the caller.
+
+## Shape
+
+Prefer the **explicit**: named arguments, declared types, data that flows through parameters rather than through module state.
+A hidden path costs nothing to write and everything to trace, and the reader who has to find it is usually you, later, with less context than you have now.
+
+Keep it **flat**.
+Guard clauses and early exits over an else branch running to the bottom of the function.
+Deep nesting reads as conditions that compound, and they usually do not -- most of them are unrelated checks stacked by whoever added them last.
+
+Never swallow an error.
+A bare `except: pass` converts a failure into wrong output that arrives later, somewhere else, without the traceback that explained it.
+Catch what you can name, handle that, and let the rest surface.
 
 ## Verify against reality, not against the diff
 
