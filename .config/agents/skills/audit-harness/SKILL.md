@@ -23,7 +23,13 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 
 ## 1. Loadability
 
-*Nothing reports a file that failed to load. Silent on success, silent on failure.*
+*Two instruments answer this directly. Run them first; the manual checks below cover what they miss.*
+
+- `claude doctor` from a terminal -- install health, and settings files that fail to parse. It replaces the `jq .` check below and adds little else; the richer checkup lives in the in-session `/doctor`, which an agent cannot reach (`claude -p "/doctor"` returns nothing), so it is the user's to run and paste in.
+  Run it **outside the sandbox**: inside, every path the sandbox denies is bind-mounted to `/dev/null`, and the tool reports each one as an invalid settings file. It invents findings there.
+- An `InstructionsLoaded` hook, which fires as each context file loads and carries `file_path`, `memory_type` (`User`/`Project`), `load_reason` (`session_start`, `path_glob_match`, `nested_traversal`, `include`, `compact`) and `cwd`.
+  It reports what actually loaded, in a fresh session and in a subagent, which is the only way to settle a question about which tier reached whom.
+  Probe with a **fresh** session: a rule added to one already running is not read again, and mistaking that for the rule's own behaviour is the standing trap here.
 
 - Resolve every harness symlink (`readlink -f`).
   A link to an **empty directory** passes `ls -l` and loads nothing.
