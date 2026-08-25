@@ -49,6 +49,9 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 `auditor` judges whether something written or proposed holds up.
 `documenter` writes down what you already decided, across however many files it reaches.
 
+`leader` is the sixth, and is not on this list: it is the main-agent mode for a project (`claude --agent leader`), never a spawn.
+A subagent that wants what `leader` does wants to hand the work back to its caller.
+
 Each brief stands alone -- these agents have no memory of the conversation that spawned them.
 
 ## Pick the model by task shape, not task category
@@ -68,8 +71,10 @@ Forks inherit the caller's model and ignore a `model` override, so spawn fresh f
 
 ## Write the prompt to stand alone
 
-The subagent has no memory of the calling conversation.
-State what is under test or under construction, what counts as done, and any constraint it cannot infer.
+State what is under test or under construction, what counts as done, and any constraint the agent cannot infer.
+
+When delegating skill-governed work, name the skill in the brief for the subagent to read.
+Do not open `SKILL.md` or its supporting files before spawning.
 
 Name what has already been tried and failed, or say that nothing has.
 A subagent cannot know it is repeating a dead end already walked, and will spend the whole task doing it.
