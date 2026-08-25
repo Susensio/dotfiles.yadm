@@ -18,6 +18,7 @@ A project's record is written for a person to read, so it is a doc in `docs/`, n
 | Throwaway material — a script, captured output, a dump read once | `.scratch/` |
 | A choice between real alternatives, once settled or reversed | the `adr` skill, which decides whether it is worth recording |
 | A procedure a person also runs by hand — a deployment, a release | a doc in `docs/`, and the skill that fires on it points there |
+| How the project is operated — the command to test it, lint it, run it | a `justfile`, the one entry here that executes instead of being read |
 | A defect with one wrong line to sit beside | that line, where the project marks defects in place |
 
 **Never agent memory**, while anything above fits.
