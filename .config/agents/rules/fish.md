@@ -1,4 +1,5 @@
 ---
+description: Fish shell coding conventions for .fish files.
 paths:
   - "**/*.fish"
 ---

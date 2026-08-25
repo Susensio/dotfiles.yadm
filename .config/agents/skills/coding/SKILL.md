@@ -1,7 +1,7 @@
 ---
 name: coding
 user-invocable: false
-description: How code is written, read and commented here — what to check before adding any, the shape it takes once written, how a comment earns its place, the check-and-fix loop that lands a change green, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all: reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
+description: How code is written, read and commented here — what to check before adding any, the shape it takes once written, how a comment earns its place, the check-and-fix loop that lands a change green, how much verification a change deserves, and how to work through a failure instead of guessing at it. Use proactively whenever code is involved at all — reading it, writing it, editing it, reviewing a diff, or when a test, lint or type check fails.
 ---
 
 # Coding
@@ -66,7 +66,10 @@ Do not skip to a fix you cannot yet explain.
 4. **Verify.**
    Rerun the specific failure, then the full suite.
 
-If you cannot complete step 2, say so and ask a specific blocking question rather than iterating blindly.
+If you cannot complete step 2, go outward before iterating.
+Confusing behaviour in mature third-party software has usually been reported already: read the project's issue tracker first, then the wider web.
+Infer the resolution from the comments and the close reason -- some maintainers do not merge through GitHub, so a missing linked PR does not mean unfixed -- and check both that the issue applies to the version in use and that the fix shipped in it.
+Still without a root cause after that, say so and ask a specific blocking question rather than iterating blindly.
 
 Once two attempts at the same failure have failed, stop and hand the code and the failure to `auditor` instead of trying a third variant.
 The third variant is where a plausible-looking change lands on top of an unexplained one, and a judge that did not write the code is the cheapest way out of a loop you are inside.

@@ -1,8 +1,12 @@
 ---
+description: Which skill to load when writing an agent, a skill, a rule or a context file.
 paths:
   - "**/agents/*.md"
   - "**/skills/**/*.md"
   - "**/rules/*.md"
+  - "**/CLAUDE.md"
+  - "**/AGENTS.md"
+  - "**/GLOBAL.md"
 ---
 
 # Harness files

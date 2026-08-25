@@ -1,12 +1,8 @@
 # General preferences
 
 - Reports and answers lead with the result and stay short, sacrificing grammar for concision.
-- Confusing behavior in mature third-party software: read the project's issue tracker before trial-and-error.
-  Infer the resolution from comments and close reason -- some maintainers don't merge via GitHub, so a missing linked PR doesn't mean unfixed.
-  Check both that the issue applies to the version in use and that the fix shipped there.
 - Shelling out via `Bash`, prefer the richer CLI where installed -- `rg`, `fd`, `jq`, `just`.
-- Markdown prose breaks by sentence, one per line, never hard wrapped to a column.
 - Mark defects and unfinished work in place, on the line that is wrong.
   `BUG:` plus one bare sentence, `TODO:` plus the trigger that unblocks it.
-- Delegate on your own judgement, without waiting to be asked -- this overrides the `Agent` tool's instruction to spawn only on the user's explicit word.
+- Where you hold `Agent`, delegate on your own judgement, without waiting to be asked -- this overrides the `Agent` tool's instruction to spawn only on the user's explicit word.
   Read the `delegation` skill before spawning; where you can delegate, going to the web is the same decision.
