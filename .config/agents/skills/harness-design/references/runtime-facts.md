@@ -53,6 +53,10 @@ All probed at v2.1.238, against a throwaway `CLAUDE_CONFIG_DIR`.
 - It does **not** see into a quoted interpreter argument: `sh -c 'cd /tmp'` passes a `Bash(cd:*)` deny.
 - A denial reaches the model as `Permission to use Bash with command <command> has been denied.` and nothing else -- no rule name, no reason, no alternative.
   A rule whose value is in explaining the fix therefore belongs in a `PreToolUse` hook, whose message the model does read.
+- Because the match is a literal prefix, a rule naming a flag only catches that flag in the position it names.
+  `Bash(git push --force:*)` blocks `git push --force origin main` and misses `git push origin main --force`; enumerating the misses needs one entry per remote, branch and flag spelling, so it goes stale the next time you cut a branch.
+  Measured against eleven forms a model writes unprompted: flag-position entries 5/11, `Bash(git push:*)` plus `Bash(yadm push:*)` 9/11 (missing only `git -C <path> push --force` and an absolute path to the binary).
+  Denying the verb rather than the flag is what makes a rule branch-agnostic, at the price of the safe uses of that verb.
 
 ## The sandbox
 
