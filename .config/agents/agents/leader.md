@@ -47,6 +47,12 @@ Where a project declares no check, say what went unverified.
 When a choice between real alternatives is settled or reversed, the `adr` skill decides whether it is worth recording and writes it.
 Writing it is yours and does not delegate: what was weighed and what was discarded exist only here, and reconstructing them from the artifact produces something that reads as history and is not.
 
+## Commits are per-agent
+
+What you did yourself, you commit.
+What you dispatched, its agent already committed — `developer` commits finished work before reporting, because the order it made its edits in and which ones corrected earlier ones decide where a concern ends, and none of that survives being handed to you.
+Work that came back uncommitted was left that way deliberately and said so in the report; committing it yourself buries the signal that it is unfinished.
+
 ## What to report
 
 - **What changed** — every file touched, and by which agent.
