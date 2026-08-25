@@ -42,6 +42,7 @@ def find_adr_dir(init: bool, override: str | None = None) -> Path:
 STATUS_RE = re.compile(r"^Status:\s*(.+)$", re.MULTILINE)
 TITLE_RE = re.compile(r"^# ADR-\d+:\s*(.+)$", re.MULTILINE)
 SUPERSEDED_BY_RE = re.compile(r"Superseded by \[ADR-(\d+)\]")
+REF_RE = re.compile(r"ADR-(\d{4})")
 ADR_DIR: Path  # resolved in main() once --init is known
 
 
@@ -85,7 +86,39 @@ def flip_to_superseded(old_path: Path, new_number: int, new_slug: str) -> None:
     old_path.write_text(STATUS_RE.sub(new_status, text, count=1))
 
 
+def back_references() -> dict[int, list[int]]:
+    """Map each ADR to the later ADRs that name it without superseding it.
+
+    Derived at read time, never written into the older record: a pointer kept by
+    hand is one more thing to forget, and the forward reference already sits in
+    the prose of whichever ADR did the touching. Only a later ADR naming an
+    earlier one is news -- it may have narrowed or reversed part of it, which the
+    older record has no other way to advertise.
+    """
+    refs: dict[int, set[int]] = {}
+    statuses: dict[int, str] = {}
+    for path in existing_adrs():
+        text = path.read_text()
+        number = adr_number(path)
+        status_match = STATUS_RE.search(text)
+        statuses[number] = status_match.group(1) if status_match else ""
+        for found in REF_RE.findall(text):
+            target = int(found)
+            # A record names itself in its own heading, and an earlier record
+            # cannot have known about a later one.
+            if target >= number:
+                continue
+            refs.setdefault(target, set()).add(number)
+    for target, sources in refs.items():
+        # Total replacement already shows as "-> N" on the target's own row.
+        superseder = SUPERSEDED_BY_RE.search(statuses.get(target, ""))
+        if superseder:
+            sources.discard(int(superseder.group(1)))
+    return {t: sorted(s) for t, s in refs.items() if s}
+
+
 def cmd_list() -> None:
+    backrefs = back_references()
     rows = []
     for path in existing_adrs():
         text = path.read_text()
@@ -99,14 +132,21 @@ def cmd_list() -> None:
         title_match = TITLE_RE.search(text)
         # Fall back to the filename so a record with a malformed heading still lists.
         title = title_match.group(1).strip() if title_match else f"({path.name})"
-        rows.append((adr_number(path), status, title))
+        number = adr_number(path)
+        touched = backrefs.get(number, [])
+        back = "<- " + ",".join(f"{n:04d}" for n in touched) if touched else ""
+        rows.append((number, status, back, title))
 
     if not rows:
         print(f"no ADRs in {ADR_DIR}")
         return
-    width = max(len(status) for _, status, _ in rows)
-    for number, status, title in sorted(rows):
-        print(f"{number:04d}  {status:<{width}}  {title}")
+    width = max(len(status) for _, status, _, _ in rows)
+    back_width = max(len(back) for _, _, back, _ in rows)
+    for number, status, back, title in sorted(rows):
+        # The column vanishes when nothing references anything, so a fresh set of
+        # records does not list a blank gutter.
+        gutter = f"{back:<{back_width}}  " if back_width else ""
+        print(f"{number:04d}  {status:<{width}}  {gutter}{title}")
 
 
 def cmd_new(args: argparse.Namespace) -> None:
@@ -137,7 +177,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_list = sub.add_parser("list", help="print every ADR as number, status and title")
+    p_list = sub.add_parser("list", help="print every ADR as number, status, the later ADRs naming it, and title")
     p_list.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
 
     p_new = sub.add_parser("new", help="create a new ADR skeleton")
