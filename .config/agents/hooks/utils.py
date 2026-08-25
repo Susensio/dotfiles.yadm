@@ -17,24 +17,34 @@ import sys
 
 # Claude Code's documented Bash separators, plus the subshell parens that shlex
 # hands back as their own tokens. The newline is the end-of-segment sentinel
-# `commands` appends, never a token shlex produces -- it splits lines first.
+# `_segment_commands` appends, never a token shlex produces -- it splits lines
+# first.
 SEPARATORS = {"&&", "||", ";", "|", "|&", "&", "\n", "(", ")"}
 SHELLS = {"sh", "bash", "zsh", "dash", "ksh", "fish"}
 
-# Nested `sh -c 'sh -c ...'` recurses; this bounds it against a pathological
-# or adversarial chain rather than any real script needing the depth.
-MAX_SHELL_C_DEPTH = 2
+# Bounds both the sh -c recursion and the wrapper-chain recursion below,
+# against a pathological or adversarial chain rather than any real script
+# needing the depth.
+MAX_DEPTH = 4
 
 # Wrappers that run a command without being it: a rule inspecting tokens[0]
-# must see the wrapped command, not the wrapper. Maps each to the flags that
-# take a separate argument, so skipping past them doesn't eat the command.
+# must see the wrapped command, not the wrapper. No per-tool flag grammar to
+# maintain -- `_expand` offers every suffix of the token list as a candidate
+# and lets each rule's own predicate, anchored on tokens[0], pick the real one
+# out of the noise.
 WRAPPERS = {
-    "sudo": {"-u", "-g", "-p", "-h", "-C", "-D", "-R", "-T", "-U"},
-    "env": {"-u", "-C", "-S"},
-    "timeout": {"-k", "-s"},
-    "nice": {"-n"},
-    "command": set(),
-    "xargs": {"-I", "-i", "-L", "-l", "-n", "-P", "-s", "-a", "-d", "-E"},
+    "sudo",
+    "env",
+    "timeout",
+    "nice",
+    "xargs",
+    "nohup",
+    "doas",
+    "stdbuf",
+    "time",
+    "ionice",
+    "setsid",
+    "eval",
 }
 
 
@@ -74,23 +84,41 @@ def commands(line, _depth=0):
     >>> list(commands("bash -lc 'cd /x'"))
     [['bash', '-lc', 'cd /x'], ['cd', '/x']]
 
-    A command wrapper -- `sudo`, `env`, `timeout`, `nice`, `command`, `xargs`
-    -- is stripped the same way, its own flags and arguments included, so the
-    rule underneath sees the command it actually runs:
+    A command wrapper -- `sudo`, `env`, `timeout`, `nice`, `xargs`, `nohup`,
+    `doas`, `stdbuf`, `time`, `ionice`, `setsid`, `eval` -- doesn't hide the
+    command it runs: every suffix of its token list is offered as a candidate,
+    and the rule underneath, anchored on tokens[0], picks the real one out of
+    the rest without needing to know that wrapper's option grammar. `xargs` is
+    the one gap this can't close -- a flag piped into its stdin, as in
+    `echo --force | xargs git push`, never reaches this argv at all.
 
-    >>> list(commands("sudo git push --force"))
-    [['sudo', 'git', 'push', '--force'], ['git', 'push', '--force']]
-    >>> list(commands("env FOO=bar git push -f"))
-    [['env', 'FOO=bar', 'git', 'push', '-f'], ['git', 'push', '-f']]
-    >>> list(commands("timeout 5 git push -f"))
-    [['timeout', '5', 'git', 'push', '-f'], ['git', 'push', '-f']]
+    >>> ['git', 'push', '--force'] in commands("sudo git push --force")
+    True
+    >>> ['git', 'push', '-f'] in commands("env FOO=bar git push -f")
+    True
+    >>> ['git', 'push', '-f'] in commands("timeout 5 git push -f")
+    True
 
-    A wrapper with nothing to wrap is left alone rather than crashed on:
+    A wrapper with nothing after it offers no further candidates:
 
     >>> list(commands("env"))
     [['env']]
     >>> list(commands("sudo"))
     [['sudo']]
+
+    Wrappers stack, and a wrapper can stand in front of a shell -- both are
+    just more suffixes for the same recursion to walk:
+
+    >>> ['git', 'push', '-f'] in commands("sudo timeout 5 git push -f")
+    True
+    >>> ['git', 'push', '--force'] in commands("sudo sh -c 'git push --force'")
+    True
+
+    `eval` re-parses its argument as a shell command line the same way `sh -c`
+    does, quoting and all:
+
+    >>> ['git', 'push', '--force'] in commands("eval 'git push --force'")
+    True
     """
     for segment in line.splitlines():
         yield from _segment_commands(segment, _depth)
@@ -111,55 +139,40 @@ def _segment_commands(line, _depth):
             current.append(token)
             continue
         if current:
-            yield current
-            # Follow a shell's -c argument, but nothing else: recursing into
-            # every quoted token would read `echo "cd foo"` as a cd. Short flags
-            # cluster, so the command flag is any of -c, -lc, -ec, -ic.
-            if _depth < MAX_SHELL_C_DEPTH and current[0] in SHELLS:
-                flag = _shell_c_index(current)
-                if flag is not None and flag + 1 < len(current):
-                    yield from commands(current[flag + 1], _depth + 1)
-            unwrapped = _unwrap(current)
-            if unwrapped != current:
-                yield unwrapped
+            yield from _expand(current, _depth)
         current = []
 
 
-def _shell_c_index(tokens):
-    """Index of a clustered -c flag (-c, -lc, -ec, ...), or None."""
-    for i, token in enumerate(tokens):
-        if token.startswith("-") and not token.startswith("--") and token.endswith("c"):
-            return i
-    return None
+def _expand(tokens, depth):
+    """`tokens`, plus every suffix a shell -c or a wrapper chain might hide.
 
+    No rule needs to identify *the* wrapped command -- each predicate is
+    anchored on tokens[0] and filters the rest, so this only has to offer up
+    candidates. Trying every suffix of a wrapper's token list, blind to its
+    option grammar, does that: whatever the wrapper's flags are, one of the
+    suffixes starts exactly where the wrapped command does.
 
-def _unwrap(tokens):
-    """The tokens of the command a chain of wrappers runs.
-
-    Unchanged if `tokens` names no wrapper. `env`'s leading NAME=value
-    assignments are skipped like flags; `timeout`'s bare DURATION is its own
-    positional argument, skipped once, before the wrapped command.
+    >>> list(_expand(["sudo", "git", "push"], 0))
+    [['sudo', 'git', 'push'], ['git', 'push'], ['push']]
     """
-    while tokens and tokens[0] in WRAPPERS:
-        name = tokens[0]
-        arg_flags = WRAPPERS[name]
-        skip_duration = name == "timeout"
-        i = 1
-        while i < len(tokens):
-            token = tokens[i]
-            if name == "env" and not token.startswith("-") and "=" in token:
-                i += 1
-            elif token.startswith("-") and token != "-":
-                i += 2 if token in arg_flags else 1
-            elif skip_duration:
-                skip_duration = False
-                i += 1
-            else:
+    yield tokens
+    if depth >= MAX_DEPTH:
+        return
+    if tokens[0] in SHELLS:
+        # Short flags cluster, so the command flag is any of -c, -lc, -ec, -ic.
+        for i, token in enumerate(tokens[:-1]):
+            if (
+                token.startswith("-")
+                and not token.startswith("--")
+                and token.endswith("c")
+            ):
+                yield from commands(tokens[i + 1], depth + 1)
                 break
-        if i >= len(tokens):
-            return tokens  # A wrapper with nothing after it wraps nothing.
-        tokens = tokens[i:]
-    return tokens
+    if tokens[0] == "eval" and len(tokens) > 1:
+        yield from commands(" ".join(tokens[1:]), depth + 1)
+    if tokens[0] in WRAPPERS:
+        for i in range(1, len(tokens)):
+            yield from _expand(tokens[i:], depth + 1)
 
 
 def any_command(line, predicate):

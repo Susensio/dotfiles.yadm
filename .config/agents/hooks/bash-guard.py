@@ -11,7 +11,9 @@ the command.
 
 Matching is on tokens, not text, so a rule catches the command after a
 separator, inside a subshell, behind `sh -lc`, and past a wrapper like
-`sudo` or `env` -- and never inside a quoted string.
+`sudo` or `env` -- and never inside a quoted string. The one gap: `xargs`
+only sees its own argv, so a flag piped into its stdin, as in
+`echo --force | xargs git push`, never reaches this at all.
 """
 
 from utils import any_command, bash_command, block, payload
@@ -63,16 +65,35 @@ def is_force_push(tokens):
     False
     >>> is_force_push(["git", "grep", "-f", "pats.txt", "push"])
     False
+
+    A short flag clusters with others, so `-f` need not stand alone, and a
+    `+` in front of a refspec is git's own force-push syntax:
+
+    >>> is_force_push(["git", "push", "-fu", "origin", "main"])
+    True
+    >>> is_force_push(["git", "push", "-uf", "origin", "main"])
+    True
+    >>> is_force_push(["git", "push", "origin", "+main"])
+    True
+    >>> is_force_push(["git", "push", "origin", "+HEAD:main"])
+    True
     """
     if not tokens or not (tokens[0].endswith("git") or tokens[0].endswith("yadm")):
         return False
     if "push" not in tokens[1:]:
         return False
     after_push = tokens[tokens.index("push", 1) + 1 :]
-    return any(flag in after_push for flag in ("--force", "-f", "--mirror"))
+    if any(flag in after_push for flag in ("--force", "--mirror")):
+        return True
+    if any(
+        t.startswith("-") and not t.startswith("--") and "f" in t[1:]
+        for t in after_push
+    ):
+        return True
+    return any(t.startswith("+") and len(t) > 1 for t in after_push)
 
 
-# Add a rule here. Nothing below needs touching.
+# A new rule needs a predicate above, then a row here.
 BLOCKED = [
     (is_cd, CD),
     (is_force_push, FORCE_PUSH),
@@ -113,13 +134,49 @@ def refusal(command):
     >>> refusal("/usr/bin/git push --force") is FORCE_PUSH
     True
 
-    A wrapper -- `sudo`, `env`, `timeout` -- does not hide the command it runs:
+    A wrapper -- `sudo`, `env`, `timeout` -- does not hide the command it runs,
+    even stacked in front of a shell or of another wrapper, and even one the
+    old flag table never named:
 
     >>> refusal("sudo git push --force") is FORCE_PUSH
     True
     >>> refusal("env FOO=bar git push -f") is FORCE_PUSH
     True
     >>> refusal("timeout 5 git push -f") is FORCE_PUSH
+    True
+    >>> refusal("sudo sh -c 'git push --force'") is FORCE_PUSH
+    True
+    >>> refusal("env FOO=1 bash -lc 'git push --force'") is FORCE_PUSH
+    True
+    >>> refusal("timeout 5 bash -lc 'cd /tmp'") is CD
+    True
+    >>> refusal("sudo --user root git push --force") is FORCE_PUSH
+    True
+    >>> refusal("env --unset FOO git push -f") is FORCE_PUSH
+    True
+    >>> refusal("timeout --signal SIGKILL 5 git push -f") is FORCE_PUSH
+    True
+    >>> refusal("nice --adjustment 10 git push -f") is FORCE_PUSH
+    True
+    >>> refusal("sudo -Hu root git push --force") is FORCE_PUSH
+    True
+    >>> refusal("nohup git push --force") is FORCE_PUSH
+    True
+    >>> refusal("doas git push --force") is FORCE_PUSH
+    True
+    >>> refusal("stdbuf -o0 git push --force") is FORCE_PUSH
+    True
+    >>> refusal("time git push --force") is FORCE_PUSH
+    True
+
+    `command -v cd` and its siblings are an ordinary agent probe for whether
+    `cd` exists, not a call to `cd` -- `command` is not a wrapper this walks:
+
+    >>> refusal("command -v cd") is None
+    True
+    >>> refusal("command -V cd") is None
+    True
+    >>> refusal("command -p cd") is None
     True
 
     A safe push stays a safe push:
