@@ -68,9 +68,13 @@ An entry that outgrows its block is a decision, not a backlog item.
 ## STATE.md — what is being worked right now
 
 The current objective, the live blocker, and the dead ends already tried.
-The main agent owns it, and nothing else writes it: a subagent has no next turn to leave notes for, and several running at once would clobber the file carrying the caller's continuity.
-What a subagent needs from it travels in the brief instead, which is why `delegation` makes "what was already tried" a named slot.
+The main agent owns it, and subagents neither read nor write it.
+Nothing else writes it: a subagent has no next turn to leave notes for, and several running at once would clobber the file carrying the caller's continuity.
+Nothing else reads it either: the brief is the only thing that tells a subagent what to build, and one that reads the caller's continuity inherits the caller's framing and widens its own scope.
+What a subagent needs from it travels in that brief, which is why `delegation` makes "what was already tried" a named slot.
 Add it to whatever ignore file the project already uses before writing it, and wipe it when the work it describes is committed.
+Root, not `docs/`: this is continuity, not record, and it is gone by the time anyone would go looking in `docs/` for it.
+Not `.claude/` either — the harness owns that directory, and what is being worked outlives any one harness.
 
 *Earned when* a session has actually been lost and the reconstruction cost was felt.
 Not before.
