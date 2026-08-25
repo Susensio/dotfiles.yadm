@@ -16,13 +16,30 @@ import shlex
 import sys
 
 # Claude Code's documented Bash separators, plus the subshell parens that shlex
-# hands back as their own tokens.
+# hands back as their own tokens. The newline is the end-of-segment sentinel
+# `commands` appends, never a token shlex produces -- it splits lines first.
 SEPARATORS = {"&&", "||", ";", "|", "|&", "&", "\n", "(", ")"}
 SHELLS = {"sh", "bash", "zsh", "dash", "ksh", "fish"}
 
+# Nested `sh -c 'sh -c ...'` recurses; this bounds it against a pathological
+# or adversarial chain rather than any real script needing the depth.
+MAX_SHELL_C_DEPTH = 2
+
+# Wrappers that run a command without being it: a rule inspecting tokens[0]
+# must see the wrapped command, not the wrapper. Maps each to the flags that
+# take a separate argument, so skipping past them doesn't eat the command.
+WRAPPERS = {
+    "sudo": {"-u", "-g", "-p", "-h", "-C", "-D", "-R", "-T", "-U"},
+    "env": {"-u", "-C", "-S"},
+    "timeout": {"-k", "-s"},
+    "nice": {"-n"},
+    "command": set(),
+    "xargs": {"-I", "-i", "-L", "-l", "-n", "-P", "-s", "-a", "-d", "-E"},
+}
+
 
 def commands(line, _depth=0):
-    """Every command in a command line, as a list of argument tokens.
+    r"""Every command in a command line, as a list of argument tokens.
 
     Tokenising the way a shell does means quoting, `(subshells)` and a missing
     space around `&&` all fall out of one pass, instead of each needing its own
@@ -32,6 +49,16 @@ def commands(line, _depth=0):
     [['cd', '/foo'], ['ls']]
     >>> list(commands("ls&&cd /x"))
     [['ls'], ['cd', '/x']]
+
+    A newline separates commands as surely as `&&` does, and it is how a model
+    ordinarily writes a two-step call. shlex consumes it as whitespace, so the
+    line is split into segments before tokenising -- without this, every
+    command after the first joins its predecessor's tokens and is never tested:
+
+    >>> list(commands("ls\ncd /x"))
+    [['ls'], ['cd', '/x']]
+    >>> list(commands("echo hi\ngit push --force\n"))
+    [['echo', 'hi'], ['git', 'push', '--force']]
 
     A quoted argument stays one token, so this is not mistaken for a `cd`:
 
@@ -46,7 +73,31 @@ def commands(line, _depth=0):
     [['sh', '-c', 'git push'], ['git', 'push']]
     >>> list(commands("bash -lc 'cd /x'"))
     [['bash', '-lc', 'cd /x'], ['cd', '/x']]
+
+    A command wrapper -- `sudo`, `env`, `timeout`, `nice`, `command`, `xargs`
+    -- is stripped the same way, its own flags and arguments included, so the
+    rule underneath sees the command it actually runs:
+
+    >>> list(commands("sudo git push --force"))
+    [['sudo', 'git', 'push', '--force'], ['git', 'push', '--force']]
+    >>> list(commands("env FOO=bar git push -f"))
+    [['env', 'FOO=bar', 'git', 'push', '-f'], ['git', 'push', '-f']]
+    >>> list(commands("timeout 5 git push -f"))
+    [['timeout', '5', 'git', 'push', '-f'], ['git', 'push', '-f']]
+
+    A wrapper with nothing to wrap is left alone rather than crashed on:
+
+    >>> list(commands("env"))
+    [['env']]
+    >>> list(commands("sudo"))
+    [['sudo']]
     """
+    for segment in line.splitlines():
+        yield from _segment_commands(segment, _depth)
+
+
+def _segment_commands(line, _depth):
+    """Every command in one newline-free segment. See `commands`."""
     lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
     try:
@@ -64,20 +115,51 @@ def commands(line, _depth=0):
             # Follow a shell's -c argument, but nothing else: recursing into
             # every quoted token would read `echo "cd foo"` as a cd. Short flags
             # cluster, so the command flag is any of -c, -lc, -ec, -ic.
-            if _depth < 2 and current[0] in SHELLS:
-                flag = next(
-                    (
-                        i
-                        for i, t in enumerate(current)
-                        if t.startswith("-")
-                        and not t.startswith("--")
-                        and t.endswith("c")
-                    ),
-                    None,
-                )
+            if _depth < MAX_SHELL_C_DEPTH and current[0] in SHELLS:
+                flag = _shell_c_index(current)
                 if flag is not None and flag + 1 < len(current):
                     yield from commands(current[flag + 1], _depth + 1)
+            unwrapped = _unwrap(current)
+            if unwrapped != current:
+                yield unwrapped
         current = []
+
+
+def _shell_c_index(tokens):
+    """Index of a clustered -c flag (-c, -lc, -ec, ...), or None."""
+    for i, token in enumerate(tokens):
+        if token.startswith("-") and not token.startswith("--") and token.endswith("c"):
+            return i
+    return None
+
+
+def _unwrap(tokens):
+    """The tokens of the command a chain of wrappers runs.
+
+    Unchanged if `tokens` names no wrapper. `env`'s leading NAME=value
+    assignments are skipped like flags; `timeout`'s bare DURATION is its own
+    positional argument, skipped once, before the wrapped command.
+    """
+    while tokens and tokens[0] in WRAPPERS:
+        name = tokens[0]
+        arg_flags = WRAPPERS[name]
+        skip_duration = name == "timeout"
+        i = 1
+        while i < len(tokens):
+            token = tokens[i]
+            if name == "env" and not token.startswith("-") and "=" in token:
+                i += 1
+            elif token.startswith("-") and token != "-":
+                i += 2 if token in arg_flags else 1
+            elif skip_duration:
+                skip_duration = False
+                i += 1
+            else:
+                break
+        if i >= len(tokens):
+            return tokens  # A wrapper with nothing after it wraps nothing.
+        tokens = tokens[i:]
+    return tokens
 
 
 def any_command(line, predicate):

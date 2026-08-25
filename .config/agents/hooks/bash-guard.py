@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 """PreToolUse/Bash: refuse commands that must not run.
 
-Add a rule by adding a row to BLOCKED. A rule is words that must appear in
-order, with anything allowed between them:
-
-    "cd"                              the command `cd`
-    "git push --force"                a force-push, wherever the flag sits
-    "*git|*yadm push --force|-f"      either porcelain, either flag, any path
-
-The gaps are implicit, so a rule never has to say "and anything else here" --
-which is what lets one row cover `git push --force origin` and `git push
-origin --force` alike. That is the thing permissions.deny cannot express, its
-patterns being anchored to the front of the command.
+Add a rule by adding a row to BLOCKED: a predicate over a command's token
+list, paired with the reason to give when it fires. The predicate decides
+what "matches" means -- a bare command name, a flag anywhere after it, a
+porcelain reached by any path -- so a rule is free to skip over `git -C
+/repo` or `push origin --force` however it needs to. That is the thing
+permissions.deny cannot express, its patterns being anchored to the front of
+the command.
 
 Matching is on tokens, not text, so a rule catches the command after a
-separator, inside a subshell and behind `sh -lc`, and never inside a quoted
-string.
+separator, inside a subshell, behind `sh -lc`, and past a wrapper like
+`sudo` or `env` -- and never inside a quoted string.
 """
-
-from fnmatch import fnmatchcase
 
 from utils import any_command, bash_command, block, payload
 
@@ -30,57 +24,63 @@ FORCE_PUSH = """Force-push blocked: this rewrites published history and can dest
 If you genuinely need it, run it yourself in a terminal -- the hook only governs the agent.
 Safer alternative: `--force-with-lease`, which refuses when the remote moved under you, and is deliberately left allowed."""
 
+
+def is_cd(tokens):
+    """A bare `cd`, wherever it sits in the command.
+
+    >>> is_cd(["cd", "/foo"])
+    True
+    >>> is_cd(["cdrecord", "-v"])
+    False
+    """
+    return bool(tokens) and tokens[0] == "cd"
+
+
+def is_force_push(tokens):
+    """A force-push, however the porcelain, the path, or the flag is written.
+
+    The command is git or yadm, reached by any path:
+
+    >>> is_force_push(["/usr/bin/git", "push", "--force"])
+    True
+    >>> is_force_push(["yadm", "push", "--mirror", "origin"])
+    True
+
+    `push` may sit behind an option that takes a value, like `-C /repo`, and
+    the force flag may land anywhere after it -- either side of the
+    refspec:
+
+    >>> is_force_push(["git", "-C", "/repo", "push", "-f"])
+    True
+    >>> is_force_push(["git", "push", "origin", "main", "--force"])
+    True
+
+    `--force-with-lease` is a different flag, not a prefix match on `--force`,
+    and `push` appearing as an argument rather than the subcommand doesn't
+    count:
+
+    >>> is_force_push(["git", "push", "--force-with-lease", "origin", "main"])
+    False
+    >>> is_force_push(["git", "grep", "-f", "pats.txt", "push"])
+    False
+    """
+    if not tokens or not (tokens[0].endswith("git") or tokens[0].endswith("yadm")):
+        return False
+    if "push" not in tokens[1:]:
+        return False
+    after_push = tokens[tokens.index("push", 1) + 1 :]
+    return any(flag in after_push for flag in ("--force", "-f", "--mirror"))
+
+
 # Add a rule here. Nothing below needs touching.
 BLOCKED = [
-    ("cd", CD),
-    ("*git|*yadm push --force|-f|--mirror", FORCE_PUSH),
+    (is_cd, CD),
+    (is_force_push, FORCE_PUSH),
 ]
 
 
-def matches(tokens, pattern):
-    """Do these words appear in this command, in order?
-
-    The first word is the command itself; the rest may sit anywhere after it:
-
-    >>> matches(["git", "push", "origin", "--force"], "git push --force")
-    True
-    >>> matches(["git", "push", "--force", "origin"], "git push --force")
-    True
-
-    Implicit gaps also step over a flag that takes a value, so `git -C` needs
-    no special case:
-
-    >>> matches(["git", "-C", "/repo", "push", "--force"], "git push --force")
-    True
-
-    Words match whole tokens, so a longer flag is a different flag, and a
-    subcommand that is not the one named does not match:
-
-    >>> matches(["git", "push", "--force-with-lease"], "git push --force")
-    False
-    >>> matches(["git", "grep", "-f", "pats.txt", "push"], "git push --force|-f")
-    False
-    """
-    first, *wanted = pattern.split()
-    if not _any_of(tokens[0], first):
-        return False
-    rest = tokens[1:]
-    for word in wanted:
-        while rest and not _any_of(rest[0], word):
-            rest = rest[1:]
-        if not rest:
-            return False
-        rest = rest[1:]
-    return True
-
-
-def _any_of(token, word):
-    """Does the token match the word, or any of its `a|b` alternatives?"""
-    return any(fnmatchcase(token, alternative) for alternative in word.split("|"))
-
-
 def refusal(command):
-    """Why this command is refused, or None.
+    r"""Why this command is refused, or None.
 
     A bare name matches the command wherever it runs, without catching the
     word in passing:
@@ -88,6 +88,14 @@ def refusal(command):
     >>> refusal("cd /foo && ls") is CD
     True
     >>> refusal("bash -lc 'cd /x'") is CD
+    True
+
+    A newline separates commands like any other separator, so a rule is not
+    escaped by putting the command on its own line:
+
+    >>> refusal("ls\ncd /foo") is CD
+    True
+    >>> refusal("echo hi\ngit push --force origin") is FORCE_PUSH
     True
     >>> refusal('echo "cd foo"') is None
     True
@@ -105,6 +113,15 @@ def refusal(command):
     >>> refusal("/usr/bin/git push --force") is FORCE_PUSH
     True
 
+    A wrapper -- `sudo`, `env`, `timeout` -- does not hide the command it runs:
+
+    >>> refusal("sudo git push --force") is FORCE_PUSH
+    True
+    >>> refusal("env FOO=bar git push -f") is FORCE_PUSH
+    True
+    >>> refusal("timeout 5 git push -f") is FORCE_PUSH
+    True
+
     A safe push stays a safe push:
 
     >>> refusal("git push --force-with-lease origin main") is None
@@ -115,11 +132,7 @@ def refusal(command):
     True
     """
     return next(
-        (
-            reason
-            for pattern, reason in BLOCKED
-            if any_command(command, lambda tokens, p=pattern: matches(tokens, p))
-        ),
+        (reason for predicate, reason in BLOCKED if any_command(command, predicate)),
         None,
     )
 
