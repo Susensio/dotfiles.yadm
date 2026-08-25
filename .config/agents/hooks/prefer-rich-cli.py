@@ -16,6 +16,9 @@ from utils import any_command, bash_command, inform, payload
 
 GREP = "Prefer `rg` over `grep -r` where installed (rg is on PATH). Not enforced -- grep stays correct inside a pipeline."
 FIND = "Prefer `fd` over `find -name` where installed (fd is on PATH). Not enforced -- find stays correct for -exec and complex predicates."
+JQ = "Prefer `jq` over text tools on JSON (jq is on PATH). Not enforced -- grep stays correct for a quick existence check."
+
+TEXT_TOOLS = {"grep", "sed", "awk", "cut"}
 
 Proposal = namedtuple("Proposal", "clause binary reminder")
 
@@ -44,9 +47,26 @@ def named_find(tokens):
     return tokens[0] == "find" and "-name" in tokens
 
 
+def json_by_hand(tokens):
+    """A text tool pointed at a JSON file.
+
+    Only a named `.json` argument: a JSON pipeline (`gh ... --json | grep`) is
+    two commands, and the tokens of the second carry no sign of the first.
+
+    >>> json_by_hand(["grep", "version", "package.json"])
+    True
+    >>> json_by_hand(["jq", ".version", "package.json"])
+    False
+    >>> json_by_hand(["grep", "version", "notes.md"])
+    False
+    """
+    return tokens[0] in TEXT_TOOLS and any(t.endswith(".json") for t in tokens[1:])
+
+
 PROPOSALS = [
     Proposal(recursive_grep, "rg", GREP),
     Proposal(named_find, "fd", FIND),
+    Proposal(json_by_hand, "jq", JQ),
 ]
 
 NUDGES = Path(os.environ.get("TMPDIR", "/tmp")) / "claude-hook-nudge"
