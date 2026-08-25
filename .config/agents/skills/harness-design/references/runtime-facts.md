@@ -15,6 +15,11 @@ Correct a line here rather than in the file that cites it -- that is the whole r
   So the rule governing how a file is authored never fires on authoring a new one.
   Tracked upstream in anthropics/claude-code#88565, which is open and widest in scope; #63142 and #72688 stated it precisely and were closed by the stale bot, not resolved.
 - A subagent's initial context carries the whole `CLAUDE.md` hierarchy the main conversation loads, project rules included (documented, v2.1.238).
+- `SessionStart` `additionalContext` reaches the main thread only; a spawned subagent never receives it (probed, v2.1.238).
+  Two runs, with a control confirming the hook fired and the main thread had it.
+- A `PreToolUse` hook fires on a subagent's own tool calls, and its `additionalContext` reaches that subagent's transcript (probed, v2.1.238).
+  Verified with a qualifying `grep -r` and a qualifying `find -name` inside a subagent, against a non-qualifying command as control.
+  So a hook delivers into a subagent per tool call, never at spawn.
 
 ## Grants and frontmatter
 
