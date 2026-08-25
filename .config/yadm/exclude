@@ -19,9 +19,6 @@
 !/.config/biome.json
 !/.config/.claude/
 /.config/.claude/settings.local.json
-.cc-writes/
-__pycache__/
 !/.local/share/yadm/archive
 !/.github
 !/bin
-!/.config/claude2agy/

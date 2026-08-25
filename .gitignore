@@ -1,0 +1,6 @@
+# Junk, not scope. Which folders this repo tracks at all is yadm/exclude's job:
+# it denies /* and re-includes each one. This file is for what never belongs in
+# any of them, wherever it appears.
+
+__pycache__/
+.cc-writes/
