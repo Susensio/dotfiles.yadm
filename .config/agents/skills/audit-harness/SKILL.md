@@ -55,16 +55,13 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - No skill's `description` exceeds 1536 characters, the per-entry cap past which it is truncated -- taking the trigger words with it, so the skill stays valid and stops firing.
   The roster as a whole is budgeted at roughly 1% of the context window; when it overflows, descriptions are dropped starting with the least-invoked skill.
   Sum them and report the total, because this is the one failure that arrives by growth rather than by edit.
-- No `SKILL.md` over 500 lines (`wc -l`) — R-one-slot.
+- No `SKILL.md` over 500 lines (`wc -l`) — progressive disclosure, `writing-for-agents`.
 - `settings*.json` parse (`jq .`).
   A malformed file is dropped whole, taking every permission and hook in it.
 - No **subagent** `tools:`/`disallowedTools:` entry uses a parenthesised specifier — R-enforcement.
-  `Bash(cmd:*)` is stripped to the bare tool wherever it appears, and `Agent(name)` is stripped in a subagent definition, so the line reads as a restriction and grants everything.
-  The exception is a main-thread agent (`claude --agent`), where `Agent(name)` is enforced and a spawn outside the list fails — flagging one there deletes a real restriction.
-  Neither the file nor the agent listing reports the effective grant.
-- Confirm an effective grant by having a spawned agent **use** the tool, never by asking it to list one — R-stamp.
+  A main-thread agent (`claude --agent`) is the exception, where `Agent(name)` is enforced: flagging one there deletes a real restriction.
+- Confirm an effective grant by having a spawned agent **use** the tool, never by asking it to list one — R-probe.
 - Every claim about runtime behaviour names the version it was tested against — R-stamp.
-  A stamp well behind `claude --version` is a rule to re-probe, not one to trust.
 - Harness files in a repo: tracked, or deliberately ignored?
   `git ls-files --error-unmatch` and `git check-ignore -v`.
   Untracked and un-ignored is one `git clean` from gone.
@@ -79,17 +76,17 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
   A divergent duplicate is still one fact in two slots: delete one, never reconcile them.
 - Two copies of a protocol that should have one home.
 
-## 3. Dead references — R-one-slot
+## 3. Dead references — R-in-time
 
 *The highest-yield check. Every failure this harness has actually had was one of these.*
 
 - Every skill, agent, path, command and script named in any harness file resolves.
   Include `${CLAUDE_SKILL_DIR}` paths and names in prose.
 - Skills reference their own scripts through `${CLAUDE_SKILL_DIR}`, not a bare or cwd-relative path.
-- **Liveness, under the sandbox** — R-stamp.
+- **Liveness, under the sandbox** — R-probe.
   For each external tool a skill shells out to, run its cheapest real invocation the way an agent will: sandboxed.
   A tool that authenticates from a keyring or a socket works in a terminal and fails for every agent.
-  - Probe with a real call, not a status subcommand (R-stamp gives the `gh` case).
+  - Probe with a real call, not a status subcommand (R-probe gives the `gh` case).
   - Denied paths appear inside the sandbox as `/dev/null` character devices, not as missing files.
     Confirm any surprising file with the sandbox off before reporting it.
 
@@ -109,7 +106,8 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - An agent whose value is only its prompt text, or that names a domain.
 - Content in a context file that should be a skill body or a path-scoped rule.
 - Any file under a `rules/` directory with no `paths:` in its frontmatter — R-one-slot.
-  It loads like CLAUDE.md but reaches no subagent, so a standard written there is absent from the agent it governs.
+  It loads at session start like CLAUDE.md and reaches every subagent (probed, v2.1.238), so it is charged to every turn and every spawn whether the path it governs is in play or not.
+  That is the cost `paths:` exists to avoid.
 
 ## 6. Wording — R-trigger, writing-for-agents
 
@@ -121,9 +119,8 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 - An action skill step with a fuzzy completion bound inviting premature completion, rather than a checkable binary condition.
 - Steering solely by prohibition -- negative guardrails without an explicit positive target behavior.
 - A description carrying setup instruction the caller cannot act on -- how to install or configure the thing is user-facing doc (R-one-slot), in a slot loaded in every session.
-- Prose wrapped to a column instead of to its sentences — R-trigger.
-  Two tells, both greppable: a line ending mid-sentence with the next one continuing it, and a paragraph whose lines all stop within a few columns of each other.
-  Frontmatter, fenced code, tables and headings are exempt; report the file, not each line.
+- Prose wrapped to a column instead of to its sentences — `rules/markdown.md` carries the convention and its exemptions.
+  Report the file, not each line.
 
 ## 7. Contract — R-fallback
 
@@ -139,23 +136,19 @@ A rule knowingly left in a file that reaches every subagent, because a narrower 
 
 - **An instruction reaching an agent that cannot obey it.**
   Cross every rule in `CLAUDE.md` and its imports, which reach each subagent with no opt-out, against the roster's `tools:` lists.
-  A delegation rule arriving at an agent holding no `Agent`, a web-research rule at one holding no `WebFetch`: it improvises around the gap and reports nothing.
   The fix is a condition on the rule, or a grant.
 - **A handoff the grant does not support.**
   Where one file tells an agent to spawn another, the named agent exists and the spawning one holds `Agent`.
 - **A scripted handoff with an incomplete brief.**
-  A file prescribing a spawn carries every input the target's description marks required — `tester` requires what counts as a pass.
-  Missing, the chain stalls one round-trip in, paid by the caller before any work starts (R-fallback).
+  A file prescribing a spawn carries every input the target's description marks required (R-fallback).
 - **Knowledge arriving after the decision it governs.**
-  A file whose description says to read it *before* X, triggered by X happening: by the time it loads, the choice it governs is made.
+  A file whose description says to read it *before* X, triggered by X happening.
   Either something present earlier carries the trigger, or the content moves to a slot that loads unconditionally.
 - **A cycle.**
   Two files each naming the other as the thing to read first; an agent whose brief routes work back to the one that spawned it; a rule telling an agent to hand off the work it exists to do.
-  Nothing detects one at runtime — it spends turns, or stalls on a first step that never comes.
   Report which end should be the entry.
 - **One concept under two names.**
-  Renaming reaches the file that was open and stops there.
-  The survivor is silent: an agent greps the name it was taught, finds nothing, and proceeds as though the thing does not exist.
+  Grep the old name: renaming reaches the file that was open and stops there, and the survivor is silent.
 
 ## 9. Enforcement — R-enforcement
 
@@ -171,7 +164,6 @@ A harness governing no build has no ladder to climb -- say that once, and skip t
 - **A hook that cannot speak.**
   A `PostToolUse` hook printing to stdout and exiting 0 tells the model nothing: that stdout reaches the debug log, never the transcript (tested, v2.1.223).
   Feedback needs `hookSpecificOutput.additionalContext` as JSON on stdout, or exit 2 to surface stderr.
-  Silent on success and silent on failure, the same shape as the frontmatter R-enforcement describes.
 - **A matcher that never fires.**
   Check each `matcher` against the tool names it means to catch: one on `Edit` misses `Write`, and file edits made through the shell arrive as `Bash`.
   Decide it by running the hook against a sample payload, not by reading the pattern.
