@@ -106,11 +106,6 @@ Keep:
 - The test, where the rule is behavioural and prose is all that holds it.
   "Every changed line traces to something the request asked for" can be applied to a diff; "make surgical changes" cannot be failed, so it is followed at random.
 
-Prose breaks at sentence boundaries -- never at a column, never only at the paragraph.
-A long sentence stays whole on its own line and the editor soft-wraps it; a short one gets its own line too.
-Verbatim regardless: YAML frontmatter, fenced code, tables, headings.
-A repo whose tracked markdown already holds to another convention keeps it (R-fallback).
-
 For document craft -- progressive disclosure, leading words, unambiguous completion bounds, and pruning no-ops -- consult the `writing-for-agents` skill.
 
 *Failure it prevents:* a skill that never fires because its description says what it is rather than when to reach for it, and agent bodies that grow into essays about the harness, paid for on every spawn.
@@ -119,13 +114,8 @@ And a one-word edit reflowing a whole paragraph, so review sees a rewritten bloc
 
 ## R-enforcement. Enforcement sits at the fastest layer that can hold it.
 
-Frontmatter looks binding and is not (tested, v2.1.223).
-`permissionMode: plan` does not stop a subagent writing or deleting through Bash; `Bash(cmd:*)` is silently stripped to the bare tool, as is `Agent(name)` in a subagent definition -- though on a main-thread agent (`claude --agent`) `Agent(name)` is enforced and a spawn outside the list fails (documented, not tested here); `model:` is a default the caller's `model` argument overrides; and `memory:` force-enables Read, Write and Edit.
-The first two fail open.
-
-Built-in availability is a separate trap.
-`Grep` and `Glob` are absent from the main session because an empty `tengu_non_deferrable_builtins` flag makes built-ins deferrable (anthropics/claude-code#86971), while a subagent that declares them gets them.
-A tool missing from the session's own list is therefore no evidence it is missing from an agent that asked for it -- stripping the pair once cost explorer its search tools.
+Frontmatter looks binding and is not: several fields read as a restriction and grant everything, and the ones that fail open fail silently.
+Which field does what, and what a built-in's absence from the session list does and does not prove, are in [`references/runtime-facts.md`](references/runtime-facts.md) -- read it before claiming a grant holds.
 
 So a read-only agent is a convention it keeps, not a cage: give it a `tools:` allowlist that omits `Write` and `Edit`, and state the contract in the body's first paragraph, naming the obvious loophole -- no shell redirect standing in for `Write`.
 Adding `disallowedTools: Write, Edit` beside such an allowlist removes nothing that was granted; it reads as a second guardrail and is none, which is worse than leaving the contract to the prose that does cover the loophole.
@@ -162,7 +152,7 @@ So a description must not demand what the body defaults, or default what the bod
 *Failure it prevents:* a generic skill dropped into a repo that declares nothing, improvising a convention instead of asking or defaulting.
 A file that only ever says "ask" turns every under-specified handoff into a cold round-trip, paid at the caller's expense before any work starts.
 
-## R-stamp. Verify under the sandbox, and stamp what you tested.
+## R-probe. Verify by use, under the sandbox, never by asking.
 
 Tools that read credentials from a keyring, a socket, or the session bus behave differently for an agent than for you.
 A skill that shells out to one is not working until it has been run the way an agent will run it.
@@ -171,10 +161,18 @@ Probe with a real call, not a status subcommand -- `gh auth status` reports fail
 An agent's account of its own tools is generated text, not a reading of the runtime: one declaring `Grep, Glob` reported neither and used both.
 So confirm an effective grant by having the agent **use** the tool, never by asking it to list one, and withhold whatever would let it reach the answer another way, so an absence means what it looks like.
 
-A claim about runtime behaviour carries the version it was tested against -- `(tested, v2.1.223)` -- so a reader can tell a rule that still holds from one that was true two releases ago.
-
 *Failure it prevents:* `gh`-dependent skills that pass by hand and fail for every subagent, indistinguishably from the tool being broken.
-And a runtime claim trusted long after the release that changed it, with nothing in the text to date it.
+And a grant an agent cheerfully reports it does not have.
+
+## R-stamp. Every runtime claim carries the version it was tested against.
+
+`(tested, v2.1.238)`, or `(probed, ...)` for a live canary and `(documented, ...)` for a doc citation, so a reader can tell a rule that still holds from one that was true two releases ago.
+A stamp well behind `claude --version` marks a rule to re-probe, not one to trust.
+
+Stamped facts live together in [`references/runtime-facts.md`](references/runtime-facts.md), one line each, so a fact that moves upstream is corrected in one place and not chased through every file that leaned on it.
+Anything asserting what the runtime does belongs there, cited from wherever it is used.
+
+*Failure it prevents:* a runtime claim trusted long after the release that changed it, with nothing in the text to date it.
 
 ## R-name. The name follows the thing's nature, and invocability follows the name.
 
