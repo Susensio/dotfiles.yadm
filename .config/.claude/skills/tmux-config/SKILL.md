@@ -7,7 +7,7 @@ description: Use when writing or debugging tmux configuration — a binding, the
 # Tmux Config
 
 Reading, editing and debugging the tmux setup.
-Anything that needs a running server is `tmux-testing`.
+Anything that needs a running server is `tmux-testing`; never the user's live session.
 
 ## 1. Consult authoritative sources first
 
@@ -17,6 +17,7 @@ Check it before `man tmux` or the web:
 - `references/variable_expansion.md` — when `$VAR`, `#{format}`, and `@user-options` each get substituted.
   Read this before debugging anything where a value comes out empty, stale, or expanded one level too early.
 - `references/formats.md` — the vocabulary inside `#{...}`: conditionals, matching, modifiers, and how to escape a literal `,` or `}`.
+- `references/headless_hooks_and_errors.md` — how tmux routes errors across execution contexts, why headless hooks fail with `(null):0: no current client`, and how to write client-safe hooks.
 
 Beyond that:
 
@@ -38,8 +39,3 @@ Give each discrete topic (keybindings, theme, plugins) its own `.conf` file rath
 - **Conflicts**: before adding a binding or option, check it against tmux defaults and the existing `conf.d/` files.
 - **Colour**: tmux style directives (`fg=`, `bg=`) take explicit gruvbox hex from `conf.d/30_gruvbox.conf`, which is the single source of truth -- tmux has no concept of the terminal's ANSI theme to defer to.
   Scripts whose output prints straight to the terminal use plain ANSI 16-colour escapes (`\e[31m`) instead: the terminal emulator already implements gruvbox at that level, so hardcoding hex there duplicates the palette and pins it in place.
-
-## 4. Verifying a change
-
-Does this binding fire, does this format expand, does this popup render — every such question needs a running server, so it goes to `tmux-testing`, or to the `tester` agent with `tmux-testing` named.
-Never check against the user's live session.

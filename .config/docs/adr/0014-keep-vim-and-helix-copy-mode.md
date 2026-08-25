@@ -9,7 +9,7 @@ Since Helix replaced Neovim ([ADR-0008](0008-replace-neovim-with-helix.md)), cop
 tmux's native `copy-mode-vi` behaves like vim: `v` opens Visual mode, all following motions extend.
 Helix's `w`/`b`/`e` *replace* the selection by default and only extend once `v` toggles select-mode on.
 Same keys, opposite behavior on the first press — not a keymap difference, a grammar difference.
-`docs/vim-vs-helix-motions.md` documents both models as the shared reference for auditing this file.
+`docs/vim-vs-helix-motions.md` documented both models as the shared reference for auditing this file, and was deleted.
 
 ## Decision
 
@@ -22,3 +22,9 @@ The helix branch needs a synthetic per-pane `@copy_select` flag to track select-
 Either grammar is available on demand, matching whichever editor's muscle memory is active, and the profile split gives future audits (like the one that produced the reference doc) a single place to check for paradigm leakage.
 Costs: roughly 35 lines of `%if`/`%else` plus separate text-object tables per profile — a helix-only config would be far smaller, a vim-only one smaller still.
 The `@copy_select` flag is extra state living outside tmux's own selection tracking, and its reset-on-entry hook is a subtle-bug surface if a new exit path is ever added without updating it.
+
+## Corrections
+
+2026-08-26: the line above was written in the present tense, naming `docs/vim-vs-helix-motions.md` as the shared reference for auditing the copy-mode config.
+That document was deleted, and the tracked `tmux-config` skill neither carries it in its references nor cites it, so git history holds the only copy under version control.
+The line is now past tense, anchored to when it was true, where it cannot rot again.
