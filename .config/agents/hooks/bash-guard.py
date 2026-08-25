@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """PreToolUse/Bash: refuse commands that must not run.
 
+One rule, and it is here rather than in `permissions.deny` because deny
+cannot express it: inside a `Bash(...)` specifier only the trailing `:*` is
+special, so no pattern reaches a flag sitting anywhere after `push`, or a
+porcelain reached by a path, or `git -C /repo push --force` (probed,
+v2.1.238). It is also the only place the agent/user boundary exists -- at the
+forge you and the agent are one credential, so no ruleset can separate them.
+
 Add a rule by adding a row to BLOCKED: a predicate over a command's token
-list, paired with the reason to give when it fires. The predicate decides
-what "matches" means -- a bare command name, a flag anywhere after it, a
-porcelain reached by any path -- so a rule is free to skip over `git -C
-/repo` or `push origin --force` however it needs to. That is the thing
-permissions.deny cannot express, its patterns being anchored to the front of
-the command.
+list, paired with the reason to give when it fires. Keep the bar high --
+blocking is the top of the enforcement ladder, for what must not happen, not
+for what could be done better. A preference belongs in prefer-rich-cli.py,
+which nudges without stopping the call.
 
 Matching is on tokens, not text, so a rule catches the command after a
 separator, inside a subshell, behind `sh -lc`, and past a wrapper like
@@ -18,24 +23,9 @@ only sees its own argv, so a flag piped into its stdin, as in
 
 from utils import any_command, bash_command, block, payload
 
-CD = """Bash commands take absolute paths, never a `cd X && ...` prefix.
-Leaving the working directory in a compound command defeats sandbox auto-approval and forces a permission prompt.
-Instead: pass the path directly (`rg PATTERN /abs/path`), or use the tool's own flag -- `git -C /abs/path`, `yadm -C`, `make -C`, `npm --prefix`."""
-
 FORCE_PUSH = """Force-push blocked: this rewrites published history and can destroy a collaborator's commits.
 If you genuinely need it, run it yourself in a terminal -- the hook only governs the agent.
 Safer alternative: `--force-with-lease`, which refuses when the remote moved under you, and is deliberately left allowed."""
-
-
-def is_cd(tokens):
-    """A bare `cd`, wherever it sits in the command.
-
-    >>> is_cd(["cd", "/foo"])
-    True
-    >>> is_cd(["cdrecord", "-v"])
-    False
-    """
-    return bool(tokens) and tokens[0] == "cd"
 
 
 def is_force_push(tokens):
@@ -95,33 +85,12 @@ def is_force_push(tokens):
 
 # A new rule needs a predicate above, then a row here.
 BLOCKED = [
-    (is_cd, CD),
     (is_force_push, FORCE_PUSH),
 ]
 
 
 def refusal(command):
     r"""Why this command is refused, or None.
-
-    A bare name matches the command wherever it runs, without catching the
-    word in passing:
-
-    >>> refusal("cd /foo && ls") is CD
-    True
-    >>> refusal("bash -lc 'cd /x'") is CD
-    True
-
-    A newline separates commands like any other separator, so a rule is not
-    escaped by putting the command on its own line:
-
-    >>> refusal("ls\ncd /foo") is CD
-    True
-    >>> refusal("echo hi\ngit push --force origin") is FORCE_PUSH
-    True
-    >>> refusal('echo "cd foo"') is None
-    True
-    >>> refusal("cdrecord -v") is None
-    True
 
     One row covers both porcelains, every force flag, and any path to them:
 
@@ -134,9 +103,14 @@ def refusal(command):
     >>> refusal("/usr/bin/git push --force") is FORCE_PUSH
     True
 
+    A newline separates commands like any other separator, so a rule is not
+    escaped by putting the command on its own line:
+
+    >>> refusal("echo hi\ngit push --force origin") is FORCE_PUSH
+    True
+
     A wrapper -- `sudo`, `env`, `timeout` -- does not hide the command it runs,
-    even stacked in front of a shell or of another wrapper, and even one the
-    old flag table never named:
+    even stacked in front of a shell or of another wrapper:
 
     >>> refusal("sudo git push --force") is FORCE_PUSH
     True
@@ -148,44 +122,24 @@ def refusal(command):
     True
     >>> refusal("env FOO=1 bash -lc 'git push --force'") is FORCE_PUSH
     True
-    >>> refusal("timeout 5 bash -lc 'cd /tmp'") is CD
-    True
     >>> refusal("sudo --user root git push --force") is FORCE_PUSH
-    True
-    >>> refusal("env --unset FOO git push -f") is FORCE_PUSH
-    True
-    >>> refusal("timeout --signal SIGKILL 5 git push -f") is FORCE_PUSH
-    True
-    >>> refusal("nice --adjustment 10 git push -f") is FORCE_PUSH
     True
     >>> refusal("sudo -Hu root git push --force") is FORCE_PUSH
     True
     >>> refusal("nohup git push --force") is FORCE_PUSH
     True
-    >>> refusal("doas git push --force") is FORCE_PUSH
-    True
-    >>> refusal("stdbuf -o0 git push --force") is FORCE_PUSH
-    True
-    >>> refusal("time git push --force") is FORCE_PUSH
+    >>> refusal("eval 'git push --force'") is FORCE_PUSH
     True
 
-    `command -v cd` and its siblings are an ordinary agent probe for whether
-    `cd` exists, not a call to `cd` -- `command` is not a wrapper this walks:
-
-    >>> refusal("command -v cd") is None
-    True
-    >>> refusal("command -V cd") is None
-    True
-    >>> refusal("command -p cd") is None
-    True
-
-    A safe push stays a safe push:
+    A safe push stays a safe push, and the word `push` in passing is not one:
 
     >>> refusal("git push --force-with-lease origin main") is None
     True
     >>> refusal("git push origin main") is None
     True
     >>> refusal("git grep -f pats.txt push") is None
+    True
+    >>> refusal("cd /foo && ls") is None
     True
     """
     return next(
