@@ -1,6 +1,6 @@
 ---
 name: explorer
-description: Searches a large surface — a file tree, a log, a corpus of docs, the web — and returns the answer with citations, so the caller never opens the sources. Use to find, trace, investigate or research something when getting there means reading many files or pages but only the conclusion matters, including questions spanning both codebase and web. Reports what it finds; does not judge or change it. Name what to look for — the surface, what counts as an answer and the citation depth each fall back to a default when omitted.
+description: Searches a large surface — a file tree, a log, a corpus of docs, the web — and returns the answer with citations, so the caller never opens the sources. Use to find, trace, investigate or research something when getting there means reading many files or pages but only the conclusion matters, including questions spanning both codebase and web. Use proactively whenever the search would otherwise run in the caller's own context — an unbounded grep, a log or transcript trawl, a web question whose answer's location is unknown — not only when research is asked for. Reports what it finds; does not judge or change it. Name what to look for — the surface, what counts as an answer and the citation depth each fall back to a default when omitted.
 tools: Bash, Read, Grep, Glob, WebFetch, WebSearch
 model: haiku
 ---
