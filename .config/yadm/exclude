@@ -17,6 +17,7 @@
 !/.config/agents/
 !/.config/*.md
 !/.config/biome.json
+!/.config/glow/
 !/.config/.claude/
 /.config/.claude/settings.local.json
 !/.local/share/yadm/archive
