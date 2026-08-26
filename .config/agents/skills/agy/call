@@ -1,0 +1,71 @@
+#!/bin/bash
+# Run agy with its permission gate off, contained by bwrap instead of by agy.
+#
+# The workspace is read-only unless --write is passed, so a review or a trawl
+# cannot alter the tree it is reading. Scratch space is the sandbox's own /tmp.
+# Everything outside the workspace is read-only or absent; credentials and both
+# settings.json stay read-only, so agy cannot grant itself global permissions.
+set -euo pipefail
+
+WORKSPACE_BIND=--ro-bind
+if [ "${1:-}" = "--write" ]; then
+  WORKSPACE_BIND=--bind
+  shift
+fi
+
+if [ $# -eq 0 ]; then
+  echo "Usage: call [--write] <agy args...>" >&2
+  exit 1
+fi
+
+WORKSPACE=$(realpath "$PWD")
+AGY=$(readlink -f "$(command -v agy)")
+GEM="$HOME/.gemini"
+CLI="$GEM/antigravity-cli"
+# Conversations from delegated runs live apart from the interactive agy history,
+# so `-c` here resumes this script's own last run and never the user's.
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/agy-sandbox"
+
+# bwrap refuses to bind a path that does not exist, and a fresh machine has no
+# conversation store until agy has run once. A caller whose own sandbox makes
+# the state directory read-only still gets a working run -- the tmpfs takes the
+# conversations instead, and only `-c` is lost.
+STATE_BINDS=()
+if mkdir -p "$STATE/conversations" "$STATE/cache" 2>/dev/null &&
+   touch "$STATE/history.jsonl" "$STATE/conversation_summaries.db" 2>/dev/null; then
+  STATE_BINDS=(
+    --bind "$STATE/conversations" "$CLI/conversations"
+    --bind "$STATE/cache" "$CLI/cache"
+    --bind "$STATE/history.jsonl" "$CLI/history.jsonl"
+    --bind "$STATE/conversation_summaries.db" "$CLI/conversation_summaries.db"
+  )
+fi
+
+exec bwrap \
+  --ro-bind / / \
+  --tmpfs "$HOME" \
+  --ro-bind "$AGY" "$AGY" \
+  --tmpfs "$GEM" \
+  --ro-bind "$GEM/settings.json" "$GEM/settings.json" \
+  --ro-bind "$GEM/oauth_creds.json" "$GEM/oauth_creds.json" \
+  --ro-bind "$GEM/google_accounts.json" "$GEM/google_accounts.json" \
+  --ro-bind "$GEM/installation_id" "$GEM/installation_id" \
+  --ro-bind "$GEM/trustedFolders.json" "$GEM/trustedFolders.json" \
+  --ro-bind "$GEM/config" "$GEM/config" \
+  --ro-bind "$CLI/antigravity-oauth-token" "$CLI/antigravity-oauth-token" \
+  --ro-bind "$CLI/settings.json" "$CLI/settings.json" \
+  --ro-bind "$CLI/installation_id" "$CLI/installation_id" \
+  --ro-bind "$CLI/builtin" "$CLI/builtin" \
+  --ro-bind "$CLI/bin" "$CLI/bin" \
+  ${STATE_BINDS[@]+"${STATE_BINDS[@]}"} \
+  --dev /dev \
+  --proc /proc \
+  --tmpfs /tmp \
+  --tmpfs "/run/user/$(id -u)" \
+  "$WORKSPACE_BIND" "$WORKSPACE" "$WORKSPACE" \
+  --unshare-all \
+  --share-net \
+  --new-session \
+  --die-with-parent \
+  --chdir "$WORKSPACE" \
+  "$AGY" --dangerously-skip-permissions "$@"
