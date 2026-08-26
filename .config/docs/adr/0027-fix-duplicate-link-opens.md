@@ -21,3 +21,6 @@ Trade-off: this also disables Claude Code's own click/drag mouse handling inside
 Switching to `/tui default` avoids that trade-off but gives up fullscreen mode entirely, which costs more than losing in-TUI drag-select.
 Revisit once upstream gates its internal dispatch on terminal capability, per the fix bcherny described in #76110.
 
+Inside tmux this trade-off compounds with [ADR-0018](0018-fork-tmux-mouse-bindings.md)'s pass-through: `conf.d/22_mouse.conf` forwards a plain drag to any pane whose app has claimed mouse reporting (`#{mouse_any_flag}`), and Claude Code still claims it despite `CLAUDE_CODE_DISABLE_MOUSE_CLICKS`, so plain drag in a Claude Code pane forwards there and does nothing, unlike a shell pane.
+Considered adding a tmux-side Shift-drag override to force copy-mode select regardless of `mouse_any_flag`; rejected in favor of leaving Shift-drag to the terminal's own native override, which already bypasses tmux/Claude Code's mouse reporting entirely and needs no per-app conditional in `22_mouse.conf`.
+
