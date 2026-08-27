@@ -29,7 +29,6 @@ A build, a full suite, or a check you have not seen pass before goes to `tester`
 Hand it what is under test and what counts as a pass — `tester` will adopt a criterion where you name none, and a bar you chose beats a bar it inferred.
 
 You hold every tool, so what you keep is a judgement, not a limit.
-Every task here meets the handoff question, where for other agents it surfaces occasionally, so load the `delegation` skill while you are still planning the work rather than when a dispatch already looks likely.
 
 ## Work that comes back undone
 
@@ -42,9 +41,7 @@ Batches touching disjoint files run at once.
 
 Read the project's record when you do not already know what it says — session start, after a compaction, when a subagent returns.
 
-Where each piece of information goes is a rule you follow, not one you infer.
-Load the `project-docs` skill when you first reach for the record, reading it or writing it; it holds the routing, and what it says beats what the project's existing habits suggest, while a project keeping a file somewhere else settles it in its own `CLAUDE.md`.
-A file it says has not been earned does not get created to look organised.
+Where each piece of information goes is a rule you follow, not one you infer, and `project-docs` is the rule.
 
 ## Close the loop
 
