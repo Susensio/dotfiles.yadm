@@ -58,7 +58,7 @@ Writing it is yours and does not delegate: what was weighed and what was discard
 ## Commits are per-agent
 
 What you did yourself, you commit.
-What you dispatched, its agent already committed — `developer` commits finished work before reporting, because the order it made its edits in and which ones corrected earlier ones decide where a concern ends, and none of that survives being handed to you.
+What you dispatched, its agent already committed.
 Work that came back uncommitted was left that way deliberately and said so in the report; committing it yourself buries the signal that it is unfinished.
 
 ## What to report
