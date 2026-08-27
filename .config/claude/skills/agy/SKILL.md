@@ -11,7 +11,7 @@ The different model family is not: it was measured and it did not pay.
 
 ## Reach it through `call`
 
-`~/.claude/skills/agy/call` wraps `agy` in `bwrap`.
+`~/.config/claude/skills/agy/call` wraps `agy` in `bwrap`.
 The workspace is read-only, everything outside it is read-only or absent, and credentials and settings are read-only, so a run cannot alter the tree it reads or grant itself permissions.
 Pass `--write` as the first argument for the rare run that must edit.
 
@@ -33,14 +33,14 @@ So it substitutes for Claude rather than supplementing it.
 
 ```bash
 cd /the/repo
-~/.claude/skills/agy/call --model gemini-3.1-pro-high --effort high -p \
+~/.config/claude/skills/agy/call --model gemini-3.1-pro-high --effort high -p \
   "Review the working-tree diff against the standard in <path>. \
    Report findings only, as file:line plus one sentence each. \
    If nothing is wrong, say so plainly."
 ```
 
 - **`$PWD` is the whole world it sees writable**, and `--chdir` puts it there. `$HOME` is blank inside the sandbox, so a standard has to live either in the workspace or in the compiled harness.
-- **It already knows the conventions.** `claude2agy` compiles `~/.config/agents/` into `~/.gemini/config/` — `AGENTS.md`, the rules and the skills — and that directory is bound read-only. Verified present; agy does not always load them, so say which standard you want applied rather than assuming it arrives.
+- **It already knows the conventions.** `claude2agy` compiles `~/.config/claude/` into `~/.gemini/config/` — `AGENTS.md`, the rules and the skills — and that directory is bound read-only. Verified present; agy does not always load them, so say which standard you want applied rather than assuming it arrives.
 - **`--agent <name>` runs your own definition there.** claude2agy compiles the agents too, so a substitute run can carry the same contract and report shape as the Claude one. `agy agents` lists what is available.
 - **Model choice moved nothing.** `gemini-3.1-pro-high` performed worse than the Flash default on the one comparison there is, so run-to-run variance dominates; do not pay for the larger tier expecting a better answer.
 - **`--output-format json` with `--json-schema`** bounds the return to a shape you choose, which is the one thing an `explorer` report cannot promise.

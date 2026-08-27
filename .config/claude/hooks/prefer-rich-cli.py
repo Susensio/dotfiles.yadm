@@ -7,12 +7,10 @@ wherever the POSIX tool is the right one -- grep inside a pipeline, find with
 flow while the reminder still reaches the model.
 """
 
-import os
 import shutil
 from collections import namedtuple
-from pathlib import Path
 
-from utils import any_command, bash_command, inform, payload
+from utils import agent_key, any_command, bash_command, first_time, inform, payload
 
 GREP = "Prefer `rg` over `grep -r` where installed (rg is on PATH). Not enforced -- grep stays correct inside a pipeline."
 FIND = "Prefer `fd` over `find -name` where installed (fd is on PATH). Not enforced -- find stays correct for -exec and complex predicates."
@@ -69,8 +67,6 @@ PROPOSALS = [
     Proposal(json_by_hand, "jq", JQ),
 ]
 
-NUDGES = Path(os.environ.get("TMPDIR", "/tmp")) / "claude-hook-nudge"
-
 
 def proposal(command):
     """The proposal this command earns, or None.
@@ -91,25 +87,12 @@ def proposal(command):
     return next((p for p in PROPOSALS if any_command(command, p.clause)), None)
 
 
-def first_time(session, binary):
-    """One reminder per session per tool, so a preference is not nagging."""
-    stamp = NUDGES / f"{session}.{binary}"
-    try:
-        NUDGES.mkdir(parents=True, exist_ok=True)
-        if stamp.exists():
-            return False
-        stamp.touch()
-    except OSError:
-        pass  # A hook that cannot write its stamp still nudges; it repeats.
-    return True
-
-
 def main():
     data = payload()
     command = bash_command(data)
     found = proposal(command) if command else None
     if found and shutil.which(found.binary):
-        if first_time(data.get("session_id", "nosession"), found.binary):
+        if first_time(agent_key(data), found.binary):
             inform(found.reminder, data)
 
 

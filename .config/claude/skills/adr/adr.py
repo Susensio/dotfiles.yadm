@@ -6,6 +6,7 @@ Usage:
   adr.py new "<title>"
   adr.py new "<title>" --supersedes 3
 """
+
 import argparse
 import datetime
 import re
@@ -82,7 +83,9 @@ def flip_to_superseded(old_path: Path, new_number: int, new_slug: str) -> None:
     text = old_path.read_text()
     if not STATUS_RE.search(text):
         sys.exit(f"error: {old_path} has no Status line to flip")
-    new_status = f"Status: Superseded by [ADR-{new_number:04d}]({new_number:04d}-{new_slug}.md)"
+    new_status = (
+        f"Status: Superseded by [ADR-{new_number:04d}]({new_number:04d}-{new_slug}.md)"
+    )
     old_path.write_text(STATUS_RE.sub(new_status, text, count=1))
 
 
@@ -177,15 +180,36 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_list = sub.add_parser("list", help="print every ADR as number, status, the later ADRs naming it, and title")
-    p_list.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
+    p_list = sub.add_parser(
+        "list",
+        help="print every ADR as number, status, the later ADRs naming it, and title",
+    )
+    p_list.add_argument(
+        "--dir",
+        metavar="PATH",
+        help="the ADR directory, instead of searching upward for one",
+    )
 
     p_new = sub.add_parser("new", help="create a new ADR skeleton")
     p_new.add_argument("title")
-    p_new.add_argument("--slug", metavar="SLUG", help="short (3-6 word) filename slug; defaults to a truncated version of the title")
-    p_new.add_argument("--supersedes", type=int, metavar="N", help="ADR number this decision replaces")
-    p_new.add_argument("--dir", metavar="PATH", help="the ADR directory, instead of searching upward for one")
-    p_new.add_argument("--init", action="store_true", help="create the ADR directory; without it, a missing one is an error")
+    p_new.add_argument(
+        "--slug",
+        metavar="SLUG",
+        help="short (3-6 word) filename slug; defaults to a truncated version of the title",
+    )
+    p_new.add_argument(
+        "--supersedes", type=int, metavar="N", help="ADR number this decision replaces"
+    )
+    p_new.add_argument(
+        "--dir",
+        metavar="PATH",
+        help="the ADR directory, instead of searching upward for one",
+    )
+    p_new.add_argument(
+        "--init",
+        action="store_true",
+        help="create the ADR directory; without it, a missing one is an error",
+    )
 
     args = parser.parse_args()
 

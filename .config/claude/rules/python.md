@@ -8,7 +8,7 @@ paths:
 # Python
 
 - CLIs take `typer`.
-- Logging goes through `loguru`.
+- Logging goes through `structlog`.
 - Tests are `pytest` — plain asserts, fixtures over setup methods.
 - Dataframes are `polars`.
 - Linting, formatting and typing are the astral tools: `ruff`, `ty`; `uv` for envs and deps.

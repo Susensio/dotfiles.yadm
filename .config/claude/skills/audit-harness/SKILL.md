@@ -16,7 +16,7 @@ The two files split by job, and keeping the split is what stops one drifting fro
 `harness-design` holds the reason a rule exists and the example that shows it.
 This file holds what to look for and the command that finds it, and cites the rule by slug instead of restating why it matters -- an explanation copied here is one that gets corrected in one file and not the other.
 
-Scope: `~/.config/agents/` (user tier, symlinked into `~/.claude/`), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
+Scope: `~/.config/claude/` (user tier, where `CLAUDE_CONFIG_DIR` points), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
 Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
 A rule is worth what the layer that catches it is worth (R-enforcement), so a harness cannot be judged from its prose alone.
 
@@ -25,7 +25,7 @@ A rule is worth what the layer that catches it is worth (R-enforcement), so a ha
 Run this before any check. Its output is the corpus, and every check below reads that list rather than whatever files happened to get opened -- otherwise two runs audit two different harnesses and neither says which.
 
 ```sh
-fd . ~/.config/agents --type f --type l          # user tier, as it is on disk
+fd . ~/.config/claude/{agents,skills,rules,hooks} --type f --type l   # user tier, as it is on disk
 fd '^(CLAUDE|AGENTS)\.md$' . --hidden --no-ignore
 fd . .claude --type f --hidden 2>/dev/null       # project tier, if present
 fd '^(settings.*\.json|\.pre-commit-config\.yaml|.*\.ya?ml)$' . --hidden --max-depth 3
@@ -69,7 +69,7 @@ Mark uncertainty with `?` and say why -- an unusual structure may be deliberate.
 ## 2. Duplication — R-one-slot
 
 - The same `name` in more than one tier -- resolved in opposite directions depending on what it is, silently either way, with no merge and no warning.
-  A **skill**: personal overrides project, so `~/.claude/skills/x` shadows the repo's own `x` and the project copy is the dead one.
+  A **skill**: personal overrides project, so `~/.config/claude/skills/x` shadows the repo's own `x` and the project copy is the dead one.
   An **agent**: project overrides user, and among nested project directories the definition closest to the working directory wins.
 - Text byte-identical between a user-tier file and a project one.
 - Two files answering the same question differently — a default named twice, a fallback one grants and another forbids.

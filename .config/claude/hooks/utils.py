@@ -8,12 +8,14 @@ A hook either stops the agent or informs it, never both, so it calls `block` or
 hook on one mechanism -- which is what the docs ask for ("choose one approach
 per hook: either use exit codes alone for signaling, or exit 0 and print JSON").
 
-Run the tests: python3 -m doctest *.py
+Run the tests: uv run --with python-frontmatter --with pyyaml python3 -m doctest *.py
 """
 
 import json
+import os
 import shlex
 import sys
+from pathlib import Path
 
 # Claude Code's documented Bash separators, plus the subshell parens that shlex
 # hands back as their own tokens. The newline is the end-of-segment sentinel
@@ -134,3 +136,48 @@ def inform(text, data):
     """
     json.dump(advice(text, data.get("hook_event_name")), sys.stdout)
     sys.exit(0)
+
+
+NUDGES = Path(os.environ.get("TMPDIR", "/tmp")) / "claude-hook-nudge"
+
+
+def first_time(*key):
+    """True the first time this key is seen, False after.
+
+    A stamp file per key under TMPDIR; the caller's key is what scopes it
+    (to a session, an agent, whatever it's built from). A hook that cannot
+    write its stamp still speaks; it repeats.
+    """
+    stamp = NUDGES / ".".join(key)
+    try:
+        NUDGES.mkdir(parents=True, exist_ok=True)
+        if stamp.exists():
+            return False
+        stamp.touch()
+    except OSError:
+        pass
+    return True
+
+
+def agent_key(data):
+    """The dedup identity: the main thread and each subagent get their own.
+
+    `session_id` and `transcript_path` are both shared with the parent, so
+    keying dedup on either lets the first agent to run consume the stamp for
+    every other agent. `agent_id` is what actually varies (see
+    `harness-design/references/runtime-facts.md`, "What reaches a subagent").
+    """
+    return data.get("agent_id") or data.get("session_id", "nosession")
+
+
+# Any of these means a project starts here. A file in no project at all is
+# rooted at its own directory.
+ROOT_MARKERS = (".git", "pyproject.toml", "package.json", "Cargo.toml", "go.mod")
+
+
+def project_root(path):
+    """Where this file's project starts, or its own directory if it is in none."""
+    return next(
+        (d for d in path.parents if any((d / m).exists() for m in ROOT_MARKERS)),
+        path.parent,
+    )

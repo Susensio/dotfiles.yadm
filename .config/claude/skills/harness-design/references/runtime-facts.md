@@ -14,6 +14,12 @@ Correct a line here rather than in the file that cites it -- that is the whole r
 - A path-scoped rule fires when the `Read` tool touches a matching path, and **not** on `Write`, `Edit`, or an edit made through the shell (documented, v2.1.238).
   So the rule governing how a file is authored never fires on authoring a new one.
   Tracked upstream in anthropics/claude-code#88565, which is open and widest in scope; #63142 and #72688 stated it precisely and were closed by the stale bot, not resolved.
+- Delivery is once per session per rule, not once per matching `Read` (probed, v2.1.238).
+  In one session: `fish.md`, `markdown.md` and `python.md` each fired its `system-reminder` on the first `Read` of a matching path and stayed silent on a second, different, later-matching path (`tree.fish` then `tool.fish`; `SKILL.md` then `BACKLOG.md`).
+  So a hook adding the `Write`/`Edit` trigger the previous line lacks should dedupe the same way -- one delivery per rule per session -- to match the existing behaviour rather than nagging on every write, *unless* the hook can key dedup per agent instead (next line) -- that reaches every subagent once, which per-session dedup structurally cannot.
+- A `PreToolUse` payload's `session_id` and `transcript_path` are both byte-identical between the main thread and every one of its subagents; only `agent_id` differs, present on a subagent's payload and absent on the main thread's (probed, v2.1.238).
+  So a hook deduping on `session_id` or `transcript_path` alone delivers to whichever agent writes first and silently skips every other agent in the session -- the `developer`/`documenter` agents that do most of a session's actual Writes chief among them.
+  Key dedup on `agent_id` (falling back to `session_id` for the main thread, which carries none) to reach each agent once instead.
 - A subagent's initial context carries the whole `CLAUDE.md` hierarchy the main conversation loads, project rules included (documented, v2.1.238).
 - `SessionStart` `additionalContext` reaches the main thread only; a spawned subagent never receives it (probed, v2.1.238).
   Two runs, with a control confirming the hook fired and the main thread had it.

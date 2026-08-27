@@ -1,6 +1,6 @@
 # ADR-0024: Track global agent config in .config/agents and symlink it into ~/.claude
 
-Status: Accepted
+Status: Superseded by [ADR-0036](0036-claude-config-dir-over-binds.md)
 Date: 2026-08-16
 
 ## Context

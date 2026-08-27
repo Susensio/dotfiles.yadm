@@ -13,7 +13,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from utils import inform, payload
+from utils import inform, payload, project_root
 
 # Biome's domain, minus what it cannot parse. Leaving yaml out is deliberate:
 # biome reports an unsupported path as exit 1, which would read here as the
@@ -36,20 +36,8 @@ DEFAULTS = {
 # Where a project keeps the formatter versions it pins.
 BIN_DIRS = ("node_modules/.bin", ".venv/bin")
 
-# Any of these means a project starts here. A file in no project at all is
-# formatted where it sits.
-ROOT_MARKERS = (".git", "pyproject.toml", "package.json", "Cargo.toml", "go.mod")
-
 TIMEOUT = 20  # Under the hook's own timeout, so this guard fires first.
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")  # Formatters colour diagnostics; strip it.
-
-
-def project_root(path):
-    """Where this file's project starts, or its own directory if it is in none."""
-    return next(
-        (d for d in path.parents if any((d / m).exists() for m in ROOT_MARKERS)),
-        path.parent,
-    )
 
 
 def resolve(command, root):

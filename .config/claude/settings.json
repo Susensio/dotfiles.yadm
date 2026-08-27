@@ -1,0 +1,123 @@
+{
+  "env": {
+    "CLAUDE_CODE_DISABLE_MOUSE_CLICKS": "1",
+    "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "WebSearch",
+      "Bash(col -b)",
+      "Bash(gh search *)",
+      "Bash(command -v *)",
+      "Bash(git check-ignore *)",
+      "Bash(yadm ls-files *)",
+      "Bash(claude --version)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(yadm push:*)",
+      "Bash(rm -r:*)",
+      "Bash(rm -R:*)",
+      "Bash(rm -fr:*)",
+      "Bash(rm -fR:*)",
+      "Bash(rm --recursive:*)",
+      "Agent(leader)",
+      "Artifact",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "DesignSync",
+      "NotebookEdit",
+      "PushNotification",
+      "RemoteTrigger",
+      "ScheduleWakeup"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "opus",
+  "skillOverrides": {
+    "design": "user-invocable-only",
+    "dataviz": "user-invocable-only",
+    "artifact-design": "user-invocable-only",
+    "artifact-diagramming": "user-invocable-only",
+    "artifact-capabilities": "user-invocable-only",
+    "loop": "user-invocable-only",
+    "schedule": "user-invocable-only",
+    "claude-api": "off",
+    "update-config": "name-only",
+    "run": "name-only",
+    "keybindings-help": "name-only"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_CONFIG_DIR/hooks/prefer-rich-cli.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --script $CLAUDE_CONFIG_DIR/hooks/rules-on-write.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_CONFIG_DIR/hooks/autoformat.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh \"$CLAUDE_CONFIG_DIR/statusline.sh\""
+  },
+  "enabledPlugins": {
+    "gruvbox@claude-themes": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-themes": {
+      "source": {
+        "source": "github",
+        "repo": "matcra587/claude-themes"
+      }
+    }
+  },
+  "outputStyle": "Concise",
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "network": {
+      "allowedDomains": ["*"]
+    },
+    "filesystem": {
+      "allowWrite": [
+        "/home/susensio/.config/claude",
+        "/home/susensio/.config/claude/jobs/*/tmp",
+        "/home/susensio/.local/share/yadm/repo.git",
+        "/home/susensio/.local/state/agy-sandbox"
+      ]
+    }
+  },
+  "syntaxHighlightingDisabled": false,
+  "theme": "custom:gruvbox:gruvbox-dark-ansi",
+  "verbose": false,
+  "preferredNotifChannel": "terminal_bell"
+}
