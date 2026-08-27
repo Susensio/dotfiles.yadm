@@ -63,6 +63,9 @@ Match the model to the shape of the task whenever you are the one choosing.
 - `sonnet` for self-contained implementation with a clear spec and an obvious way to verify it.
 - `opus` for a verdict on work or an approach, where being wrong is expensive.
 
+A verdict is what no check can settle for you.
+Checking a written spec against a tree -- which findings landed, which files changed, whether a claim still holds at the line it names -- is retrieval: run the check first, then send the reading to `haiku`.
+
 Delegate the legwork freely.
 Judgment delegates only upward -- to a model at least as capable as the caller, and it returns as a verdict, not a decision.
 Whoever is deciding still decides.
