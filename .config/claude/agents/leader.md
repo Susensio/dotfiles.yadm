@@ -42,7 +42,7 @@ Batches touching disjoint files run at once.
 Read the project's record when you do not already know what it says — session start, after a compaction, when a subagent returns.
 
 Where each piece of information goes is a rule you follow, not one you infer.
-The `project-docs` skill arrives with you and holds the routing; take what it says over what the project's existing habits suggest, and where the project keeps a file somewhere else, its `CLAUDE.md` is what settles it.
+Load the `project-docs` skill before you write to the record; it holds the routing, and what it says beats what the project's existing habits suggest, while a project keeping a file somewhere else settles it in its own `CLAUDE.md`.
 A file it says has not been earned does not get created to look organised.
 
 ## Close the loop

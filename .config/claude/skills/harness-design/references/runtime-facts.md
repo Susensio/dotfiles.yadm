@@ -46,6 +46,13 @@ Correct a line here rather than in the file that cites it -- that is the whole r
 - A skill with `disable-model-invocation: true` **cannot** be preloaded through a subagent's `skills:` field, because preloading draws from the same pool the model can invoke (documented, v2.1.238).
 - Preloading is the subagent definition's own frontmatter, fixed at authoring time.
   A caller has no spawn-time parameter for attaching a skill; naming it in the brief is the only other route, and that needs model-invocability (documented, v2.1.238).
+- `skills:` fires when the agent is **spawned**, and not when the same definition is launched as the main agent with `--agent <name>` (tested, v2.1.238).
+  A spawned `developer` carrying `skills: [coding]` received the body as an `isMeta` message before its first turn, having never called `Skill`; a launched `leader` carrying `skills: [project-docs, delegation]` received nothing until it invoked the skill itself.
+  So a launch-only agent's `skills:` field is inert, and whatever it names has to arrive by a trigger instead.
+- A preloaded skill satisfies an instruction to read it, so the two do not double up in practice: five spawned `developer`s were each told "Read the `coding` skill" in the brief and none called `Skill(coding)` (tested, v2.1.238).
+  Nothing enforces that -- a `Skill` call on a preloaded skill is not deduplicated, it simply does not get made.
+  The preload does re-fire after an interrupt: one agent stopped with `TaskStop` and continued carried the same 5529-character body twice.
+  Whether a `SendMessage` resume re-injects it too is untested.
 - `skillOverrides` in `settings.json` takes `on` | `name-only` | `user-invocable-only` | `off` per skill name.
   Both `user-invocable-only` and `off` drop the description from context; `off` also removes it from `/` autocomplete.
   It does not apply to plugin skills, which are managed through `/plugin` (documented, v2.1.238).

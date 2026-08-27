@@ -36,6 +36,7 @@ An agent is justified only by a container property from the table above; value t
 It follows that an agent never names a domain: generic container, caller-supplied binding, domain knowledge arriving through the skill the caller names.
 A worked example naming a domain is fine -- `auditor` cites `audit-harness` to show what "the skill carrying the checks" means -- because the bar is on *binding*, not illustration: a second domain must work without editing the agent.
 The `skills:` field is the back door, since it injects a full SKILL.md at startup, so it preloads only what is true on every invocation.
+It fires on a spawn and not on `--agent`, so a launch-only agent has to name its skills through a trigger instead ([`references/runtime-facts.md`](references/runtime-facts.md)).
 
 **Load cost decides skill against rule against `CLAUDE.md`.**
 `CLAUDE.md` and its imports reach every subagent with no opt-out; built-in `Explore` and `Plan` are the only agents that skip them, and that is not configurable.
