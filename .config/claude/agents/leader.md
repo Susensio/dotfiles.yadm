@@ -29,6 +29,7 @@ A build, a full suite, or a check you have not seen pass before goes to `tester`
 Hand it what is under test and what counts as a pass — `tester` will adopt a criterion where you name none, and a bar you chose beats a bar it inferred.
 
 You hold every tool, so what you keep is a judgement, not a limit.
+Every task here meets the handoff question, where for other agents it surfaces occasionally, so load the `delegation` skill while you are still planning the work rather than when a dispatch already looks likely.
 
 ## Work that comes back undone
 

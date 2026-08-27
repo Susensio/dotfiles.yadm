@@ -89,3 +89,10 @@ All probed at v2.1.238, against a throwaway `CLAUDE_CONFIG_DIR`.
 - A `PostToolUse` hook printing to stdout and exiting 0 tells the model nothing: that stdout reaches the debug log, never the transcript (tested, v2.1.223).
   Feedback needs `hookSpecificOutput.additionalContext` as JSON on stdout, or exit 2 to surface stderr.
 - `hookSpecificOutput` requires `hookEventName` beside it; a top-level `additionalContext` fails schema validation and is discarded in silence (tested, v2.1.223).
+- A `SessionStart` payload names the launched agent in `agent_type` -- `"leader"` under `--agent leader` -- and omits the key entirely on a default launch, so its absence is the test for one (probed, v2.1.238).
+  Alongside it: `session_id`, `transcript_path`, `cwd`, `hook_event_name`, and `source`, which read `startup` on a `-p` launch.
+- `additionalContext` carrying a skill body suppresses that skill's later `Skill` call: 0/5 runs called it with the hook against 5/5 without (probed, v2.1.238).
+  The body alone does it; the native preload's `<command-name>`/`<skill-format>` marker block is not needed, and the injection lands as an `attachment` record of type `hook_additional_context` rather than the `isMeta` user message the native paths produce.
+  Suppression is the model reading it as known, not an enforced dedup -- nothing stops a second load (see below).
+- Loading a skill twice injects the body twice; there is no deduplication (tested, v2.1.238).
+  Observed where an agent called `Skill` on the same skill twice in one session -- `git-commit` at 2808 and 2815 characters, `tmux_helper` at records 13 and 1100.
