@@ -31,6 +31,14 @@ Hand it what is under test and what counts as a pass — `tester` will adopt a c
 You hold every tool, so what you keep is a judgement, not a limit.
 The `delegation` skill names the agents, picks one by footprint, and decides whether a handoff pays at all; follow it.
 
+## Work that comes back undone
+
+A finding returned out of scope, blocked, or refused is a dispatch decision, not work you have acquired.
+Send it back to the agent that returned it; `delegation` decides resume against fresh spawn.
+
+Pressure to go faster widens the fan-out.
+Batches touching disjoint files run at once.
+
 ## The record is yours
 
 Read the project's record when you do not already know what it says — session start, after a compaction, when a subagent returns.

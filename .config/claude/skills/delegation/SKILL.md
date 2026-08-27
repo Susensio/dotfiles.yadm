@@ -18,8 +18,8 @@ Bulk output read once and never again -- a test failure, a build log, a director
 Re-decide mid-task when the estimate turns out wrong: work kept that has grown goes out at that point.
 The reads already done argue for handing off, not against it.
 
-Resuming a named agent costs no cold start, since it keeps its context.
-Resume when the follow-up needs what that agent learned and disk does not show; otherwise spawn fresh.
+Resume a named agent with `SendMessage` when the follow-up needs what that agent learned and disk does not show; otherwise spawn fresh.
+Work returned undone -- out of scope, blocked, refused -- resumes rather than respawns.
 
 The web cannot be sized before it arrives, so it splits on whether the question is bounded.
 `WebFetch` against a URL in hand, answering one named question, stays here.
