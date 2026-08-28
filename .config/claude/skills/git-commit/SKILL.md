@@ -28,6 +28,7 @@ description: Stages and commits pending work as atomic commits — one concern e
 5. **Message:** read `git log` first and match the existing history — its casing, its mood, and whether it uses conventional-commit prefixes.
    The repo's own record is authoritative; do not impose a convention it does not already follow.
    **Fallback:** a repo with no history, or too little to read a convention from, gets conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.
+   Never append a `Co-Authored-By`/AI-attribution trailer unless the repo's own history already carries one — the default Bash-tool commit instructions add it uninvited, and this overrides that default.
 6. **Decision check:** if a concern reverses a prior decision, or adopts a constraint for a non-obvious reason, say so before committing — it may want an ADR.
    A commit is where a decision lands, and the only moment it is still obvious that one was made.
 7. Commit with `git commit -m "<message>"`.
