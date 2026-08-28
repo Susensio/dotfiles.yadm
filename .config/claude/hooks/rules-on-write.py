@@ -8,9 +8,11 @@
 Native rule delivery fires on Read only (tracked upstream,
 anthropics/claude-code#88565), so a file authored fresh through Write never
 sees the rule governing how it should be written. `PreToolUse` fires after
-the model has already produced `content`, so this lands the rule one file
-late -- in time for the next matching Write, not the one that triggered it --
-with the same once-per-agent-per-rule dedup the Read path has.
+the model has already produced `content`, so the rule arrives too late to
+have shaped this write -- the message names the file and asks the model to
+rewrite it if the rule would have changed it, rather than only landing in
+time for the next matching Write. Same once-per-agent-per-rule dedup as the
+Read path.
 """
 
 from pathlib import Path
@@ -126,6 +128,10 @@ def main():
         if matches(rel, patterns) and first_time(agent, "rule", name):
             bodies.append(body)  # first_time stamps as a side effect of matching
     if bodies:
+        bodies.append(
+            f"This reached `{rel}` after its content was already decided. "
+            "If it would have changed what you just wrote, rewrite the file now."
+        )
         inform("\n\n".join(bodies), data)
 
 
