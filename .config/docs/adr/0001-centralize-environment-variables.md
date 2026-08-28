@@ -13,7 +13,7 @@ That only reaches shells launched after the edit, and never reaches `systemd --u
 ## Decision
 
 Set all environment variables as static `KEY=VALUE` files under `environment.d/` (`10_xdg.conf`, `11_path.conf`, `tools.conf`, `fzf.conf`, `ls_colors.conf`), read by `systemd-environment-d-generator` at session start.
-This becomes the single source of truth; see `ENVIRONMENT_ARCHITECTURE.md` §3.
+This becomes the single source of truth; see `environment-architecture.md` §3.
 
 ## Consequences
 

@@ -6,7 +6,7 @@ Date: 2026-08-19
 ## Context
 
 The repo's markdown had no declared line-break convention and had drifted into two.
-Forty of forty-five harness and doc files were hard wrapped near 80 columns; `GLOBAL.md`, the `git-commit` skill and parts of the `adr` skill ran one long line per paragraph, and `ENVIRONMENT_ARCHITECTURE.md` did too.
+Forty of forty-five harness and doc files were hard wrapped near 80 columns; `GLOBAL.md`, the `git-commit` skill and parts of the `adr` skill ran one long line per paragraph, and `environment-architecture.md` did too.
 Nothing recorded which was intended, so each edit picked whichever the surrounding file happened to use.
 
 The cost falls on review rather than reading.

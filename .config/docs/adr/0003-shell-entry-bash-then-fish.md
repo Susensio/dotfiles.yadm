@@ -6,7 +6,7 @@ Date: 2026-06-02
 ## Context
 
 Fish is the primary interactive shell but isn't POSIX, and login managers, `ssh`, and scripts that `source` a profile all expect a POSIX entry point.
-Separately, `gnome-terminal-server` inherits its environment from whatever session first activated it and stays stuck with it; a running terminal server doesn't see later environment changes, so every new tab it spawns starts stale unless something re-pulls the environment at shell start (`ENVIRONMENT_ARCHITECTURE.md` §4).
+Separately, `gnome-terminal-server` inherits its environment from whatever session first activated it and stays stuck with it; a running terminal server doesn't see later environment changes, so every new tab it spawns starts stale unless something re-pulls the environment at shell start (`environment-architecture.md` §4).
 
 ## Decision
 

@@ -41,7 +41,7 @@ Adding one reaches every project at once, which is what makes the tier worth hav
 ADR-0023's observation that the rules are also correct for a subagent that delegates further still holds -- subagents do get the Agent tool -- but a skill serves that case too.
 
 Doctrine now has two homes and the boundary needs watching: ADRs record a decision at a moment and are immutable, the `harness-design` skill is current practice and gets edited.
-The same split as ADR-0022 drew between `docs/adr/` and `ENVIRONMENT_ARCHITECTURE.md`, one level in.
+The same split as ADR-0022 drew between `docs/adr/` and `environment-architecture.md`, one level in.
 If the two disagree, the ADR is history and the rules file is policy.
 
 Cost: the delegation policy now fires on a description match rather than being unconditionally present.

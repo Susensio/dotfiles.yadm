@@ -7,7 +7,7 @@ Date: 2026-08-26
 
 Tracing where a commit-ownership rule belonged surfaced three defects in the record set, none of which was a wrong decision.
 
-ADR-0022's routing line named `ENVIRONMENT_ARCHITECTURE.md` as the destination for "what the setup is now", a brief that document never held -- it explains environment-variable flow and nothing wider.
+ADR-0022's routing line named `environment-architecture.md` as the destination for "what the setup is now", a brief that document never held -- it explains environment-variable flow and nothing wider.
 ADR-0032 recorded content as having moved to `leader`, and `leader.md` never received it; the claim was written as completed fact and was never true.
 ADR-0026 read `Accepted` while ADR-0030 had already reversed its placement rule, which ADR-0030 states exactly and ADR-0026 had no way to advertise.
 
