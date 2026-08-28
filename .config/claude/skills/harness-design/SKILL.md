@@ -75,6 +75,14 @@ Three copies of one skill drifting apart, and a project agent silently shadowing
 Delegation policy shipped into every spawn, including the agents that cannot delegate -- and worse than the token cost, context files arrive under an injected reminder that this content may not be relevant and should not be acted on unless it clearly is, so an off-topic rule teaches the model to discount the rules sitting beside it.
 Project state buried under `.claude/` where someone returning to the repo will not find it, and a runbook copied into a skill body, where the copy the person does not read is the copy that goes stale.
 
+## R-harness-map. `docs/harness.md` describes the harness; whoever changes the harness updates it.
+
+Adding or removing an entry point, a subagent, or a hook -- anything that would change what a reader of `docs/harness.md` believes -- carries the doc edit in the same change, not a follow-up.
+It is the one context file a person reads to onboard into `claude/`; keeping it current is the editor's responsibility, not the reader's, because a stale map is worse than none -- it reads as authoritative and is not.
+Skip it only where the change is invisible from the doc's altitude: rewording a skill's internal instructions, not what it is for or when it fires.
+
+*Failure it prevents:* `docs/harness.md` naming an agent already deleted, or silent about one that has been running for months -- trusted by the next reader precisely because nothing marked it stale.
+
 ## R-trigger. A description is a trigger, not a label; a body is instructions, not commentary.
 
 The description says what it does, then when to use it, and for an agent what comes back.
