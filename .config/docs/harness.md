@@ -1,9 +1,10 @@
 # Claude Harness
 
-This explains how Claude Code is configured in this repo: the two ways to start a session, what each piece of `claude/` does, and the hooks that quietly fix behaviour the model would otherwise get wrong.
-Land here first if you're an agent picking up work in `.config/claude/`, or a human trying to understand what's running.
+This explains the global userspace Claude Code configuration, which applies across all projects for this user: the two ways to start a session, what each piece of `~/.config/claude/` does, and the hooks that quietly fix behaviour the model would otherwise get wrong.
+Land here first if you're an agent picking up work in `~/.config/claude/`, or a human trying to understand what's running globally.
+Note that this doc describes the global userspace harness, not a project-local harness (like `.claude/` in a specific repository).
 
-All of it lives under `claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
+All of it lives under `~/.config/claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
 
 ## Two entry points
 
@@ -45,7 +46,7 @@ Some are user-invocable (`/adr`, `/git-commit`, `/report-issue`...), others fire
 They load automatically on a matching file's **read**, natively — no invocation needed.
 They also load on a matching file's **write**\*, because a file created fresh is never read first: `rules-on-write.py` (below) backfills that gap, after the fact, and asks the model to rewrite the file if the rule would have changed it.
 
-\* Only *this repo's* rules do — the write-time load is a hook, not a Claude Code feature.
+\* This write-time load is powered by a custom hook in this harness, not a native Claude Code feature.
 
 ## Hooks: fixing what the runtime doesn't
 
@@ -78,7 +79,7 @@ Each one exists because something *should* happen automatically and doesn't, in 
 
 ```
 claude/
-├── CLAUDE.md       # always-loaded instructions (this repo's + user-global)
+├── CLAUDE.md       # always-loaded instructions (user-global)
 ├── settings.json   # hooks, permissions, model, statusline, sandbox
 ├── agents/         # leader + the five subagents above
 ├── skills/         # knowledge loaded on demand
