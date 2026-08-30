@@ -8,7 +8,11 @@ install() {
 }
 
 upgrade() {
-  mise upgrade --bump "$@"
+  mise upgrade "$@" --bump
+}
+
+alias() {
+  mise tool-alias set "$@"
 }
 
 remove() {
@@ -39,6 +43,7 @@ Commands:
   install [TOOL@VER]...      Install one or more global tools
   remove  [TOOL]...          Remove one or more global tools
   upgrade [TOOL]...          Upgrade all or specific installed packages
+  alias   [NAME] [TOOL]      Set up an alias for a given tool
   list [--installed] [TOOL]  Search for tools, or list installed global tools
   show    [TOOL]             Show details about a specific tool
 
@@ -55,6 +60,7 @@ main() {
     install) install "$@" ;;
     upgrade) upgrade "$@" ;;
     remove) remove "$@" ;;
+    alias) alias "$@" ;;
     list) list "$@" ;;
     show) show "$@" ;;
     -h | --help) usage ;;

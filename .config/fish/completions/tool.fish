@@ -23,6 +23,9 @@ complete -c tool -n "__fish_seen_subcommand_from remove" -a "(__fish_tool_list_i
 complete -c tool -n __fish_use_subcommand -a upgrade -d 'Upgrade all or specific global tools'
 complete -c tool -n "__fish_seen_subcommand_from upgrade" -a "(__fish_tool_list_installed)"
 
+# Alias
+complete -c tool -n __fish_use_subcommand -a alias -d 'Set up an alias for a five tool'
+
 # List: Handle the --installed flag
 complete -c tool -n __fish_use_subcommand -a list -d 'Search for tools, or list installed tools'
 complete -c tool -n "__fish_seen_subcommand_from list" -l installed -d 'List only installed global tools'

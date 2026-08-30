@@ -1,4 +1,9 @@
 [tools]
+aichat = { version = "latest", extra_assets = [
+  "raw://v@scripts/completions/aichat.fish",
+  "raw://v@scripts/shell-integration/integration.fish",
+] }
+antigravity = { version = "latest", rename_exe = "agy" }
 bat = "latest"
 claude = "latest"
 delta = { version = "latest", extra_assets = [
@@ -13,16 +18,20 @@ fzf = { version = "latest", extra_assets = [
   "raw://v@man/man1/fzf.1",
 ] }
 gh = "latest"
-"github:google-antigravity/antigravity-cli" = { version = "latest", rename_exe = "agy" }
 "github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
 glow = "latest"
 helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
 herdr = { version = "latest", gen_completions = "completion fish" }
+just = "latest"
 lazygit = "latest"
 node = "latest"
+pandoc = "latest"
 "pipx:howdoi" = "latest"
+"pipx:tlp-ui" = "latest"
+python = "latest"
 ripgrep = "latest"
 rust = "latest"
+tealdeer = "latest"
 tmux = { version = "latest", extra_assets = [
   "raw://tmux/tmux:tmux.1",
 ] }
@@ -38,3 +47,7 @@ experimental = true
 
 [settings.github]
 use_git_credentials = true
+
+[tool_alias]
+antigravity = "github:google-antigravity/antigravity-cli"
+llm = "pipx:llm"

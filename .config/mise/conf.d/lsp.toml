@@ -1,4 +1,5 @@
 [tools]
+biome = "latest"
 "cargo:https://github.com/nushell/nufmt" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:fish-lsp" = "latest"
