@@ -57,7 +57,7 @@ Each brief stands alone -- these agents have no memory of the conversation that 
 ## The agent carries its model
 
 Each agent is pinned to the model its work needs, so choosing the agent has already chosen the model.
-Pass no `model:` on a spawn; passing one discards the pin.
+Pass no `model:` on a spawn nor inherit the main agent's; passing one discards the pin.
 Reach for it only to go cheaper than the pin -- work that seems to need a dearer model than the agent carries is work for a different agent.
 
 A verdict is what no check can settle for you.
