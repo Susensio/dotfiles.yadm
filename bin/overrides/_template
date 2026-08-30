@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source _super
+
+# Pre-run logic or env vars here
+
+super "$@"

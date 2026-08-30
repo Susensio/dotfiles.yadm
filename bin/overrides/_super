@@ -1,0 +1,36 @@
+# Helper library for ~/bin/overrides wrappers.
+#
+# Emulates OOP `super()` for CLI commands by stripping the caller's directory from
+# PATH to locate and delegate to the underlying binary without recursive loops.
+# Canonicalizes PATH entries with `pwd -P` to ensure symlinked directories match.
+
+# Resolves the absolute path to the underlying command down the PATH hierarchy.
+# Useful when the wrapper needs to intercept or sandbox execution (e.g. bwrap).
+super_bin() {
+    local caller_file="${BASH_SOURCE[1]}"
+    local caller_dir
+    caller_dir=$(cd -- "$(dirname -- "$caller_file")" 2>/dev/null && pwd -P || dirname -- "$caller_file")
+    local cmd_name="${caller_file##*/}"
+    local clean_path=""
+
+    IFS=: read -ra entries <<< "$PATH"
+    for entry in "${entries[@]}"; do
+        [ -z "$entry" ] && continue
+        # Resolve symlinks so entry comparison matches canonical caller_dir
+        local resolved
+        resolved=$(cd -- "$entry" 2>/dev/null && pwd -P || echo "$entry")
+        [ "$resolved" = "$caller_dir" ] && continue
+        clean_path="${clean_path:+${clean_path}:}$entry"
+    done
+
+    PATH="$clean_path" command -v "$cmd_name"
+}
+
+# Directly replaces the current process with the underlying command.
+super() {
+    local bin
+    bin=$(super_bin)
+    exec "$bin" "$@"
+}
+
+
