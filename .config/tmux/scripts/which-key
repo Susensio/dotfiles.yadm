@@ -32,7 +32,7 @@ import time
 SELF = pathlib.Path(__file__).resolve()
 CONFIG_DIR = SELF.parent.parent
 SEP = "\x1f"  # list-keys field separator, safe inside notes and commands
-DELAY = 1  # idle seconds before the first menu of a chain
+DELAY = 0.7  # idle seconds before the first menu of a chain
 ENTRY = "prefix"  # the table C-Space enters, so reaching it is a new chain
 FLAG = "@wk_menu"  # holds the client whose menu is up: it is in menu mode
 BREAK = None  # a row with this instead of a key is a rule between groups
@@ -218,18 +218,24 @@ def main(args):
     # mode the last one ended in is over.
     if table == ENTRY:
         tmux("set", "-gu", FLAG)
+
+    arguments = menu(table, client)
+    if not arguments:
+        return
+
     if state(client, "#{%s}" % FLAG) != client:
         time.sleep(DELAY)  # not in menu mode yet, so this menu is still earned
-    # A keypress before the idle delay elapsed has left the table.
+
+    # A keypress before the idle delay elapsed or while preparing has left the table.
     if state(client, "#{client_key_table}") != table:
+        tmux("set", "-gu", FLAG)
         return
-    arguments = menu(table, client)
-    if arguments:
-        # Set before drawing, since display-menu blocks until the menu is
-        # dismissed -- by which time the next key has already read the flag.
-        tmux("set", "-g", FLAG, client)
-        tmux("display-menu", "-c", client, "-T", f" {table.upper()}... ",
-             "-x", RIGHT, "-y", "S", *arguments)
+
+    # Set before drawing, since display-menu blocks until the menu is
+    # dismissed -- by which time the next key has already read the flag.
+    tmux("set", "-g", FLAG, client)
+    tmux("display-menu", "-c", client, "-T", f" {table.upper()}... ",
+         "-x", RIGHT, "-y", "S", *arguments)
 
 
 if __name__ == "__main__":
