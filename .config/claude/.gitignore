@@ -1,0 +1,22 @@
+# Only the hand-maintained config is version controlled. Everything else here
+# is credentials, session transcripts, or churn.
+*
+!.gitignore
+!CLAUDE.md
+!settings.json
+!keybindings.json
+!statusline.sh
+!agents/
+!agents/**
+!skills/
+!skills/**
+!rules/
+!rules/**
+!hooks/
+!hooks/**
+
+# Regenerable, even inside the whitelisted config dirs (last match wins).
+__pycache__/
+*.pyc
+.ruff_cache/
+.claude/
