@@ -106,7 +106,8 @@
     "command": "sh \"$CLAUDE_CONFIG_DIR/subagent-statusline.sh\""
   },
   "enabledPlugins": {
-    "gruvbox@claude-themes": true
+    "gruvbox@claude-themes": true,
+    "skill-creator@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-themes": {
@@ -121,7 +122,9 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "network": {
-      "allowedDomains": ["*"]
+      "allowedDomains": [
+        "*"
+      ]
     },
     "filesystem": {
       "allowWrite": [
