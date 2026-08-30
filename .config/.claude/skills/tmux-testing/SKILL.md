@@ -36,17 +36,16 @@ If a check genuinely cannot be done in isolation, stop and tell the user what yo
 ## 1. Pick the lightest check that answers the question
 
 - Anything queryable as plain state — options, formats, key tables — reads out of `tmux-test eval`, `display-message -p`, or `show-options`.
-- The nested-session recipe only when something must actually be *seen*.
+- A visual check only when something must actually be *seen*.
 - Run `tmux -V` before trusting an option or format: both vary by version.
 
 `capture-pane` cannot see popups, menus, or other client-side overlays — it only dumps the pane content buffer.
-Never trust a `capture-pane` check as proof a popup rendered correctly.
+Never trust a bare `capture-pane` check as proof a popup rendered correctly.
 
 ## 2. Visual checks (popups, menus, overlays)
 
-Nest a second tmux server that attaches to the first, and capture *that* pane instead.
-The `nested-*` subcommands of `tmux-test` drive it — spawn, run, capture, eval, kill.
-Full recipe, gotchas, and a Python driver pattern: `references/nested_session_visual_testing.md`.
+Because popups are client-side overlays, they don't appear in the pane buffer. To see them, we use the `tui-testing` skill to watch a tmux client attach to our test server.
+Full recipe, gotchas, and a Python driver pattern: `references/visual_testing.md`.
 
 Captured frames are large and often need several tries to time right.
 That is work for the `tester` agent, not for the calling conversation — hand it over with what's under test and what counts as a pass, and get back a verdict.
