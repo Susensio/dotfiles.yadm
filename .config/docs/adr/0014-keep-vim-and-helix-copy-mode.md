@@ -15,7 +15,7 @@ Same keys, opposite behavior on the first press — not a keymap difference, a g
 
 Keep both grammars, switched by `@copy_profile` (`vim` or `helix`), default `helix`.
 Everything after the profile `%if`/`%else` block in `conf.d/21_copy.conf` is shared.
-The helix branch needs a synthetic per-pane `@copy_select` flag to track select-mode, reset on every fresh entry into copy-mode via a `pane-mode-changed` hook — `y` and mouse-drag-end exit copy-mode through `copy-pipe-and-cancel` without ever reaching the shared Escape binding that would otherwise clear it.
+The helix branch needs a synthetic per-pane `@copy_select` flag to track select-mode, reset on every fresh entry into copy-mode via a `pane-mode-changed` hook — `y` and mouse-drag-end exit copy-mode through `copy-pipe-and-cancel` without ever reaching the Escape binding that would otherwise clear it. Escape is itself per-profile: helix exits copy-mode outright and only swallows the key while the flag is set, to fall back to normal mode, whereas vim clears a live selection first.
 
 ## Consequences
 
