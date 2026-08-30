@@ -7,7 +7,6 @@ import readline
 from pathlib import Path
 
 if readline.get_current_history_length() == 0:
-
     state_home = os.environ.get("XDG_STATE_HOME")
     if state_home is None:
         state_home = Path.home() / ".local" / "state"
@@ -22,11 +21,12 @@ if readline.get_current_history_length() == 0:
 
     try:
         readline.read_history_file(history)
-    except OSError: # Non existent
+    except OSError:  # Non existent
         pass
 
     def write_history(history):
         import readline
+
         try:
             readline.write_history_file(history)
         except OSError:

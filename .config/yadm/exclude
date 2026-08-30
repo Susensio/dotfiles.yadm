@@ -12,6 +12,7 @@
 !/.config/cidm/
 !/.config/fish/
 !/.config/mise/
+!/.config/python/
 !/.config/environment.d/
 !/.config/docs/
 !/.config/biome.json
