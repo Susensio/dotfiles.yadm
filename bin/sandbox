@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+
+DOTFILES_BIND=()
+if [[ "${1:-}" =~ ^(--dotfiles|-d|--yadm|-y)$ ]]; then
+  DOTFILES_BIND=(
+    --bind-try "$HOME/.local/share/yadm" "$HOME/.local/share/yadm"
+    --bind-try "$HOME/bin" "$HOME/bin"
+  )
+  shift
+fi
+
+if [ $# -eq 0 ]; then
+  echo "Usage: sandbox [--dotfiles|-d] <command> [args...]"
+  exit 1
+fi
+
+WORKSPACE=$(pwd)
+
+exec bwrap \
+  --ro-bind / / \
+  --dev /dev \
+  --proc /proc \
+  --unshare-all \
+  --share-net \
+  --tmpfs /tmp \
+  --tmpfs "/run/user/$(id -u)" \
+  --tmpfs "$HOME/.cache" \
+  --tmpfs "$HOME/.local/state" \
+  --bind-try "$HOME/.config/claude" "$HOME/.config/claude" \
+  --bind-try "$HOME/.gemini" "$HOME/.gemini" \
+  "${DOTFILES_BIND[@]}" \
+  --bind "$WORKSPACE" "$WORKSPACE" \
+  --chdir "$WORKSPACE" \
+  "$@"
