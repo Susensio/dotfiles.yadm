@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PREFIX=tuitest
+
+usage() {
+    cat <<'EOF'
+tui-test — a headless terminal wrapper for visually testing TUIs.
+
+  spawn <cmd> [w] [h]     start a headless terminal (w=100, h=24 by default)
+                          running the given command, prints its <id>
+  send-keys <id> <keys>   send keystrokes to the terminal (e.g. "Escape", "Enter", "i")
+  capture <id>            capture the screen, formatted for reading (cat -A | nl -ba)
+  kill <id>               kill the terminal and clean up
+  sweep                   kill every leftover tui-test terminal
+
+Under the hood, this uses a throwaway tmux server to emulate the terminal and
+store the screen buffer.
+EOF
+}
+
+socket_path() { echo "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$1"; }
+
+# Hide our own tmux from the TUI being tested
+unset TMUX
+
+cmd_spawn() {
+    local cmd=${1:?usage: spawn <cmd> [width] [height]}
+    local w=${2:-100} h=${3:-24}
+    local id="${PREFIX}_$$_${RANDOM}"
+    
+    mkdir -p "$(dirname "$(socket_path x)")"
+    tmux -L "$id" -f /dev/null new-session -d -s term -x "$w" -y "$h" "$cmd"
+    echo "$id"
+}
+
+cmd_send_keys() {
+    local id=${1:?usage: send-keys <id> <keys...>}
+    shift
+    [ $# -gt 0 ] || { echo "send-keys needs at least one key" >&2; exit 1; }
+    case "$id" in
+        "${PREFIX}"_*) ;;
+        *) echo "refusing '$id': not a tui-test id" >&2; exit 1 ;;
+    esac
+    tmux -L "$id" send-keys -t term "$@"
+}
+
+cmd_capture() {
+    local id=${1:?usage: capture <id>}
+    case "$id" in
+        "${PREFIX}"_*) ;;
+        *) echo "refusing '$id': not a tui-test id" >&2; exit 1 ;;
+    esac
+    tmux -L "$id" capture-pane -p -t term | cat -A | sed 's/\$$//' | nl -ba
+}
+
+cmd_kill() {
+    local id=${1:?usage: kill <id>}
+    case "$id" in
+        "${PREFIX}"_*) ;;
+        *) echo "refusing to kill '$id': not a tui-test id" >&2; exit 1 ;;
+    esac
+    tmux -L "$id" kill-server 2>/dev/null || true
+    rm -f "$(socket_path "$id")"
+}
+
+cmd_sweep() {
+    local dir
+    dir="$(dirname "$(socket_path x)")"
+    [ -d "$dir" ] || return 0
+    local s
+    for s in "$dir/${PREFIX}"_*; do
+        [ -e "$s" ] || continue
+        tmux -L "$(basename "$s")" kill-server 2>/dev/null || true
+        rm -f "$s"
+    done
+}
+
+case "${1:-}" in
+    spawn)          shift; cmd_spawn "$@" ;;
+    send-keys)      shift; cmd_send_keys "$@" ;;
+    capture)        shift; cmd_capture "$@" ;;
+    kill)           shift; cmd_kill "$@" ;;
+    sweep)          shift; cmd_sweep "$@" ;;
+    ""|-h|--help|help) usage ;;
+    *) echo "unknown subcommand: $1" >&2; usage >&2; exit 1 ;;
+esac
