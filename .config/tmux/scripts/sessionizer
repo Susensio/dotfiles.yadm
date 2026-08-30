@@ -102,8 +102,10 @@ else
   # Avoid nested popups. TMUX_PARENT is set by scripts/scratchpad when it
   # launches a popup session, so we can detach and re-target its parent
   # client instead of opening a popup inside a popup.
+  # Bare `detach` errors "no current client" when the popup is already gone;
+  # closing it is best-effort.
   if [[ -n "${TMUX_PARENT:-}" ]]; then
-    tmux detach
+    tmux detach 2>/dev/null || true
     export TMUX=$TMUX_PARENT
   fi
 
