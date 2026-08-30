@@ -14,4 +14,5 @@ done
 # Make this system config (sets PATH) lower precedence, so user config can override.
 if [[ -f /usr/lib/environment.d/99-environment.conf ]]; then
   sudo mv --verbose /usr/lib/environment.d/99-environment.conf /usr/lib/environment.d/00-environment.conf
+  ln -sf /dev/null /usr/lib/environment.d/99-environment.conf
 fi
