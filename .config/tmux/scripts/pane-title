@@ -13,29 +13,53 @@ set -eu
 [[ "${DEBUG:-}" == "1" ]] && set -x
 shopt -s extglob
 
-cmd="${1:-}"
-title="${2:-}"
-sep="${3:- }"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-icon="$("$(dirname "$0")/icon" "$cmd" 2>/dev/null || true)"
+get_icon() {
+  local cmd="$1"
+  [[ -z "$cmd" ]] && return 0
+  "$SCRIPT_DIR/icon" "$cmd" 2>/dev/null || true
+}
 
-cleaned=""
-if [[ -n "$title" ]]; then
-  cleaned="$title"
-  if [[ -n "$cmd" ]]; then
-    if [[ "$title" == "$cmd"* ]]; then
-      rest="${title#"$cmd"}"
-      cleaned="${rest##+([:_ -])}"
-    elif [[ "$title" == *"$cmd" ]]; then
-      rest="${title%"$cmd"}"
-      cleaned="${rest%%+([:_ -])}"
-    fi
+# Strips $cmd if it appears at the start or end of $title,
+# along with any leftover separator punctuation (':', '_', '-', ' ').
+strip_redundant_cmd() {
+  local title="$1" cmd="$2"
+  [[ -z "$title" || -z "$cmd" ]] && { printf '%s' "$title"; return; }
+
+  local sep_chars='[:_ -]'
+
+  if [[ "$title" == "$cmd"* ]]; then
+    # Prefix match: "hx: main.rs" -> "main.rs"
+    local rest="${title#"$cmd"}"
+    printf '%s' "${rest##+($sep_chars)}"
+  elif [[ "$title" == *"$cmd" ]]; then
+    # Suffix match: "main.rs - hx" -> "main.rs"
+    local rest="${title%"$cmd"}"
+    printf '%s' "${rest%%+($sep_chars)}"
+  else
+    printf '%s' "$title"
   fi
-fi
+}
 
-out="$icon"
-[[ -n "$out" && -n "$cmd" ]] && out+=" "
-out+="$cmd"
-[[ -n "$cleaned" ]] && out+="${sep}${cleaned}"
+main() {
+  local cmd="${1:-}"
+  local raw_title="${2:-}"
+  local sep="${3:- }"
 
-printf '%s' "$out"
+  local icon
+  icon="$(get_icon "$cmd")"
+
+  local extra_title
+  extra_title="$(strip_redundant_cmd "$raw_title" "$cmd")"
+
+  local cmd_part="${icon:+$icon }$cmd"
+
+  if [[ -n "$cmd_part" && -n "$extra_title" ]]; then
+    printf '%s%s%s' "$cmd_part" "$sep" "$extra_title"
+  else
+    printf '%s%s' "$cmd_part" "$extra_title"
+  fi
+}
+
+main "$@"
