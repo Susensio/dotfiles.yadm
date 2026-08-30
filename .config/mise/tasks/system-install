@@ -32,7 +32,7 @@ check_execution_context() {
     current_pid=$(ps -o ppid= -p "$current_pid" | tr -d ' ')
   done
 
-  [[ "$original_cmd" =~ --global|-g[[:space:]]|system-install ]]
+  [[ "$original_cmd" =~ --global|-g[[:space:]]|system-install|upgrade ]]
 }
 
 setup_target_dirs() {
@@ -53,12 +53,16 @@ list_links() {
 
 get_installed_tools() {
   # Normalize JSON input based on execution context
+  local filter_tools=("$@")
+
   if [[ -n "$MISE_INSTALLED_TOOLS" ]]; then
     echo "$MISE_INSTALLED_TOOLS" | jq --compact-output '.[]'
     return 0
   fi
-  mise list --installed --global --json |
-    jq --compact-output 'to_entries | map({name: .key, version: .value[].version}) | .[]'
+
+  mise list --installed --global --json  |
+    jq --compact-output 'to_entries | map({name: .key, version: .value[].version}) | .[] |
+    select($ARGS.positional == [] or IN(.name; $ARGS.positional[]))' --args "${filter_tools[@]}"
 }
 
 init_tool_context() {
@@ -70,6 +74,7 @@ init_tool_context() {
   tool[spec]="${tool[name]}@${tool[version]}"
   tool[path]=$(mise where "${tool[spec]}")
   tool[info]=$(mise tool "${tool[name]}" --json 2>/dev/null)
+  tool[description]=$(echo "${tool[info]}" | jq --raw-output '.description // empty')
 
   tool[backend]=$(echo "${tool[info]}" | jq --raw-output '.backend')
   tool[repo]=""
@@ -97,6 +102,7 @@ symlink() {
 # ------------------------------------------------------------------------------
 
 process_extra_assets() {
+  # (raw|release)://[owner/repo:][v@]path
   local extra_assets=()
   readarray -t extra_assets < <(echo "${tool[info]}" | jq -r '.tool_options.extra_assets[]?')
 
@@ -202,16 +208,23 @@ link_node_modules() {
 main() {
   check_execution_context || exit 0
 
-  [[ "${1:-}" == '--list-links' ]] && { list_links; exit 0; }
+  local filter_tools=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --list-links) list_links; exit 0 ;;
+      --only-prune) prune_broken_links; exit 0 ;;
+      -f|--filter) filter_tools+=("$2"); shift 2 ;;
+      -*) shift ;; # Ignore any other unknown flags
+      *) filter_tools+=("$1"); shift ;; # Fallback: append plain positional arguments
+    esac
+  done
 
   prune_broken_links
-  [[ "${1:-}" == '--only-prune' ]] && exit 0
-
   setup_target_dirs
 
   local -A tool
   local tools=()
-  readarray -t tools < <(get_installed_tools)
+  readarray -t tools < <(get_installed_tools "${filter_tools[@]}")
   for tool_json in "${tools[@]}"; do
     init_tool_context "$tool_json"
 
