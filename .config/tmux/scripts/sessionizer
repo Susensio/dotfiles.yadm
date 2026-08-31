@@ -61,13 +61,11 @@ list_sources() {
 
   local session_row_format=$(to_row "SESSION" "#{session_id}" "#{session_name}" "#{session_path}" "${ICONS[TMUX]} #{?@session_pretty_name,#{@session_pretty_name},#S}")
 
-  # 1. Sessions sorted by recent activity
+  # 1. Unattached sessions first, each group sorted by recent activity
   {
-    sessions=$("${TMUX_SCRIPTS}/ls" --mru -F "$session_row_format" 2>/dev/null)
+    sessions=$("${TMUX_SCRIPTS}/ls" --mru --unattached-first -F "$session_row_format" 2>/dev/null)
     if [[ -n "$sessions" ]]; then
-      # Current session goes last
-      echo "$sessions" | tail -n +2
-      echo "$sessions" | head -n 1
+      echo "$sessions"
     fi
     {
       # 2. Zoxide MRU folders

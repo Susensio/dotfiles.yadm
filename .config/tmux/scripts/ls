@@ -7,11 +7,13 @@ MRU_KEY="#{?session_last_attached,#{session_last_attached},#{session_created}}"
 
 format="#{session_name}"
 mru=false
+unattached_first=false
 args=()
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --mru)      mru=true ;;
+    --unattached-first) unattached_first=true ;;
     --detached) args+=('-f' '#{!:#{session_attached}}') ;;
     --id)       format='#{session_id}' ;;
     -F)         format="$2"; shift ;;
@@ -20,7 +22,11 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if $mru; then
+if $mru && $unattached_first; then
+  tmux list-sessions "${args[@]}" -F "#{session_attached}${SEP}${MRU_KEY}${SEP}${format}" \
+    | sort -t "$SEP" -k1,1n -k2,2nr \
+    | cut -d"${SEP}" -f3-
+elif $mru; then
   tmux list-sessions "${args[@]}" -F "${MRU_KEY}${SEP}${format}" | sort -rn | cut -d"${SEP}" -f2-
 else
   tmux list-sessions "${args[@]}" -F "$format"
