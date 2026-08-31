@@ -33,5 +33,5 @@ XDG config repo for `~/.config`, managed with yadm.
 ## tmux/
 
 - Invoke the `tmux-config` skill before any tmux work.
-  It carries the reference docs, the `conf.d/` layout, and the upstream-research routine.
+  It carries the reference docs and the upstream-research routine.
 - Anything run against a server -- a binding, a format, a popup, a fish function that shells out to `tmux` -- is `tmux-testing`, which owns the `-L <socket>` isolation protocol.

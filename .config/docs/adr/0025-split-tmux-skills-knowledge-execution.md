@@ -19,7 +19,7 @@ That argument loses its force once the testing skill *is* the isolation protocol
 
 ## Decision
 
-Split `tmux-helper` along knowledge versus execution — `tmux-config` holds the references, the `conf.d/` layout and the research routine; `tmux-testing` owns the isolation protocol, the `tmux-test` wrapper and the visual-testing recipe — and replace `tmux-tester` with a domain-agnostic `tester` agent that carries only the container discipline and loads the domain's testing skill before running anything.
+Split `tmux-helper` along knowledge versus execution — `tmux-config` holds the references and the research routine; `tmux-testing` owns the isolation protocol, the `tmux-test` wrapper and the visual-testing recipe — and replace `tmux-tester` with a domain-agnostic `tester` agent that carries only the container discipline and loads the domain's testing skill before running anything.
 
 ADR-0021's isolation rules are unchanged and now live in exactly one file, `tmux-testing`; this record supersedes it because its Decision named an agent that no longer exists, not because throwaway-server isolation was reconsidered.
 
@@ -33,3 +33,8 @@ A second domain that earns a tester now needs only a testing skill — no second
 
 Cost: the isolation protocol now arrives through a skill load rather than the agent's own body, so an agent that ignores the instruction to load the skill has nothing else stopping it — the rule is one indirection further from the thing it governs.
 The two skills also have to stay disjoint on their descriptions alone, since neither names the other; if both fire on one task the split costs context instead of saving it.
+
+## Corrections
+
+2026-08-31: the Decision said `tmux-config` holds "the references, the `conf.d/` layout and the research routine".
+The `conf.d/` layout left that skill when it was promoted to the user tier, since the layout is this repository's and the skill is not.

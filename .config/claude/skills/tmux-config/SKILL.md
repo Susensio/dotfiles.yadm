@@ -25,17 +25,11 @@ Beyond that:
 - Run `tmux -V` before trusting any option: syntax and available formats vary by version.
 - Search upstream with `gh search issues ... repo:tmux/tmux` and `gh issue view <n> --repo tmux/tmux`; the maintainer (nicm) often explains the exact mechanism in the comments.
 
-## 2. Directory architecture
-
-`tmux.conf` glob-sources individual config files from `conf.d/`.
-Supporting scripts live in `scripts/` and must be executable.
-Give each discrete topic (keybindings, theme, plugins) its own `.conf` file rather than extending an unrelated one.
-
-## 3. Configuration practices
+## 2. Configuration practices
 
 - **Performance**: limit the use of `#()` in status lines if they cause lag.
   Use robust scripts with caching where appropriate.
 - **Clarity**: unbind default keys explicitly before rebinding them if the behavior changes drastically.
-- **Conflicts**: before adding a binding or option, check it against tmux defaults and the existing `conf.d/` files.
-- **Colour**: tmux style directives (`fg=`, `bg=`) take explicit gruvbox hex from `conf.d/30_gruvbox.conf`, which is the single source of truth -- tmux has no concept of the terminal's ANSI theme to defer to.
-  Scripts whose output prints straight to the terminal use plain ANSI 16-colour escapes (`\e[31m`) instead: the terminal emulator already implements gruvbox at that level, so hardcoding hex there duplicates the palette and pins it in place.
+- **Conflicts**: before adding a binding or option, check it against tmux defaults and against the config files the project already has.
+- **Colour**: tmux style directives (`fg=`, `bg=`) take explicit hex from wherever the project keeps its palette -- tmux has no concept of the terminal's ANSI theme to defer to.
+  Scripts whose output prints straight to the terminal use plain ANSI 16-colour escapes (`\e[31m`) instead: the emulator already implements the theme at that level, so hex there duplicates the palette and pins it in place.
