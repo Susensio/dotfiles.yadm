@@ -10,8 +10,9 @@ Two sources decide what the menu shows:
   list-keys      truth. A declared binding is shown only if it is bound;
                  anything bound but undeclared is appended at the end.
 
-Entering a chain costs DELAY idle seconds. After that the client is in menu
-mode and every further table is drawn as soon as its key is pressed.
+Entering a chain costs DELAY idle seconds; repeat keys restart that delay.
+After that the client is in menu mode and every further table is drawn as soon
+as its key is pressed.
 
 Drawing, sizing, positioning and key capture are display-menu's job. Requires
 tmux 3.7. Every failure path exits 0: run-shell reports a nonzero exit as an
@@ -35,6 +36,8 @@ SEP = "\x1f"  # list-keys field separator, safe inside notes and commands
 DELAY = 0.7  # idle seconds before the first menu of a chain
 ENTRY = "prefix"  # the table C-Space enters, so reaching it is a new chain
 FLAG = "@wk_menu"  # holds the client whose menu is up: it is in menu mode
+TIMER = "@wk_timer"  # newest delayed menu invocation wins
+REPEAT_MARKER = "--repeat-key"
 BREAK = None  # a row with this instead of a key is a rule between groups
 REPEATS = "\u27f3"  # marks a -r binding; "(hold)" would read as a second key
 # Right edge of the client. Plain -x R gives the active pane's edge instead.
@@ -138,6 +141,19 @@ def bound(table):
     return keys
 
 
+# A -r key does not re-enter its table.
+# Append a marked hook to restart the idle delay without duplicating bindings.
+def arm_repeats(table):
+    """Append the menu hook to each repeat binding in table once per reload."""
+    hook = (f"run -b '{SELF} #{{client_key_table}} #{{client_name}} "
+            f"{REPEAT_MARKER} 2>&1'")
+    for key, (note, command, repeat) in bound(table).items():
+        if not repeat or REPEAT_MARKER in command:
+            continue
+        tmux("bind-key", "-T", table, "-r", "-N", note, key,
+             f"{command} ; {hook}")
+
+
 def rows(table):
     """(key, description, repeat, command) to show, BREAK where a rule goes."""
     live = bound(table)
@@ -211,20 +227,25 @@ def state(client, format):
 
 
 def main(args):
-    if len(args) != 2:
+    if len(args) < 2 or args[2:] not in ([], [REPEAT_MARKER]):
         return
-    table, client = args
+    table, client = args[:2]
     # C-Space is the only way in, so ENTRY means a new chain: whatever menu
     # mode the last one ended in is over.
     if table == ENTRY:
         tmux("set", "-gu", FLAG)
 
+    arm_repeats(table)
     arguments = menu(table, client)
     if not arguments:
         return
 
     if state(client, "#{%s}" % FLAG) != client:
+        token = str(time.monotonic_ns())
+        tmux("set", "-g", TIMER, token)
         time.sleep(DELAY)  # not in menu mode yet, so this menu is still earned
+        if state(client, "#{%s}" % TIMER) != token:
+            return  # a repeat key restarted the delay
 
     # A keypress before the idle delay elapsed or while preparing has left the table.
     if state(client, "#{client_key_table}") != table:
