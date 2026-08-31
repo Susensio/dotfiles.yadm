@@ -7,8 +7,6 @@ XDG config repo for `~/.config`, managed with yadm.
   Plain `git` happens to work inside `.config` via an untracked pointer file that a fresh machine does not have until `yadm/bootstrap` recreates it.
 - Shell and environment questions -- a variable is unset, login vs interactive shells, the bash-to-fish relay, `environment.d`, hot reload -- are answered in `docs/environment-architecture.md`.
   Read it before investigating the process tree by hand.
-- Fish functions live in `fish/functions/`.
-  Scripts elsewhere are mostly bash -- check the shebang before assuming fish syntax.
 - Before writing config syntax you have not verified in this session, check the tool's manpage or `--help`.
 - Fan out along config domains -- `tmux`, `fish`, `nvim`, `mise`, `keyd`.
   That is the seam that divides this repo.
