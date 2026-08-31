@@ -5,26 +5,32 @@ Each entry below: what earns the file, what it holds, and the boundary that stop
 Creating one means writing that boundary into the file's own first lines — one line naming what it holds and what it excludes.
 Not the format: a file that explains its own field layout is carrying the skill's job, and it goes stale the first time the layout changes.
 
+## README.md — what this project is
+
+What it does, and what someone types to use it, present tense, as though it already works.
+Written before the code: a README you cannot keep short is telling you the project is not clear yet.
+
+*Earned when* the project has a name — the one file earned on day one.
+
+*Boundary:* what a reader needs in order to use it.
+Why it is built this way is an ADR, a topic needing more than a paragraph is a doc in `docs/`, and milestones that outgrow this file earn `docs/PLAN.md`.
+
 ## docs/PLAN.md — what is intended
 
-Milestones, and the anti-goals that say what this project will deliberately not do.
+Milestones, once there are more of them than the README can carry.
 The user writes it; agents read it and do not edit it unasked.
 
-*Earned when* the work spans more sessions than one plan can be held in.
+*Earned when* the work spans more sessions than one plan can be held in, and the README is no longer where the next step is found.
 
 *Boundary:* an architectural shift goes here, never into the backlog.
-
-The anti-goals are the part that cannot be recovered from reading the code, so they are the part worth writing first.
+What the project is stays in the README; this file holds only the order things happen in.
 
 ```markdown
 # Plan
 
-What this project is for, and what it will not do.
+The order things happen in. What this project is, is in the README.
 
 ## Milestones
-
-## Anti-goals
-- No plugin system. Every extension so far has been one function.
 ```
 
 ## docs/BACKLOG.md — what is open but not being worked

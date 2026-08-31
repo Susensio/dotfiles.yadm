@@ -15,6 +15,7 @@ XDG config repo for `~/.config`, managed with yadm.
   Not layers, not phases.
 - Decisions about this setup belong in `.config/docs/adr/`; a reason with a line to sit beside is a comment there instead.
   Ask the `adr` skill which -- it holds the test, and never auto-memory.
+- Open work with no single line to mark lives in `docs/BACKLOG.md`; `rg -n 'BUG:|TODO:'` lists the rest.
 - A limitation deliberately accepted is not a bug.
   It goes in the Consequences of an ADR, like `.xsession-errors` in ADR-0004.
 - The `report-issue` skill files upstream, never against this repo.

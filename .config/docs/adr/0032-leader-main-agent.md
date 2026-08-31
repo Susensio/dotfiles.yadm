@@ -30,7 +30,7 @@ What it keeps versus delegates is a judgement it makes each time, never a capabi
 It owns the project's record, closing the loop, ADR authorship, and the delegate-or-keep call.
 Subagents own the doing, and `developer` commits its own finished work, because the order it did things in and which edits corrected earlier ones decide where one concern ends, and none of that survives being handed to anyone else.
 
-Content that was main-session-only moved out of `GLOBAL.md` accordingly: commits to `leader`, agent-memory routing to the `project-docs` skill, and concision toward the user to the `outputStyle` setting, which reaches the main conversation and not subagents.
+Content that was main-session-only moved out of `GLOBAL.md` accordingly: commits to `leader`, agent-memory routing to the `project-record` skill, and concision toward the user to the `outputStyle` setting, which reaches the main conversation and not subagents.
 The delegation trigger stays where ADR-0030 put it, unchanged: three agents now hold `Agent`, so a trigger written into `leader` alone would not reach the other two.
 
 ## Consequences

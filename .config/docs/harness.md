@@ -14,7 +14,7 @@ This is what runs when nothing else is specified — including background jobs.
 
 **`claude --agent leader`** — a project's main agent, on `opus`.
 `leader` doesn't do the work itself: it decides what happens next, dispatches tasks to subagents, and reconciles what comes back.
-It owns the project's record (plan, decisions, backlog) instead of the diff.
+It owns the project's record — plan, decisions, backlog, in whatever form that project keeps them — instead of the diff.
 It's only ever a top-level entry point, never something a subagent spawns.
 
 Both are "main-thread" modes — the difference is whether the session orchestrates (`leader`) or just acts (`claude`).
@@ -37,7 +37,7 @@ The `delegation` skill has the full picture of when handing off pays for itself.
 ## Skills
 
 Skills are knowledge loaded only when it's relevant, instead of sitting in context every turn.
-Some are user-invocable (`/adr`, `/git-commit`, `/report-issue`...), others fire only when an agent's own judgement calls for them (`delegation`, `project-docs`, `harness-design`).
+Some are user-invocable (`/adr`, `/git-commit`, `/bootstrap-project-docs`...), others fire only when an agent's own judgement calls for them (`delegation`, `project-record`, `harness-design`).
 `claude/skills/` has the full list; each `SKILL.md` says in its own description when to reach for it.
 
 ## Rules
