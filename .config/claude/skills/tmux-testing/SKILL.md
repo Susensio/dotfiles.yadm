@@ -29,7 +29,8 @@ Spawning and killing go through it, every time.
 It passes `-L` on every call, unsets `$TMUX` before anything runs, refuses to kill a socket it did not create, and removes the socket file and its fakebin on every exit path including failure.
 It also carries two findings that cost hours to rederive: pane commands are typed through a fakebin, because under a fish default-shell the argument form leaves `pane_current_command` reporting `fish`; and panes are addressed by id, because `pane-base-index` varies with the config under test.
 
-Talking to a socket it handed you is expected and safe — `tmux -L "$s" list-keys`, `show-options`, `source-file` — because `$s` came from `spawn` and the `-L` is already in hand.
+Read-only queries against a socket it handed you are safe and expected: `tmux -L "$s" list-keys`, `show-options`, `source-file`.
+Ending that server is `$t kill "$s"`, which is what removes the socket file and the fakebin and refuses a socket it did not create.
 
 Where `spawn` cannot express the case — per-file `source-file` error reporting, `-f /dev/null`, a server that must outlive one command — [`references/by_hand.md`](references/by_hand.md) carries the protocol to follow instead.
 Read it at that point, and follow it exactly.

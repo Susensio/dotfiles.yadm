@@ -37,7 +37,7 @@ The order things happen in. What this project is, is in the README.
 
 Discovered bugs, tech debt, and explorations nobody has approved.
 The main agent writes it, from its own work and from whatever a subagent reports as outside its scope.
-Subagents read it and do not append — an entry landing in a scoped diff breaks the single concern that diff was supposed to be, and reading it is what stops one repeating a dead end recorded here.
+Subagents read it, and reading it is what stops one repeating a dead end recorded here.
 
 *Earned when* something is found that will not be fixed in this session and has no single line to mark.
 

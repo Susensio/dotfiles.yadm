@@ -11,10 +11,13 @@ Where it sits is the project's call, not yours; finding where is the work.
 
 ## Find it before adding to it
 
-1. **What the project declares about itself** — its `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`.
+0. **Whether your change lands here directly.**
+   Where it goes through someone else's review instead, what you found travels in your report or through what that project uses to propose a change, under `Someone else's repository` below.
+1. **What the project declares about itself** — its `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`, taking the nearest one above the files you touched, which outranks the root's where they disagree.
    A location named there wins over anything you would otherwise reach for; a location you settle on that nothing named earns a line there.
 2. **What it visibly keeps** — a `docs/` tree, a `TODO`, a changelog, an issue tracker it points at.
    Match that location and that format, however little it resembles what you would have chosen.
+   Where more than one qualifies, follow what the project has most recently done with a finding of that kind; where that is still unclear, ask rather than pick.
    List the root directly: a file holding live working state is ignored, so `rg` and `fd` skip it.
 3. **No home for this kind yet**, and setting this project's conventions is yours to do.
    The `bootstrap-project-docs` skill carries where each kind goes, and what earns a file for it.
@@ -39,7 +42,8 @@ The rest have an answer that holds in any project:
 ## Someone else's repository
 
 Any edit to their tree changes someone else's project — a marker on one wrong line as much as a new file.
-Where the conventions belong to someone else, what you found travels in your report, or through whatever that project uses to propose a change — an issue the `report-issue` skill drafts, a pull request, a review comment on the line.
+Where the conventions belong to someone else, what you found travels in your report first.
+Anything that would post in public — an issue, a pull request, a review comment — is the user's to send, not yours: the `report-issue` skill drafts one for them to submit, and never files it itself.
 
 ## Never agent memory
 

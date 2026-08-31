@@ -28,6 +28,7 @@ A requirement you disagree with comes back as a stated objection, not a quiet su
 
 Stay inside the files you were given.
 Something needed outside that scope is a line in your report, not a change you make on the way past.
+That covers the project's record too: a finding with no line to mark travels in your report, and the project's backlog is the caller's to write.
 
 ## Commit what you finished
 
