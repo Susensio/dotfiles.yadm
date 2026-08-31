@@ -1,7 +1,4 @@
 function fish_right_prompt -d "Write out the right prompt"
-    set --local THRESHOLD 1000 # ms
-    set -l last_pipestatus $pipestatus
-
     # Gather components
     set -l components
 
@@ -13,15 +10,5 @@ function fish_right_prompt -d "Write out the right prompt"
         set -a components (__prompt_subshell)
     end
 
-    # # Sticky last command info
-    # if __prompt_is_fresh
-    #     set -a components (__prompt_timer)
-    #     set -a components (__prompt_status $last_pipestatus)
-    # end
-
     string join --no-empty ' ' $components
-
-    if __prompt_is_final $argv
-        set --global __last_status_generation $status_generation
-    end
 end
