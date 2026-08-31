@@ -14,7 +14,7 @@ This is what runs when nothing else is specified — including background jobs.
 
 **`claude --agent leader`** — a project's main agent, on `opus`.
 `leader` doesn't do the work itself: it decides what happens next, dispatches tasks to subagents, and reconciles what comes back.
-It owns the project's record — plan, decisions, backlog, in whatever form that project keeps them — instead of the diff.
+It owns the project's record — decisions, backlog, notes — in whatever form that project keeps them, instead of the diff; the plan is the user's, and it reads that without editing.
 It's only ever a top-level entry point, never something a subagent spawns.
 
 Both are "main-thread" modes — the difference is whether the session orchestrates (`leader`) or just acts (`claude`).

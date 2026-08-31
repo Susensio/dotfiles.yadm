@@ -23,7 +23,7 @@ Read a file before writing to it, and where it declares what it holds and exclud
 
 ## Name the kind, then find its home
 
-- **What is intended**, and what the project deliberately will not do.
+- **What this project is**, and how someone uses it.
 - **What is open** and nobody is on — a found bug, tech debt, an unapproved idea.
 - **What is being worked right now** — the objective, the live blocker, the dead ends already tried.
 - **A procedure a person also runs by hand** — a deployment, a release.
@@ -31,15 +31,15 @@ Read a file before writing to it, and where it declares what it holds and exclud
 Those four go wherever the ladder lands.
 The rest have an answer that holds in any project:
 
-- **A defect with one wrong line to sit beside** is marked on that line, where the project marks defects in place.
+- **A defect with one wrong line to sit beside** is marked on that line, where the project marks defects in place and its tree is yours to edit.
 - **A choice between real alternatives**, once settled or reversed, goes to the `adr` skill, which decides whether it is worth recording at all.
 - **Throwaway material** — a script, captured output, a dump read once — goes somewhere the project already ignores, and is gone when the work commits.
 - **How the project is operated** is whatever it already declares: a `justfile`, `package.json` scripts, the CI workflow.
 
 ## Someone else's repository
 
-A new top-level file changes a project's conventions.
-Where those conventions belong to someone else, what you found travels in your report, or through whatever that project uses to propose a change — an issue, a pull request, a comment on the line.
+Any edit to their tree changes someone else's project — a marker on one wrong line as much as a new file.
+Where the conventions belong to someone else, what you found travels in your report, or through whatever that project uses to propose a change — an issue the `report-issue` skill drafts, a pull request, a review comment on the line.
 
 ## Never agent memory
 

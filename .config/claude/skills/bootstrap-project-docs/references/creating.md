@@ -15,7 +15,7 @@ Written before the code: a README you cannot keep short is telling you the proje
 *Boundary:* what a reader needs in order to use it.
 Why it is built this way is an ADR, a topic needing more than a paragraph is a doc in `docs/`, and milestones that outgrow this file earn `docs/PLAN.md`.
 
-## docs/PLAN.md — what is intended
+## docs/PLAN.md — the order things happen in
 
 Milestones, once there are more of them than the README can carry.
 The user writes it; agents read it and do not edit it unasked.

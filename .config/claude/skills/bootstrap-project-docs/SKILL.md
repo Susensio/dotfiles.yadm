@@ -17,11 +17,12 @@ A repository whose conventions belong to someone else is out of scope — there,
 | Open work nobody is on — a found bug, tech debt, an unapproved idea | `docs/BACKLOG.md` |
 | What is being worked right now — the objective, the live blocker, the dead ends already tried | `STATE.md` |
 | Throwaway material — a script, captured output, a dump read once | `.scratch/` |
+| A procedure a person also runs by hand — a deployment, a release | a doc in `docs/`, and the skill that fires on it points there |
 | How the project is operated — the command to test it, lint it, run it | a `justfile`, the one entry here that executes instead of being read |
 
 ## Earned, not adopted
 
-Adopt none of the rest on day one.
+The `README.md` is day one; adopt none of the other rows until their condition is met.
 Until a file's condition is met the repository and its history are the record, and adding the file costs more than it holds.
 A file that is absent has not been earned yet; that is the only thing its absence means.
 An empty one is worse than absent: it advertises a record that does not exist.
@@ -34,7 +35,7 @@ Read it when you are about to create one.
 ## What this leaves behind
 
 Create only what is already earned.
-On day one that is the `README.md`, written before the code, and nothing else.
+On day one that is the `README.md`, written before the code, and its line in the project's `CLAUDE.md`.
 
 Creating a file and naming it in the project's `CLAUDE.md` are one step, never two.
 One line per file: where it sits, and what kind of thing it holds.

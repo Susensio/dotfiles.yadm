@@ -14,5 +14,5 @@ Everything here is what the script already does; doing it by hand means doing al
   A test script that shells out inherits `$TMUX`; `unset TMUX` so nested commands cannot fall through to the real server.
 - **Clean up only what you created** — kill the server *and* `rm -f` its socket file on every exit path, including failures.
 
-`tmux-test sweep` then kills every leftover `tmuxtest_*` server, including the ones spawned here.
+`${CLAUDE_SKILL_DIR}/scripts/tmux-test sweep` then kills every leftover `tmuxtest_*` server, including the ones spawned here.
 It touches no socket named otherwise, so the `tuitest_*` servers `tui-testing` runs are unaffected.

@@ -26,7 +26,8 @@ XDG config repo for `~/.config`, managed with yadm.
 - All Claude Code config goes under `.config/claude/`, as real files -- `agents/`, `skills/`, `rules/`, `hooks/` and `CLAUDE.md`.
   `CLAUDE_CONFIG_DIR` points there, so that directory is also where the credentials, session transcripts and plugins live.
   Only the hand-maintained config is tracked; `yadm/exclude` and `.config/claude/.gitignore` keep the rest out.
-  Paths written into `settings.json` are absolute -- a move breaks the hooks and the statusline until they are rewritten.
+  Hooks and the statusline in `settings.json` are rooted at `$CLAUDE_CONFIG_DIR` and survive a move; the sandbox paths under `permissions` are literal and do not, and a stale one denies writes silently rather than erroring.
+- How the global harness fits together -- the two entry points, the subagents, the hooks and what each exists to fix -- is `docs/harness.md`.
 
 ## tmux/
 

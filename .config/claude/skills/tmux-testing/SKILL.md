@@ -14,13 +14,15 @@ Reading or editing the config is `tmux-config`.
 The user is very likely *inside* tmux right now — quite possibly the session this agent was launched from.
 A bare `tmux ...` targets `$TMUX`, which is that session: one stray `kill-server`, `set -g` or `kill-session` wrecks their live workspace.
 
-`${CLAUDE_SKILL_DIR}/scripts/tmux-test` owns the life of every test server, and `tmux-test --help` lists its subcommands:
+`${CLAUDE_SKILL_DIR}/scripts/tmux-test` owns the life of every test server.
+It is not on `PATH`, so bind it once and use that:
 
 ```bash
-s=$(tmux-test spawn conf.d/31_visual.conf)   # fresh socket, name printed
-w=$(tmux-test window "$s" nvim git)          # panes reporting those commands
-tmux-test eval "$s" '#{E:automatic-rename-format}' "$w"
-tmux-test kill "$s"                          # server killed, socket file removed
+t=${CLAUDE_SKILL_DIR}/scripts/tmux-test    # $t --help lists the subcommands
+s=$($t spawn conf.d/31_visual.conf)        # fresh socket, name printed
+w=$($t window "$s" nvim git)               # panes reporting those commands
+$t eval "$s" '#{E:automatic-rename-format}' "$w"
+$t kill "$s"                               # server killed, socket file removed
 ```
 
 Spawning and killing go through it, every time.
