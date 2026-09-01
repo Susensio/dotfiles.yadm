@@ -52,7 +52,8 @@ Correct a line here rather than in the file that cites it -- that is the whole r
 - `SessionStart` fires with `source` of `startup`, `clear`, `resume` or `compact`, and `/clear` wipes the transcript along with anything injected into it (probed, v2.1.238).
   Two trials of `claude --agent leader`: before `/clear` it answered from the injected `project-docs` body; after, both said they had not read the skill this session.
   So a hook injecting an agent's `skills:` must fire on `clear` as well as `startup`, or a launched agent silently continues without what its own definition names.
-  Whether a `compact` summary preserves an injected body is untested.
+- Whether compaction preserves an injected skill body is untested and deliberately left so: `CLAUDE.md` is re-injected from disk and names the skill, so the on-demand path still reaches it, and re-injecting ~9 kB per compaction would work against the compaction.
+  A probe here would change nothing either way, which is why there is no result to date.
 
 - A preloaded skill satisfies an instruction to read it, so the two do not double up in practice: five spawned `developer`s were each told "Read the `coding` skill" in the brief and none called `Skill(coding)` (tested, v2.1.238).
   Nothing enforces that -- a `Skill` call on a preloaded skill is not deduplicated, it simply does not get made.

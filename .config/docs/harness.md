@@ -84,7 +84,7 @@ Each one exists because something *should* happen automatically and doesn't, in 
 
 `rules-on-write.py`, `not-your-repo.py` and `prefer-rich-cli.py` get their once-per-agent quiet by stamping a marker under `$TMPDIR/claude-hook-nudge` the first time each speaks, so the same lesson doesn't repeat every call within a session.
 `skills-on-launch.py` needs no marker — `SessionStart` fires on four sources and it acts on the two that begin with no skill in context: `startup` and `clear`.
-It skips `resume`, where the restored transcript still holds the injection, and `compact`, which is the same question unprobed.
+It skips `resume`, where the restored transcript still holds the injection, and `compact`, where `CLAUDE.md` is re-injected from disk and names the skill anyway.
 `autoformat.py` skips dedup entirely: formatting is idempotent, so repeating it costs nothing.
 
 ## Where things live

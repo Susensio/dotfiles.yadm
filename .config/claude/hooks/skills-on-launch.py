@@ -16,9 +16,8 @@ read the skill this session" after).
 
 Not on `resume`, where the earlier injection is still in the restored
 transcript and a second copy would be injected with nothing to deduplicate it.
-Not on `compact` either, which is the same question unprobed -- a summary may
-drop the body, but re-injecting on every compaction is a cost worth measuring
-before paying.
+Not on `compact` either: that gap is closed by `CLAUDE.md`, which is re-injected
+from disk and names the skill, so the ordinary on-demand path still reaches it.
 
 Frontmatter is parsed here rather than through PyYAML so the hook carries no
 dependency into a session's startup path.
