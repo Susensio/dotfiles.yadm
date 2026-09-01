@@ -8,9 +8,20 @@ launched agent's definition and injects each body under the header the runtime
 writes, which the model reads as already loaded rather than calling `Skill` for
 it again.
 
-Only fires on `startup`: a skill loaded twice is injected twice, and nothing
-deduplicates it. Frontmatter is parsed here rather than through PyYAML so the
-hook carries no dependency into a session's startup path.
+Fires on `startup` and on `clear`, the two sources that begin with no skill in
+context. `/clear` wipes the transcript, so without this `leader` continues with
+neither of the skills its own definition names and nothing says so (probed,
+v2.1.238: two trials, both answering correctly before and explicitly "I have not
+read the skill this session" after).
+
+Not on `resume`, where the earlier injection is still in the restored
+transcript and a second copy would be injected with nothing to deduplicate it.
+Not on `compact` either, which is the same question unprobed -- a summary may
+drop the body, but re-injecting on every compaction is a cost worth measuring
+before paying.
+
+Frontmatter is parsed here rather than through PyYAML so the hook carries no
+dependency into a session's startup path.
 """
 
 import sys
@@ -64,7 +75,7 @@ def main():
 
     # Absent on a default launch, which declares no agent to read.
     agent = data.get("agent_type")
-    if not agent or data.get("source") != "startup":
+    if not agent or data.get("source") not in ("startup", "clear"):
         sys.exit(0)
 
     declared = declared_skills(agent)

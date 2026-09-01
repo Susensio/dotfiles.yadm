@@ -54,10 +54,12 @@ They also load on a matching file's **write**\*, because a file created fresh is
 Hooks are the patches for gaps in how Claude Code natively delivers context.
 Each one exists because something *should* happen automatically and doesn't, in one specific case:
 
-- **`SessionStart` → `skills-on-launch.py`** — fires once, at startup only
+- **`SessionStart` → `skills-on-launch.py`** — fires at startup and after `/clear`
   An agent's `skills:` frontmatter only auto-loads when it's *spawned* as a subagent — not when it's launched directly as the main thread (`claude --agent leader`).
   Without this, `leader` would start a session with none of the skills its own definition names.
-  This hook reads the launched agent's declared skills and injects them at startup, so it reads as if they'd loaded normally.
+  This hook reads the launched agent's declared skills and injects them, so it reads as if they'd loaded normally.
+  `/clear` wipes the transcript, so it re-injects there too — probed at v2.1.238, `leader` was losing both its skills silently.
+  An unresolvable skill name exits 2 rather than being dropped, since a rename is how that happens.
 
 - **`PreToolUse:Write|Edit` → `rules-on-write.py`** — fires once per rule, per agent
   Path-scoped rules (`claude/rules/*.md`) natively load when a file is *read*, not when it's freshly *written*.
@@ -81,7 +83,8 @@ Each one exists because something *should* happen automatically and doesn't, in 
   If formatting changes the file, the model is told its on-disk copy no longer matches what it wrote — otherwise the next edit builds on stale text and fails to apply.
 
 `rules-on-write.py`, `not-your-repo.py` and `prefer-rich-cli.py` get their once-per-agent quiet by stamping a marker under `$TMPDIR/claude-hook-nudge` the first time each speaks, so the same lesson doesn't repeat every call within a session.
-`skills-on-launch.py` gets to once-only by construction — `SessionStart` fires on more than just startup (resume, clear, compact), and it acts on none of those.
+`skills-on-launch.py` needs no marker — `SessionStart` fires on four sources and it acts on the two that begin with no skill in context: `startup` and `clear`.
+It skips `resume`, where the restored transcript still holds the injection, and `compact`, which is the same question unprobed.
 `autoformat.py` skips dedup entirely: formatting is idempotent, so repeating it costs nothing.
 
 ## Where things live
