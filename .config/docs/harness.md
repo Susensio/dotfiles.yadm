@@ -5,6 +5,7 @@ Land here first if you're an agent picking up work in `~/.config/claude/`, or a 
 Note that this doc describes the global userspace harness, not a project-local harness (like `.claude/` in a specific repository).
 
 All of it lives under `~/.config/claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
+That tree is the only source of truth: anything elsewhere that reads as harness config is a compiled copy, so edit it here.
 
 ## Two entry points
 
@@ -58,10 +59,12 @@ Each one exists because something *should* happen automatically and doesn't, in 
   Without this, `leader` would start a session with none of the skills its own definition names.
   This hook reads the launched agent's declared skills and injects them at startup, so it reads as if they'd loaded normally.
 
-- **`PreToolUse:Write` → `rules-on-write.py`** — fires once per rule, per agent
+- **`PreToolUse:Write|Edit` → `rules-on-write.py`** — fires once per rule, per agent
   Path-scoped rules (`claude/rules/*.md`) natively load when a file is *read*, not when it's freshly *written*.
   A file created from scratch would never see the rule governing how it should be written.
   This hook checks the rules directory against the file being written and injects any that match — too late to have shaped this write, so the message names the file and tells the model to rewrite it if the rule would have changed it.
+  `Edit` is matched too: native delivery is once per *session*, and a session is shared with its subagents, so a subagent editing a matching file after its parent consumed that rule would otherwise get nothing.
+  A file written through the shell arrives as `Bash` with no path to match, and stays uncovered.
 
 - **`PreToolUse:Bash` → `prefer-rich-cli.py`** — fires once per binary, per agent
   Nudges toward `rg`/`fd`/`jq` over `grep -r`/`find -name`/hand-parsed JSON, when the richer tool is installed.
