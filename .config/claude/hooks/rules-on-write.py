@@ -3,7 +3,7 @@
 # requires-python = ">=3.13"
 # dependencies = ["python-frontmatter", "pyyaml"]
 # ///
-"""PreToolUse/Write: back-fill a rule Write bypassed.
+"""PreToolUse/Write|Edit: back-fill a rule the write bypassed.
 
 Native rule delivery fires on Read only (tracked upstream,
 anthropics/claude-code#88565), so a file authored fresh through Write never
@@ -13,8 +13,19 @@ have shaped this write -- the message names the file and asks the model to
 rewrite it if the rule would have changed it, rather than only landing in
 time for the next matching Write. Same once-per-agent-per-rule dedup as the
 Read path.
+
+Edit is matched too, though it cannot reach a file the agent has not Read.
+Native delivery is once per *session* per rule, and `session_id` is shared
+with every subagent, so a subagent editing a matching file after the parent
+consumed that rule receives nothing. Dedup here keys on `agent_id`, which
+that case needs and per-session dedup structurally cannot give. It is free:
+`first_time` caps delivery at one per agent per rule however many calls come.
+
+Still uncovered: a file written through the shell, which arrives as Bash and
+carries no `file_path` to match on.
 """
 
+import os
 from pathlib import Path
 
 import yaml
@@ -26,7 +37,11 @@ RULES_DIRS = (
     # way native rule loading is, so project-local discovery follows the
     # session's own directory. Narrower wins over the global dir below.
     Path(".claude/rules"),
-    Path.home() / ".claude" / "rules",
+    # CLAUDE_CONFIG_DIR, not ~/.claude: this harness lives at ~/.config/claude
+    # (ADR-0036), and a hardcoded ~/.claude made every global rule invisible
+    # here without erroring -- the hook ran, found no directory, and said
+    # nothing. Resolve it the way the runtime does, so a move stays survivable.
+    Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "rules",
 )
 
 

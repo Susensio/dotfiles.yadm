@@ -35,7 +35,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opus",
   "skillOverrides": {
     "design": "user-invocable-only",
     "dataviz": "user-invocable-only",
@@ -74,7 +74,7 @@
         ]
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
@@ -122,9 +122,7 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "network": {
-      "allowedDomains": [
-        "*"
-      ]
+      "allowedDomains": ["*"]
     },
     "filesystem": {
       "allowWrite": [
