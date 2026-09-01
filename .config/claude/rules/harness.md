@@ -6,7 +6,6 @@ paths:
   - "**/rules/*.md"
   - "**/CLAUDE.md"
   - "**/AGENTS.md"
-  - "**/GLOBAL.md"
 ---
 
 # Harness files

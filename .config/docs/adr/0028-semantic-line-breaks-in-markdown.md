@@ -6,7 +6,7 @@ Date: 2026-08-19
 ## Context
 
 The repo's markdown had no declared line-break convention and had drifted into two.
-Forty of forty-five harness and doc files were hard wrapped near 80 columns; `GLOBAL.md`, the `git-commit` skill and parts of the `adr` skill ran one long line per paragraph, and `environment-architecture.md` did too.
+Forty of forty-five harness and doc files were hard wrapped near 80 columns; `CLAUDE.md`, the `git-commit` skill and parts of the `adr` skill ran one long line per paragraph, and `environment-architecture.md` did too.
 Nothing recorded which was intended, so each edit picked whichever the surrounding file happened to use.
 
 The cost falls on review rather than reading.
@@ -25,7 +25,7 @@ It is one per-language setting, not a constraint.
 
 Markdown prose breaks at sentence boundaries — one sentence per line, never wrapped to a column — with YAML frontmatter, fenced code, tables and headings left verbatim, and `soft-wrap` enabled for markdown in helix so the long lines stay readable.
 
-The rule as current practice lives in the `harness-design` skill as R2, enforced by a check in the audit beside it, with the always-loaded instruction in `GLOBAL.md`.
+The rule as current practice lives in the `harness-design` skill as R2, enforced by a check in the audit beside it, with the always-loaded instruction in `CLAUDE.md`.
 That split follows [ADR-0026](0026-harness-content-by-tier.md): this record is the decision at a moment and does not change, the `harness-design` skill is the policy that gets edited.
 Being a user-tier rule, R2 yields to a repo whose tracked markdown already holds to another convention.
 

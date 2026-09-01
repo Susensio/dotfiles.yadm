@@ -1,11 +1,11 @@
-# ADR-0030: Keep the delegation trigger in GLOBAL.md and the policy in the skill
+# ADR-0030: Keep the delegation trigger in CLAUDE.md and the policy in the skill
 
 Status: Accepted
 Date: 2026-08-20
 
 ## Context
 
-ADR-0026 moved the delegation policy out of `GLOBAL.md` into the `delegation` skill, because only skills load on demand and seven lines were shipping into every spawn.
+ADR-0026 moved the delegation policy out of `CLAUDE.md` into the `delegation` skill, because only skills load on demand and seven lines were shipping into every spawn.
 It priced the loss as soft -- "fires on a description match rather than being unconditionally present", costing "a worse model choice, not a wrong action".
 
 That pricing assumed nothing was arguing the other way.
@@ -26,7 +26,7 @@ R1 already rejects it as a trap and says to write the glob or write CLAUDE.md, a
 
 ## Decision
 
-`GLOBAL.md` carries the trigger and nothing else: that delegating is the agent's own call, and that this outranks the `Agent` tool's instruction to wait for the user.
+`CLAUDE.md` carries the trigger and nothing else: that delegating is the agent's own call, and that this outranks the `Agent` tool's instruction to wait for the user.
 Everything downstream -- which agent, whether the handoff pays, which model, how to write a brief that stands alone -- stays in the `delegation` skill.
 
 This reverses ADR-0026 on placement alone.
@@ -38,7 +38,7 @@ Three lines reach every subagent again, including `developer`, `explorer` and `t
 That is the cost ADR-0026 bought off, re-incurred deliberately at the smallest size that still fires.
 
 The trigger is unconditional, so the Pro-tier brake is answered on every turn rather than whenever a description happens to match.
-Routing stays out of `GLOBAL.md`: which agent to reach for is already in each agent's own `description`, which the roster surfaces anyway.
+Routing stays out of `CLAUDE.md`: which agent to reach for is already in each agent's own `description`, which the roster surfaces anyway.
 
 Both brakes are plan- and version-dependent, and neither is contractual.
 The Opus one lifts on Sonnet, the Pro one on Max, and a release can move or drop either -- at which point these three lines pay rent for nothing.

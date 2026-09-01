@@ -52,7 +52,7 @@ Between the remaining two, follow the trigger: a skill when deciding it applies 
 A skill pays its whole cost on invocation, so past roughly 500 lines the detail belongs in a sibling file it loads on demand.
 
 One exception (ADR-0030): content whose job is to counter an instruction present every turn cannot be a skill, because a skill loads only once the decision it governs is already being taken.
-The delegation trigger sits in `GLOBAL.md` for that reason -- the trigger alone, never the policy behind it.
+The delegation trigger sits in the user-tier `CLAUDE.md` for that reason -- the trigger alone, never the policy behind it.
 
 **Audience decides skill against doc.**
 A skill exists to make Claude act correctly; a doc exists for a person to read.

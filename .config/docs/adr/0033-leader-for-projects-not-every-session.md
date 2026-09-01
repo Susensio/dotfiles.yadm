@@ -20,7 +20,7 @@ The alternative to reserving it was to condition those rituals and keep the ubiq
 Rejected because the hedging compounds: a leader written to be safe in a session with no record, no check and no plan says progressively less about the case it exists for, and the sharpest thing it owns -- reconciling what two subagents each brought back -- never arises in the sessions the hedging was for.
 
 Underneath this is that the default session is not a weak fallback.
-Shaped by `GLOBAL.md` and the skills, it implements, verifies, searches and can spawn an `auditor` more capable than itself when it is stuck.
+Shaped by `CLAUDE.md` and the skills, it implements, verifies, searches and can spawn an `auditor` more capable than itself when it is stuck.
 Ubiquity was buying one architecture at the price of forcing a project-shaped workflow onto work that has no project.
 
 ## Decision
@@ -41,7 +41,7 @@ Getting it wrong degrades gracefully in one direction only: a project session st
 `leader` can state its rules unconditionally again, because the sessions that made them awkward no longer reach it.
 The record cadence became "when you do not already know what it says", which is a rhythm rather than a hedge.
 
-`GLOBAL.md` now has to carry what both modes need, and it reaches every subagent with no opt-out, so main-session-only content still has nowhere cheap to sit.
+`CLAUDE.md` now has to carry what both modes need, and it reaches every subagent with no opt-out, so main-session-only content still has nowhere cheap to sit.
 ADR-0032's finding stands: the pronoun test is the tell, and content that only makes sense to whoever is talking to the user belongs in `leader` or in `outputStyle`, not there.
 
 Enforcement remains convention.

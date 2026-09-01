@@ -24,7 +24,7 @@ Yes places it in the project tier, no in the user tier (`.config/agents/`, symli
 When in doubt, go narrower.
 
 Content that should not reach every subagent goes in a skill body, because only skills load on demand.
-The delegation policy moves out of `GLOBAL.md` into a `delegation` skill accordingly, reversing ADR-0023.
+The delegation policy moves out of `CLAUDE.md` into a `delegation` skill accordingly, reversing ADR-0023.
 
 A user-tier skill must work in a repo that has never seen it -- no pre-existing directory, no setup step -- and references project facts by generic phrase with a documented fallback, so a repo that declares nothing still behaves predictably.
 
@@ -37,7 +37,7 @@ One copy of each generic skill, at the tier where it is true.
 Adding one reaches every project at once, which is what makes the tier worth having.
 `~/.claude/skills` resolves to content for the first time; it previously pointed at an empty directory and loaded nothing.
 
-`GLOBAL.md` drops from 25 lines to 18, and the delegation policy is absent from subagents rather than merely inert in them.
+`CLAUDE.md` drops from 25 lines to 18, and the delegation policy is absent from subagents rather than merely inert in them.
 ADR-0023's observation that the rules are also correct for a subagent that delegates further still holds -- subagents do get the Agent tool -- but a skill serves that case too.
 
 Doctrine now has two homes and the boundary needs watching: ADRs record a decision at a moment and are immutable, the `harness-design` skill is current practice and gets edited.
