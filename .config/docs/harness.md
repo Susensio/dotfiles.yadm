@@ -15,7 +15,7 @@ This is what runs when nothing else is specified — including background jobs.
 
 **`claude --agent leader`** — a project's main agent, on `opus`.
 `leader` doesn't do the work itself: it decides what happens next, dispatches tasks to subagents, and reconciles what comes back.
-It owns the project's record — decisions, backlog, notes — in whatever form that project keeps them, instead of the diff; the plan is the user's, and it reads that without editing.
+It owns the project's record — decisions, backlog, notes — in whatever form that project keeps them, instead of the diff; the roadmap is the user's, and it reads that without editing.
 It's only ever a top-level entry point, never something a subagent spawns.
 
 Both are "main-thread" modes — the difference is whether the session orchestrates (`leader`) or just acts (`claude`).
@@ -38,7 +38,7 @@ The `delegation` skill has the full picture of when handing off pays for itself.
 ## Skills
 
 Skills are knowledge loaded only when it's relevant, instead of sitting in context every turn.
-Some are user-invocable (`/adr`, `/git-commit`, `/bootstrap-project-docs`...), others fire only when an agent's own judgement calls for them (`delegation`, `project-record`, `harness-design`).
+Some are user-invocable (`/adr`, `/git-commit`, `/grow-project-docs`...), others fire only when an agent's own judgement calls for them (`delegation`, `project-docs`, `harness-design`).
 `claude/skills/` has the full list; each `SKILL.md` says in its own description when to reach for it.
 
 ## Rules
@@ -66,6 +66,12 @@ Each one exists because something *should* happen automatically and doesn't, in 
   `Edit` is matched too: native delivery is once per *session*, and a session is shared with its subagents, so a subagent editing a matching file after its parent consumed that rule would otherwise get nothing.
   A file written through the shell arrives as `Bash` with no path to match, and stays uncovered.
 
+- **`PreToolUse:Write` → `not-your-repo.py`** — fires once per reason, per agent
+  `project-docs` says a finding travels in the report where the repository isn't yours, and that `docs/ROADMAP.md` is the user's to write.
+  Both are decidable from the git remote and the path, and an agent that skipped the skill never sees either.
+  This hook checks whether the repo has an `upstream` remote or an `origin` you don't own, and nudges before a *new* record file is created there.
+  Never blocks, and only matches creation — editing a file that already exists goes through untouched, so a README fix you were asked to make isn't second-guessed.
+
 - **`PreToolUse:Bash` → `prefer-rich-cli.py`** — fires once per binary, per agent
   Nudges toward `rg`/`fd`/`jq` over `grep -r`/`find -name`/hand-parsed JSON, when the richer tool is installed.
   Never blocks — it's a preference, not a rule, so `grep` inside a pipeline or `find -exec` still goes through untouched.
@@ -74,7 +80,7 @@ Each one exists because something *should* happen automatically and doesn't, in 
   Format-on-save for whatever was just touched (`ruff format`, `rustfmt`, `gofmt`, `biome`, project-pinned versions preferred over global installs).
   If formatting changes the file, the model is told its on-disk copy no longer matches what it wrote — otherwise the next edit builds on stale text and fails to apply.
 
-`rules-on-write.py` and `prefer-rich-cli.py` get their once-per-agent quiet by stamping a marker under `$TMPDIR/claude-hook-nudge` the first time each speaks, so the same lesson doesn't repeat every call within a session.
+`rules-on-write.py`, `not-your-repo.py` and `prefer-rich-cli.py` get their once-per-agent quiet by stamping a marker under `$TMPDIR/claude-hook-nudge` the first time each speaks, so the same lesson doesn't repeat every call within a session.
 `skills-on-launch.py` gets to once-only by construction — `SessionStart` fires on more than just startup (resume, clear, compact), and it acts on none of those.
 `autoformat.py` skips dedup entirely: formatting is idempotent, so repeating it costs nothing.
 
@@ -87,7 +93,7 @@ claude/
 ├── agents/         # leader + the five subagents above
 ├── skills/         # knowledge loaded on demand
 ├── rules/          # path-scoped standards
-└── hooks/          # the four scripts above, plus utils.py
+└── hooks/          # the five scripts above, plus utils.py
 ```
 
 For how a new piece of harness content should be slotted in (agent vs. skill vs. rule vs. `CLAUDE.md` vs. a doc like this one), see the `harness-design` skill — it's the doctrine this whole layout follows.

@@ -40,7 +40,7 @@ No `PreToolUse` onboarding hook is built.
 `CLAUDE.md` is the slot because it is the only one that loads unconditionally in every agent, which is what R-in-time requires of content whose trigger must sit upstream of the choice it governs.
 `just` is dropped from the richer-CLI bullet in the same edit: that list is about replacements for POSIX tools, and a task runner is a project interface, which the new bullet now owns.
 
-`leader` gets more than this, and needs no change to get it -- it autoloads the `project-record` skill and follows a project's record already.
+`leader` gets more than this, and needs no change to get it -- it autoloads the `project-docs` skill and follows a project's record already.
 
 ## Consequences
 

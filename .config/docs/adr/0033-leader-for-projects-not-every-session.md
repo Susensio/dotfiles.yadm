@@ -29,7 +29,7 @@ Ubiquity was buying one architecture at the price of forcing a project-shaped wo
 `Agent(leader)` is denied, so it is never spawned as a subagent and its description stops contradicting the roster it appeared in.
 
 Everything else runs as the default session, which delegates on judgement rather than by rule.
-The line between them is documentation discipline, not capability: `leader` follows where each piece of information goes, autoloading the `project-record` and `delegation` skills; the default session reads a project's docs and infers how to use them.
+The line between them is documentation discipline, not capability: `leader` follows where each piece of information goes, autoloading the `project-docs` and `delegation` skills; the default session reads a project's docs and infers how to use them.
 
 Freed from covering the trivial case, `leader` keeps three things and delegates the rest: a quick check whose output it can bound, a quick fix it can make and verify faster than it could brief, and reconciling what two subagents each returned -- which exists only where the returns meet and so cannot be delegated at all.
 

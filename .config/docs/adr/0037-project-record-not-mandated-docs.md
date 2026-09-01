@@ -49,7 +49,7 @@ One architecture covers all five modes, and the community-repository case degrad
 
 The split costs `bootstrap-project-docs`'s description in every session's roster, including repositories where it can never fire. That was measured at roughly 250 characters and accepted as the price of the `/` entry and of one concept per container.
 
-The default session gained no record duty. `project-record` is autoloaded only by `leader`, so elsewhere it fires on a description match or not at all, and nothing in `CLAUDE.md` mandates writing anything down. During a prototype this is survivable because the user is in the conversation; the loss is decisions settled while prototyping, which is what the `adr` skill exists for and which nothing currently triggers. Whether that duty needs a home is left open.
+The default session gained no record duty. `project-docs` is autoloaded only by `leader`, so elsewhere it fires on a description match or not at all, and nothing in `CLAUDE.md` mandates writing anything down. During a prototype this is survivable because the user is in the conversation; the loss is decisions settled while prototyping, which is what the `adr` skill exists for and which nothing currently triggers. Whether that duty needs a home is left open.
 
 The `PLAN.md`, `STATE.md` and `.scratch/` rows are unvalidated. Across this repository's whole history none of the three was ever created, but a dotfiles repository has no build, no roadmap and no prototyping phase, so that is weak evidence about a software project. The first real project settles it: whether any of the three gets reached for, or worked around.
 

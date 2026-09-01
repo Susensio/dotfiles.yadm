@@ -39,7 +39,7 @@ It refreshed the marker half on a hook, so that opening one file showed everythi
 Removed on three counts: the machinery came to a script, a hook, and a relevance gate to keep the per-edit cost tolerable, against a payload of two markers; hand-copying the markers instead would have put a second, drifting copy of each in the file; and the script's `grep` fallback silently indexed several hundred TODOs out of the vendored grammars under `~/.config`, which `rg` ignores correctly and `grep` cannot be told to.
 Worth revisiting only once the marker count is high enough that searching for them is the awkward part.
 
-Accepted limitation until then: a person opening `docs/BACKLOG.md` sees what has no single line, and has to run the search in the header to see the rest.
+Accepted limitation until then: a person opening `docs/BACKLOG.md` sees what has no single line, and has to run the search to see the rest.
 
 The indented block is the escape valve for the entry that needs more than a line, and it has a ceiling: an entry that outgrows it is a decision, and belongs in an ADR instead.
 That boundary is a judgment, so the backlog will sometimes hold something that should have been recorded here.
@@ -47,5 +47,8 @@ That boundary is a judgment, so the backlog will sometimes hold something that s
 Cost: no per-item history, no author, no discussion thread, no way for anyone else to report anything.
 The last is the one that would bite -- if this repo ever acquires a reader who is not its author, they have no place to file, and this decision is the one to revisit.
 
-Merge conflicts move from nowhere to one file, since every branch that finds a defect appends to the same three sections.
-Appending to the end of a section keeps them trivial.
+Merge conflicts move from nowhere to one file, since every branch that finds a defect appends to it.
+
+## Corrections
+
+2026-09-01 -- ADR-0038 superseded the entry format decided above. Three lines here described that format and were repaired rather than left false. "has to run the search in the header" lost "in the header", since the header it named is gone and the search now sits in this repository's `CLAUDE.md`. The merge-locality line named "the same three sections" and "the end of a section"; there are no sections, so it now names the file. The decision this record makes -- defects live in a local file rather than GitHub issues -- is unchanged.

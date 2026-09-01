@@ -67,7 +67,21 @@ def main():
     if not agent or data.get("source") != "startup":
         sys.exit(0)
 
-    bodies = [b for b in map(body_of, declared_skills(agent)) if b]
+    declared = declared_skills(agent)
+    missing = [n for n in declared if body_of(n) is None]
+    if missing:
+        # Silence here is the rename failure mode: the agent launches without a
+        # skill its own definition names, behaves subtly wrong, and nothing says
+        # why. exit 2 surfaces stderr, which is the only channel that reaches the
+        # transcript from SessionStart.
+        sys.stderr.write(
+            f"Agent `{agent}` declares skills that do not resolve: "
+            f"{', '.join(missing)}. Fix the `skills:` list in "
+            f"{CONFIG / 'agents' / f'{agent}.md'}, or create the skill.\n"
+        )
+        sys.exit(2)
+
+    bodies = [b for b in map(body_of, declared) if b]
     if bodies:
         inform("\n\n".join(bodies), data)
     sys.exit(0)
