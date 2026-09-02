@@ -19,3 +19,7 @@ Related actions are grouped, discoverable via the menu, and the README's `p`/`t`
 Costs: `prefix None` gives up tmux's built-in prefix handling — `send-prefix` and the usual double-tap-prefix idiom for nested sessions no longer work.
 Every table has to arm its own which-key explicitly; there is no default.
 A key moved between tables keeps responding from its old table until the server restarts, which is exactly why `00_reset.conf` loops over `list-keys` output to unbind every custom table before re-sourcing — `unbind -a -T` errors on a table that does not exist yet, so a static unbind list would not do it.
+
+## Corrections
+
+2026-09-02 -- The root entry binding moved from `C-Space` to `F12`, now reached via a capslock-space overlay in keyd rather than a literal `Ctrl+Space` press, so a real `C-Space` stays free for the terminal instead of being swallowed by tmux. The decision this record makes -- modal tables entered via `switch-client -T`, `prefix` set to `None` -- is unchanged.

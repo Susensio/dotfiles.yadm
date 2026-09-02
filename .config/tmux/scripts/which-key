@@ -34,7 +34,7 @@ SELF = pathlib.Path(__file__).resolve()
 CONFIG_DIR = SELF.parent.parent
 SEP = "\x1f"  # list-keys field separator, safe inside notes and commands
 DELAY = 0.7  # idle seconds before the first menu of a chain
-ENTRY = "prefix"  # the table C-Space enters, so reaching it is a new chain
+ENTRY = "prefix"  # the table F12 (capslock-space) enters, so reaching it is a new chain
 FLAG = "@wk_menu"  # holds the client whose menu is up: it is in menu mode
 TIMER = "@wk_timer"  # newest delayed menu invocation wins
 REPEAT_MARKER = "--repeat-key"
@@ -230,8 +230,8 @@ def main(args):
     if len(args) < 2 or args[2:] not in ([], [REPEAT_MARKER]):
         return
     table, client = args[:2]
-    # C-Space is the only way in, so ENTRY means a new chain: whatever menu
-    # mode the last one ended in is over.
+    # F12 (capslock-space) is the only way in, so ENTRY means a new chain:
+    # whatever menu mode the last one ended in is over.
     if table == ENTRY:
         tmux("set", "-gu", FLAG)
 

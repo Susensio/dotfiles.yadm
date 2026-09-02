@@ -2,7 +2,7 @@
 
 ## Prefix & navigation
 
-The prefix is `C-Space`, not the default `C-b`.
+The prefix is `F12`, not the default `C-b` — bound to capslock-space via keyd, kept distinct from a real `C-Space` press.
 From there, keys branch into modal sub-tables instead of one flat prefix map:
 
 - `p` → pane actions, `t` → tab (window) actions, `s` → session actions, `c` → config actions (e.g. `r` reloads the config).
