@@ -5,7 +5,7 @@ description: Stages and commits pending work as atomic commits — one concern e
 
 # Git Commit Protocol
 
-1. Inspect state: `git status` and `git diff --stat`.
+1. Inspect state: `git status`, `git diff --stat`, and `git log -1` — the last commit is the one candidate for amend, so know what it touched before deciding pick vs. amend.
 2. **No-op guard:** nothing changed, or only scratch files under a job tmp dir — abort and say so rather than producing an empty commit.
 3. **Atomicity:** changes spanning unrelated concerns get split, one commit per concern, each buildable and revertable on its own — a split that leaves an intermediate commit not building is not atomic.
    Repeat steps 4-7 per concern.
@@ -16,6 +16,7 @@ description: Stages and commits pending work as atomic commits — one concern e
    Any one of these means it belongs to the commit before it — the message would read as *continue*, *also* or *fix the previous*; reverting it alone would leave the tree incoherent; it only touches lines that commit just wrote.
    While that commit is unpushed, amend it.
    A second commit is the wrong shape, not a smaller one.
+   Check that even when nothing here feels like a continuation — a resumed session has no memory of the last commit, only `git log -1`.
 
    Never record an experiment and its retraction.
    A change taking back something committed earlier in the same unpushed run gets amended or dropped, never stacked on top; two commits that cancel are noise in the permanent record.
