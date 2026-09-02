@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly HISTORY_THRESHOLD=3
+readonly DIFF_BYTE_CAP=200000
+readonly SYSTEM_PROMPT='Write a concise Git commit message. Return only the message text: no Markdown fences, labels, explanation, or quotation marks. Use an imperative subject. Recent commits are style reference only: never copy their wording, bodies, trailers, or footers. Do not invent a body; output a subject only unless the staged diff or additional context explicitly provides information that belongs in a body. Never output trailers or footers such as Fixes, Closes, or Co-authored-by.'
+
+message_file=''
+save_marker=''
+aichat_pid=''
+
+abort() {
+  printf '%s\n' "$1" >&2
+  exit 1
+}
+
+cleanup() {
+  kill "$aichat_pid" 2>/dev/null || true
+  rm -f -- "$message_file" "$save_marker"
+}
+
+is_running() {
+  kill -0 "$1" 2>/dev/null
+}
+
+write_prompt() {
+  local commit_count
+  commit_count=$(git rev-list --count HEAD 2>/dev/null || echo 0)
+
+  if (( commit_count >= HISTORY_THRESHOLD )); then
+    printf '%s\n\n' 'Match the established commit-message style shown below.'
+    printf '%s\n' "Recent commits (style reference; up to $HISTORY_THRESHOLD, subject and body):"
+    git log -n "$HISTORY_THRESHOLD" --format='%h%n%s%n%b%n---'
+  else
+    printf '%s\n' 'Not enough commit history to establish a style. Propose a Conventional Commit using type(scope): imperative subject; omit the scope when it adds no value.'
+  fi
+
+  printf '\n%s\n' 'Staged diff:'
+  local diff
+  diff=$(git diff --cached)
+  if (( ${#diff} > DIFF_BYTE_CAP )); then
+    printf '%s\n' "Diff too large to include in full (${#diff} bytes); showing file-level summary instead:"
+    git diff --cached --stat
+  else
+    printf '%s\n' "$diff"
+  fi
+
+  if (( $# > 0 )); then
+    printf '\n%s\n' 'Additional context:'
+    printf '%s\n' "$@"
+  fi
+}
+
+generate_message() {
+  write_prompt "$@" | aichat --no-stream --prompt "$SYSTEM_PROMPT" >"$message_file" &
+  aichat_pid=$!
+
+  if [[ -t 2 ]]; then
+    local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' i=0
+    while is_running "$aichat_pid"; do
+      printf '\r%s Generating commit message...' "${frames:i++%${#frames}:1}" >&2
+      sleep 0.1
+    done
+    printf '\r\033[K' >&2
+  fi
+
+  wait "$aichat_pid"
+}
+
+main() {
+  if git diff --cached --quiet; then
+    abort 'No staged changes to commit.'
+  fi
+
+  message_file=$(mktemp "${TMPDIR:-/tmp}/git-aicommit.XXXXXX")
+  save_marker=$(mktemp "${TMPDIR:-/tmp}/git-aicommit-saved.XXXXXX")
+  trap cleanup EXIT
+
+  generate_message "$@" || abort 'aichat could not generate a commit message.'
+
+  [[ -s $message_file ]] || abort 'aichat returned an empty commit message.'
+
+  touch "$save_marker"
+  local editor
+  editor=$(git var GIT_EDITOR)
+  bash -c "$editor \"\$1\"" aicommit-editor "$message_file" || abort 'Commit canceled by editor.'
+
+  [[ -s $message_file ]] || abort 'Commit canceled: empty message.'
+  [[ $message_file -nt $save_marker ]] || abort 'Commit canceled: message was not saved.'
+
+  git commit --cleanup=strip -F "$message_file"
+}
+
+main "$@"
