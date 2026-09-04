@@ -1,6 +1,6 @@
 ---
 name: grow-project-docs
-description: Creating or growing a `README`, `docs/SPEC.md`, `docs/ROADMAP.md`, `docs/BACKLOG.md` or `.scratch/` in one of this user's own repositories — which file holds what, and the overflow that earns it. Use when starting such a project, or when something in one has outgrown the file holding it. Not for a repository whose conventions belong to someone else.
+description: Creating or growing a `README`, `docs/SPEC.md`, `docs/ROADMAP.md`, `docs/BACKLOG.md`, `docs/STATE.md` or `.scratch/` in one of this user's own repositories — which file holds what, and the overflow (or, for `docs/STATE.md`, work left mid-flight) that earns it. Use when starting such a project, when something in one has outgrown the file holding it, or when work on it is being left mid-flight across a session. Not for a repository whose conventions belong to someone else.
 ---
 
 # Grow project docs
@@ -24,6 +24,7 @@ Everything that overflowed goes under `docs/`, so location alone answers whether
 | What the system must do | `docs/SPEC.md` | the README cannot hold the behaviour |
 | The order things happen in | `docs/ROADMAP.md` | the README's roadmap or TODO section outgrew it |
 | Open work nobody is on | `docs/BACKLOG.md` | the README's TODO section outgrew it |
+| Current state of work left unfinished across a session | `docs/STATE.md` | work on one concern is deliberately left mid-flight at a session boundary |
 | Why it is built this way | `docs/adr/` | the `adr` skill decides — an event, never overflow |
 | A procedure a person also runs by hand | a doc in `docs/`, with the skill that fires on it pointing there | a person will run it too, not only an agent |
 | Throwaway material | `.scratch/` | the first temporary file is about to be written into the repository proper |

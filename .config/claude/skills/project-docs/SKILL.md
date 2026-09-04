@@ -16,6 +16,8 @@ An `upstream` remote means someone else's even where `origin` is your own fork, 
 Without `Bash` you cannot answer this: treat the repository as someone else's and report rather than write, which is the answer that is never harmful to be wrong about.
 Someone else's and you create nothing — not a file, not a `BUG:` marker on one wrong line — because what you found travels in your report instead.
 Anything that would post in public is the user's to send: `report-issue` drafts it for them and never files it.
+Silent when the repository is yours — that is the ordinary case and earns no line.
+Report only when it is not, since that is the answer that changes what happens next.
 
 **1. What does it say about itself?** `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`.
 Take the nearest one above the files you touched; it beats the root's where they disagree.
@@ -41,6 +43,7 @@ Five go wherever the ladder lands:
 - **What is open and nobody is on** — a bug found, tech debt, an unapproved idea. A `BACKLOG`, a `TODO`, an issue tracker.
   A subagent reports it and the main agent writes it, so a finding never rides in a scoped diff.
 - **A procedure a person also runs by hand** — a deploy, a release. A doc, with the skill that fires on it pointing there.
+- **The current state of work left mid-flight across a session** — what changed, what was verified, what a fresh session needs to pick it back up. A `STATE.md`, current rather than open, and edited or dropped as work moves past it rather than appended to.
 
 Two never touch the ladder: a settled choice between real alternatives goes to the `adr` skill, which decides whether it is worth recording at all, and throwaway material goes wherever the project already ignores, gone when the work commits.
 

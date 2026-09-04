@@ -95,6 +95,20 @@ Sections come back if the flat list stops being readable, which is the same over
 
 The indented block is the part that pays, and it has a ceiling: an entry that outgrows it is a decision, and belongs in an ADR instead.
 
+## docs/STATE.md — current state of work left mid-flight
+
+What changed and what was verified, for a concern actively being implemented across more than one session.
+The main agent writes it and keeps it current.
+
+*Earned when* work on one concern is deliberately left unfinished across a session boundary.
+This is checkable the moment work stops, not an event recognised only after something has already gone wrong.
+
+*Boundary:* current, not open.
+Work nobody has picked up is `docs/BACKLOG.md`; why a choice was made is an ADR.
+Edit the file, or drop a section once it is no longer new — never append.
+An append-only file is a log, and a log is not what a fresh session needs: it needs the current truth, not its history.
+Delete it, and its `CLAUDE.md` line, once the work it tracks lands — an empty or stale one advertises a record that is no longer true.
+
 ## .scratch/ — working material
 
 Throwaway scripts, captured output, a dump being read once.
