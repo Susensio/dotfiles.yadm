@@ -178,9 +178,11 @@ link_tool_assets() {
 
     local tool_manpages=()
     readarray -t tool_manpages < <(find -L "${tool[path]}" -type f \
-      \( -name "$bin_name.[1-9]" -o -name "$bin_name-*.[1-9]" \) 2>/dev/null)
+      \( -name "$bin_name.[1-9]" -o -name "$bin_name-*.[1-9]" \
+         -o -name "$bin_name.[1-9].gz" -o -name "$bin_name-*.[1-9].gz" \) 2>/dev/null)
     for manpage in "${tool_manpages[@]}"; do
-      local man_section=${manpage##*.}
+      local man_base=${manpage%.gz}
+      local man_section=${man_base##*.}
       local man_dir=${TARGET_DIRS[MAN]}/man$man_section
       mkdir --parents "$man_dir"
       symlink "$manpage" "${man_dir}/"
