@@ -4,7 +4,13 @@ set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
 install() {
-  mise use --global "$@"
+  if [[ "${1:-}" == "--lsp" ]]; then
+    shift
+    local lsp_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/lsp.toml
+    mise use --global --path "$lsp_config" "$@"
+  else
+    mise use --global "$@"
+  fi
 }
 
 upgrade() {
@@ -22,6 +28,7 @@ remove() {
 
 list() {
   if [[ "${1:-}" == "--installed" ]]; then
+    shift
     mise list --global "$@"
   else
     mise search "$@"
