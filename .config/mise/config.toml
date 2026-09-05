@@ -4,6 +4,7 @@ aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/shell-integration/integration.fish",
 ] }
 antigravity = { version = "latest", rename_exe = "agy" }
+argc = "latest"
 bat = "latest"
 claude = "latest"
 delta = { version = "latest", extra_assets = [

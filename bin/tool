@@ -1,78 +1,62 @@
 #!/usr/bin/env bash
-# Wraps mise to install global tools with apt interface
+# @describe Manage global tools using mise with an apt-like interface.
 set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
+# @cmd Install one or more global tools
+# @flag --lsp Install into the global LSP config
+# @arg tools+ Tool specifications, optionally including a version
 install() {
-  if [[ "${1:-}" == "--lsp" ]]; then
-    shift
+  if [[ "$argc_lsp" == "1" ]]; then
     local lsp_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/lsp.toml
-    mise use --global --path "$lsp_config" "$@"
+    mise use --global --path "$lsp_config" "${argc_tools[@]}"
   else
-    mise use --global "$@"
+    mise use --global "${argc_tools[@]}"
   fi
 }
 
+# @cmd Upgrade all or specific installed tools
+# @arg tools* Tools to upgrade
 upgrade() {
-  mise upgrade "$@" --bump
+  mise upgrade "${argc_tools[@]}" --bump
 }
 
+# @cmd Set up an alias for a tool
+# @arg name! Alias name
+# @arg tool! Tool
 alias() {
-  mise tool-alias set "$@"
+  mise tool-alias set "$argc_name" "$argc_tool"
 }
 
+# @cmd Remove one or more global tools
+# @arg tools+ Tools to remove
 remove() {
-  mise unuse --global "$@"
+  mise unuse --global "${argc_tools[@]}"
   mise run system-install --only-prune
 }
 
+# @cmd Search for tools, or list installed global tools
+# @flag --installed List installed global tools
+# @arg tools* Tools to upgrade
 list() {
-  if [[ "${1:-}" == "--installed" ]]; then
-    shift
-    mise list --global "$@"
+  if [[ "$argc_installed" == "1" ]]; then
+    mise list --global "${argc_tools[@]}"
   else
-    mise search "$@"
+    mise search "${argc_tools[@]}"
   fi
 }
 
+# @cmd Show details about a specific tool
+# @arg tool! Tool
 show() {
-  mise tool "$@"
-  echo "Latest:             $(mise latest "$@")"
+  mise tool "$argc_tool"
+  echo "Latest:             $(mise latest "$argc_tool")"
 }
 
-usage() {
-  cat <<EOF
-Usage: $(basename "$0") COMMAND [ARGS...]
-
-Manage global tools using mise with an apt-like interface.
-
-Commands:
-  install [TOOL@VER]...      Install one or more global tools
-  remove  [TOOL]...          Remove one or more global tools
-  upgrade [TOOL]...          Upgrade all or specific installed packages
-  alias   [NAME] [TOOL]      Set up an alias for a given tool
-  list [--installed] [TOOL]  Search for tools, or list installed global tools
-  show    [TOOL]             Show details about a specific tool
-
-Options:
-  -h, --help                 Display this help and exit
-EOF
-}
-
-main() {
-  local cmd=${1:-}
-  shift || true
-
-  case "$cmd" in
-    install) install "$@" ;;
-    upgrade) upgrade "$@" ;;
-    remove) remove "$@" ;;
-    alias) alias "$@" ;;
-    list) list "$@" ;;
-    show) show "$@" ;;
-    -h | --help) usage ;;
-    *) usage exit 1 ;;
-  esac
-}
-
-main "$@"
+# argc-generated variables
+declare argc_lsp
+declare argc_installed
+declare argc_name
+declare argc_tool
+declare -a argc_tools
+eval "$(argc --argc-eval "$0" "$@")"
