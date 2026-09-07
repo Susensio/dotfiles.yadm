@@ -22,7 +22,7 @@ Both are "main-thread" modes — the difference is whether the session orchestra
 
 ## The subagents
 
-`leader` (and `claude`, when it chooses to delegate) dispatches to five subagents, each pinned to one job and one model:
+`leader` (and `claude`, when it chooses to delegate) dispatches to five first-party subagents, each pinned to one job and one model -- a plugin can add its own, see Plugins below:
 
 | Agent | Job | Model |
 |---|---|---|
@@ -34,6 +34,19 @@ Both are "main-thread" modes — the difference is whether the session orchestra
 
 Each is briefed standalone — none of them remember the conversation that spawned them.
 The `delegation` skill has the full picture of when handing off pays for itself.
+
+## Plugins
+
+`claude plugin` installs third-party additions under `claude/plugins/`, outside the hand-maintained tree above and untracked — a plugin owns its own agents and skill triggers, and updates independently of this repo.
+
+The `codex` plugin (`codex@openai-codex`) adds `codex-rescue`, a sixth agent Claude reaches for on its own judgement — its description says to use it proactively when Claude is stuck or a task should go to Codex/GPT-5.x instead, the same shape of trigger the five first-party agents above carry.
+It runs against the user's Codex/ChatGPT quota, not Claude's.
+`/codex:review`, `/codex:adversarial-review`, `/codex:cancel`, `/codex:result`, `/codex:status` and `/codex:transfer` are `disable-model-invocation: true` — typed only, unreachable by any agent's own judgement; `/codex:setup` and `/codex:rescue` are not.
+Run `/codex:setup` once per machine to authenticate.
+The plugin also registers `SessionStart`/`SessionEnd` hooks of its own (job bookkeeping, not counted among the five first-party hooks below) and an opt-in `Stop` review gate, off until `/codex:setup --enable-review-gate` — left off deliberately, since `Stop` fires at the end of every turn, not at session end.
+
+`independent-code-review` (a skill, not a plugin command) reaches the same native reviewer automatically: `coding`'s own check-and-fix loop calls for it once per finished non-trivial change, by reading `review.md`'s current invocation and running the equivalent directly rather than through the gated command.
+That is now the harness's default for a routine review, ahead of `agy` or Claude's own judgement, on the reasoning that a model that did not write the diff sees what its author cannot — worth flagging against `agy`'s own record, which measured the opposite conclusion for a different vendor: a non-Claude second opinion that raised no high-severity finding a Claude auditor didn't already have.
 
 ## Skills
 

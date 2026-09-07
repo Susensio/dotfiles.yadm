@@ -82,6 +82,10 @@ All probed at v2.1.238, against a throwaway `CLAUDE_CONFIG_DIR`.
   Measured against eleven forms a model writes unprompted: flag-position entries 5/11, `Bash(git push:*)` plus `Bash(yadm push:*)` 9/11 (missing only `git -C <path> push --force` and an absolute path to the binary).
   Denying the verb rather than the flag is what makes a rule branch-agnostic, at the price of the safe uses of that verb.
 
+## Plugins
+
+- `${CLAUDE_PLUGIN_ROOT}` is unset outside a plugin's own registered command, agent or hook -- an agent that reads such a file and copies its invocation verbatim must resolve the plugin's install path itself and substitute it in (probed, v2.1.238, against `codex@openai-codex`).
+
 ## The sandbox
 
 - A `cd <dir> && <cmd>` prefix does **not** defeat sandbox auto-approval (probed, v2.1.238).

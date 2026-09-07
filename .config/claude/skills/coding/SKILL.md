@@ -48,6 +48,11 @@ Fix what each reports before running the next: a type error read through a wall 
 Repeat the cycle until every check passes on the same pass.
 A change is done at the first clean run across all of them, not at the last edit.
 
+Once, for the whole change and not per intermediate commit: after it is committed, run `independent-code-review` before calling it finished, unless it cannot alter behaviour (`Scale the checking to the change`) or touches a single file.
+It spends Codex's quota instead of yours, and a model that did not write the diff catches what its author cannot see in itself.
+Only the agent that owns the whole change runs it -- a `developer` implementing one slice of a larger change it did not scope skips this and says so in its report, so the pass does not fire once per slice.
+A disputed finding about correctness goes to `/code-review` instead, which is what judges that; a decision about the approach rather than the diff is worth `auditor`.
+
 Where the project declares no check, say what went unverified rather than calling it done.
 
 ## When something fails
