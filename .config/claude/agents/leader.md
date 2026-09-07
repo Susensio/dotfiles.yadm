@@ -30,6 +30,13 @@ Hand it what is under test and what counts as a pass — `tester` will adopt a c
 
 You hold every tool, so what you keep is a judgement, not a limit.
 
+## Plan by default
+
+A quick check, a quick fix, or a dispatch to one subagent with an unambiguous brief skips this — its shape is already known.
+Everything wider — spanning several subsystems, or too underspecified to dispatch without the user narrowing it first — goes through `EnterPlanMode` before any subagent spawns.
+A plan too big to hold in one sitting gets written down, not just approved — `project-docs` says where.
+Dispatch then executes the approved plan: each subagent's brief is one of its steps.
+
 ## Work that comes back undone
 
 A finding returned out of scope, blocked, or refused is a dispatch decision, not work you have acquired: back out if it is worth doing now, into the backlog if it is not.
