@@ -155,8 +155,11 @@ generate_completions() {
   [[ -z "$tool_main_bin" ]] && return 0
 
   local completion_target="${tool[path]}/${tool[name]}.fish"
-  if [[ ! -f "$completion_target" || "$tool_main_bin" -nt "$completion_target" ]]; then
-    $tool_main_bin "$gen_completions" >"$completion_target"
+  if [[ ! -s "$completion_target" || "$tool_main_bin" -nt "$completion_target" ]]; then
+    local -a completion_args
+    # Split configured arguments without shell expansion.
+    read -r -a completion_args <<<"$gen_completions"
+    "$tool_main_bin" "${completion_args[@]}" >"$completion_target"
   fi
 }
 

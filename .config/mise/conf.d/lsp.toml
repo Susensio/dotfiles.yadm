@@ -6,5 +6,5 @@ biome = "latest"
 ruff = { version = "latest", gen_completions = "generate-shell-completion fish" }
 shellcheck = "latest"
 shfmt = "latest"
-taplo = { version = "latest", filter_bins = "taplo", gen_completions = "completions fish" }
+taplo = { version = "latest", symlink_bins = true, gen_completions = "completions fish" }
 ty = { version = "latest", gen_completions = "generate-shell-completion fish" }

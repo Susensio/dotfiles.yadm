@@ -3,10 +3,11 @@ aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
   "raw://v@scripts/shell-integration/integration.fish",
 ] }
-antigravity = { version = "latest", rename_exe = "agy" }
+antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
 bat = "latest"
 claude = "latest"
+codex = { version = "latest", symlink_bins = true }
 delta = { version = "latest", extra_assets = [
   "raw://etc/completion/completion.fish",
 ] }
@@ -38,6 +39,7 @@ tmux = { version = "latest", extra_assets = [
 ] }
 usage = "latest"
 uv = "latest"
+xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = "latest"
 
 [hooks]
@@ -52,3 +54,4 @@ use_git_credentials = true
 [tool_alias]
 antigravity = "github:google-antigravity/antigravity-cli"
 llm = "pipx:llm"
+xdg-ninja = "aqua:b3nj5m1n/xdg-ninja"
