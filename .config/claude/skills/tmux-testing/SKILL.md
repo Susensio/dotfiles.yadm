@@ -25,6 +25,10 @@ $t eval "$s" '#{E:automatic-rename-format}' "$w"
 $t kill "$s"                               # server killed, socket file removed
 ```
 
+Every call through `tmux-test`, and every direct `tmux -L ...` against a socket it handed you, needs `dangerouslyDisableSandbox: true`.
+The sandbox blocks the Unix-domain-socket `bind`/`connect` syscall outright, regardless of path or allowlist — plain file writes to the same directory succeed.
+Don't try relocating the socket to a sandbox-writable path first, and don't wait for the first attempt to fail before adding the flag.
+
 Spawning and killing go through it, every time.
 It passes `-L` on every call, unsets `$TMUX` before anything runs, refuses to kill a socket it did not create, and removes the socket file and its fakebin on every exit path including failure.
 It also carries two findings that cost hours to rederive: pane commands are typed through a fakebin, because under a fish default-shell the argument form leaves `pane_current_command` reporting `fish`; and panes are addressed by id, because `pane-base-index` varies with the config under test.
@@ -36,6 +40,10 @@ Where `spawn` cannot express the case — per-file `source-file` error reporting
 Read it at that point, and follow it exactly.
 
 If a check genuinely cannot be done in isolation, stop and tell the user what you would need to run against their live server, rather than doing it.
+
+A hand-rolled `TMUX_TMPDIR=$(...)` export, read back from a file or variable in a later command, is still a bare `tmux ...` the moment that read comes back empty — the socket silently falls back to the live default, and a `kill-server` in that command kills the user's actual session with no error printed.
+This happened in practice: a benchmarking script exported an isolated `TMUX_TMPDIR`, wrote its path to a file, and a separate cleanup command read it back with `$(cat ...)` to build the `kill-server` call — the read failed silently, and the live server died.
+`scripts/tmux-test`'s `-L` on every call plus its refusal to kill a socket it did not create is exactly what prevents this class of bug; reach for it even for a one-off, ad-hoc investigation, not just formal test suites.
 
 ## 1. Pick the lightest check that answers the question
 
