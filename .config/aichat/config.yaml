@@ -1,0 +1,21 @@
+# see https://github.com/sigoden/aichat/blob/main/config.example.yaml
+
+model: groq:openai/gpt-oss-120b
+clients:
+  - type: gemini
+
+  - type: openai-compatible
+    name: groq
+    patch:
+      chat_completions:
+        "openai/gpt-oss-.*":
+          body:
+            include_reasoning: false
+            # reasoning_effort: low
+
+repl_prelude: "shell:companion"
+save_session: false
+
+mapping_tools:
+  fs_read: 'fs_cat,fs_ls'
+  fs_edit: 'fs_write,fs_patch,fs_mkdir,fs_rm'

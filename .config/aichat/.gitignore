@@ -1,0 +1,7 @@
+.env
+/functions/
+/macros/
+/messages.md
+/rags/
+/sessions/
+models-override.yaml
