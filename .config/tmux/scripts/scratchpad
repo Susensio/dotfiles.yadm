@@ -22,18 +22,30 @@ done
 
 command=("$@")
 
-# Toggle off: we're inside a scratchpad popup already, so close it.
-# A bare `detach` makes tmux resolve an ambient "current client", which
-# fails with "no current client" whenever that can't be determined
-# unambiguously. The key binding already tells us the invoking client, so
-# prefer that; fall back to the ambient client only if we weren't told one
-# (or it went stale), and never let a failed detach spill a raw tmux error
-# into the popup -- the worst case is the popup staying open.
+# Already inside a scratchpad popup: read the open window before detaching
+# makes it unreachable, so we know whether to close or swap.
 if [[ "$current_socket" == *$SUFFIX ]]; then
+  if [[ -n "$current_client" ]]; then
+    current_window_name="$(tmux display -c "$current_client" -pF '#{window_name}')"
+  else
+    current_window_name="$(tmux display -pF '#{window_name}')"
+  fi
+
+  # Prefer the client the binding gave us; a bare `detach` resolves an
+  # ambient "current client" that can fail as "no current client". Never
+  # let a failed detach spill a raw tmux error into the popup.
   { [[ -n "$current_client" ]] && tmux detach -t "$current_client" 2>/dev/null; } ||
     tmux detach 2>/dev/null ||
     true
-  exit 0
+
+  # Same window requested again: that's the close half of the toggle.
+  [[ "$current_window_name" == "$scratch_window_name" ]] && exit 0
+
+  # A different one was requested: fall through to the open flow below,
+  # re-pointed at the parent socket/client since this one is now gone.
+  current_socket="${current_socket%$SUFFIX}"
+  current_client=""
+  current_session_id=""
 fi
 
 scratch_socket=${current_socket}${SUFFIX}
