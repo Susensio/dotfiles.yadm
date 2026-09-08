@@ -92,7 +92,7 @@ symlink() {
   local target="$alias"
   [[ -d "$alias" ]] && target="${alias%/}/$(basename "$real")"
 
-  if [[ ! -e "$target" || "$real" -nt "$target" ]]; then
+  if [[ ! -e "$target" || "$(readlink -f "$target")" != "$(readlink -f "$real")" ]]; then
     ln --symbolic --relative --force --verbose "${flags[@]}" "$real" "$alias"
   fi
 }
