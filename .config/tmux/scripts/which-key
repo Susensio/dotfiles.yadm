@@ -10,9 +10,9 @@ Two sources decide what the menu shows:
   list-keys      truth. A declared binding is shown only if it is bound;
                  anything bound but undeclared is appended at the end.
 
-Entering a chain costs DELAY idle seconds; repeat keys restart that delay.
-After that the client is in menu mode and every further table is drawn as soon
-as its key is pressed.
+Entering a chain costs DELAY idle seconds. After that the client is in menu
+mode and every further table is drawn as soon as its key is pressed. Repeatable
+bindings use tmux's own repeat timer instead of redrawing the menu.
 
 Drawing, sizing, positioning and key capture are display-menu's job. Requires
 tmux 3.7. Every failure path exits 0: run-shell reports a nonzero exit as an
@@ -23,7 +23,6 @@ rationale: docs/adr/0013-which-key-menus-from-config.md
 """
 
 import getopt
-import json
 import os
 import pathlib
 import shlex
@@ -38,8 +37,6 @@ DELAY = 0.7  # idle seconds before the first menu of a chain
 ENTRY = "prefix"  # the table F12 (capslock-space) enters, so reaching it is a new chain
 FLAG = "@wk_menu"  # holds the client whose menu is up: it is in menu mode
 TIMER = "@wk_timer"  # newest delayed menu invocation wins
-CACHE = "@wk_cache"  # menu arguments for the active table/client chain
-REPEAT_MARKER = "--repeat-key"
 BREAK = None  # a row with this instead of a key is a rule between groups
 REPEATS = "\u27f3"  # marks a -r binding; "(hold)" would read as a second key
 # Right edge of the client. Plain -x R gives the active pane's edge instead.
@@ -146,21 +143,9 @@ def bound(table):
     return keys
 
 
-# A -r key does not re-enter its table.
-# Append a marked hook to restart the idle delay without duplicating bindings.
-def arm_repeats(table, live):
-    """Append the menu hook to each repeat binding in table once per reload."""
-    hook = (f"run -b '{SELF} #{{client_key_table}} #{{client_name}} "
-            f"{REPEAT_MARKER} 2>&1'")
-    for key, (note, command, repeat) in live.items():
-        if not repeat or REPEAT_MARKER in command:
-            continue
-        tmux("bind-key", "-T", table, "-r", "-N", note, key,
-             f"{command} ; {hook}")
-
-
-def rows(table, live):
-    """(key, description, repeat, command) to show, BREAK where a rule goes."""
+def rows(table):
+    """(key, description, repeat) to show, BREAK where a rule goes."""
+    live = bound(table)
     order, listed, pending = [], set(), False
 
     for key in declared(table):
@@ -179,124 +164,77 @@ def rows(table, live):
 
     def entry(key):
         note, command, repeat = live[key]
-        return key, note or command, repeat, command
+        return key, note or command, repeat
 
-    return [(BREAK, "", False, "") if key is BREAK else entry(key)
+    return [(BREAK, "", False) if key is BREAK else entry(key)
             for key in order + undeclared]
 
 
-def chosen(table, client, key, repeat, command):
-    """What a menu entry runs: re-enter the table, then trigger the binding.
+def chosen(table, client, key):
+    """Re-enter table, then dispatch a binding through tmux.
 
-    Re-entering matters because the menu outlives the table -- a -r key holds
-    the client for repeat-time only, and a key sent into root reaches the pane.
-    Ordinary keys are replayed, leaving compound (\\;-chained) bindings to
-    tmux's own dispatch; a -r key runs its command instead, since dispatching
-    it would arm the repeat state, in which the next non-repeat key is skipped.
-    It also redraws its menu -- nothing else would bring it back.
+    A repeatable binding starts tmux's native repeat state, which lasts for
+    repeat-time and returns to root after it expires.
     """
     enter = f"switch-client -c {quote(client)} -T {quote(table)}"
-    if not repeat:
-        return f"{enter} ; send-keys -K -c {quote(client)} -- {quote(key)}"
-    redraw = ""
-    if REPEAT_MARKER not in command:
-        redraw = f" ; run -b {quote(f'{SELF} {table} {client} {REPEAT_MARKER} 2>&1')}"
-    return f"{enter} ; {defuse(command)}{redraw}"
+    return f"{enter} ; send-keys -K -c {quote(client)} -- {quote(key)}"
 
 
-def menu(table, client, live):
+def menu(table, client):
     """display-menu arguments: name, key and command for each entry."""
-    entries = rows(table, live)
+    entries = rows(table)
     if not entries:
         return []
     # Repeatable rows are padded so their marker lines up with the key column.
-    column = max(len(text) for key, text, *_ in entries if key is not BREAK)
+    column = max(len(text) for key, text, _ in entries if key is not BREAK)
 
     arguments = []
-    for key, description, repeat, command in entries:
+    for key, description, repeat in entries:
         if key is BREAK:
             arguments.append("")  # an empty name draws a rule
             continue
         if repeat:
             description = f"{description.ljust(column)} {REPEATS}"
-        arguments += [defuse(description), key,
-                      chosen(table, client, key, repeat, command)]
+        arguments += [defuse(description), key, chosen(table, client, key)]
     # Without this, Escape closes the menu but leaves the client in the
     # table. An unbound key normally drops back to root instead.
     return arguments + ["", "Cancel", "Escape",
-                        f"switch-client -c {quote(client)} -T root ; "
-                        f"set -gu {FLAG} ; set -gu {CACHE}"]
+                        f"switch-client -c {quote(client)} -T root ; set -gu {FLAG}"]
 
 
-def state(client):
-    """(menu client, timer, key table, cache) for client, or empty strings."""
-    fields = ("#{%s}" % FLAG, "#{%s}" % TIMER, "#{client_key_table}",
-              "#{%s}" % CACHE)
-    output = (tmux("display-message", "-p", "-c", client, SEP.join(fields))
-              or "").rstrip("\n")
-    return tuple((output.split(SEP, 3) + ["", "", "", ""])[:4])
-
-
-def cached_menu(table, client, value):
-    """Cached menu arguments when they belong to this active menu chain."""
-    try:
-        cached_table, cached_client, arguments = json.loads(value)
-    except (json.JSONDecodeError, ValueError):
-        return None
-    if cached_table == table and cached_client == client:
-        return arguments
-    return None
-
-
-def cache_menu(table, client, arguments):
-    """Save menu arguments until this menu chain ends."""
-    return tmux("set", "-g", CACHE,
-                json.dumps((table, client, arguments), separators=(",", ":")))
+def state(client, format):
+    """A format expanded for the client, or "" if it has gone away."""
+    return (tmux("display-message", "-p", "-c", client, format) or "").strip()
 
 
 def main(args):
-    if len(args) < 2 or args[2:] not in ([], [REPEAT_MARKER]):
+    if len(args) != 2:
         return
     table, client = args[:2]
-    repeat = args[2:] == [REPEAT_MARKER]
     # F12 (capslock-space) is the only way in, so ENTRY means a new chain:
     # whatever menu mode the last one ended in is over.
     if table == ENTRY:
         tmux("set", "-gu", FLAG)
-        tmux("set", "-gu", CACHE)
 
-    menu_client, timer, current_table, cache = state(client)
-    if repeat and menu_client == client and current_table == table:
-        arguments = cached_menu(table, client, cache)
-        if arguments:
-            tmux("display-menu", "-c", client, "-T", f" {table.upper()}... ",
-                 "-x", RIGHT, "-y", "S", *arguments)
-            return
-
-    live = bound(table)
-    arm_repeats(table, live)
-    arguments = menu(table, client, live)
+    arguments = menu(table, client)
     if not arguments:
         return
 
-    if menu_client != client:
+    if state(client, "#{%s}" % FLAG) != client:
         token = str(time.monotonic_ns())
         tmux("set", "-g", TIMER, token)
         time.sleep(DELAY)  # not in menu mode yet, so this menu is still earned
-        _, timer, current_table, _ = state(client)
-        if timer != token:
-            return  # a repeat key restarted the delay
+        if state(client, "#{%s}" % TIMER) != token:
+            return  # a newer menu invocation restarted the delay
 
     # A keypress before the idle delay elapsed or while preparing has left the table.
-    if current_table != table:
+    if state(client, "#{client_key_table}") != table:
         tmux("set", "-gu", FLAG)
-        tmux("set", "-gu", CACHE)
         return
 
     # Set before drawing, since display-menu blocks until the menu is
     # dismissed -- by which time the next key has already read the flag.
     tmux("set", "-g", FLAG, client)
-    cache_menu(table, client, arguments)
     tmux("display-menu", "-c", client, "-T", f" {table.upper()}... ",
          "-x", RIGHT, "-y", "S", *arguments)
 
