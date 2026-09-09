@@ -1,6 +1,6 @@
 # ADR-0014: Keep both vim and helix copy-mode grammars
 
-Status: Accepted
+Status: Superseded by [ADR-0042](0042-one-native-copy-mode.md)
 Date: 2026-08-08
 
 ## Context

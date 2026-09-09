@@ -12,8 +12,10 @@ From there, keys branch into modal sub-tables instead of one flat prefix map:
 
 ## Copy mode
 
-Copy mode supports two selectable motion grammars, not just stock tmux's vi-mode: **vim** (operator-then-motion, e.g. `dw`, `ciw`) or **Helix** (selection-first, e.g. select a word then act on it).
-Pick one via `@copy_profile` in `conf.d/21_copy.conf`; everything past the profile switch (search, yank/paste, text objects) is shared by both.
+Copy mode uses tmux's native vi selection model, so `w`, `b`, `e` and their WORD variants use tmux's own boundaries.
+`v` starts a selection, `x` selects lines, `C` starts rectangle selection, and `y`/`Y` copy the selection/current line.
+`mi<obj>` and `ma<obj>` select inner or around text objects; `mm` and `%` jump to a matching bracket.
+`_` intentionally has no trim-selection binding because tmux cannot change a live selection's whitespace endpoints.
 
 ## Mouse
 
