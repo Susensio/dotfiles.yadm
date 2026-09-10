@@ -1,8 +1,10 @@
-#!/bin/bash
-# Clipboard, platform agnostic
+#!/usr/bin/env bash
+# @describe Clipboard, platform agnostic
+# @option -s --selection[=clipboard|primary] Clipboard selection
+# @meta inherit-flag-options
 
-MODE="pipe"
-SELECTION="clipboard"
+set -euo pipefail
+
 DISPLAY="${DISPLAY:-:0}"
 export DISPLAY
 FALLBACK_FILE="${XDG_RUNTIME_DIR:-/tmp}/clipboard_${USER:-shared}"
@@ -12,32 +14,31 @@ get_system() {
     echo "wsl"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo "macos"
-  elif [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+  elif [[ "${XDG_SESSION_TYPE:-}" == "wayland" ]]; then
     echo "wayland"
-  elif [[ "$XDG_SESSION_TYPE" == "x11" ]] || [[ -n "$DISPLAY" ]]; then
+  elif [[ "${XDG_SESSION_TYPE:-}" == "x11" ]] || [[ -n "$DISPLAY" ]]; then
     echo "x11"
-  elif [[ -n "$TMUX" ]]; then
+  elif [[ -n "${TMUX:-}" ]]; then
     echo "tmux"
   else
     echo "fallback"
   fi
 }
 
-# Copying function
 copy_to_clipboard() {
   local system
   system=$(get_system)
 
   case "$system" in
     wayland)
-      if [ "$SELECTION" == "clipboard" ]; then
+      if [[ "$argc_selection" == "clipboard" ]]; then
         wl-copy
       else
         wl-copy --primary
       fi
       ;;
     x11)
-      xsel -i --"$SELECTION"
+      xsel -i --"$argc_selection"
       ;;
     wsl)
       /mnt/c/Windows/System32/clip.exe
@@ -60,21 +61,20 @@ copy_to_clipboard() {
   esac
 }
 
-# Pasting function
 paste_from_clipboard() {
   local system
   system=$(get_system)
 
   case "$system" in
     wayland)
-      if [ "$SELECTION" == "clipboard" ]; then
+      if [[ "$argc_selection" == "clipboard" ]]; then
         wl-paste --no-newline
       else
         wl-paste --primary --no-newline
       fi
       ;;
     x11)
-      xsel -o --"$SELECTION"
+      xsel -o --"$argc_selection"
       ;;
     wsl)
       powershell.exe -noprofile -c '[Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))'
@@ -97,50 +97,25 @@ paste_from_clipboard() {
   esac
 }
 
-# Parse command line arguments
-while [[ "$#" -gt 0 ]]; do
-  case $1 in
-    copy | paste)
-      MODE=$1
-      shift
-      ;;
-    -s | --selection)
-      shift
-      case "$1" in
-        "clipboard" | "primary")
-          SELECTION="$1"
-          ;;
-        *)
-          echo "Invalid selection value: $1. Allowed values are 'clipboard' or 'primary'."
-          exit 1
-          ;;
-      esac
-      shift
-      ;;
-    *)
-      echo "Unknown argument: $1"
-      exit 1
-      ;;
-  esac
-done
+# @cmd Copy stdin to the clipboard
+copy() {
+  copy_to_clipboard
+}
 
-case $MODE in
-  copy)
+# @cmd Paste the clipboard to stdout
+paste() {
+  paste_from_clipboard
+}
+
+# @cmd Copy stdin if piped, otherwise paste to stdout
+# @meta default-subcommand
+pipe() {
+  if [[ -p /dev/stdin ]]; then
     copy_to_clipboard
-    ;;
-  paste)
+  else
     paste_from_clipboard
-    ;;
-  pipe)
+  fi
+}
 
-    if [[ -p /dev/stdin ]]; then
-      copy_to_clipboard
-    else
-      paste_from_clipboard
-    fi
-    ;;
-  *)
-    echo "ERROR: No command provided" >&2
-    exit 1
-    ;;
-esac
+declare argc_selection
+eval "$(argc --argc-eval "$0" "$@")"
