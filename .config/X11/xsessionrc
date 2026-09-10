@@ -1,0 +1,8 @@
+# Import environment variables defined in ~/.config/environment.d/*.conf
+# Excludes shell-managed names: this exec's onward into cinnamon-session, so a
+# corrupted PWD/SHLVL here would leak into the whole graphical session. See ADR-0043.
+if [ -n "$DBUS_SESSION_BUS_ADDRESS" ] && command -v systemctl >/dev/null; then
+  set -a
+  source <(systemctl --user show-environment | grep -Ev '^(PWD|USER|HOME|SHELL|SHLVL|_)=')
+  set +a
+fi

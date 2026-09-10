@@ -7,9 +7,10 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # Import environment variables defined in ~/.config/environment.d/*.conf
-# only if NOT in a graphical environment (TTY, SSH)
-if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -v systemctl >/dev/null; then
+# Unconditional: see ADR-0043 for why the old DISPLAY/WAYLAND_DISPLAY guard
+# was dropped, and why this must exclude shell-managed names.
+if command -v systemctl >/dev/null; then
   set -a
-  eval "$(systemctl --user show-environment)"
+  eval "$(systemctl --user show-environment | grep -Ev '^(PWD|USER|HOME|SHELL|SHLVL|_)=')"
   set +a
 fi

@@ -47,13 +47,14 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
 2.  **`Xsession`:** The session script takes over and runs scripts in `/etc/X11/Xsession.d/`:
     *   **Step A: The Pull (`00xdg-compliance` -> `40x11-common_xsessionrc`):**
         *   `00xdg-compliance` redirects `USERXSESSIONRC` to `~/.config/X11/xsessionrc`.
-        *   **Action:** `xsessionrc` runs `source <(systemctl --user show-environment)` to pull the systemd variables into the X session.
+        *   **Action:** `xsessionrc` runs `source <(systemctl --user show-environment)` to pull the systemd variables into the X session, filtering out shell-managed names first (`PWD`, `USER`, `HOME`, `SHELL`, `SHLVL`, `_`) since this process `exec`s onward into `cinnamon-session` — see [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md).
     *   **Step B: The Push (`95dbus_update-activation-env`):**
         *   **Action:** Runs `dbus-update-activation-environment --systemd --all`.
             This pushes the X11 environment (containing `DISPLAY`, `XAUTHORITY`, etc.) back into `systemd --user`.
     *   **Step C: The Unpin (`96fix-env-precedence`):**
         *   **Action:** Runs `_env_unpin` (calling `systemctl --user unset-environment`).
-            This unsets the dynamic overrides from Step B so that `environment.d` remains the master for hot-reloads.
+            This unsets the dynamic overrides from Step B for the names `environment.d`'s generator owns, so `environment.d` remains the master for hot-reloads on those names — see [ADR-0002](adr/0002-unset-systemd-overrides.md).
+            `DISPLAY` and `XAUTHORITY` are not generator-owned, so they are deliberately left pinned, not unset.
 
 ### Phase 3: The Shell Layer (The Interactive Experience)
 1.  **Terminal Startup:** You open a terminal.
@@ -69,6 +70,10 @@ We use `systemd-environment-d-generator(8)` to maintain a single, static configu
     It:
     1.  Defines the standard XDG base directories (`XDG_CONFIG_HOME`, `XDG_CACHE_HOME`, etc.).
     2.  Forces many standard tools (Rust, Node, Python, GnuPG, GTK) to use these directories instead of their default dotfiles in `$HOME`.
+*   **Excluded from every import:** `systemctl --user show-environment` also reports shell-managed names that must never be imported verbatim: `PWD`, `USER`, `HOME`, `SHELL`, `SHLVL`, `_`.
+    Importing `PWD` would desynchronise it from the real working directory; `SHLVL` is load-bearing in `bash/bashrc`'s exec-into-fish condition (`^[12]$`).
+    Every consumer of `show-environment` filters these six names out before importing: `fish/functions/environment/_env_fetch.fish`'s `readonly_vars` list, and an inline `grep -Ev '^(PWD|USER|HOME|SHELL|SHLVL|_)='` in both `~/.config/profile` and `~/.config/X11/xsessionrc`.
+    See [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md) for why each of the three keeps its own copy instead of sharing one.
 
 ## 4. Why `_env_pull` and Login Shells are Mandatory
 `gnome-terminal-server` functionally inherits its environment from the session that first triggered its activation (usually Cinnamon).
@@ -85,11 +90,12 @@ While Fish is our primary interactive shell, we use Bash as the entry point for 
 2.  **Relay (`~/.config/bash/bashrc`):** If the shell is interactive, it `exec`s into `fish`.
 3.  **State Preservation:** Bash checks if it is a login shell and passes the `--login` flag to Fish, ensuring the environment sync logic is triggered.
 
-### TTY and SSH Support (`~/.config/profile`)
-This architecture works seamlessly on TTYs or via SSH:
-1.  **Login:** `/bin/bash` starts as a login shell and sources `~/.config/profile`.
-2.  **Systemd Sync:** If no graphical display is detected (`DISPLAY` is empty), `profile` pulls the latest environment from `systemctl --user show-environment`.
-3.  **Interactive Transition:** `profile` sources `bashrc`, which then `exec`s into `fish` (preserving the login state).
+### Login Shell Support (`~/.config/profile`)
+This architecture works seamlessly on TTYs, via SSH, and for any other login shell:
+1.  **Login:** `/bin/bash` starts as a login shell and sources `~/.config/profile`, which sources `bashrc` first.
+2.  **Interactive Transition:** If interactive, `bashrc` `exec`s into `fish` here, replacing the process before it ever reaches step 3 below.
+3.  **Systemd Sync:** Otherwise (a non-interactive login shell, e.g. `bash -lc '...'`, or an interactive shell past `SHLVL` 2), control returns to `profile`, which unconditionally pulls the latest environment from `systemctl --user show-environment`, filtering out shell-managed names first.
+    Before [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md) this step only ran when no graphical display was detected, leaving a non-interactive login shell in a graphical session unable to reconstruct its own `$PATH` — the gap that ADR closes.
 
 ## 6. XDG Compliance & Dotfile Management
 Our system is designed to keep `$HOME` clean by adhering strictly to the **XDG Base Directory Specification**.
