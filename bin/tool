@@ -39,7 +39,7 @@ remove() {
 # @flag --installed List installed global tools
 # @arg tools* Tools to upgrade
 list() {
-  if [[ "$argc_installed" == "1" ]]; then
+  if [[ "${argc_installed:-}" == "1" ]]; then
     mise list --global "${argc_tools[@]}"
   else
     mise search "${argc_tools[@]}"
