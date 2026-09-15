@@ -111,7 +111,7 @@ else
   F_KIND=1
   F_SESSION_ID=2
   F_SESSION_PATH=4
-  preview_cmd="[[ {$F_KIND} == 'NEW' ]] && exit || [[ {$F_KIND} == 'SESSION' ]] && ${TMUX_SCRIPTS}/preview-session {$F_SESSION_ID} || eza --color=always --icons --tree --level=2 --git-ignore -- {$F_SESSION_PATH}"
+  preview_cmd="[[ {$F_KIND} == 'NEW' ]] && exit || [[ {$F_KIND} == 'SESSION' ]] && ${TMUX_SCRIPTS}/preview-session {$F_SESSION_ID} || eza --color=always --group-directories-first --icons --tree --level=2 --git-ignore -- {$F_SESSION_PATH}"
 
   selection=$(
     list_sources | fzf \

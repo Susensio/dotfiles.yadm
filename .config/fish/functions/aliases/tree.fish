@@ -6,7 +6,7 @@ function tree --wraps=eza --description 'Tree contents in directory'
             set git_ignore --git-ignore
         end
 
-        eza --tree --group-directories-first --icons $git_ignore $argv
+        eza --tree --group-directories-first --icons=auto $git_ignore $argv
     else
         command tree $argv
     end

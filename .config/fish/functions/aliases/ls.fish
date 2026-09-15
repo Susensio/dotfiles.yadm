@@ -1,7 +1,7 @@
 function ls --wraps=eza --description 'List contents in directory'
     if command -qs eza
         if isatty stdout
-            eza --group-directories-first (test "$TERM" != linux; and echo --icons) --hyperlink $argv
+            eza --group-directories-first (test "$TERM" != linux; and echo --icons) --hyperlink=auto $argv
         else
             eza $argv
         end

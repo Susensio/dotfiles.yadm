@@ -4,3 +4,4 @@
 --map-syntax '/home/*/.config/profile.d/*:Bourne Again Shell (bash)'
 --map-syntax '/home/*/.config/bash/*:Bourne Again Shell (bash)'
 --map-syntax '/home/*/.config/git/*.config:Git Config'
+--map-syntax '/home/*/.config/tmux/**/*.conf:Bash'
