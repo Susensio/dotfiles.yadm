@@ -1,6 +1,7 @@
 [user]
 	name = Saúl Nogueras
 	email = susensio@gmail.com
+	signingkey = /home/susensio/.ssh/id_ed25519.pub
 
 [init]
 	defaultBranch = master
@@ -26,6 +27,7 @@
 
 [push]
 	autoSetupRemote = true
+	followTags = true
 
 [pull]
 	ff = only
@@ -40,3 +42,5 @@
 	path = config.local
 	path = delta.config
 	path = lfs.config
+[gpg]
+	format = ssh
