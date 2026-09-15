@@ -1,0 +1,26 @@
+--popup=80%
+--border=rounded
+--layout=reverse
+--style=full
+--header-lines-border=none
+--ansi
+--preview-window="right:50%:wrap,<60(:hidden)"
+--with-shell="bash -c"
+--color=\
+bg:#282828,\
+bg+:#3c3836,\
+fg:#bdae93,\
+fg+:#fbf1c7,\
+header:#458588,\
+hl:#98971a,\
+hl+:#b8bb26,\
+info:#d79921,\
+marker:#689d6a,\
+pointer:#689d6a,\
+prompt:#d79921,\
+spinner:#689d6a
+--bind=ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down
+--bind=tab:toggle+down,btab:toggle+up
+--bind=change:first
+--bind=esc:become:
+
