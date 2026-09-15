@@ -9,6 +9,7 @@
 !/.config/nvim/
 !/.config/helix/
 !/.config/yadm/
+!/.config/fzf/
 !/.config/cidm/
 !/.config/fish/
 !/.config/mise/

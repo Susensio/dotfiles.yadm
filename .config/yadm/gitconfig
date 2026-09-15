@@ -3,6 +3,6 @@
 [advice]
   addIgnoredFile = false
 [status]
-  showUntrackedFiles = normal
+  showUntrackedFiles = all
 [pull]
   rebase = true

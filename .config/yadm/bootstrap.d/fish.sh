@@ -6,7 +6,7 @@ source "${HOME}/bin/log"
 # Add repo if not present
 if ! grep -rq "fish-shell" /etc/apt/sources.list*; then
   log_info "Adding fish shell repository..."
-  sudo add-apt-repository -y ppa:fish-shell/release-3
+  sudo add-apt-repository -y ppa:fish-shell/release-4
 fi
 
 if ! command -v fish &> /dev/null; then
