@@ -102,7 +102,7 @@ symlink() {
 # ------------------------------------------------------------------------------
 
 process_extra_assets() {
-  # (raw|release)://[owner/repo:][v@]path
+  # (raw|release)://[owner/repo:][v@]path[>filename]
   local extra_assets=()
   readarray -t extra_assets < <(echo "${tool[info]}" | jq -r '.tool_options.extra_assets[]?')
 
@@ -110,6 +110,16 @@ process_extra_assets() {
     local url
     url=$(MISE_TOOL_NAME="${tool[name]}" MISE_TOOL_VERSION="${tool[version]}" \
       envsubst '$MISE_TOOL_NAME $MISE_TOOL_VERSION' <<<"$asset")
+
+    local filename=""
+    if [[ "$url" == *">"* ]]; then
+      filename=${url#*>}
+      url=${url%%>*}
+      if [[ -z "$filename" || "$filename" == */* || "$filename" == . || "$filename" == .. ]]; then
+        echo "Invalid extra asset filename: $filename" >&2
+        return 1
+      fi
+    fi
 
     local scheme repo tag_prefix path
     IFS=$SEP read -r scheme repo tag_prefix path < <(echo "$url" |
@@ -121,18 +131,27 @@ process_extra_assets() {
     esac
     echo "$url"
 
-    local filename
-    filename=$(basename "$url")
-    if [[ "$filename" == *.tar.gz ]]; then
+    local source_filename
+    source_filename=$(basename "$url")
+    filename=${filename:-$source_filename}
+    if [[ "$source_filename" == *.tar.gz ]]; then
       local download_dir=${XDG_CACHE_HOME:-$HOME/.cache}/mise/${tool[name]}
       local download_target=${download_dir}/$filename
       if [[ ! -f "$download_target" ]]; then
         mkdir -p "$download_dir"
-        wget --no-verbose --timestamping "$url" -P "$download_dir"
+        if [[ "$filename" != "$source_filename" ]]; then
+          wget --no-verbose --output-document "$download_target" "$url"
+        else
+          wget --no-verbose --timestamping "$url" -P "$download_dir"
+        fi
         tar -xzi --file "$download_target" --directory "${tool[path]}"
       fi
     elif [[ ! -f "${tool[path]}/${filename}" ]]; then
-      wget --no-verbose --timestamping "$url" -P "${tool[path]}"
+      if [[ "$filename" == "$source_filename" ]]; then
+        wget --no-verbose --timestamping "$url" -P "${tool[path]}"
+      else
+        wget --no-verbose --output-document "${tool[path]}/${filename}" "$url"
+      fi
     fi
   done
 }
