@@ -17,7 +17,7 @@ file_extension=$(echo "${file_path##*.}" | tr '[:upper:]' '[:lower:]')
 mimetype=$(file --dereference --brief --mime-type -- "$file_path")
 
 case "$mimetype" in
-  */directory) eza --tree --level=2 --git-ignore --color=always --icons -- "$file_path" ;;
+  */directory) eza --tree --group-directories-first --level=2 --git-ignore --color=always --icons -- "$file_path" ;;
   image/*) chafa "$file_path" -s "$pv_width"x"$pv_height" ;;
   */pdf) pdftotext "$file_path" - ;;
   text/* | */xml | application/json)
