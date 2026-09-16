@@ -11,6 +11,7 @@ declare -A TARGET_DIRS=(
   [BIN]=${HOME}/.local/bin
   [MAN]=${XDG_DATA_HOME:-$HOME/.local/share}/man
   [FISH_VENDOR_COMPLETIONS]=${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d
+  [FISH_VENDOR_CONF]=${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_conf.d
   [NODE_MODULES]=${XDG_LIB_HOME:-$HOME/.local/lib}/node_modules
 )
 
@@ -156,30 +157,34 @@ process_extra_assets() {
   done
 }
 
-generate_completions() {
-  # Vendor sometimes ship `completions.fish` instead of `$tool_name.fish`
-  local found_completions=()
-  readarray -t found_completions < <(find -L "${tool[path]}" -maxdepth 1 -type f -name "completion.fish")
-  if [[ "${#found_completions[@]}" -eq 1 ]]; then
-    local found_completion=${found_completions[0]}
-    symlink "$found_completion" "$(dirname "$found_completion")/${tool[name]}.fish"
-  fi
-
-  local gen_completions
-  gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
-  [[ -z "$gen_completions" ]] && return 0
-
+generate() {
+  local command=$1
+  local filename=$2
   local tool_main_bin
   tool_main_bin=$(find "${tool[path]}" -name "${tool[name]}" -executable -print -quit)
   [[ -z "$tool_main_bin" ]] && return 0
 
-  local completion_target="${tool[path]}/${tool[name]}.fish"
-  if [[ ! -s "$completion_target" || "$tool_main_bin" -nt "$completion_target" ]]; then
-    local -a completion_args
+  local target="${tool[path]}/${filename}"
+  if [[ ! -s "$target" || "$tool_main_bin" -nt "$target" ]]; then
+    local -a command_args
     # Split configured arguments without shell expansion.
-    read -r -a completion_args <<<"$gen_completions"
-    "$tool_main_bin" "${completion_args[@]}" >"$completion_target"
+    read -r -a command_args <<<"$command"
+    "$tool_main_bin" "${command_args[@]}" >"$target"
   fi
+}
+
+generate_completions() {
+  local gen_completions
+  gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
+  [[ -z "$gen_completions" ]] && return 0
+  generate "$gen_completions" completion.fish
+}
+
+generate_shell_init() {
+  local gen_shell_init
+  gen_shell_init=$(echo "${tool[info]}" | jq -r '.tool_options.gen_shell_init // empty')
+  [[ -z "$gen_shell_init" ]] && return 0
+  generate "$gen_shell_init" config.fish
 }
 
 link_tool_assets() {
@@ -193,9 +198,18 @@ link_tool_assets() {
     symlink "$bin" "${TARGET_DIRS[BIN]}/"
 
     local fish_completion
-    fish_completion=$(find -L "${tool[path]}" -type f -name "${bin_name}.fish" -print -quit 2>/dev/null)
-    if [[ -n "$fish_completion" ]]; then
-      symlink "$fish_completion" "${TARGET_DIRS[FISH_VENDOR_COMPLETIONS]}/"
+    fish_completion=$(find -L "${tool[path]}" -type f \
+      \( -name "completion.fish" -o -name "${bin_name}.fish" \) -print -quit 2>/dev/null)
+    local fish_completion_target="${TARGET_DIRS[FISH_VENDOR_COMPLETIONS]}/${bin_name}.fish"
+    if [[ -n "$fish_completion" && ! -e "$fish_completion_target" ]]; then
+      symlink "$fish_completion" "$fish_completion_target"
+    fi
+
+    local fish_conf
+    fish_conf=$(find -L "${tool[path]}" -type f -name "config.fish" -print -quit 2>/dev/null)
+    local fish_conf_target="${TARGET_DIRS[FISH_VENDOR_CONF]}/${tool[name]}.fish"
+    if [[ -n "$fish_conf" && ! -e "$fish_conf_target" ]]; then
+      symlink "$fish_conf" "$fish_conf_target"
     fi
 
     local tool_manpages=()
@@ -254,6 +268,7 @@ main() {
 
     process_extra_assets
     generate_completions
+    generate_shell_init
     link_tool_assets
     link_node_modules
   done
