@@ -37,7 +37,7 @@ function _fzf_variable_widget
     set -l query (_fzf_anchored_query "$name_prefix")
 
     set -l preview "fish -c '_set_show_lean {}'"
-    set -l result (set --names | _fzf --no-multi --query="$query" --preview=$preview)
+    set -l result (set --names | _fzf --query="$query" --preview=$preview)
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
         commandline -rt -- \$$result
@@ -62,11 +62,11 @@ function _fzf_path_widget
     end
 
     set -l preview_command (string join '' 'preview ' (string escape -- $base_directory) '/{}')
-    set -l result (fd --base-directory=$base_directory --type=$entry_type --hidden --exclude=.git | _fzf --no-multi --query="$query" --preview=$preview_command)
+    set -l result (fd --base-directory=$base_directory --type=$entry_type --hidden --exclude=.git | _fzf --multi --query="$query" --preview=$preview_command)
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
-        set -l selected_path (path normalize -- "$base_directory/$result")
-        commandline -rt -- (string escape -- $selected_path)
+        set -l selected_path (path normalize -- $base_directory/$result)
+        commandline -rt -- (string join ' ' (string escape -- $selected_path))
     end
 end
 

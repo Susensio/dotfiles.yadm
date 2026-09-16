@@ -20,7 +20,8 @@ pointer:#689d6a,\
 prompt:#d79921,\
 spinner:#689d6a
 --bind=ctrl-u:preview-half-page-up,ctrl-d:preview-half-page-down
---bind=tab:toggle+down,btab:toggle+up
+--bind=tab:down,btab:up
+--bind=ctrl-space:toggle+down
 --bind=change:first
 --bind=esc:become:
 
