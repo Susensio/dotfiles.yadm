@@ -1,4 +1,9 @@
 function env_reload -d "Hot-reload environment.d variables into systemctl and current shell"
+    if not systemctl --user show-environment >/dev/null
+        log error "Cannot reach systemd --user; environment not reloaded."
+        return 1
+    end
+
     log info "Unpinning dynamic variables..."
     _env_unpin
 
