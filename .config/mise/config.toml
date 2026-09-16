@@ -23,7 +23,7 @@ gh = "latest"
 "github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
 glow = "latest"
 helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
-herdr = { version = "latest", gen_completions = "completion fish" }
+herdr = { version = "latest", gen_completions = "completion fish", postinstall = "~/.config/herdr/scripts/sync-agent-skill.sh" }
 just = "latest"
 lazygit = "latest"
 node = "latest"

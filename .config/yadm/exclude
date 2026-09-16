@@ -5,6 +5,7 @@
 !/.config/git/
 !/.config/bat/
 !/.config/tmux/
+!/.config/herdr/
 !/.config/keyd/
 !/.config/nvim/
 !/.config/helix/

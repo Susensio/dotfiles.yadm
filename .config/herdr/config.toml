@@ -1,0 +1,99 @@
+onboarding = false
+[theme]
+name = "gruvbox"
+auto_switch = false
+[theme.custom]
+surface_dim = "#504945"
+
+[ui]
+tab_bar_position = "bottom"
+accent = "green"
+prompt_new_tab_name = false
+pane_borders = "always"
+pane_outer_borders = true
+pane_gaps = true
+window_title = "[{workspace}] {tab} - {terminal_title}"
+
+[ui.toast]
+delivery = "herdr"
+
+[keys]
+prefix = "F12"
+
+focus_pane_left = "alt+h"
+focus_pane_down = "alt+j"
+focus_pane_up = "alt+k"
+focus_pane_right = "alt+l"
+
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+close_pane = "prefix+q"
+zoom = "prefix+z"
+resize_mode = "prefix+p"
+
+new_tab = "prefix+t"
+rename_tab = "prefix+r"
+previous_tab = "alt+i"
+next_tab = "alt+o"
+switch_tab = "alt+1..9"
+close_tab = "prefix+shift+q"
+
+settings = "prefix+C"
+reload_config = "prefix+R"
+toggle_sidebar = "prefix+s"
+# rename_workspace = "prefix+shift+w"
+# close_workspace = "prefix+shift+d"
+detach = "prefix+D"
+previous_workspace = ""
+next_workspace = ""
+previous_agent = ""
+next_agent = ""
+
+# navigate_workspace_up = "tab"
+# navigate_workspace_down = "shift-tab"
+# navigate_workspace_up = ""
+# navigate_workspace_down = ""
+# navigate_pane_left = ""
+# navigate_pane_down = ""
+# navigate_pane_up = ""
+# navigate_pane_right = ""
+
+[[keys.command]]
+key = "prefix+enter"
+type = "shell"
+command = "/home/susensio/.config/herdr/scripts/smart-split.sh"
+description = "new pane"
+[[keys.command]]
+key = "alt+`"
+type = "popup"
+command = "/home/susensio/.config/herdr/scripts/scratchpad.sh"
+description = "open scratchpad"
+width = "80%"
+height = "85%"
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "/home/susensio/.config/herdr/scripts/sessionizer.sh"
+description = "open sessionizer"
+width = "80%"
+height = "80%"
+[[keys.command]]
+key = "prefix+g"
+type = "popup"
+command = "lazygit"
+description = "open lazygit"
+width = "80%"
+height = "85%"
+[[keys.command]]
+key = "alt+m"
+type = "popup"
+command = "/home/susensio/bin/f-man"
+description = "open man pages"
+width = "80%"
+height = "85%"
+
+[worktrees]
+directory = "~/.local/share/herdr/worktrees"
+
+[experimental]
+pane_history = false
