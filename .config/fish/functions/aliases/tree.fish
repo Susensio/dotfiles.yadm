@@ -1,13 +1,24 @@
 function tree --wraps=eza --description 'Tree contents in directory'
-    if command -qs eza
-        # Do not show and empty tree for git-ignored root dir, only hide subdirs
-        set -l git_ignore
-        if not git check-ignore -- . $argv >/dev/null 2>&1
-            set git_ignore --git-ignore
-        end
-
-        eza --tree --group-directories-first --icons=auto $git_ignore $argv
-    else
+    if not command -qs eza
         command tree $argv
+        return
     end
+
+    set -l roots (path filter $argv)
+
+    if test -z "$roots"
+        set roots .
+    end
+
+    set -l options \
+        --tree \
+        --group-directories-first \
+        --icons=auto
+
+    # Avoid an empty tree when the requested root itself is git-ignored.
+    if not git check-ignore -q -- $roots 2>/dev/null
+        set -a options --git-ignore
+    end
+
+    command eza $options $argv
 end
