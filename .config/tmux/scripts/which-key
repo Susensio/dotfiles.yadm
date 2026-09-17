@@ -5,8 +5,10 @@ Usage: which-key <table> <client>   — armed by the alias in conf.d/15_aliases.
 
 Two sources decide what the menu shows:
 
-  conf.d/*.conf  order and grouping. Blank lines already in the config become
-                 the rules between groups.
+  conf.d/*.conf  order and grouping, resolved through `source-file -nv` so
+                 a %if branch that didn't run on this server is invisible
+                 here too -- not re-decided by hand-parsing. Blank lines
+                 already in the config become the rules between groups.
   list-keys      truth. A declared binding is shown only if it is bound;
                  anything bound but undeclared is appended at the end.
 
@@ -60,17 +62,39 @@ def defuse(text):
 
 
 def config_lines():
-    """Lines of conf.d/*.conf, in source order, backslash continuations
-    joined so a binding is always a single line."""
+    """(path, lineno, line) for conf.d/*.conf, in source order, backslash
+    continuations joined into one logical line. lineno is that line's
+    last physical line -- where `source-file -nv` reports it too."""
     for path in sorted((CONFIG_DIR / "conf.d").glob("*.conf")):
         joined = ""
-        for line in path.read_text().splitlines():
+        for lineno, line in enumerate(path.read_text().splitlines(), 1):
             joined += line.strip()
             if joined.endswith("\\"):
                 joined = joined[:-1]
             else:
-                yield joined
+                yield path, lineno, joined
                 joined = ""
+
+
+def live_lines():
+    """{(path, lineno)} of statements tmux itself parses for this server.
+
+    `source-file -nv` resolves %if the way tmux does at real load time, so
+    a branch that didn't run here never shows up in its output -- no need
+    to reimplement %if evaluation. -n parses without executing, so this
+    is side-effect free. Nested command blocks (an `if -F` inside a bind,
+    say) get reported too, under their own line, but that never collides
+    with a `bind` line's own (path, lineno).
+    """
+    paths = sorted(str(path) for path in (CONFIG_DIR / "conf.d").glob("*.conf"))
+    output = tmux("source-file", "-nv", *paths) or ""
+    live = set()
+    for reported in output.splitlines():
+        path, _, rest = reported.partition(":")
+        lineno, sep, _ = rest.partition(":")
+        if sep and lineno.strip().isdigit():
+            live.add((path, int(lineno)))
+    return live
 
 
 def parse_bind(line):
@@ -102,18 +126,22 @@ def parse_bind(line):
 def declared(table):
     """The table's keys in config order, with BREAK where a rule goes.
 
-    Groups are separated by the blank lines in the config. A key declared twice
-    keeps its last position. A binding nested in %if or `if -F cond {…} {…}`
-    reads like any other line, so both branches contribute order -- but only
-    the branch that ran is shown, since list-keys decides what exists.
+    Groups are separated by the blank lines in the config. Among lines
+    live_lines() says actually ran here -- a %if branch that didn't run
+    this time is invisible -- a key declared twice keeps its first
+    position: the note is normally the same either way, only the command
+    differs by context, and list-keys still supplies whichever is live.
     """
+    live = live_lines()
     items, pending = [], False
-    for line in config_lines():
+    for path, lineno, line in config_lines():
         if not line:
             pending = True  # a blank line already separates groups
             continue
         if not line.startswith(("bind ", "bind-key ")):
             continue  # comments and everything else leave the break pending
+        if (str(path), lineno) not in live:
+            continue  # %if branch that didn't run here -- not declared
         binding = parse_bind(line)
         if not binding:
             continue
@@ -121,7 +149,8 @@ def declared(table):
             pending = False  # that blank line separated some other table
             continue
         key = binding[1]
-        items = [item for item in items if item != key]
+        if key in items:
+            continue  # already declared here -- keeps its first position
         if pending:
             items.append(BREAK)
             pending = False

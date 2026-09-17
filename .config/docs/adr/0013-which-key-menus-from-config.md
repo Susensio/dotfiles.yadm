@@ -19,5 +19,11 @@ Requires tmux 3.7.
 ## Consequences
 
 A menu entry cannot drift from what is bound.
-Cost: correctness is coupled to config *text* formatting, which produced two real bugs — bundled short flags like `bind -rN "note"` were misparsed until parsing switched to `getopt`, and `%if`/`%else` branches are invisible to the parser, a deliberately unsupported limitation relied on only holding because the config's one `%if` block contains no bindings.
+Cost: correctness is coupled to config *text* formatting, which produced two real bugs — bundled short flags like `bind -rN "note"` were misparsed until parsing switched to `getopt`, and `%if`/`%else` branches were invisible to the parser.
+
+## Corrections
+
+2026-09-17: the `%if`/`%else` limitation above no longer holds.
+`50_scratchpad.conf` grew a `bind` inside its `%if` guard, which reordered the prefix table's menu because both branches counted toward config order.
+`scripts/which-key` now resolves each candidate line through `tmux source-file -nv`, tmux's own dry-run parser, so a branch that didn't run on the current server is invisible to order too — see `declared()`'s and `live_lines()`'s docstrings.
 
