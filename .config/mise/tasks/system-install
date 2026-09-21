@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sync global tools to ~/.local/ either manually or via a global postinstall hook.
-set -e
+set -euo pipefail
 
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
@@ -31,11 +31,11 @@ link_roots() {
 prune_broken_links() {
   local roots=()
   readarray -t roots < <(link_roots)
-    find "${roots[@]}" \
+  find "${roots[@]}" \
     -xtype l \
     -lname "*/$(basename "$MISE_HOME")/*" \
     -printf "removed '%p'\n" \
-    -delete
+    -delete 2>/dev/null || true
 }
 
 # ------------------------------------------------------------------------------
@@ -45,17 +45,17 @@ prune_broken_links() {
 list_links() {
   local roots=()
   readarray -t roots < <(link_roots)
-    find "${roots[@]}" \
+  find "${roots[@]}" \
     -type l \
     -lname "*/$(basename "$MISE_HOME")/*" \
-    -printf '%p -> %l\n'
+    -printf '%p -> %l\n' 2>/dev/null || true
 }
 
 get_installed_tools() {
   # Normalize JSON input based on execution context
   local filter_tools=("$@")
 
-  if [[ -n "$MISE_INSTALLED_TOOLS" ]]; then
+  if [[ -n "${MISE_INSTALLED_TOOLS:-}" ]]; then
     echo "$MISE_INSTALLED_TOOLS" | jq --compact-output '.[]'
     return 0
   fi
@@ -92,9 +92,19 @@ symlink() {
   local target="$alias"
   [[ -d "$alias" ]] && target="${alias%/}/$(basename "$real")"
 
-  if [[ ! -e "$target" || "$(readlink -f "$target")" != "$(readlink -f "$real")" ]]; then
-    ln --symbolic --relative --force --verbose "${flags[@]}" "$real" "$alias"
+  if [[ -e "$target" || -L "$target" ]]; then
+    local target_real real_path
+    target_real=$(readlink -f -- "$target")
+    real_path=$(readlink -f -- "$real")
+    [[ "$target_real" == "$real_path" ]] && return 0
+
+    if [[ ! -L "$target" || "$target_real" != "$MISE_HOME/"* ]]; then
+      echo "Skipping '$target': existing target is not a managed mise link" >&2
+      return 0
+    fi
   fi
+
+  ln --symbolic --relative --force --verbose "${flags[@]}" "$real" "$alias"
 }
 
 # ------------------------------------------------------------------------------
@@ -234,7 +244,6 @@ link_tool_assets() {
       symlink "$manpage" "${man_dir}/"
     done
   done
-  mandb --user-db --quiet
 }
 
 link_skills() {
@@ -292,7 +301,8 @@ link_node_modules() {
   local node_modules=()
   readarray -t node_modules < <(find -L "$node_modules_dir" -mindepth 1 -maxdepth 1 -type d)
   for node_module in "${node_modules[@]}"; do
-    local node_module_target=${TARGET_DIRS[NODE_MODULES]}/$(basename "$node_module")
+    local node_module_target
+    node_module_target=${TARGET_DIRS[NODE_MODULES]}/$(basename "$node_module")
     symlink --no-dereference "$node_module" "$node_module_target"
   done
 }
@@ -318,14 +328,17 @@ main() {
     case "$1" in
       --list-links) list_links; exit 0 ;;
       --only-prune) prune_broken_links; exit 0 ;;
-      -f|--filter) filter_tools+=("$2"); shift 2 ;;
+      -f|--filter)
+        [[ $# -ge 2 ]] || { echo "Missing tool name after $1" >&2; return 2; }
+        filter_tools+=("$2"); shift 2
+        ;;
       -*) shift ;; # Ignore any other unknown flags
       *) filter_tools+=("$1"); shift ;; # Fallback: append plain positional arguments
     esac
   done
 
-  prune_broken_links
   setup_target_dirs
+  prune_broken_links
 
   local -A tool
   local tools=()
@@ -340,6 +353,8 @@ main() {
     link_skills
     link_node_modules
   done
+
+  mandb --user-db --quiet
 }
 
 main "$@"
