@@ -19,23 +19,6 @@ declare -A TARGET_DIRS=(
 # PRE-FLIGHT & INFRASTRUCTURE
 # ------------------------------------------------------------------------------
 
-# Stop if called from a local project
-check_execution_context() {
-  local original_cmd=${BASH_SOURCE[0]}
-  local current_pid=$PPID
-  while [ "$current_pid" -gt 1 ]; do
-    local cmd
-    cmd=$(ps -o args= -p "$current_pid")
-    if [[ "$cmd" == *"mise"* ]]; then
-      original_cmd=$cmd
-      break
-    fi
-    current_pid=$(ps -o ppid= -p "$current_pid" | tr -d ' ')
-  done
-
-  [[ "$original_cmd" =~ --global|-g[[:space:]]|system-install|upgrade ]]
-}
-
 setup_target_dirs() {
   mkdir --parents "${TARGET_DIRS[@]}"
 }
@@ -272,12 +255,14 @@ link_skills() {
       skill_roots=(
         "$HOME/.config/claude/skills/$name"
         "$HOME/.config/codex/skills/$name"
+        "$HOME/.config/opencode/skills/$name"
         "$HOME/.config/pi/agent/skills/$name"
       )
     else
       skill_roots=(
         "$HOME/.config/.agents/skills/$name"
         "$HOME/.config/.claude/skills/$name"
+        "$HOME/.config/.opencode/skills/$name"
       )
     fi
 
@@ -316,8 +301,17 @@ link_node_modules() {
 # ENTRY POINT
 # ------------------------------------------------------------------------------
 
+# Global postinstall hooks also fire on project installs, but only global-only
+# operations and manual runs should trigger a re-sync.
+bail_on_project_hook() {
+  # Set on any hook run, even a no-op install; manual runs leave it unset.
+  [[ -v MISE_INSTALLED_TOOLS ]] &&
+    # Distinct for project installs; equal only for global-only operations.
+    [[ "${MISE_PROJECT_ROOT:-}" != "${MISE_CONFIG_ROOT:-}" ]]
+}
+
 main() {
-  check_execution_context || exit 0
+  bail_on_project_hook && exit 0
 
   local filter_tools=()
   while [[ $# -gt 0 ]]; do
