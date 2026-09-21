@@ -32,3 +32,5 @@ abbr --add t todo
 abbr --add please fix
 abbr --add howto howdoi
 abbr --add ipy ipython
+
+abbr --add ai aichat
