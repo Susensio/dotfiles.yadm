@@ -24,11 +24,14 @@ case "$mimetype" in
     # bat --color=always --style=plain --line-range=:500 \
     #   --paging=never --terminal-width="$pv_width" \
     #   "$file_path"
-    scope=--line-range=:500
-    [[ -n "$line_number" ]] && scope=--highlight-line=$line_number
+    if [[ -n "$line_number" ]]; then
+      bat_args=(--line-range=":$((line_number + 500))" --highlight-line="$line_number")
+    else
+      bat_args=(--line-range=:500)
+    fi
 
     bat --color=always --style=plain --paging=never \
-      --terminal-width=$pv_width "$scope" \
+      --terminal-width="$pv_width" "${bat_args[@]}" \
       "$file_path"
     ;;
   *)

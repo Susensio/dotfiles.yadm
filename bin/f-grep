@@ -21,5 +21,6 @@ fzf --ansi --disabled --query "$INITIAL_QUERY" \
   --prompt '1. ripgrep> ' \
   --delimiter : \
   --preview 'preview {1} {2}' \
+  --preview-window '+{2}/2' \
   --accept-nth 1 \
   "${args[@]}"
