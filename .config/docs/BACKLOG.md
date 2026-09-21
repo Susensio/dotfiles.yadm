@@ -1,7 +1,7 @@
 # Backlog
 
-- tmux | Bell tray for headless agent-view sessions (`--bg`, no pty).
-  See `tmux/PROPOSAL-agent-bell-tray.md`.
+- tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
+  See `tmux/PROPOSAL-tmux-notify.md`.
 - tmux | `PreToolUse` hook on `Bash` that blocks `tmux kill-server`/`kill-session`/`kill-window` when the command has no explicit `-L`/`-S`, message pointing at the `tmux-testing` skill's `scripts/tmux-test`.
   Prevents a bare destructive `tmux` command from silently falling through to the live default socket when hand-rolled `TMUX_TMPDIR` isolation resolves empty (happened in practice during tmux-uzi benchmarking: a cleanup command read an isolated socket path back from a file via `$(cat ...)`, the read failed silently, and `kill-server` hit the user's live session instead).
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."
