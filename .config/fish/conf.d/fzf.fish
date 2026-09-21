@@ -37,7 +37,7 @@ function _fzf_variable_widget
     set -l query (_fzf_anchored_query "$name_prefix")
 
     set -l preview "fish -c '_set_show_lean {}'"
-    set -l result (set --names | _fzf --prompt="VAR> " --query="$query" --preview=$preview)
+    set -l result (set --names | _fzf --prompt="VAR> " --query="$query" --preview=$preview --scheme="path")
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
         commandline -rt -- \$$result
@@ -80,6 +80,7 @@ function _fzf_path_widget
                 --query="$query" \
                 --prompt="$prompt" \
                 --preview="$preview_command" \
+                --scheme="path" \
                 --bind="ctrl-f:transform:
                     if [[ \$FZF_PROMPT == FILE* ]]; then
                         printf 'change-prompt(DIR> )+reload($fd_command --type=directory)'
