@@ -3,16 +3,20 @@ onboarding = false
 name = "gruvbox"
 auto_switch = false
 [theme.custom]
-surface_dim = "#504945"
+overlay0 = "#665c54"  # inactive pane border darker
 
 [ui]
-tab_bar_position = "bottom"
+tab_bar_position = "top"
 accent = "green"
 prompt_new_tab_name = false
 pane_borders = "always"
 pane_outer_borders = true
 pane_gaps = true
 window_title = "[{workspace}] {tab} - {terminal_title}"
+sidebar_collapsed_mode = "hidden"
+tab_bar_right = [
+  { type = "command", command = "\"$HERDR_BIN_PATH\" workspace list | jq -r --arg id \"$HERDR_ACTIVE_WORKSPACE_ID\" '.result.workspaces[] | select(.workspace_id == $id) | .label'", interval_seconds = 1, timeout_seconds = 2 },
+  ]
 
 [ui.toast]
 delivery = "herdr"
@@ -25,8 +29,8 @@ focus_pane_down = "alt+j"
 focus_pane_up = "alt+k"
 focus_pane_right = "alt+l"
 
-split_vertical = "prefix+v"
-split_horizontal = "prefix+minus"
+split_vertical = "prefix+\\"
+split_horizontal = "prefix+-"
 close_pane = "prefix+q"
 zoom = "prefix+z"
 resize_mode = "prefix+p"
@@ -41,39 +45,32 @@ close_tab = "prefix+shift+q"
 settings = "prefix+C"
 reload_config = "prefix+R"
 toggle_sidebar = "prefix+s"
-# rename_workspace = "prefix+shift+w"
-# close_workspace = "prefix+shift+d"
-detach = "prefix+D"
-previous_workspace = ""
-next_workspace = ""
-previous_agent = ""
-next_agent = ""
+copy_mode = "prefix+v"
 
-# navigate_workspace_up = "tab"
-# navigate_workspace_down = "shift-tab"
-# navigate_workspace_up = ""
-# navigate_workspace_down = ""
-# navigate_pane_left = ""
-# navigate_pane_down = ""
-# navigate_pane_up = ""
-# navigate_pane_right = ""
+rename_workspace = ""
+close_workspace = ""
+detach = "prefix+d"
+previous_workspace = "alt+shift+p"
+next_workspace = "alt+shift+n"
+previous_agent = "alt+p"
+next_agent = "alt+n"
 
 [[keys.command]]
 key = "prefix+enter"
 type = "shell"
-command = "/home/susensio/.config/herdr/scripts/smart-split.sh"
+command = "/home/susensio/.config/herdr/scripts/smart-split"
 description = "new pane"
 [[keys.command]]
 key = "alt+`"
 type = "popup"
-command = "/home/susensio/.config/herdr/scripts/scratchpad.sh"
+command = "/home/susensio/.config/herdr/scripts/scratchpad"
 description = "open scratchpad"
 width = "80%"
 height = "85%"
 [[keys.command]]
 key = "prefix+f"
 type = "popup"
-command = "/home/susensio/.config/herdr/scripts/sessionizer.sh"
+command = "/home/susensio/.config/herdr/scripts/sessionizer"
 description = "open sessionizer"
 width = "80%"
 height = "80%"
@@ -96,4 +93,4 @@ height = "85%"
 directory = "~/.local/share/herdr/worktrees"
 
 [experimental]
-pane_history = false
+pane_history = true

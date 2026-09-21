@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+set -eu
+[[ "${DEBUG:-}" == "1" ]] && set -x
+# exec 2> /tmp/herdr-sessionizer.log
+
+# --- Configuration ---
+SEP=$'\x1f'
+LOOKUP_PATHS=("$HOME/Projects" "${XDG_CONFIG_HOME:-$HOME/.config}")
+
+declare -A ICONS=(
+  [NEW]="󰄱 "
+  [HERDR]=" "
+  [DIR]=" "
+  [PROJECT]="󰊢 "
+  [CONFIG]=" "
+  [CODE]=" "
+)
+
+# --- Data Helpers ---
+to_row() {
+  # $1 kind
+  # $2 id
+  # $3 name
+  # $4 path
+  # $5 fzf_display
+  local IFS=$SEP
+  echo "$*"
+}
+
+path_to_row() {
+  local path=$1 kind icon short_path
+  short_path="${path##*/}" # vastly faster than basename
+
+  case "$path" in
+    "$HOME/.config" | $HOME/.config/*) kind="CONFIG" ;;
+    "$HOME/bin" | $HOME/bin/*) kind="CODE" ;;
+    $HOME/Projects/*) kind="PROJECT" ;;
+    *) kind="DIR" ;;
+  esac
+  icon=${ICONS[$kind]}
+  to_row "$kind" "" "${icon}${short_path}" "$path" "$icon ${path/#$HOME/\~}"
+}
+
+parse_row() {
+  IFS=$SEP read -r kind id name path display <<<"$1"
+}
+
+# --- Source Gathering ---
+list_sources() {
+  local workspaces workspace_id workspace_label current_path
+
+  to_row "NEW" "" "" "$HOME" "${ICONS[NEW]} +New workspace"
+
+  # 1. Existing workspaces, in listing order
+  {
+    workspaces=$(herdr workspace list 2>/dev/null | jq -r '.result.workspaces[]? | [.workspace_id,.label] | @tsv' 2>/dev/null)
+    if [[ -n "$workspaces" ]]; then
+      while IFS=$'\t' read -r workspace_id workspace_label; do
+        to_row "WORKSPACE" "$workspace_id" "$workspace_label" "" "${ICONS[HERDR]} $workspace_label"
+      done <<<"$workspaces"
+    fi
+    {
+      # 2. Zoxide MRU folders
+      zoxide query --list | head -n 50
+
+      # 3. Defined lookup dirs
+      find "${LOOKUP_PATHS[@]}" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
+
+      # 4. Current directory and its subfolders
+      current_path="$PWD"
+      echo "$current_path"
+      find "$current_path" -maxdepth 1 -mindepth 1 -type d 2>/dev/null
+    } | while read -r path; do
+      path_to_row "$path"
+    done
+  # Dedups on name/label (field 3) -- works for paths too, since
+  # path_to_row is deterministic: same path always yields the same name.
+  } | awk -W interactive -F"$SEP" '!seen[$3]++'
+}
+
+# --- Execution ---
+handle_selection() {
+  local selection=$1
+  parse_row "$selection"
+
+  local target_workspace existing_workspace
+  case "$kind" in
+    NEW)
+      target_workspace=$(herdr workspace create --cwd "$path" --no-focus 2>/dev/null | jq -r '.result.workspace.workspace_id' 2>/dev/null)
+      ;;
+    WORKSPACE)
+      target_workspace="$id"
+      ;;
+    *)
+      existing_workspace=$(herdr workspace list 2>/dev/null | jq -r --arg want "$name" '.result.workspaces[]? | select(.label == $want) | .workspace_id' 2>/dev/null | head -n 1)
+
+      if [[ -n "$existing_workspace" ]]; then
+        target_workspace="$existing_workspace"
+      else
+        target_workspace=$(herdr workspace create --cwd "$path" --label "$name" --no-focus 2>/dev/null | jq -r '.result.workspace.workspace_id' 2>/dev/null)
+        zoxide add "$path"
+      fi
+      ;;
+  esac
+
+  [[ -n "$target_workspace" ]] || { echo "sessionizer: no workspace (herdr down?)" >&2; exit 1; }
+  herdr workspace focus "$target_workspace"
+}
+
+if [[ "${1:-}" == "--list" ]]; then
+  # Powers the fzf `change` reload below: drops "+New workspace" so it can't
+  # surface as a fuzzy match once the user starts typing a query.
+  list_sources | tail -n +2
+  exit
+fi
+
+# Can be used without interaction
+if [[ -n "${1:-}" ]]; then
+  selection=$(path_to_row "$1")
+else
+  # fzf field refs below are positional -- keep in sync with to_row()'s order.
+  F_KIND=1
+  F_ID=2
+  F_NAME=3
+  F_PATH=4
+  preview_cmd="[[ {$F_KIND} == 'NEW' ]] && exit || [[ {$F_KIND} == 'WORKSPACE' ]] && echo '{$F_NAME}' || eza --color=always --group-directories-first --icons --tree --level=2 --git-ignore -- {$F_PATH}"
+
+  selection=$(
+    list_sources | fzf \
+      --delimiter="$SEP" \
+      --with-nth=-1 \
+      --no-sort \
+      --scheme=path \
+      --preview="$preview_cmd" \
+      --bind="change:reload-sync($0 --list)+unbind(change)"
+  )
+fi
+
+[[ -z "$selection" ]] && exit
+
+handle_selection "$selection"

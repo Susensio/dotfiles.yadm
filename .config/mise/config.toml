@@ -23,7 +23,13 @@ gh = "latest"
 "github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
 glow = "latest"
 helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
-herdr = { version = "latest", gen_completions = "completion fish", postinstall = "~/.config/herdr/scripts/sync-agent-skill.sh" }
+herdr = { version = "latest", gen_completions = "completion fish", extra_assets = [
+  "raw://v@skills/herdr/SKILL.md",
+  "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
+], skills = [
+  { name = "herdr", file = "SKILL.md", global = true },
+  { name = "herdr-config", references = "*.mdx" },
+] }
 just = "latest"
 lazygit = "latest"
 node = "latest"

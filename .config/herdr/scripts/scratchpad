@@ -6,12 +6,12 @@ unset TMUX
 unset TMUX_PANE
 
 CMD="${1:-}"
-SESSION_NAME="${2:-main}"
+WORKSPACE_ID="$(herdr pane get "$HERDR_ACTIVE_PANE_ID" | jq -r '.result.workspace_id')"
 
 if [ -z "$CMD" ]; then
     # No command provided, let tmux launch the default shell
-    exec tmux -L herdr_scratchpad new-session -A -s "$SESSION_NAME"
+    exec tmux -L herdr_scratchpad new-session -A -s "$WORKSPACE_ID"
 else
     # Command provided, run it in the session
-    exec tmux -L herdr_scratchpad new-session -A -s "$SESSION_NAME" "$CMD"
+    exec tmux -L herdr_scratchpad new-session -A -s "$WORKSPACE_ID" "$CMD"
 fi

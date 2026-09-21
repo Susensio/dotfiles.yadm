@@ -40,8 +40,19 @@ setup_target_dirs() {
   mkdir --parents "${TARGET_DIRS[@]}"
 }
 
+link_roots() {
+  printf '%s\n' "${TARGET_DIRS[@]}"
+  find "$HOME/.config" -maxdepth 3 -type d -name skills 2>/dev/null
+}
+
 prune_broken_links() {
-  find "${TARGET_DIRS[@]}" -xtype l -lname "*/$(basename "$MISE_HOME")/*" -printf "removed '%p'\n" -delete
+  local roots=()
+  readarray -t roots < <(link_roots)
+    find "${roots[@]}" \
+    -xtype l \
+    -lname "*/$(basename "$MISE_HOME")/*" \
+    -printf "removed '%p'\n" \
+    -delete
 }
 
 # ------------------------------------------------------------------------------
@@ -49,7 +60,12 @@ prune_broken_links() {
 # ------------------------------------------------------------------------------
 
 list_links() {
-  find "${TARGET_DIRS[@]}" -type l -lname "*/$(basename "$MISE_HOME")/*" -printf "%p -> %l\n"
+  local roots=()
+  readarray -t roots < <(link_roots)
+    find "${roots[@]}" \
+    -type l \
+    -lname "*/$(basename "$MISE_HOME")/*" \
+    -printf '%p -> %l\n'
 }
 
 get_installed_tools() {
@@ -108,63 +124,74 @@ process_extra_assets() {
   readarray -t extra_assets < <(echo "${tool[info]}" | jq -r '.tool_options.extra_assets[]?')
 
   for asset in "${extra_assets[@]}"; do
-    local url
-    url=$(MISE_TOOL_NAME="${tool[name]}" MISE_TOOL_VERSION="${tool[version]}" \
+    local expanded_asset
+    expanded_asset=$(MISE_TOOL_NAME="${tool[name]}" MISE_TOOL_VERSION="${tool[version]}" \
       envsubst '$MISE_TOOL_NAME $MISE_TOOL_VERSION' <<<"$asset")
 
-    local filename=""
-    if [[ "$url" == *">"* ]]; then
-      filename=${url#*>}
-      url=${url%%>*}
-      if [[ -z "$filename" || "$filename" == */* || "$filename" == . || "$filename" == .. ]]; then
-        echo "Invalid extra asset filename: $filename" >&2
-        return 1
-      fi
-    fi
+    # Brace expansion lets one entry list several files from the same
+    # folder, e.g. ".../docs/{configuration,keyboard}.mdx". `set -f` keeps
+    # `*`/`?` in unrelated URLs from also glob-expanding against the cwd.
+    local urls=()
+    set -f
+    eval "urls=($expanded_asset)"
+    set +f
 
-    local scheme repo tag_prefix path
-    IFS=$SEP read -r scheme repo tag_prefix path < <(echo "$url" |
-      sed -E "s|^([a-z]+):\/\/(([^:@]+):)?((v?)@)?(.*)$|\1${SEP}\3${SEP}\5${SEP}\6|")
-
-    case "$scheme" in
-      raw) url="https://raw.githubusercontent.com/${repo:-${tool[repo]}}/refs/tags/${tag_prefix}${tool[version]}/${path}" ;;
-      release) url="https://github.com/${repo:-${tool[repo]}}/releases/download/${tag_prefix}${tool[version]}/${path}" ;;
-    esac
-    echo "$url"
-
-    local source_filename
-    source_filename=$(basename "$url")
-    filename=${filename:-$source_filename}
-    if [[ "$source_filename" == *.tar.gz ]]; then
-      local download_dir=${XDG_CACHE_HOME:-$HOME/.cache}/mise/${tool[name]}
-      local download_target=${download_dir}/$filename
-      if [[ ! -f "$download_target" ]]; then
-        mkdir -p "$download_dir"
-        if [[ "$filename" != "$source_filename" ]]; then
-          wget --no-verbose --output-document "$download_target" "$url"
-        else
-          wget --no-verbose --timestamping "$url" -P "$download_dir"
+    for url in "${urls[@]}"; do
+      local filename=""
+      if [[ "$url" == *">"* ]]; then
+        filename=${url#*>}
+        url=${url%%>*}
+        if [[ -z "$filename" || "$filename" == */* || "$filename" == . || "$filename" == .. ]]; then
+          echo "Invalid extra asset filename: $filename" >&2
+          return 1
         fi
-        tar -xzi --file "$download_target" --directory "${tool[path]}"
       fi
-    elif [[ ! -f "${tool[path]}/${filename}" ]]; then
-      if [[ "$filename" == "$source_filename" ]]; then
-        wget --no-verbose --timestamping "$url" -P "${tool[path]}"
-      else
-        wget --no-verbose --output-document "${tool[path]}/${filename}" "$url"
+
+      local scheme repo tag_prefix path
+      IFS=$SEP read -r scheme repo tag_prefix path < <(echo "$url" |
+        sed -E "s|^([a-z]+):\/\/(([^:@]+):)?((v?)@)?(.*)$|\1${SEP}\3${SEP}\5${SEP}\6|")
+
+      case "$scheme" in
+        raw) url="https://raw.githubusercontent.com/${repo:-${tool[repo]}}/refs/tags/${tag_prefix}${tool[version]}/${path}" ;;
+        release) url="https://github.com/${repo:-${tool[repo]}}/releases/download/${tag_prefix}${tool[version]}/${path}" ;;
+      esac
+      echo "$url"
+
+      local source_filename
+      source_filename=$(basename "$url")
+      filename=${filename:-$source_filename}
+      if [[ "$source_filename" == *.tar.gz ]]; then
+        local download_dir=${XDG_CACHE_HOME:-$HOME/.cache}/mise/${tool[name]}
+        local download_target=${download_dir}/$filename
+        if [[ ! -f "$download_target" ]]; then
+          mkdir -p "$download_dir"
+          if [[ "$filename" != "$source_filename" ]]; then
+            wget --no-verbose --output-document "$download_target" "$url"
+          else
+            wget --no-verbose --timestamping "$url" -P "$download_dir"
+          fi
+          tar -xzi --file "$download_target" --directory "${tool[path]}"
+        fi
+      elif [[ ! -f "${tool[path]}/${filename}" ]]; then
+        if [[ "$filename" == "$source_filename" ]]; then
+          wget --no-verbose --timestamping "$url" -P "${tool[path]}"
+        else
+          wget --no-verbose --output-document "${tool[path]}/${filename}" "$url"
+        fi
       fi
-    fi
+    done
   done
 }
 
 generate() {
   local command=$1
   local filename=$2
+  local target_dir=${3:-${tool[path]}}
   local tool_main_bin
   tool_main_bin=$(find "${tool[path]}" -name "${tool[name]}" -executable -print -quit)
   [[ -z "$tool_main_bin" ]] && return 0
 
-  local target="${tool[path]}/${filename}"
+  local target="${target_dir%/}/${filename}"
   if [[ ! -s "$target" || "$tool_main_bin" -nt "$target" ]]; then
     local -a command_args
     # Split configured arguments without shell expansion.
@@ -227,6 +254,52 @@ link_tool_assets() {
   mandb --user-db --quiet
 }
 
+link_skills() {
+  local skills=()
+  readarray -t skills < <(echo "${tool[info]}" | jq --compact-output '.tool_options.skills[]?')
+
+  for skill_json in "${skills[@]}"; do
+    local name file references is_global
+    name=$(echo "$skill_json" | jq --raw-output '.name')
+    file=$(echo "$skill_json" | jq --raw-output '.file // empty')
+    references=$(echo "$skill_json" | jq --raw-output '.references // empty')
+    is_global=$(echo "$skill_json" | jq --raw-output '.global // false')
+
+    # Project-scoped skills mirror into this repo's own agent-config dirs;
+    # global ones go where each agent actually looks from any project.
+    local skill_roots=()
+    if [[ "$is_global" == "true" ]]; then
+      skill_roots=(
+        "$HOME/.config/claude/skills/$name"
+        "$HOME/.config/codex/skills/$name"
+        "$HOME/.config/pi/agent/skills/$name"
+      )
+    else
+      skill_roots=(
+        "$HOME/.config/.agents/skills/$name"
+        "$HOME/.config/.claude/skills/$name"
+      )
+    fi
+
+    for skill_root in "${skill_roots[@]}"; do
+      if [[ -n "$file" ]]; then
+        mkdir -p "$skill_root"
+        echo "*" > "$skill_root/.gitignore"
+        symlink "${tool[path]}/${file}" "$skill_root/SKILL.md"
+      fi
+
+      if [[ -n "$references" ]]; then
+        mkdir -p "$skill_root/references"
+        echo "*" > "$skill_root/references/.gitignore"
+        local ref
+        for ref in "${tool[path]}"/$references; do
+          [[ -f "$ref" ]] && symlink "$ref" "$skill_root/references/"
+        done
+      fi
+    done
+  done
+}
+
 link_node_modules() {
   local node_modules_dir=${tool[path]}/lib/node_modules
   [[ ! -d "$node_modules_dir" ]] && return 0
@@ -270,6 +343,7 @@ main() {
     generate_completions
     generate_shell_init
     link_tool_assets
+    link_skills
     link_node_modules
   done
 }
