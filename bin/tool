@@ -7,7 +7,7 @@ set -euo pipefail
 # @flag --lsp Install into the global LSP config
 # @arg tools+ Tool specifications, optionally including a version
 install() {
-  if [[ "$argc_lsp" == "1" ]]; then
+  if [[ "${argc_lsp:-}" == "1" ]]; then
     local lsp_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/lsp.toml
     mise use --global --path "$lsp_config" "${argc_tools[@]}"
   else
@@ -51,6 +51,12 @@ list() {
 show() {
   mise tool "$argc_tool"
   echo "Latest:             $(mise latest "$argc_tool")"
+}
+
+# @cmd Resync assets from one or more global tools
+# @arg tools+ Tools to remove
+sync() {
+  mise run system-install "${argc_tools[@]}"
 }
 
 # argc-generated variables
