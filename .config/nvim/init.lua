@@ -2,8 +2,13 @@ vim.loader.enable()
 
 vim.g.mapleader = " "
 
--- Editor
+-- ── Editor ────────────────────────────────────────────────────────────────
 local opt = vim.opt
+
+vim.g.clipboard = {
+   copy = { ["+"] = { "clipboard", "copy" }, ["*"] = { "clipboard", "copy", "--selection", "primary" } },
+   paste = { ["+"] = { "clipboard", "paste" }, ["*"] = { "clipboard", "paste", "--selection", "primary" } },
+}
 
 opt.clipboard = "unnamedplus"
 opt.relativenumber = true
@@ -11,12 +16,13 @@ opt.scrolloff = 5
 opt.wrap = true
 opt.list = true
 opt.listchars = "tab:» ,trail:·,eol:↲,extends:…,precedes:…,nbsp:␣"
+opt.numberwidth = 3
 opt.expandtab = true
 opt.shiftwidth = 4
 opt.softtabstop = 4
 opt.tabstop = 4
 
--- Motions and editing
+-- ── Motions and editing ───────────────────────────────────────────────────
 local map = vim.keymap.set
 
 -- `matchit` takes `%`; this mapping intentionally selects the whole buffer instead.
@@ -40,8 +46,8 @@ map("n", "<Esc>", function()
    end
 end, { desc = "Clear search highlight" })
 
-map("n", "<C-c>", "gcc", { desc = "Toggle comment on current line" })
-map("x", "<C-c>", "gc", { desc = "Toggle comment on selection" })
+map("n", "<C-c>", "gcc", { desc = "Toggle comment on current line", remap = true })
+map("x", "<C-c>", "gc", { desc = "Toggle comment on selection", remap = true })
 
 map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 map("n", "gy", vim.lsp.buf.type_definition, { desc = "Go to type definition" })
@@ -51,11 +57,9 @@ map("n", "<leader>R", function()
    vim.notify("Config reloaded!", vim.log.levels.INFO, { timeout = 2000 })
 end, { desc = "Reload config" })
 
--- Packages
+-- ── Packages ──────────────────────────────────────────────────────────────
 -- Managed by vim.pack and pinned in nvim-pack-lock.json.
-local gh = function(repo)
-   return "https://github.com/" .. repo
-end
+local gh = function(repo) return "https://github.com/" .. repo end
 
 vim.api.nvim_create_user_command("PackUpdate", function()
    vim.pack.update()
@@ -66,7 +70,7 @@ end, { desc = "Delete installed packages", nargs = "+" })
 
 vim.pack.add({
    gh("nvim-mini/mini.nvim"),
-   "ellisonleao/gruvbox.nvim",
+   gh("ellisonleao/gruvbox.nvim"),
    gh("folke/lazydev.nvim"),
    gh("nvim-treesitter/nvim-treesitter"),
    gh("nvim-treesitter/nvim-treesitter-textobjects"),
@@ -75,12 +79,8 @@ vim.pack.add({
 
 require("mini.basics").setup({ mappings = { option_toggle_prefix = "" } })
 
--- Appearance
-require("gruvbox").setup({
-   overrides = {
-      Normal = { bg = "none" }, -- Allow tmux pane dimming.
-   },
-})
+-- ── Appearance ────────────────────────────────────────────────────────────
+require("gruvbox").setup({ transparent_mode = true })
 vim.cmd.colorscheme("gruvbox")
 
 local miniclue = require("mini.clue")
@@ -111,7 +111,7 @@ miniclue.setup({
 
 require("mini.icons").setup()
 
--- Find
+-- ── Find ──────────────────────────────────────────────────────────────────
 local pick = require("mini.pick")
 pick.setup()
 
@@ -139,7 +139,7 @@ map("n", "<leader>b", pick.builtin.buffers, { desc = "Buffers" })
 local misc = require("mini.misc")
 misc.setup_restore_cursor()
 
--- Text objects
+-- ── Text objects ──────────────────────────────────────────────────────────
 -- Built-in objects cover words, paragraphs, pairs, and quotes.
 -- Tree-sitter adds functions, types, arguments, and comments.
 local ai = require("mini.ai")
@@ -169,7 +169,9 @@ ai.setup({
    },
 })
 
--- UI
+-- ── UI ────────────────────────────────────────────────────────────────────
+opt.signcolumn = "yes"
+
 -- Keep the mode width stable and the filename anchored on the left.
 local statusline = require("mini.statusline")
 statusline.setup({
@@ -178,10 +180,8 @@ statusline.setup({
          local mode, mode_hl = statusline.section_mode({ trunc_width = 0 })
          mode = mode:sub(1, 3):upper()
          local filename = statusline.section_filename({ trunc_width = math.huge })
-         local diagnostics =
-            statusline.section_diagnostics({ trunc_width = 75 })
-         local position =
-            string.format("%d:%d", vim.fn.line("."), vim.fn.col("."))
+         local diagnostics = statusline.section_diagnostics({ trunc_width = 75 })
+         local position = string.format("%d:%d", vim.fn.line("."), vim.fn.col("."))
 
          return statusline.combine_groups({
             { hl = mode_hl, strings = { mode } },
@@ -209,6 +209,10 @@ require("mini.surround").setup({
    search_method = "cover_or_next",
 })
 
+-- ── Git ───────────────────────────────────────────────────────────────────
+require("mini.diff").setup({ view = { style = "sign", signs = { delete = "🮎" }, priority = 1 } })
+-- vim.api.nvim_set_hl(0, "MiniDiffSignChange", { link = "GruvboxYellow" })
+
 require("mini.cmdline").setup({
    autocomplete = {
       -- Search prompts should stay plain.
@@ -223,13 +227,9 @@ require("mini.notify").setup({
 })
 require("mini.completion").setup({})
 
--- Show only the diagnostic for the current line below the buffer text.
-vim.diagnostic.config({
-   virtual_text = false,
-   virtual_lines = { current_line = true },
-})
+vim.diagnostic.config({ severity_sort = true, virtual_text = false, virtual_lines = { current_line = true } })
 
--- Language tooling
+-- ── Language tooling ──────────────────────────────────────────────────────
 -- LazyDev gives LuaLS Neovim runtime metadata.
 require("lazydev").setup({})
 
