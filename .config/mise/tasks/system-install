@@ -189,7 +189,11 @@ generate() {
     local -a command_args
     # Split configured arguments without shell expansion.
     read -r -a command_args <<<"$command"
-    "$tool_main_bin" "${command_args[@]}" >"$target"
+    {
+      # Keep tool init interactive-only.
+      [[ "$filename" == config.fish ]] && printf 'if not status is-interactive\n    return\nend\n\n'
+      "$tool_main_bin" "${command_args[@]}"
+    } >"$target"
   fi
 }
 
