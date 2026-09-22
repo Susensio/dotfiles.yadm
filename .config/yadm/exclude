@@ -3,6 +3,7 @@
 !/.config
 /.config/*
 !/.config/git/
+!/.config/lazygit/
 !/.config/bat/
 !/.config/tmux/
 !/.config/herdr/
