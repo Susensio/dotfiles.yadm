@@ -241,6 +241,14 @@ link_tool_assets() {
       \( -name "$bin_name.[1-9]" -o -name "$bin_name-*.[1-9]" \
          -o -name "$bin_name.[1-9].gz" -o -name "$bin_name-*.[1-9].gz" \) 2>/dev/null)
     for manpage in "${tool_manpages[@]}"; do
+      local man_mime
+      if [[ "$manpage" == *.gz ]]; then
+        man_mime=$(gzip --decompress --stdout -- "$manpage" | file --brief --mime-type -)
+      else
+        man_mime=$(file --dereference --brief --mime-type -- "$manpage")
+      fi
+      [[ "$man_mime" == "text/troff" ]] || continue
+
       local man_base=${manpage%.gz}
       local man_section=${man_base##*.}
       local man_dir=${TARGET_DIRS[MAN]}/man$man_section
