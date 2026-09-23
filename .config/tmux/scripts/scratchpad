@@ -38,8 +38,8 @@ if [[ "$current_socket" == *$SUFFIX ]]; then
     tmux detach 2>/dev/null ||
     true
 
-  # Same window requested again: that's the close half of the toggle.
-  [[ "$current_window_name" == "$scratch_window_name" ]] && exit 0
+  # Main closes any open scratchpad. Named scratchpads still swap windows.
+  [[ "$scratch_window_name" == "main" || "$current_window_name" == "$scratch_window_name" ]] && exit 0
 
   # A different one was requested: fall through to the open flow below,
   # re-pointed at the parent socket/client since this one is now gone.
