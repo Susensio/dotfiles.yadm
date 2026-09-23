@@ -69,6 +69,12 @@ generate_message() {
 }
 
 main() {
+  local lazygit=false
+  if [[ $# -gt 0 && $1 == '--lazygit' ]]; then
+    lazygit=true
+    shift
+  fi
+
   if git diff --cached --quiet; then
     abort 'No staged changes to commit.'
   fi
@@ -80,6 +86,19 @@ main() {
   generate_message "$@" || abort 'aichat could not generate a commit message.'
 
   [[ -s $message_file ]] || abort 'aichat returned an empty commit message.'
+
+  if $lazygit; then
+    local target
+    target=$(git rev-parse --git-path LAZYGIT_PENDING_COMMIT)
+    if [[ $target != /* ]]; then target="${PWD}/${target}"; fi
+    cp "$message_file" "$target"
+    if [[ -n ${TMUX_PANE:-} ]] && command -v tmux >/dev/null 2>&1; then
+      tmux send-keys -t "$TMUX_PANE" c
+    else
+      printf '%s\n' "AI message written; press c in lazygit to edit and commit."
+    fi
+    return 0
+  fi
 
   touch "$save_marker"
   local editor

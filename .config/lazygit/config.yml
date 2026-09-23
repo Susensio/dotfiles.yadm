@@ -1,3 +1,10 @@
 gui:
   scrollHeight: 10
 promptToReturnFromSubprocess: false
+customCommands:
+  - key: <ctrl-a>
+    context: files
+    description: Fill commit message with AI
+    command: git aicommit --lazygit
+    output: logWithPty
+    loadingText: Generating AI commit message...
