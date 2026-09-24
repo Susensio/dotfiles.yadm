@@ -19,13 +19,23 @@ install() {
     return
   fi
 
-  local tool
+  local tool name
   for tool in "${argc_tools[@]}"; do
-    if declared "$TOOLS_CONFIG" "$tool"; then
+    # Drop a trailing @version, but not the @ of an npm:@scope/pkg
+    name=$tool
+    [[ ${tool##*@} == */* ]] || name=${tool%@*}
+    if declared "$TOOLS_CONFIG" "$name" && [[ $name == "$tool" ]]; then
       mise install "$tool"
-    elif declared "$PACKAGES_MISE" "$tool"; then
+    elif declared "$PACKAGES_MISE" "$name"; then
       # Already a distro tool: pacman on Arch, mise elsewhere
-      if command -v pacman &>/dev/null; then mise bootstrap --only packages --yes; else mise install "$tool"; fi
+      if command -v pacman &>/dev/null; then
+        [[ $name == "$tool" ]] || echo "tool: pacman cannot pin $tool; installing the repo version" >&2
+        mise bootstrap --only packages --yes
+      elif [[ $name == "$tool" ]]; then
+        mise install "$tool"
+      else
+        mise use --global --path "$PACKAGES_MISE" "$tool"
+      fi
     elif [[ $tool =~ ^[A-Za-z0-9_.+-]+$ ]] && command -v pacman &>/dev/null && pacman -Si "$tool" &>/dev/null; then
       mise config set --file "$PACKAGES_MISE" "tools.$tool" latest
       mise bootstrap packages use --yes --path "$PACKAGES_ARCH" "pacman:$tool"
@@ -33,7 +43,7 @@ install() {
       mise use --global --path "$TOOLS_CONFIG" "$tool"
     fi
     # Drops it from config.toml, if plain `mise use -g` put it there
-    mise unuse --global --no-prune "$tool"
+    mise unuse --global --no-prune "$name"
   done
   mise run system-install --only-prune
 }
@@ -68,7 +78,7 @@ remove() {
 
 # @cmd Search for tools, or list installed global tools
 # @flag --installed List installed global tools
-# @arg tools* Tools to upgrade
+# @arg tools* Tools to search for or list
 list() {
   if [[ "${argc_installed:-}" == "1" ]]; then
     mise list --global "${argc_tools[@]}"
@@ -85,7 +95,7 @@ show() {
 }
 
 # @cmd Resync assets from one or more global tools
-# @arg tools+ Tools to remove
+# @arg tools+ Tools to resync
 sync() {
   mise run system-install "${argc_tools[@]}"
 }
