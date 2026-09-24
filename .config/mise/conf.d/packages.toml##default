@@ -1,0 +1,30 @@
+# Distro-sourced tools, installed through mise on machines without a variant for their distro.
+# Keep in sync with packages.toml##distro.arch; `tool` writes both (docs/adr/0046).
+[tools]
+bat = "latest"
+delta = { version = "latest", extra_assets = [
+  "raw://etc/completion/completion.fish",
+] }
+eza = { version = "latest", extra_assets = [
+  "release://v@completions-$MISE_TOOL_VERSION.tar.gz",
+  "release://v@man-$MISE_TOOL_VERSION.tar.gz",
+] }
+fd = "latest"
+fzf = { version = "latest", extra_assets = [
+  "raw://v@man/man1/fzf.1",
+] }
+glow = "latest"
+gum = "latest"
+helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
+just = "latest"
+lazygit = "latest"
+neovim = "latest"
+pandoc = "latest"
+ripgrep = "latest"
+tealdeer = { version = "latest", extra_assets = [
+  "release://v@completions_fish>tldr.fish",
+] }
+tmux = { version = "latest", extra_assets = [
+  "raw://tmux/tmux:tmux.1",
+] }
+yadm = "latest"

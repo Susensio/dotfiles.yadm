@@ -1,30 +1,15 @@
-# Tracked global tools, shared across machines; `tool install` writes here.
-# The global config.toml is machine-local and untracked (docs/adr/0045).
+# Tracked tools installed through mise on every machine; distro-sourced ones live in
+# packages.toml (docs/adr/0046). The global config.toml is machine-local (docs/adr/0045).
 [tools]
 aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
 ] }
 antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
-bat = "latest"
 claude = "latest"
 codex = { version = "latest", symlink_bins = true }
-delta = { version = "latest", extra_assets = [
-  "raw://etc/completion/completion.fish",
-] }
-eza = { version = "latest", extra_assets = [
-  "release://v@completions-$MISE_TOOL_VERSION.tar.gz",
-  "release://v@man-$MISE_TOOL_VERSION.tar.gz",
-] }
-fd = "latest"
-fzf = { version = "latest", extra_assets = [
-  "raw://v@man/man1/fzf.1",
-] }
 gh = "latest"
-glow = "latest"
 go = "latest"
-gum = "latest"
-helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
 herdr = { version = "latest", gen_completions = "completion fish", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
@@ -32,26 +17,14 @@ herdr = { version = "latest", gen_completions = "completion fish", extra_assets 
   { name = "herdr", file = "SKILL.md", global = true },
   { name = "herdr-config", file = "SKILL-config.md", references = "*.mdx" },
 ] }
-just = "latest"
-lazygit = "latest"
-neovim = "latest"
 node = "latest"
 opencode = "latest"
-pandoc = "latest"
 pi = "latest"
 python = "latest"
-ripgrep = "latest"
 rust = "latest"
-tealdeer = { version = "latest", extra_assets = [
-  "release://v@completions_fish>tldr.fish",
-] }
-tmux = { version = "latest", extra_assets = [
-  "raw://tmux/tmux:tmux.1",
-] }
 usage = "latest"
 uv = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
-yadm = "latest"
 zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
 
 [tool_alias]
