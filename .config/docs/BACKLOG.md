@@ -21,3 +21,18 @@
   Skip the `--system-prompt` override entirely -- it's mostly a paraphrase of Claude Code's own default system prompt (duplicating/conflicting with existing instructions, including a stale hardcoded commit-attribution model name) with only the tool-selection section actually novel, and skip a `coding`-skill edit too, since the `remind` hook (once project-scoped) already does that job dynamically and correctly-scoped, unlike a global skill edit that would apply even in projects with no Serena registered.
 - claude | `audit-harness` could mechanize ADR-0041's identity-only rule for a project's `CLAUDE.md` record-file lines — flag one that restates a boundary or edit/append rule instead of naming location/kind/writer only, rather than leaving the check to whoever next reads that `CLAUDE.md` under `project-docs` step 1.
   One incident (`maniac`'s 186-line `docs/STATE.md`) is not yet enough to justify building this; revisit if it recurs.
+
+## Omarchy migration
+
+- env | Editor alternates: move `EDITOR` out of `tools.conf` into `environment.d/editor.conf##default` (`hx`) and `##class.omarchy` (`omarchy-launch-editor --inline`), so Omarchy's editor menu keeps working.
+  Needs `yadm config local.class omarchy` on the new machine.
+- env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
+  Then revisit `_env_unpin`: it unsets every name environment.d defines, which under uwsm also discards uwsm's deliberate `EDITOR` and `PATH`.
+- docs | Add a Wayland/uwsm section to `environment-architecture.md`: SDDM's login shell does the pull, uwsm pushes only what it changed, no Xsession.
+- omarchy | Omarchy links its agent skills into `~/.claude/skills`, `~/.codex/skills` and `~/.pi/agent/skills`, which `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `PI_CODING_AGENT_DIR` make invisible; ignore them or link them into the XDG dirs.
+- mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
+- omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
+  Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
+- tmux | `omarchy-theme-set-tmux` runs on every theme change and sets `window-style`, `window-active-style` and `cursor-colour` globally on the live server, overriding our theme until the config is reloaded; decide whether to adopt Omarchy's colours or neutralise the hook.
+- mise | Omarchy's agent wrappers in `~/.local/bin` (`claude`, `codex`, `pi`, …) run `mise use -g` on every call, so a tool also in `tools.toml` prints mise's duplicate warning each time (ADR-0045); `omarchy-remove-preinstalls` deletes them.
+- upstream | Omarchy: `omarchy-launch-editor` should fall back from `helix` to `hx`; its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
