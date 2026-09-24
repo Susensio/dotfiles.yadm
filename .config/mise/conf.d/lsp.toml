@@ -1,10 +1,14 @@
 [tools]
 biome = "latest"
-"cargo:https://github.com/nushell/nufmt" = "latest"
 "npm:bash-language-server" = "latest"
 "npm:fish-lsp" = "latest"
+"npm:yaml-language-server" = "latest"
+"pipx:code-review-graph" = "latest"
+lua-language-server = "latest"
 ruff = { version = "latest", gen_completions = "generate-shell-completion fish" }
 shellcheck = "latest"
 shfmt = "latest"
+stylua = "latest"
 taplo = { version = "latest", symlink_bins = true, gen_completions = "completions fish" }
+tree-sitter = "latest"
 ty = { version = "latest", gen_completions = "generate-shell-completion fish" }

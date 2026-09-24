@@ -1,0 +1,12 @@
+[hooks]
+postinstall = { task = "system-install" }
+
+[settings]
+experimental = true
+
+[settings.github]
+use_git_credentials = true
+
+# The registry baked into mise lacks some packages (yadm-dev/yadm); fetch the live one
+[settings.aqua]
+baked_registry = false

@@ -1,7 +1,8 @@
+# Tracked global tools, shared across machines; `tool install` writes here.
+# The global config.toml is machine-local and untracked (docs/adr/0045).
 [tools]
 aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
-  "raw://v@scripts/shell-integration/integration.fish",
 ] }
 antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
@@ -20,44 +21,42 @@ fzf = { version = "latest", extra_assets = [
   "raw://v@man/man1/fzf.1",
 ] }
 gh = "latest"
-"github:todotxt/todo.txt-cli" = { version = "latest", filter_bins = "todo.sh" }
 glow = "latest"
+go = "latest"
+gum = "latest"
 helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
 herdr = { version = "latest", gen_completions = "completion fish", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
 ], skills = [
   { name = "herdr", file = "SKILL.md", global = true },
-  { name = "herdr-config", references = "*.mdx" },
+  { name = "herdr-config", file = "SKILL-config.md", references = "*.mdx" },
 ] }
 just = "latest"
 lazygit = "latest"
+neovim = "latest"
 node = "latest"
+opencode = "latest"
 pandoc = "latest"
-"pipx:howdoi" = "latest"
-"pipx:tlp-ui" = "latest"
+pi = "latest"
 python = "latest"
 ripgrep = "latest"
 rust = "latest"
-tealdeer = "latest"
+tealdeer = { version = "latest", extra_assets = [
+  "release://v@completions_fish>tldr.fish",
+] }
 tmux = { version = "latest", extra_assets = [
   "raw://tmux/tmux:tmux.1",
 ] }
 usage = "latest"
 uv = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
-zoxide = "latest"
-
-[hooks]
-postinstall = { task = "system-install" }
-
-[settings]
-experimental = true
-
-[settings.github]
-use_git_credentials = true
+yadm = "latest"
+zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
 
 [tool_alias]
 antigravity = "github:google-antigravity/antigravity-cli"
 llm = "pipx:llm"
+pastel = "aqua:sharkdp/pastel"
 xdg-ninja = "aqua:b3nj5m1n/xdg-ninja"
+yadm = "aqua:yadm-dev/yadm"

@@ -3,6 +3,10 @@
 set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
+# Tracked global tools. The global config.toml is left untracked, for machine-local
+# tools and whatever other installers write with `mise use -g`.
+TOOLS_CONFIG=${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/tools.toml
+
 # @cmd Install one or more global tools
 # @flag --lsp Install into the global LSP config
 # @arg tools+ Tool specifications, optionally including a version
@@ -11,7 +15,7 @@ install() {
     local lsp_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/lsp.toml
     mise use --global --path "$lsp_config" "${argc_tools[@]}"
   else
-    mise use --global "${argc_tools[@]}"
+    mise use --global --path "$TOOLS_CONFIG" "${argc_tools[@]}"
   fi
 }
 
@@ -25,13 +29,14 @@ upgrade() {
 # @arg name! Alias name
 # @arg tool! Tool
 alias() {
-  mise tool-alias set "$argc_name" "$argc_tool"
+  # tool-alias set has no --path; it always writes to the global config file
+  MISE_GLOBAL_CONFIG_FILE="$TOOLS_CONFIG" mise tool-alias set "$argc_name" "$argc_tool"
 }
 
 # @cmd Remove one or more global tools
 # @arg tools+ Tools to remove
 remove() {
-  mise unuse --global "${argc_tools[@]}"
+  mise unuse --path "$TOOLS_CONFIG" "${argc_tools[@]}"
   mise run system-install --only-prune
 }
 

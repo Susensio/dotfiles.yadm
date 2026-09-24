@@ -10,7 +10,7 @@ eget grabbed release binaries but had no concept of versions, man pages, or shel
 
 ## Decision
 
-Manage CLI tools with mise, declared in `mise/config.toml`.
+Manage CLI tools with mise, declared in `mise/config.toml` (moved into `mise/conf.d/` by [ADR-0045](0045-mise-conf-d-over-global-config.md)).
 
 Tools come from the mise registry, `github:` releases, and `pipx:`.
 Per-tool options fill the gaps eget left: `extra_assets` fetches completions and man pages not covered by a backend (delta, eza, fzf, helix's `languages.toml`, tmux), `gen_completions` runs a tool's own completion generator (herdr), `rename_exe` and `filter_bins` handle awkward upstream binary names.
