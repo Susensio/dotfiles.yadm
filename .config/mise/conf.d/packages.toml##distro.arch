@@ -1,0 +1,25 @@
+# Distro-sourced tools on Arch, installed by `mise bootstrap` through pacman.
+# Keep in sync with packages.toml##default; `tool` writes both (docs/adr/0046).
+[bootstrap.packages]
+"pacman:bat" = "latest"
+"pacman:git-delta" = "latest"
+"pacman:eza" = "latest"
+"pacman:fd" = "latest"
+"pacman:fzf" = "latest"
+"pacman:glow" = "latest"
+"pacman:gum" = "latest"
+"pacman:helix" = "latest"
+"pacman:just" = "latest"
+"pacman:lazygit" = "latest"
+"pacman:neovim" = "latest"
+"pacman:pandoc-cli" = "latest"
+"pacman:ripgrep" = "latest"
+"pacman:tealdeer" = "latest"
+"pacman:tmux" = "latest"
+"pacman:yadm" = "latest"
+
+[bootstrap.hooks]
+# Omarchy's tldr conflicts with tealdeer
+pre-packages = "! pacman -Q tldr >/dev/null 2>&1 || sudo pacman -R --noconfirm tldr"
+# Arch names the binary helix; SUDO_EDITOR expects hx
+post-packages = "[ ! -x /usr/bin/helix ] || ln -sfn /usr/bin/helix \"$HOME/.local/bin/hx\""
