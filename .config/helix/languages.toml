@@ -81,3 +81,6 @@ language-servers = ["biome"]
 [[language]]
 name = "markdown"
 soft-wrap = { enable = true, wrap-indicator = "" }
+
+[language-server.ty]
+config = { experimental = { useUv = "scripts" } }
