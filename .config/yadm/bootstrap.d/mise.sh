@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "$(cat /etc/os-release | grep "^UBUNTU_CODENAME" | cut -d"=" -f2)" != "noble" ]]; then
-  log info "Maybe a PPA could be used here..."
-fi
-
-if ! grep -rq "mise" /etc/apt/sources.list*; then
+if command -v apt-get &>/dev/null && ! grep -rq "mise" /etc/apt/sources.list*; then
   log info "Adding mise repository..."
-  sudo install -dm 755 /etc/apt/keyrings
-  curl -fSs https://mise.jdx.dev/gpg-key.pub | sudo tee /etc/apt/keyrings/mise-archive-keyring.pub 1>/dev/null
-  echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.pub arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | sudo tee /etc/apt/sources.list.d/mise.list
+  pkg-install extrepo
+  sudo extrepo enable mise
 fi
 
 
 if ! command -v mise &>/dev/null; then
   log info "Installing mise..."
-  sudo apt update
-  sudo apt install -y mise
+  pkg-install mise
   log info "mise installed"
 fi
 
-# Integrate with fish
-FISH_COMPLETIONS_DIR="/usr/share/fish/vendor_completions.d"
+# Integrate with fish. User vendor dir, so it never overwrites a packaged copy.
+FISH_COMPLETIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d"
 mkdir --parents --verbose "$FISH_COMPLETIONS_DIR" &&
-  mise completion fish | sudo tee "$FISH_COMPLETIONS_DIR/mise.fish" 1>/dev/null
+  mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"

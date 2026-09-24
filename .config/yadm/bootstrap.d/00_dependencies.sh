@@ -16,6 +16,6 @@ done
 
 if (( ${#missing_pkgs[@]} > 0 )); then
   log info "Installing missing packages..."
-  sudo apt update && sudo apt install -y "${missing_pkgs[@]}"
+  pkg-install "${missing_pkgs[@]}"
   log info "Missing packages installed"
 fi

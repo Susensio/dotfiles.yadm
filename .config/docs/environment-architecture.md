@@ -100,7 +100,7 @@ This architecture works seamlessly on TTYs, via SSH, and for any other login she
 ## 6. XDG Compliance & Dotfile Management
 Our system is designed to keep `$HOME` clean by adhering strictly to the **XDG Base Directory Specification**.
 
-### The Bootstrap (`yadm/bootstrap.d/xdg_compliance/`)
+### The Bootstrap (`yadm/bootstrap.d/10_xdg_compliance/`)
 These scripts perform the initial "surgical" moves and configuration:
 *   **Bash:** Config is moved to `~/.config/bash/` and patched via `/etc/bash.bashrc`.
 *   **Profile:** Moved to `~/.config/profile` and sourced via `/etc/profile.d/`.

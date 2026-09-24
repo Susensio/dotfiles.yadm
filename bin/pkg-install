@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Install system packages with whatever package manager this machine has.
+# Package names are passed through as-is, so they must match on every distro used.
+set -euo pipefail
+
+if (( $# == 0 )); then
+  echo "Usage: pkg-install <package>..." >&2
+  exit 1
+fi
+
+if command -v pacman &>/dev/null; then
+  sudo pacman -S --needed --noconfirm "$@"
+elif command -v apt-get &>/dev/null; then
+  sudo apt-get update
+  sudo apt-get install -y "$@"
+else
+  echo "pkg-install: no supported package manager found" >&2
+  exit 1
+fi

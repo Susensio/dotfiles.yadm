@@ -9,17 +9,24 @@ USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 WATCHER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.path
 SYNCER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.service
 
-if ! command -v keyd.rvaiya &>/dev/null; then
+if ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null; then
   log info "Installing keyd..."
-  sudo apt update
-  sudo apt install keyd
+  pkg-install keyd
+  log success "Keyd installed"
+fi
 
+if ! command -v keyd &>/dev/null && command -v keyd.rvaiya &>/dev/null; then
   log info "Symlinking keyd because it is installed as keyd.rvaiya..."
   sudo ln -srfv /usr/bin/keyd.rvaiya /usr/bin/keyd
   sudo ln -srfv /usr/share/man/man1/keyd.rvaiya.1.gz /usr/share/man/man1/keyd.1.gz
   sudo mandb
+fi
 
-  log success "Keyd installed"
+sudo systemctl enable --now keyd
+
+# setfacl below needs the file, and the sync unit only copies on a later edit
+if [[ ! -f $SYSTEM_CONFIG ]]; then
+  sudo install --mode 644 -D --verbose "$USER_CONFIG" "$SYSTEM_CONFIG"
 fi
 
 # I want `keyd` to be managed by user and tracked by yadm
@@ -27,7 +34,8 @@ fi
 # Solution: use a user config and sync it using a systemd service
 
 
-# Let user manage keyd without password
+# Let user manage keyd without password. Not every package creates the group.
+getent group keyd &>/dev/null || sudo groupadd --system keyd
 sudo usermod -aG keyd "$USER"
 # if [[ ! -f "$SUDOERS_FILE" ]]; then
 #   echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/keyd reload" |

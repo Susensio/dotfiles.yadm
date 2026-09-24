@@ -4,7 +4,7 @@ set -euo pipefail
 # All subsequent commands must have the right environment variables
 source "${XDG_CONFIG_HOME:-${HOME}/.config}/profile" || source "${HOME}/.profile"
 
-# ~/bin helpers (log) for every bootstrap.d script. On a fresh clone
+# ~/bin helpers (log, pkg-install) for every bootstrap.d script. On a fresh clone
 # systemd --user predates environment.d/11_path.conf, so profile can't provide it.
 export PATH="${HOME}/bin:${PATH}"
 

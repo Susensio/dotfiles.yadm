@@ -12,7 +12,7 @@ Bootstrap has to be safe to run again at any time to restore that state, not jus
 
 `yadm/bootstrap` dispatches every executable file under `bootstrap.d/` (excluding `*##*`), sorted by name, adapted from yadm's own contrib `bootstrap-in-dir` script.
 The executable bit is the enable/disable switch; numeric prefixes (`00_dependencies.sh`, ...) fix run order.
-Each script guards its own idempotency: `00_dependencies.sh` only installs packages `command -v` can't already find; `xdg_compliance/bash.sh` checks with `grep --quiet` before appending its patch, and installs assets with `sudo install --mode ... --compare -D`, which is a no-op when the file already matches.
+Each script guards its own idempotency: `00_dependencies.sh` only installs packages `command -v` can't already find; `10_xdg_compliance/bash.sh` checks with `grep --quiet` before appending its patch, and installs assets with `sudo install --mode ... --compare -D`, which is a no-op when the file already matches.
 
 ## Consequences
 

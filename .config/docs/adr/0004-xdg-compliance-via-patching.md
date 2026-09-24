@@ -11,7 +11,7 @@ No environment variable set from user space can redirect them.
 ## Decision
 
 Patch the system files directly.
-`yadm/bootstrap.d/xdg_compliance/` installs assets into `/etc/bash.bashrc` (via patch), `/etc/bashrc.d/xdg.sh`, `/etc/profile.d/{bash_xdg.sh,profile_xdg.sh}`, `/etc/X11/Xsession.d/{00xdg-compliance,96fix-env-precedence}`, `/etc/lightdm/lightdm.conf` (XAuthority redirect), and `/etc/sudoers.d/disable_admin_file`, then moves the corresponding user dotfiles into `~/.config/`.
+`yadm/bootstrap.d/10_xdg_compliance/` installs assets into `/etc/bash.bashrc` (via patch), `/etc/bashrc.d/xdg.sh`, `/etc/profile.d/{bash_xdg.sh,profile_xdg.sh}`, `/etc/X11/Xsession.d/{00xdg-compliance,96fix-env-precedence}`, `/etc/lightdm/lightdm.conf` (XAuthority redirect), and `/etc/sudoers.d/disable_admin_file`, then moves the corresponding user dotfiles into `~/.config/`.
 See `environment-architecture.md` §6.
 
 One exception is accepted rather than fought: `~/.xsession-errors` is unfixable in userspace — its path is compiled into the `lightdm` daemon binary and written before any session-wrapper script runs (upstream canonical/lightdm#95, unaddressed).

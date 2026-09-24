@@ -2,15 +2,14 @@
 set -euo pipefail
 
 # Add repo if not present
-if ! grep -rq "fish-shell" /etc/apt/sources.list*; then
+if command -v apt-get &> /dev/null && ! grep -rq "fish-shell" /etc/apt/sources.list*; then
   log info "Adding fish shell repository..."
   sudo add-apt-repository -y ppa:fish-shell/release-4
 fi
 
 if ! command -v fish &> /dev/null; then
   log info "Installing fish shell..."
-  sudo apt update
-  sudo apt install fish
+  pkg-install fish
   log info "Fish shell installed"
 fi
 
@@ -18,7 +17,7 @@ fi
 BASHRC_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/bash/bashrc"
 if ! grep --quiet "fish" "$BASHRC_FILE"; then
   log info "Setting fish as default interactive shell for current user..."
-  sudo tee --append "$BASHRC_FILE" << EOF
+  RELAY=$(cat << 'EOF'
 # Drop into fish cleanly
 if [[ $- == *i* ]] &&                                     # 1. Is it an interactive session?
    command -v fish >/dev/null 2>&1 &&                     # 2. Is fish actually installed?
@@ -30,6 +29,9 @@ if [[ $- == *i* ]] &&                                     # 1. Is it an interact
     exec fish $LOGIN_OPTION
 fi
 EOF
+)
+  # Prepended, so bash hands over before running the rest of its startup
+  printf '%s\n\n%s\n' "$RELAY" "$(<"$BASHRC_FILE")" >"$BASHRC_FILE"
 fi
 # if [ "$SHELL" != "$(which fish)" ]; then
 #   log info "Setting fish as default shell for current user..."
