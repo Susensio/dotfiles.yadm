@@ -5,7 +5,8 @@
 The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR-0044, 0045 and 0046; what remains happens on that laptop.
 
 - Push the yadm repo first: the laptop clones from GitHub, and everything since `c41f054` is local.
-- Setting up the laptop: `yadm clone`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap; never run `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
+- Setting up the laptop: `yadm clone`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap; run `omarchy-remove-preinstalls` to drop the agent wrappers from `~/.local/bin`; never run `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
+  After every `omarchy update`, `yadm diff`: its migrations edit the tracked tmux and herdr configs.
 - The first run on Arch verifies what ADR-0046 was written without: the `packages.toml##distro.arch` installs and hooks (`tldr` removal, `hx` link), `tool install`'s pacman branch, and `mise bootstrap packages use` writing to a `##`-named file.
   `keyd.sh` has never run on Arch either: group creation, enabling the service, seeding `/etc/keyd/default.conf`.
   In a new terminal, `status is-login`: if terminals start non-login shells, `_env_pull` never runs.
