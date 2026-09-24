@@ -24,8 +24,6 @@
 
 ## Omarchy migration
 
-- env | Editor alternates: move `EDITOR` out of `tools.conf` into `environment.d/editor.conf##default` (`hx`) and `##class.omarchy` (`omarchy-launch-editor --inline`), so Omarchy's editor menu keeps working.
-  Needs `yadm config local.class omarchy` on the new machine.
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
   Then revisit `_env_unpin`: it unsets every name environment.d defines, which under uwsm also discards uwsm's deliberate `EDITOR` and `PATH`.
 - yadm | Move system packages (fish, keyd, curl, git, jq, help2man) into the `packages.toml` variants as `pacman:`/`apt:` entries, replacing `dependencies.txt` and the install lines of `20_fish.sh` and `keyd.sh`.
@@ -37,4 +35,4 @@
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
 - tmux | `omarchy-theme-set-tmux` runs on every theme change and sets `window-style`, `window-active-style` and `cursor-colour` globally on the live server, overriding our theme until the config is reloaded; decide whether to adopt Omarchy's colours or neutralise the hook.
 - mise | Omarchy's agent wrappers in `~/.local/bin` (`claude`, `codex`, `pi`, …) run `mise use -g` on every call, so a tool also in `tools.toml` prints mise's duplicate warning each time (ADR-0045); `omarchy-remove-preinstalls` deletes them.
-- upstream | Omarchy: `omarchy-launch-editor` should fall back from `helix` to `hx`; its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
+- upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
