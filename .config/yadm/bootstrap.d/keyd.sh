@@ -9,6 +9,12 @@ USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 WATCHER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.path
 SYNCER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.service
 
+# Ubuntu 24.04, Mint 22's base, does not package keyd
+if command -v apt-get &>/dev/null && ! grep -rq "keyd-team" /etc/apt/sources.list*; then
+  log info "Adding keyd repository..."
+  sudo add-apt-repository -y ppa:keyd-team/ppa
+fi
+
 if ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null; then
   log info "Installing keyd..."
   pkg-install keyd
