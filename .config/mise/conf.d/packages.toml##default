@@ -15,7 +15,8 @@ fzf = { version = "latest", extra_assets = [
 ] }
 glow = "latest"
 gum = "latest"
-helix = { version = "latest", extra_assets = ["raw://languages.toml"] }
+# Upstream ships only hx; helix is the name EDITOR and Arch use (docs/adr/0047)
+helix = { version = "latest", extra_assets = ["raw://languages.toml"], postinstall = 'cd "$MISE_TOOL_INSTALL_PATH"/helix-*/ && ln -sfn hx helix' }
 just = "latest"
 lazygit = "latest"
 neovim = "latest"
