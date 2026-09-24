@@ -15,6 +15,7 @@ XDG config repo for `~/.config`, managed with yadm.
   Ask the `adr` skill which -- it holds the test, and never auto-memory.
 - Open work with no single line to mark lives in `docs/BACKLOG.md`; `rg -n 'BUG:|TODO:'` lists the rest.
   Whoever is talking to me writes it; a subagent reports the finding instead, so it does not ride in a scoped diff.
+- Work committed to and not yet finished lives in `docs/STATE.md`, written by the main agent.
 - A limitation deliberately accepted is not a bug.
   It goes in the Consequences of an ADR, like `.xsession-errors` in ADR-0004.
 - The `report-issue` skill files upstream, never against this repo.
