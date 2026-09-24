@@ -1,0 +1,19 @@
+{
+  "disableDefaultAgents": true,
+  "fallbackSubagent": "none",
+  "backgroundByDefault": true,
+  "maxConcurrent": 4,
+  "workflowsEnabled": false,
+  "schedulingEnabled": false,
+  "worktreeIsolation": true,
+  "maxSubagentDepth": 1,
+  "agentMentions": "off",
+  "fleetView": false,
+  "widgetMode": "off",
+  "rememberAgents": false,
+  "outputTranscript": false,
+  "toolDescriptionMode": "compact",
+  "reportUsage": true,
+  "showCost": false,
+  "showModel": true
+}

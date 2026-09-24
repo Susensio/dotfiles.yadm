@@ -1,0 +1,22 @@
+# Only the hand-maintained config is version controlled. Everything else here
+# is credentials, session transcripts, caches, or churn.
+*
+!.gitignore
+!agent/
+!agent/AGENTS.md
+!agent/README.md
+!agent/settings.json
+!agent/subagents.json
+!agent/agents/
+!agent/agents/**
+!agent/skills/
+!agent/skills/**
+!agent/extensions/
+!agent/extensions/**
+!agent/model-fallback/
+!agent/model-fallback/config.json
+
+# Regenerable, even inside the whitelisted config dirs (last match wins).
+node_modules/
+__pycache__/
+*.pyc

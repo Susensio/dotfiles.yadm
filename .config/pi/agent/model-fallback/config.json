@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "enabled": true,
+  "autoRetry": true,
+  "rules": [
+    {
+      "name": "codex-sol-to-opencode-glm",
+      "matchModels": [
+        {
+          "provider": "openai-codex",
+          "model": "gpt-5.6-sol"
+        }
+      ],
+      "statuses": [429, 500, 502, 503, 504],
+      "fallback": {
+        "provider": "opencode",
+        "model": "glm-5.3-flash"
+      }
+    },
+    {
+      "name": "codex-terra-to-opencode-deepseek",
+      "matchModels": [
+        {
+          "provider": "openai-codex",
+          "model": "gpt-5.6-terra"
+        }
+      ],
+      "statuses": [429, 500, 502, 503, 504],
+      "fallback": {
+        "provider": "opencode",
+        "model": "deepseek-v4-flash"
+      }
+    },
+    {
+      "name": "codex-luna-to-opencode-mimo",
+      "matchModels": [
+        {
+          "provider": "openai-codex",
+          "model": "gpt-5.6-luna"
+        }
+      ],
+      "statuses": [429, 500, 502, 503, 504],
+      "fallback": {
+        "provider": "opencode",
+        "model": "mimo-v2.5-free"
+      }
+    }
+  ]
+}
