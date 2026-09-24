@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source _super
+source "$(dirname -- "${BASH_SOURCE[0]}")/_super"
 
 # Pre-run logic or env vars here
 
