@@ -24,6 +24,7 @@ Take the nearest one above the files you touched; it beats the root's where they
 
 **2. What does it visibly keep?** A `docs/` tree, `TODO.md`, `CHANGELOG.md`, an issue tracker it links to.
 Match it, even where the format is not what you would have chosen.
+A section that has drifted outside its file's purpose, like decisions in a backlog, is worth trimming rather than extending.
 Two candidates: follow whichever it used most recently for a finding like yours, and ask if that is still unclear.
 List the root directly — a file holding live state is often gitignored, and `rg` and `fd` skip those.
 
@@ -46,7 +47,11 @@ Five go wherever the ladder lands:
 - **A procedure a person also runs by hand** — a deploy, a release. A doc, with the skill that fires on it pointing there.
 - **Work already committed to and not yet finished** — an accepted decision awaiting implementation, a change left mid-flight, the handoff a fresh session needs to resume it. A `STATE.md`, edited or dropped as work moves past it rather than appended to.
 
-Two never touch the ladder: a settled choice between real alternatives goes to the `adr` skill, which decides whether it is worth recording at all, and throwaway material goes wherever the project already ignores, gone when the work commits.
+Three skip the ladder.
+A settled choice between real alternatives, including a decision not to do something, goes to the `adr` skill, which decides whether it is worth recording at all.
+A standing fact about the system sits where it would otherwise be re-derived: a comment beside its code, or a path-scoped rule when it spans one path; one cheap to re-derive can simply go.
+`CLAUDE.md` is for rules every session there needs, so it makes a poor catch-all.
+Throwaway material goes wherever the project already ignores, gone when the work commits.
 
 Roadmap or backlog, when both fit: `grow-project-docs` holds that boundary.
 

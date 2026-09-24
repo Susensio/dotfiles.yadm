@@ -68,16 +68,19 @@ A roadmap item you have stopped intending goes back to the backlog rather than r
 
 Discovered bugs, tech debt, and explorations nobody has approved.
 The main agent writes it, from its own work and from whatever a subagent reports as outside its scope.
-Subagents read it, and reading it is what stops one repeating a dead end recorded here.
+Subagents read it to find what is open before starting something.
 
 *Earned when* the README's TODO section outgrew it.
 
 *Boundary:* not committed to, and not what one wrong line can carry.
+Each entry names something someone could start, or what would unblock it.
+A decision not to do something is a decision, so it goes to the `adr` skill; git history keeps anything dropped.
+Ground an accepted ADR already covers is settled rather than open.
 Once a decision is made — an ADR accepted, a change started — it has left this file for `docs/STATE.md`, even with zero lines of implementation (ADR-0041).
 A defect with a line to sit beside is marked on that line, where the project marks defects in place.
 Never copy those markers in to make it a full index: the copy kept by hand is the one that goes stale.
 
-Where the project already keeps a backlog, its format wins.
+Where the project already keeps a backlog, its format wins, though a section of settled decisions is drift rather than format.
 Otherwise one entry per line, with an indented block under any entry needing a repro, a link, or what was already tried:
 
 ```markdown
