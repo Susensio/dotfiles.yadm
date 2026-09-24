@@ -3,7 +3,10 @@ set -euo pipefail
 
 # All subsequent commands must have the right environment variables
 source "${XDG_CONFIG_HOME:-${HOME}/.config}/profile" || source "${HOME}/.profile"
-source "${HOME}/bin/log"
+
+# ~/bin helpers (log) for every bootstrap.d script. On a fresh clone
+# systemd --user predates environment.d/11_path.conf, so profile can't provide it.
+export PATH="${HOME}/bin:${PATH}"
 
 # Execute all executable files (excluding templates and editor backups) in the
 # ~/.config/yadm/bootstrap.d directory when run.
@@ -13,7 +16,7 @@ source "${HOME}/bin/log"
 BOOTSTRAP_DIR="${BASH_SOURCE[0]}.d"
 
 if [[ ! -d "$BOOTSTRAP_DIR" ]]; then
-  log_error "Error: bootstrap directory '$BOOTSTRAP_DIR' not found"
+  log error "Error: bootstrap directory '$BOOTSTRAP_DIR' not found"
   exit 1
 fi
 
@@ -21,9 +24,9 @@ scripts=()
 readarray -t scripts < <(find -L "$BOOTSTRAP_DIR" -type f -executable ! -name '*##*' | sort)
 
 for script in "${scripts[@]}"; do
-  log_debug "Bootstraping file $script)..."
+  log debug "Bootstraping file $script)..."
   if ! "$script"; then
-    log_error "Error: bootstrap $script failed"
+    log error "Error: bootstrap $script failed"
     exit 1
   fi
 done

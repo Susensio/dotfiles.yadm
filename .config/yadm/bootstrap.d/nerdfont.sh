@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "${HOME}/bin/log"
-
 if ! command -v fc-cache >/dev/null 2>&1; then
-  log_debug "No GUI detected (fc-cache missing). Skipping font installation."
+  log debug "No GUI detected (fc-cache missing). Skipping font installation."
   exit 0
 fi
 
@@ -20,10 +18,10 @@ remote_url=$(curl -sIL -o /dev/null -w '%{url_effective}' "$LATEST_URL")
 remote_version=$(basename "$remote_url")
 
 if [[ -f "$VERSION_FILE" ]]; then
-  log_debug "Checking for Nerd Font updates..."
+  log debug "Checking for Nerd Font updates..."
 
   if [[ "$(cat "$VERSION_FILE")" == "$remote_version" ]]; then
-    log_debug "Nerd Fonts are up to date."
+    log debug "Nerd Fonts are up to date."
     exit 0
   fi
 fi
@@ -31,7 +29,7 @@ fi
 temp_dir=$(mktemp --directory)
 trap "rm -rf $temp_dir" EXIT
 
-log_info "Installig Nerd Fonts Symbols..."
+log info "Installig Nerd Fonts Symbols..."
 curl --fail --location --output "$temp_dir/symbols.tar.xz" "$DOWNLOAD_URL"
 
 # Extract the tar.xz file directly into the temp folder

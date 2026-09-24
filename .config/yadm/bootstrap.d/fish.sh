@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "${HOME}/bin/log"
-
 # Add repo if not present
 if ! grep -rq "fish-shell" /etc/apt/sources.list*; then
-  log_info "Adding fish shell repository..."
+  log info "Adding fish shell repository..."
   sudo add-apt-repository -y ppa:fish-shell/release-4
 fi
 
 if ! command -v fish &> /dev/null; then
-  log_info "Installing fish shell..."
+  log info "Installing fish shell..."
   sudo apt update
   sudo apt install fish
-  log_info "Fish shell installed"
+  log info "Fish shell installed"
 fi
 
 # set default interactive shell
 BASHRC_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/bash/bashrc"
 if ! grep --quiet "fish" "$BASHRC_FILE"; then
-  log_info "Setting fish as default interactive shell for current user..."
+  log info "Setting fish as default interactive shell for current user..."
   sudo tee --append "$BASHRC_FILE" << EOF
 # Drop into fish cleanly
 if [[ $- == *i* ]] &&                                     # 1. Is it an interactive session?
@@ -34,7 +32,7 @@ fi
 EOF
 fi
 # if [ "$SHELL" != "$(which fish)" ]; then
-#   log_info "Setting fish as default shell for current user..."
+#   log info "Setting fish as default shell for current user..."
 #   sudo chsh -s "$(which fish)" "$USER"
 # fi
 

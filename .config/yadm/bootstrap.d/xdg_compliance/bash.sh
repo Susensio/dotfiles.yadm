@@ -4,8 +4,6 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 ASSETS_DIR="${SCRIPT_DIR}/assets"
 
-source "${HOME}/bin/log"
-
 ### ROOT SPACE
 
 ETC_BASHRC_FILE="/etc/bash.bashrc"
@@ -15,10 +13,10 @@ ETC_PROFILE_DIR="/etc/profile.d"
 ETC_PROFILE_XDG_FILE="${ETC_PROFILE_DIR}/bash_xdg.sh"
 
 if ! grep --quiet "${ETC_BASHRC_DIR}" ${ETC_BASHRC_FILE}; then
-  log_info "Patching /etc/bash.bashrc to support /etc/bashrc.d/*..."
+  log info "Patching /etc/bash.bashrc to support /etc/bashrc.d/*..."
   cat "${ASSETS_DIR}${ETC_BASHRC_FILE}.patch" | sudo tee --append ${ETC_BASHRC_FILE} > /dev/null
 else
-  log_debug "/etc/bash.bashrc is already patched. Skipping."
+  log debug "/etc/bash.bashrc is already patched. Skipping."
 fi
 
 # Install the asset files directly into /etc
@@ -57,7 +55,7 @@ if compgen -G "${BASH_DOTFILES}" > /dev/null; then
       mv --verbose -- "${file}" "${dest}"
     else
       mv --verbose -- "${file}" "${dest}.bak"
-      log_warn "File ${dest} already exists. Renamed to ${dest}.bak"
+      log warn "File ${dest} already exists. Renamed to ${dest}.bak"
     fi
 
   done

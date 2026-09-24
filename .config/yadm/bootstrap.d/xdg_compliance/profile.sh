@@ -4,8 +4,6 @@ set -euo pipefail
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 ASSETS_DIR="${SCRIPT_DIR}/assets"
 
-source "$HOME/bin/log"
-
 ### ROOT SPACE
 
 ETC_PROFILE_DIR="/etc/profile.d"
@@ -28,7 +26,7 @@ if [[ -f ${OLD_PROFILE} ]]; then
     if [[ ! -f $NEW_PROFILE ]]; then
         mv --verbose -- "${OLD_PROFILE}" "${NEW_PROFILE}"
     else
-        log_warn "File ${NEW_PROFILE} already exists. Backing up old profile."
+        log warn "File ${NEW_PROFILE} already exists. Backing up old profile."
         mv --verbose -- "${OLD_PROFILE}" "${NEW_PROFILE}.bak"
     fi
 fi

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "${HOME}/bin/log"
-
 SYSTEM_CONFIG=/etc/keyd/default.conf
 USER_CONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/keyd/default.conf
 
@@ -12,16 +10,16 @@ WATCHER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.path
 SYNCER_UNIT=$USER_SYSTEMD_DIR/keyd-sync.service
 
 if ! command -v keyd.rvaiya &>/dev/null; then
-  log_info "Installing keyd..."
+  log info "Installing keyd..."
   sudo apt update
   sudo apt install keyd
 
-  log_info "Symlinking keyd because it is installed as keyd.rvaiya..."
+  log info "Symlinking keyd because it is installed as keyd.rvaiya..."
   sudo ln -srfv /usr/bin/keyd.rvaiya /usr/bin/keyd
   sudo ln -srfv /usr/share/man/man1/keyd.rvaiya.1.gz /usr/share/man/man1/keyd.1.gz
   sudo mandb
 
-  log_success "Keyd installed"
+  log success "Keyd installed"
 fi
 
 # I want `keyd` to be managed by user and tracked by yadm
@@ -45,7 +43,7 @@ if [[ -f "$WATCHER_UNIT" && -f "$SYNCER_UNIT" ]]; then
   exit
 fi
 
-log_info "Writing systemd units to keep keyd user config in sync with system config"
+log info "Writing systemd units to keep keyd user config in sync with system config"
 
 mkdir --parents "$USER_SYSTEMD_DIR"
 
@@ -72,4 +70,4 @@ EOF
 systemctl --user daemon-reload
 systemctl --user enable --now keyd-sync.path
 
-log_success "Keyd sync configured"
+log success "Keyd sync configured"

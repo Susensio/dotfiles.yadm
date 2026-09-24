@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "${HOME}/bin/log"
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 DEPENDENCIES_FILE=${SCRIPT_DIR}/dependencies.txt
 
@@ -16,7 +15,7 @@ for pkg in "${required_pkgs[@]}"; do
 done
 
 if (( ${#missing_pkgs[@]} > 0 )); then
-  log_info "Installing missing packages..."
+  log info "Installing missing packages..."
   sudo apt update && sudo apt install -y "${missing_pkgs[@]}"
-  log_info "Missing packages installed"
+  log info "Missing packages installed"
 fi
