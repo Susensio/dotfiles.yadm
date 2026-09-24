@@ -8,6 +8,9 @@ description: How code is written, read and commented here — what to check befo
 
 ## Before writing anything
 
+When the brief requests `independent-code-review`, capture `git rev-parse HEAD` before the first edit.
+The review needs this repo's pre-change ref later, and it is not cleanly recoverable afterward once this branch's own in-flight, multi-domain commits sit mixed in with the change.
+
 Check, in order:
 
 1. Can this be deleted instead, or does the codebase already solve it somewhere else?
@@ -48,9 +51,13 @@ Fix what each reports before running the next: a type error read through a wall 
 Repeat the cycle until every check passes on the same pass.
 A change is done at the first clean run across all of them, not at the last edit.
 
-Once, for the whole change and not per intermediate commit: after it is committed, run `independent-code-review` before calling it finished, unless it cannot alter behaviour (`Scale the checking to the change`) or touches a single file.
-It spends Codex's quota instead of yours, and a model that did not write the diff catches what its author cannot see in itself.
-Only the agent that owns the whole change runs it -- a `developer` implementing one slice of a larger change it did not scope skips this and says so in its report, so the pass does not fire once per slice.
+Run `independent-code-review` only when the brief explicitly requests it for a completed feature that changes behaviour, after all of its implementation commits are present.
+Completing a task or making a commit never adds a review step.
+Intermediate commits, documentation, and chores get the checks their change warrants, then land without an independent review.
+Give the reviewer the pre-change ref and require the findings back verbatim.
+A model that did not write the diff catches what its author cannot see in itself.
+Review the completed feature once after integrating every slice.
+Fix what comes back like a linter's output, and say plainly where you disagree rather than dropping a finding silently.
 A disputed finding about correctness goes to `/code-review` instead, which is what judges that; a decision about the approach rather than the diff is worth `auditor`.
 
 Where the project declares no check, say what went unverified rather than calling it done.

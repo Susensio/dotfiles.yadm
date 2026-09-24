@@ -2,9 +2,10 @@
 
 Each entry below: what earns the file, what it holds, and the boundary that stops it absorbing its neighbours.
 
-The boundary lives in the project's `CLAUDE.md`, not in the file's own first lines.
-One line there per file — where it sits, what it holds, who writes it.
+A pointer to each file lives in the project's `CLAUDE.md`, not in the file's own first lines.
+One line there per file, naming identity only — where it sits, what kind of thing it holds, who writes it — never the boundary or behaviour below, which stays here as the one copy.
 A file that explains itself is carrying that line's job in a copy nobody routes by, and it goes stale the first time the boundary moves.
+A `CLAUDE.md` line caught restating a boundary or an edit/append rule is a defect in the project: trim it back to identity, do not sync it (ADR-0041).
 
 ## README.md — what this project is
 
@@ -71,7 +72,8 @@ Subagents read it, and reading it is what stops one repeating a dead end recorde
 
 *Earned when* the README's TODO section outgrew it.
 
-*Boundary:* not what is being coded right now, and not what one wrong line can carry.
+*Boundary:* not committed to, and not what one wrong line can carry.
+Once a decision is made — an ADR accepted, a change started — it has left this file for `docs/STATE.md`, even with zero lines of implementation (ADR-0041).
 A defect with a line to sit beside is marked on that line, where the project marks defects in place.
 Never copy those markers in to make it a full index: the copy kept by hand is the one that goes stale.
 
@@ -81,8 +83,8 @@ Otherwise one entry per line, with an indented block under any entry needing a r
 ```markdown
 # Backlog
 
-- Bell tray for headless agent-view sessions (`--bg`, no pty).
-  See tmux/PROPOSAL-agent-bell-tray.md.
+- tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
+  See tmux/PROPOSAL-tmux-notify.md.
 - auth | Token refresh fails after 24h offline.
   Only when the refresh lands during clock skew over 60s.
   Tried: widening the leeway window, no change.
@@ -95,17 +97,19 @@ Sections come back if the flat list stops being readable, which is the same over
 
 The indented block is the part that pays, and it has a ceiling: an entry that outgrows it is a decision, and belongs in an ADR instead.
 
-## docs/STATE.md — current state of work left mid-flight
+## docs/STATE.md — work committed to and not yet finished
 
-What changed and what was verified, for a concern actively being implemented across more than one session.
+Work already decided or already started that is not done: an accepted ADR awaiting implementation, a change left mid-flight, the handoff a fresh session needs to resume it.
+What changed and what was verified belongs here too, as detail about that unfinished work, never as the file's own opening frame.
 The main agent writes it and keeps it current.
 
-*Earned when* work on one concern is deliberately left unfinished across a session boundary.
-This is checkable the moment work stops, not an event recognised only after something has already gone wrong.
+*Earned when* work moves from proposed to committed and is not yet finished — deciding something, or leaving it mid-flight across a session boundary, are both committing.
+This is checkable the moment the commitment happens, not an event recognised only after something has already gone wrong.
 
-*Boundary:* current, not open.
-Work nobody has picked up is `docs/BACKLOG.md`; why a choice was made is an ADR.
-Edit the file, or drop a section once it is no longer new — never append.
+*Boundary:* committed, not merely proposed.
+`docs/BACKLOG.md` holds work nobody has committed to yet; the moment an ADR is accepted it has left the backlog and belongs here instead, whether or not implementation has started (ADR-0041).
+Why a choice was made stays in the ADR — this file tracks only that it is not yet done.
+Edit the file, or drop a section once it is no longer current — never append.
 An append-only file is a log, and a log is not what a fresh session needs: it needs the current truth, not its history.
 Delete it, and its `CLAUDE.md` line, once the work it tracks lands — an empty or stale one advertises a record that is no longer true.
 

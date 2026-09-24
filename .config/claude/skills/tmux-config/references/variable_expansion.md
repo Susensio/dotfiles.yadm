@@ -179,6 +179,16 @@ With `-F`, it's a **format string** (non-empty/non-zero = true).
 
 ---
 
+### Trap 5: `run-shell -c` never expands formats
+
+```bash
+run-shell -c "#{pane_current_path}" 'some-command'   # ❌ cwd is $HOME, not the pane's path
+run-shell 'cd #{q:pane_current_path} && some-command'  # ✅ cd inside the command body instead
+```
+Unlike the shell-command argument, `-c` is passed straight through with no format-tree expansion at all (`cmd-run-shell.c`, `args_get(args, 'c')` with no `format_expand_time()` call) — and there's no `-F` flag to opt in.
+The literal string `#{pane_current_path}` is handed to `chdir()`, which fails silently, so the job just keeps the server's own working directory.
+Put the format inside the shell-command string and `cd` there instead — that argument *does* expand.
+
 ## Quick Decision Flowchart
 
 ```

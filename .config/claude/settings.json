@@ -1,7 +1,12 @@
 {
   "env": {
     "CLAUDE_CODE_DISABLE_MOUSE_CLICKS": "1",
-    "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1"
+    "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1",
+    "CLAUDE_CODE_TMUX_TRUECOLOR": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "sessionUrl": false
   },
   "permissions": {
     "allow": [
@@ -35,7 +40,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "skillOverrides": {
     "design": "user-invocable-only",
     "dataviz": "user-invocable-only",
@@ -57,6 +61,16 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_CONFIG_DIR/hooks/skills-on-launch.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/susensio/.config/claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
           }
         ]
@@ -104,8 +118,21 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_CONFIG_DIR/hooks/sandbox-noise.py",
+            "timeout": 10
+          }
+        ]
       }
     ]
+  },
+  "worktree": {
+    "baseRef": "head"
   },
   "statusLine": {
     "type": "command",
@@ -117,13 +144,20 @@
   },
   "enabledPlugins": {
     "gruvbox@claude-themes": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": true,
+    "codex@openai-codex": true
   },
   "extraKnownMarketplaces": {
     "claude-themes": {
       "source": {
         "source": "github",
         "repo": "matcra587/claude-themes"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
       }
     }
   },
@@ -140,13 +174,16 @@
       "allowWrite": [
         "/home/susensio/.config/claude",
         "/home/susensio/.config/claude/jobs/*/tmp",
+        "/home/susensio/.config/codex",
         "/home/susensio/.local/share/yadm/repo.git",
-        "/home/susensio/.local/state/agy-sandbox"
+        "/home/susensio/.local/state/agy-sandbox",
+        "/home/susensio/.cache"
       ]
     }
   },
   "syntaxHighlightingDisabled": false,
-  "theme": "custom:gruvbox:gruvbox-dark-ansi",
+  "effortLevel": "high",
+  "theme": "custom:gruvbox-dark-ansi-fixed",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell"
 }

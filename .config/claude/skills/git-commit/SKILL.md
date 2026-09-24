@@ -29,7 +29,19 @@ description: Stages and commits pending work as atomic commits — one concern e
 5. **Message:** read `git log` first and match the existing history — its casing, its mood, and whether it uses conventional-commit prefixes.
    The repo's own record is authoritative; do not impose a convention it does not already follow.
    **Fallback:** a repo with no history, or too little to read a convention from, gets conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.
-   Never append a `Co-Authored-By`/AI-attribution trailer unless the repo's own history already carries one — the default Bash-tool commit instructions add it uninvited, and this overrides that default.
-6. **Decision check:** if a concern reverses a prior decision, or adopts a constraint for a non-obvious reason, say so before committing — it may want an ADR.
+   Never append a `Co-Authored-By` or `Claude-Session` trailer, regardless of what the repo's history already carries — this overrides the default Bash-tool commit instructions, which add both uninvited.
+6. **Breaking-change check:** skip this entirely unless the project already has something to break — a tagged release, a published package, or prior commits that already carry `!`/`BREAKING CHANGE:`.
+   Nothing like that yet: churn is free, say nothing.
+   Once it applies, mark the concern as breaking when its diff does any of —
+   - removes, renames, or narrows a public function/exported symbol
+   - removes, renames, or changes the meaning of a CLI flag/subcommand
+   - removes, renames, or requires a config/schema key
+   - changes default behavior an existing caller could rely on
+
+   On conventional commits: mark the type with `!` (`feat!:`) and add a `BREAKING CHANGE: <what breaks, and how a consumer adapts>` footer.
+   Off conventional commits: fold the same into the message body — state what breaks, not just what changed.
+   Decide it and move on; don't stop to ask.
+   None of the signals fire, or the user says it isn't: say nothing about it.
+7. **Decision check:** if a concern reverses a prior decision, or adopts a constraint for a non-obvious reason, say so before committing — it may want an ADR.
    A commit is where a decision lands, and the only moment it is still obvious that one was made.
-7. Commit with `git commit -m "<message>"`.
+8. Commit with `git commit -m "<message>"`.

@@ -20,3 +20,5 @@ __pycache__/
 *.pyc
 .ruff_cache/
 .claude/
+# Anthropic skills synced from the claude.ai account, not hand-maintained.
+skills/synced/

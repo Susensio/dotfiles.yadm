@@ -6,7 +6,7 @@ description: Checks which earlier decisions are still binding, then records the 
 # Architecture Decision Record Protocol
 
 ## Before deciding
-Run `${CLAUDE_SKILL_DIR}/adr.py list` — one line per ADR in number order: number, status, the later ADRs naming it, and title.
+Run `${CLAUDE_SKILL_DIR}/scripts/adr.py list` — one line per ADR in number order: number, status, the later ADRs naming it, and title.
 A superseded record shows `-> <N>`, the number that replaced it, in place of its status.
 `<- <N>,<M>` are later ADRs that name this one without replacing it — a narrowing, a partial reversal, or a plain citation, and only reading the later one says which.
 It is derived from the records, so nothing has to be kept in step by hand.
@@ -41,7 +41,7 @@ Adopting a documented, reversible setting because the tool's own docs say to —
 Offer an ADR rather than assuming one is warranted.
 
 ## How to write one
-1. Run `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>"` — prints the created file's path.
+1. Run `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>"` — prints the created file's path.
    It finds `docs/adr/` by walking up from wherever it is invoked.
    If there is none it stops and says where it looked, rather than starting a second set somewhere nobody reads.
    `--dir <path>` names the directory outright when the search would find the wrong one; `--init` creates it, for a project with no records yet.
@@ -58,12 +58,13 @@ Offer an ADR rather than assuming one is warranted.
    Put that in the live file that governs it, cited by name, and record what was decided about it here.
 3. Cite a skill or a doc by name, never by path — a name is a stable address, a path moves and the record cannot chase it.
    Naming the `harness-design` skill survives that skill's file being moved; the path `agents/skills/audit-harness/design-rules.md` did not.
-4. Never edit an accepted ADR's decision, or the reasoning that reached it.
+4. Never edit an accepted ADR's decision, or the reasoning that reached it, once it is committed.
+   A draft is not yet a decision: revise freely up to the commit that lands it, including a correction the user gives minutes after `new` wrote the file, with no `Corrections` note — nothing has been re-decided because nothing was decided yet.
    Immutability protects the decision from being re-decided, not the prose from being repaired: repair anything that changes no decision — a rotted pointer, a broken link, a typo, or a claim about the world that was false or has since become so.
    A claim nobody can act on wrongly is worth more than a record nobody trusts.
    Where the repair changed what a line meant, add a dated note under a `## Corrections` heading saying what it said before: a repair that leaves no trace is its own half-truth.
    If the decision changes, write a new ADR that supersedes it:
-   `${CLAUDE_SKILL_DIR}/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`
+   `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`
    This writes `Supersedes: [ADR-<N>](<file>)` into the new file and flips ADR-`<N>`'s status to `Superseded by [ADR-<M>](<file>)` — the old record stays, it just stops being current.
 
 Title and status live in each record and `list` reads them from there.

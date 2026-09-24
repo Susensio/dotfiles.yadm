@@ -31,7 +31,8 @@ List the root directly — a file holding live state is often gitignored, and `r
 The `grow-project-docs` skill has this user's filenames and what earns each.
 
 Read a file before writing to it.
-Someone else's may declare its own boundary in its first lines and that governs; this user's will not, because the repository's own `CLAUDE.md` carries it — one line per file.
+Someone else's may declare its own boundary in its first lines and that governs; this user's will not, because the repository's own `CLAUDE.md` carries a line per file — identity only, never the boundary or edit rule.
+A line found doing more than that is a defect in the project's `CLAUDE.md`: trim it back to identity rather than following it (ADR-0041).
 
 ## What kind of thing is it?
 
@@ -40,10 +41,10 @@ Five go wherever the ladder lands:
 - **What this project is**, and how someone uses it — a `README`.
 - **What it must do** — a spec, a requirements doc.
 - **The order things happen in** — a `ROADMAP`, milestones, a pinned issue. The user writes it; you read it and do not edit it unasked.
-- **What is open and nobody is on** — a bug found, tech debt, an unapproved idea. A `BACKLOG`, a `TODO`, an issue tracker.
+- **What is open and nobody has committed to** — a bug found, tech debt, an unapproved idea. A `BACKLOG`, a `TODO`, an issue tracker.
   A subagent reports it and the main agent writes it, so a finding never rides in a scoped diff.
 - **A procedure a person also runs by hand** — a deploy, a release. A doc, with the skill that fires on it pointing there.
-- **The current state of work left mid-flight across a session** — what changed, what was verified, what a fresh session needs to pick it back up. A `STATE.md`, current rather than open, and edited or dropped as work moves past it rather than appended to.
+- **Work already committed to and not yet finished** — an accepted decision awaiting implementation, a change left mid-flight, the handoff a fresh session needs to resume it. A `STATE.md`, edited or dropped as work moves past it rather than appended to.
 
 Two never touch the ladder: a settled choice between real alternatives goes to the `adr` skill, which decides whether it is worth recording at all, and throwaway material goes wherever the project already ignores, gone when the work commits.
 

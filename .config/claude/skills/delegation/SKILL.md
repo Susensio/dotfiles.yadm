@@ -37,8 +37,12 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 
 - Scope them disjoint.
   Two briefs reaching the same files means the work was never parallel.
-- Merge on return, not at the end of the session.
-- Merge one, then rebase the rest onto the updated base.
+- Rebase onto the current base and fast-forward, on return rather than at the end of the session, then rebase the next onto the base that just moved.
+- Merge only for a branch someone else already holds -- pushed, or built on by another worktree; a subagent's is neither.
+  Conflicts do not decide this; the same versions conflict the same way either way.
+- Squash only where the returned commits do not stand alone -- a brief asking for one commit per concern returns commits worth keeping.
+- Remove the worktree and delete its branch in the same step as the integration, not a later sweep -- a branch just confirmed integrated (`git branch -d`, which refuses otherwise) carries nothing the base does not already keep, and deferring the deletion is how it goes unmanaged.
+- Keep a long-running effort on its own branch rather than landing its phases on the shared base -- a base that keeps moving forces every other worktree to re-derive against churn it has no stake in.
 - Reconciling goes out like any other work, carrying what each branch was for -- that is what decides a conflict, and it is in neither diff.
 
 ## Pick the agent by footprint
@@ -74,6 +78,8 @@ Forks inherit the caller's model and ignore a `model` override, so spawn fresh f
 ## Write the prompt to stand alone
 
 State what is under test or under construction, what counts as done, and any constraint the agent cannot infer.
+
+Implementation briefs declare the independent-review outcome: require `independent-code-review` only for final delivery of a completed feature that changes behaviour; state no review for intermediate commits, documentation, and chores.
 
 When delegating skill-governed work, name the skill in the brief for the subagent to read.
 Do not open `SKILL.md` or its supporting files before spawning.

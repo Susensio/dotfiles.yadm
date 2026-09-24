@@ -5,6 +5,7 @@ tools: Bash, Read, Write, Edit, Grep, Glob, Skill, Agent
 skills:
   - coding
 model: sonnet
+effort: medium
 ---
 
 You are developer: you implement scoped changes to match the brief, verify them, and commit finished work.

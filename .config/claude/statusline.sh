@@ -1,6 +1,6 @@
 #!/bin/sh
 # Claude Code statusline. Reads status JSON on stdin, prints one line.
-# Left: folder, branch, diff lines. Right: model, context bar, 5h limit bar.
+# Left: folder, branch, diff lines. Right: agent/model, context bar, 5h limit bar.
 # Every segment degrades to empty (never "null") if its field is absent.
 
 # Locale with comma decimals makes awk read "0.1234" as 0.
@@ -111,9 +111,14 @@ if [ -n "$added" ] || [ -n "$removed" ]; then
   add left "${ADD_C}+${added}${RESET}/${DEL_C}-${removed}${RESET}" "$((${#added} + ${#removed} + 3))"
 fi
 
-# --- model ---
+# --- agent + model ---
+agent=$(j '.agent.name')
 model=$(j '.model.display_name')
-[ -n "$model" ] && add right "${MODEL_C}${model}${RESET}" "${#model}"
+if [ -n "$agent" ] && [ -n "$model" ]; then
+  add right "${MODEL_C}${agent}${RESET}${DIM}/${RESET}${MODEL_C}${model}${RESET}" "$((${#agent} + 1 + ${#model}))"
+elif [ -n "$model" ]; then
+  add right "${MODEL_C}${model}${RESET}" "${#model}"
+fi
 
 # --- context window ---
 # Percentage of the soft budget, so it passes 100 while the real window still

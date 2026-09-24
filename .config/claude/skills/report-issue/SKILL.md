@@ -1,24 +1,22 @@
 ---
 name: report-issue
-description: Use when drafting a bug report or feature request to file upstream on GitHub — "report this to <project>", "open an issue for this", "file a bug", "let's get this upstream". Produces a draft in the user's own voice, matching the target repo's live issue template, opened via `gh issue create --web` for the user to review and submit themselves. This skill never submits an issue directly.
+description: Use when drafting a bug report or feature request to file upstream on GitHub — "report this to <project>", "open an issue for this", "file a bug", "let's get this upstream". Produces a draft in the user's own voice, matching the target repo's live issue template, shown for review and then filed with `gh issue create` on the user's word.
 ---
 
 # GitHub Upstream Issue Reporting
 
-Drafts issues for filing against any GitHub repo, in the user's (Susensio) own voice, ready to review, and never files anything itself.
+Drafts issues for filing against any GitHub repo, in the user's (Susensio) own voice, ready to review, and files one only after they have read it.
 
 If reproducing the bug requires running the tool live, check whether the project declares a testing skill for that domain and follow it — it owns the isolation protocol.
 If none is declared, reproduce against something you created and can throw away, never the user's live state.
 No per-tool mapping belongs here: the relevant skill's own trigger picks it up once the task involves that tool.
 
-## 0. Never submit directly (non-negotiable)
+## 0. Show the draft before filing
 
-- GitHub issues have no native draft state.
-  The closest equivalent is a prefilled, *unsent* web form, so that is always the last step: `gh issue create -R <owner>/<repo> --web -t "<title>" -F draft.md`.
-  `--web` opens the browser with the fields filled in and stops there — the user reviews and clicks submit themselves.
-- Never pass `-b`/`-F` without `--web`.
-  Omitting `--web` files the issue for real.
-- Write the draft to a scratch file and show the full text to the user before opening the web form, so they can request edits without touching GitHub.
+- Write the draft to a scratch file and show the full text to the user first, so they can request edits without touching GitHub.
+- On their word, file it: `gh issue create -R <owner>/<repo> -t "<title>" -F draft.md`.
+- `gh` keeps its token in the system keyring, which an agent sandbox blocks — `HTTP 401: Requires authentication` looks like an expired login but is not.
+  No `oauth_token` in `~/.config/gh/hosts.yml` means keyring-backed: run the call unsandboxed.
 
 ## 1. Resolve the target repo
 
@@ -35,7 +33,7 @@ Branch on what comes back:
   Follow its structure — a repo's own past issues sometimes add extra headings on top of it, never fewer.
 - **Several templates** → match filename/frontmatter `name:`/`title:` to bug vs. feature intent; ask if it's ambiguous which one applies.
 - **New-style `.yml`/`.yaml` issue forms** → these are structured fields, not a body `gh` can prefill well with `-F`.
-  Draft the content matching what the form's fields ask for, but tell the user up front that they'll need to re-enter it into the form fields once `--web` opens — don't silently paste it as a flat body and call it done.
+  Issue forms are a web-UI construct; `gh issue create` posts a plain body regardless. Draft the content matching what the form's fields ask for, structured as headings, and say that is what you have done — don't imply the form was filled.
 - **No `ISSUE_TEMPLATE` dir (404)** → no live template to match.
   Fall back to whatever structure `CONTRIBUTING.md` (§3) implies, or a plain description body if it says nothing about issue structure either.
 
@@ -64,7 +62,7 @@ No hits → don't manufacture a file, `voice.md` alone is enough.
   - Pure feature requests: omit a logs line entirely.
   - Reproducible non-crash bugs: inline only the handful of lines that actually show the bug, in a fenced block or `<details>`.
   - Actual crashes: full logs/core dumps are warranted.
-    `gh` can't attach files to an issue body via the API — tell the user to drag files into the prefilled web form themselves once it opens.
+    `gh` can't attach files to an issue body via the API — file the issue, then tell the user to drag the files into the issue they now have open.
 - If a short recording would help demonstrate the bug, suggest it (mention asciinema if the user has used it before) — don't record one, leave a placeholder link for the user to fill in.
 
 ## 6. Order
@@ -78,4 +76,4 @@ The duplicate check comes before the template pull — a duplicate makes the res
 4. Pull the live template (§2).
 5. Draft to a scratch file, in voice (§4), with the required-information block (§5).
 6. Show the user the full draft.
-7. On approval only: `gh issue create -R <owner>/<repo> --web -t "<title>" -F draft.md`.
+7. On approval only: `gh issue create -R <owner>/<repo> -t "<title>" -F draft.md`.
