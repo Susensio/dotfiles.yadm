@@ -19,8 +19,8 @@ XDG config repo for `~/.config`, managed with yadm.
 - A limitation deliberately accepted is not a bug.
   It goes in the Consequences of an ADR, like `.xsession-errors` in ADR-0004.
 - The `report-issue` skill files upstream, never against this repo.
-- Commit messages here are capitalized imperative, no trailing period, naming the domain touched -- `Fix tmux bugs`, `Add fish fenv`.
-  No conventional-commit prefixes.
+- Commit messages here are `domain: imperative`, lowercase after the prefix, no trailing period -- `tmux: fix copy-mode bugs`, `fish: add fenv`.
+  The prefix names the config domain touched, never a conventional-commit type like `feat:` or `fix:`.
   Stage by explicit path; this tree carries in-flight edits across several config domains at once.
 
 ## claude/
