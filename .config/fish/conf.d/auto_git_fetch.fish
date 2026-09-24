@@ -4,5 +4,6 @@ function _auto_git_fetch --on-variable PWD --description "git fetch automaticall
             return
         end
         git fetch --quiet &
+        builtin disown
     end
 end
