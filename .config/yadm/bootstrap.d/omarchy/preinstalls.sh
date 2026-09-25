@@ -2,7 +2,7 @@
 # Trim Omarchy's preinstalls to the apps actually used. Mirrors
 # omarchy-remove-preinstalls without its prompt, and without its blanket rm over
 # ~/.local/bin, where mise.sh links our own claude, codex, gh... The packages are
-# mise/conf.d/omarchy.toml##distro.omarchy's, removed by mise.sh.
+# mise/conf.d/omarchy.toml##distro.omarchy's, applied by mise.sh.
 set -euo pipefail
 
 command -v omarchy-webapp-remove-all &>/dev/null || exit 0
