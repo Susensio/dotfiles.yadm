@@ -26,8 +26,6 @@
 
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
   Then revisit `_env_unpin`: it unsets every name environment.d defines, which under uwsm also discards uwsm's deliberate `EDITOR` and `PATH`.
-- yadm | Move system packages (fish, keyd, curl, git, jq, help2man) into the `packages.toml` variants as `pacman:`/`apt:` entries, replacing `dependencies.txt` and the install lines of `20_fish.sh` and `keyd.sh`.
-  Apt repo setup (fish PPA, mise extrepo) must still run first.
 - docs | Add a Wayland/uwsm section to `environment-architecture.md`: SDDM's login shell does the pull, uwsm pushes only what it changed, no Xsession.
 - omarchy | Omarchy links its agent skills into `~/.claude/skills`, `~/.codex/skills` and `~/.pi/agent/skills`, which `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `PI_CODING_AGENT_DIR` make invisible; ignore them or link them into the XDG dirs.
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
