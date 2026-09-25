@@ -1,0 +1,6 @@
+{
+  // yadm/bootstrap.d/omarchy/packages.sh trims the preinstalls instead: both
+  // upstream scripts overwrite the tools mise links into ~/.local/bin
+  "remove.preinstalls": { "when": "false" },
+  "install.preinstalls": { "when": "false" }
+}
