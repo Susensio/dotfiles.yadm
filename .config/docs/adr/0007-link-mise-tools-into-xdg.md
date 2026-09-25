@@ -17,5 +17,5 @@ Man pages and completions land where the normal lookup paths already find them â
 ## Consequences
 
 Shells start faster and stay ignorant of mise.
-Costs: the symlink farm is a second source of truth that must be re-synced after every install or uninstall (`prune_broken_links` walks `TARGET_DIRS` for dangling links via `find -xtype l -lname "*/mise/*"`); the guard that stops this running from a local project (`check_execution_context`, walking the PPID chain for a `--global`/`system-install` invocation) is a fragile heuristic, not a real sandbox; and because resolution no longer goes through mise for these globals, per-directory version switching does not apply to them.
+Costs: the symlink farm is a second source of truth that must be re-synced after every install or uninstall (`prune_broken_links` walks `TARGET_DIRS` for dangling links via `find -xtype l -lname "*/mise/*"`); the guard that stops this running from a local project (`check_execution_context`, gating on the hook env that mise 2026.8.9+ sets only for global-only operations) is still a heuristic, not a real sandbox; and because resolution no longer goes through mise for these globals, per-directory version switching does not apply to them.
 
