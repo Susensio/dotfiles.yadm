@@ -15,13 +15,17 @@ if [[ ! -e $MARKER ]]; then
   # Omarchy's mise wrappers, which run `mise use -g` on every call; a real install
   # or one of our links at the same path is left alone. Omarchy's migrations skip
   # re-adding them once the marker exists.
-  for wrapper in codex claude agy copilot gh opencode playwright playwright-cli pi \
-    omp ori grok crush ghui hunk cursor-agent muse hey basecamp cf; do
+  for wrapper in codex claude agy gemini copilot gh opencode playwright playwright-cli \
+    pi omp ori grok crush ghui hunk cursor-agent muse hey basecamp cf; do
     wrapper=${XDG_BIN_HOME:-${HOME}/.local/bin}/$wrapper
     if [[ -f $wrapper && ! -L $wrapper ]] && grep -q '^mise use -g' "$wrapper"; then
       rm --verbose "$wrapper"
     fi
   done
+  # Hermes' launcher carries its installer's marker instead; --owns checks it for us
+  if command -v omarchy-install-hermes-cli &>/dev/null && omarchy-install-hermes-cli --owns; then
+    rm --force --verbose "${XDG_BIN_HOME:-${HOME}/.local/bin}/hermes"
+  fi
   mkdir --parents "$(dirname "$MARKER")"
   touch "$MARKER"
   hyprctl reload &>/dev/null || true
