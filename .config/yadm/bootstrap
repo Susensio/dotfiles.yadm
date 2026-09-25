@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# All subsequent commands must have the right environment variables
-source "${XDG_CONFIG_HOME:-${HOME}/.config}/profile" || source "${HOME}/.profile"
-
-# ~/bin helpers (log, pkg-install) for every bootstrap.d script. On a fresh clone
-# systemd --user predates environment.d/11_path.conf, so profile can't provide it.
-export PATH="${HOME}/bin:${PATH}"
+# Ensure ~/bin (log, pkg-install) is on PATH, missing on a fresh clone
+[[ :$PATH: == *":$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
 
 # Execute all executable files (excluding templates and editor backups) in the
 # ~/.config/yadm/bootstrap.d directory when run.
