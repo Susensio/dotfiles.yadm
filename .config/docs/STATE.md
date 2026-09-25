@@ -8,11 +8,11 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   `master` is about 280 commits behind `wip`, so the laptop clones `wip`, or `wip` is merged into `master` first.
 - Setting up the laptop: `yadm clone -b wip <url>`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap, which trims Omarchy's preinstalls; never `omarchy-remove-preinstalls`, whose blanket `rm` hits the tools mise links into `~/.local/bin`, and never `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
   After every `omarchy update`, `yadm diff`: its migrations edit the tracked tmux and herdr configs.
-- The first run on Arch verifies what ADR-0048 was written without: the `packages.toml##distro_family.arch` installs and hook (`tldr` removal), `tool install`'s direct pacman branch, and `mise config set` writing a bootstrap package into a `##`-named file.
+- The first run on Arch verifies what ADR-0048 was written without: the `packages.toml##distro_family.arch` installs, `tool install`'s direct pacman branch, and `mise config set` writing a bootstrap package into a `##`-named file.
   `keyd.sh` has never run on Arch either: group creation, enabling the service, seeding `/etc/keyd/default.conf`.
   `yadm.sh` drives yadm's repo with plain `git`, no yadm binary; untested on a fresh clone, including one run from `bootstrap.yadm.io`'s remote yadm.
   ADR-0047's editor sync is untested against a real Omarchy: after bootstrap, `omarchy default editor` should print helix; pick nvim in Omarchy's menu, and `tools.conf` should read `EDITOR=nvim` and, after `env_reload`, `EDITOR` and `sudoedit` should follow.
-  `omarchy/packages.sh` has never run: the launcher removal and restore, the wrapper cleanup; nor has `omarchy.toml##distro.omarchy`'s `absent` packages, which need mise 2026.9.2+.
+  `omarchy/preinstalls.sh` has never run: the launcher removal and restore, the wrapper cleanup; nor has `omarchy.toml##distro.omarchy`, whose `absent` packages need mise 2026.9.2+ and whose `tldr` must go before `tealdeer` installs.
   Both alternates assume yadm reads `/etc/os-release`; an installed `lsb_release` would take precedence.
   `omarchy/extensions/omarchy-menu.jsonc` should hide Install and Remove › Preinstalls; unchecked against a live menu.
   In a new terminal, `status is-login`: if terminals start non-login shells, `_env_pull` never runs.
