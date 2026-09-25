@@ -1,49 +1,41 @@
 #!/usr/bin/env bash
-# @describe Manage global tools using mise with an apt-like interface.
+# @describe Manage global tools with an apt-like interface.
 set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
-# On Arch, tools pacman packages go to both packages.toml variants; the rest go to
-# tools.toml (docs/adr/0046). config.toml is machine-local (docs/adr/0045).
+# Distro tools go to both packages.toml variants; other tools go to tools.toml.
+# config.toml is machine-local (docs/adr/0045, docs/adr/0048).
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/mise
 TOOLS_CONFIG=$CONFIG_DIR/conf.d/tools.toml
 PACKAGES_MISE=$CONFIG_DIR/conf.d/packages.toml##default
-PACKAGES_ARCH=$CONFIG_DIR/conf.d/packages.toml##distro.arch
+PACKAGES_ARCH=$CONFIG_DIR/conf.d/packages.toml##distro_family.arch
 
-# @cmd Install global tools, or promote ones installed with plain `mise use -g`
+# @cmd Add global tools, or promote ones installed with plain `mise use -g`
 # @flag --lsp Install into the global LSP config
-# @arg tools+ Tool specifications, optionally including a version
+# @flag --mise Put new tools in tools.toml even when pacman has them
+# @arg tools+ Tool names; use `mise use -g` directly to pin a version locally
 install() {
   if [[ "${argc_lsp:-}" == "1" ]]; then
     mise use --global --path "$CONFIG_DIR/conf.d/lsp.toml" "${argc_tools[@]}"
     return
   fi
 
-  local tool name
+  local tool
   for tool in "${argc_tools[@]}"; do
-    # Drop a trailing @version, but not the @ of an npm:@scope/pkg
-    name=$tool
-    [[ ${tool##*@} == */* ]] || name=${tool%@*}
-    if declared "$TOOLS_CONFIG" "$name" && [[ $name == "$tool" ]]; then
-      mise install "$tool"
-    elif declared "$PACKAGES_MISE" "$name"; then
-      # Already a distro tool: pacman on Arch, mise elsewhere
-      if command -v pacman &>/dev/null; then
-        [[ $name == "$tool" ]] || echo "tool: pacman cannot pin $tool; installing the repo version" >&2
-        mise bootstrap --only packages --yes
-      elif [[ $name == "$tool" ]]; then
-        mise install "$tool"
-      else
-        mise use --global --path "$PACKAGES_MISE" "$tool"
-      fi
-    elif [[ $tool =~ ^[A-Za-z0-9_.+-]+$ ]] && command -v pacman &>/dev/null && pacman -Si "$tool" &>/dev/null; then
+    if declared "$TOOLS_CONFIG" "$tool" || declared "$PACKAGES_MISE" "$tool"; then
+      echo "tool: $tool is already tracked" >&2
+      continue
+    fi
+
+    if [[ "${argc_mise:-}" != 1 ]] && is_pacman_package "$tool"; then
+      sudo pacman -S --needed --noconfirm "$tool"
       mise config set --file "$PACKAGES_MISE" "tools.$tool" latest
-      mise bootstrap packages use --yes --path "$PACKAGES_ARCH" "pacman:$tool"
+      mise config set --file "$PACKAGES_ARCH" "bootstrap.packages.pacman:$tool" latest
     else
       mise use --global --path "$TOOLS_CONFIG" "$tool"
     fi
     # Drops it from config.toml, if plain `mise use -g` put it there
-    mise unuse --global --no-prune "$name"
+    mise unuse --global --no-prune "$tool"
   done
   mise run system-install --only-prune
 }
@@ -63,15 +55,23 @@ alias() {
 }
 
 # @cmd Remove one or more global tools
-# @arg tools+ Tools to remove
+# @arg tools+ Tool names; versioned specifications are unsupported
 remove() {
-  local tool file
+  local tool file package
   for tool in "${argc_tools[@]}"; do
+    if is_pacman_tool "$tool"; then
+      package=$(pacman_package "$tool")
+      if command -v pacman &>/dev/null; then
+        sudo pacman -R --noconfirm "$package"
+      fi
+      # mise has no command to drop a [bootstrap.packages] entry.
+      sed -i "\|^\"pacman:$package\" = |d" "$PACKAGES_ARCH"
+    fi
     for file in "$TOOLS_CONFIG" "$PACKAGES_MISE"; do
-      ! declared "$file" "$tool" || mise unuse --path "$file" "$tool"
+      if declared "$file" "$tool"; then
+        mise unuse --path "$file" "$tool"
+      fi
     done
-    # mise has no command to drop a [bootstrap.packages] entry
-    sed -i "/^\"pacman:$tool\" = /d" "$PACKAGES_ARCH"
   done
   mise run system-install --only-prune
 }
@@ -104,8 +104,26 @@ declared() {
   mise config get --file "$1" "tools.$2" &>/dev/null
 }
 
+is_pacman_package() {
+  [[ $1 =~ ^[A-Za-z0-9_.+-]+$ ]] || return 1
+  command -v pacman &>/dev/null || return 1
+  pacman -Si "$1" &>/dev/null
+}
+
+is_pacman_tool() {
+  local package
+  [[ $1 =~ ^[A-Za-z0-9_.+-]+$ ]] || return 1
+  package=$(pacman_package "$1")
+  mise config get --file "$PACKAGES_ARCH" "bootstrap.packages.pacman:$package" &>/dev/null
+}
+
+pacman_package() {
+  mise config get --file "$PACKAGES_MISE" "tools.$1.pacman" 2>/dev/null || echo "$1"
+}
+
 # argc-generated variables
 declare argc_lsp
+declare argc_mise
 declare argc_installed
 declare argc_name
 declare argc_tool
