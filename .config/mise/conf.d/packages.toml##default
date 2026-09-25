@@ -28,4 +28,4 @@ tealdeer = { version = "latest", extra_assets = [
 tmux = { version = "latest", extra_assets = [
   "raw://tmux/tmux:tmux.1",
 ] }
-yadm = "latest"
+yadm = { version = "latest", extra_assets = ["raw://@completion/fish/yadm.fish", "raw://@yadm.1"] }
