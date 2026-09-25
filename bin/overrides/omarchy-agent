@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+upstream=${OMARCHY_PATH:-/usr/share/omarchy}/bin/omarchy-agent
+# Match upstream source literally, before shell expansion.
+# shellcheck disable=SC2016
+fallback='[[ $PWD == "$HOME" && -d $HOME/Work ]] && cd "$HOME/Work"'
+
+if grep -Fxq -- "$fallback" "$upstream"; then
+  [[ $PWD == "$HOME" ]] && cd -- "$HOME/Projects"
+else
+  printf 'omarchy-agent: upstream workdir logic changed; review this override\n' >&2
+fi
+
+exec "$upstream" "$@"
