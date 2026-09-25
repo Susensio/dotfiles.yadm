@@ -1,0 +1,12 @@
+# Omarchy preinstalls not wanted here, removed by `mise bootstrap` through pacman.
+# Their launchers and wrappers are yadm/bootstrap.d/omarchy/packages.sh's.
+[bootstrap.packages]
+"pacman:cliamp" = { state = "absent" }
+"pacman:xournalpp" = { state = "absent" }
+"pacman:obsidian" = { state = "absent" }
+"pacman:obs-studio" = { state = "absent" }
+"pacman:kdenlive" = { state = "absent" }
+"pacman:moonlight-qt" = { state = "absent" }
+"pacman:lazydocker" = { state = "absent" }
+"pacman:omacut" = { state = "absent" }
+"pacman:omawrite" = { state = "absent" }
