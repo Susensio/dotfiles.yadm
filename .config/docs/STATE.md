@@ -17,5 +17,6 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   `omarchy/extensions/omarchy-menu.jsonc` should hide Install and Remove › Preinstalls; unchecked against a live menu.
   In a new terminal, `status is-login`: if terminals start non-login shells, `_env_pull` never runs.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`; the bootstrap hooks run under `--only packages`.
+- Decide before shipping ADR-0047's open point: which `EDITOR` wins on Omarchy, uwsm's `omarchy-launch-editor --inline` or `environment.d`'s, in shells and in programs started from the session.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.
