@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# alert-bell hook (31_visual.conf). $1 = #{session_attached} of the bell's
+# alert-bell hook (32_visual.conf). $1 = #{session_attached} of the bell's
 # session -- skip if attached, since bell-action already rang it there.
 set -eu
 [[ "${DEBUG:-}" == "1" ]] && set -x

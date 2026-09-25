@@ -33,7 +33,9 @@ One key (`f`, from the prefix table or the mouse menu) fuzzy-finds a directory a
 
 ## Theme & visuals
 
-Gruvbox color scheme throughout.
+Gruvbox is the default palette. On Omarchy, tmux follows the active Omarchy theme.
+`30_gruvbox.conf` defines Gruvbox colors. `31_palette.conf` maps them to tmux roles, then optionally sources the active palette rendered from `omarchy/themed/tmux-palette.conf.tpl` to override those roles. `32_visual.conf` uses the roles.
+The Omarchy theme-set hook reapplies the palette to running main and scratchpad servers after Omarchy's own tmux retint.
 Pane borders double as a status signal at a glance: yellow means the pane is in a mode (e.g. copy mode), red means synchronized-panes is on, green means normal.
 Window/session activity and bell events are highlighted in the status line, and terminal titles reflect the current tmux position.
 

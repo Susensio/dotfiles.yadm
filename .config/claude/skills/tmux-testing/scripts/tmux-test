@@ -19,7 +19,7 @@ Test on the set of commands present in a window, not on pane position.
 
 Compose them to A/B a format across scenarios:
 
-  s=$(tmux-test spawn conf.d/31_visual.conf)
+  s=$(tmux-test spawn conf.d/32_visual.conf)
   w=$(tmux-test window "$s" nvim git)
   tmux-test eval "$s" '#{E:automatic-rename-format}' "$w"
   tmux-test kill "$s"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Popup menu of windows with a pending bell, in detached sessions. Bound to
 # MouseUp1Control7 (22_mouse.conf), which the [range=control|7] tag on
-# BELL_TRAY's icon (31_visual.conf) fires on click.
+# BELL_TRAY's icon (32_visual.conf) fires on click.
 #
 # Bells are window-scoped in tmux (window_bell_flag) -- there's no per-pane
 # bell -- so windows, not sessions, are the right granularity to list.

@@ -7,7 +7,7 @@ Not implemented. A design write-up, not a decision — see `docs/BACKLOG.md`.
 Notification handling in this repo is a workaround built on tmux's bell
 engine:
 
-- `monitor-bell` + the `alert-bell` hook (`conf.d/31_visual.conf`) turn any
+- `monitor-bell` + the `alert-bell` hook (`conf.d/32_visual.conf`) turn any
   BEL written to a pane into `window_bell_flag`; `BELL_TRAY` lights a
   `[range=control|7]`-clickable icon and `scripts/bell-menu` lists the
   pending windows.
@@ -83,7 +83,7 @@ mouse-movable only. (This box is on 3.7c — upgrade first.)
 all* entry is last). `Prefix n` opens the same menu.
 
 **Clear semantics: focusing the pane clears.** The `pane-focus-in` hook
-(focus-events already on, `31_visual.conf`) runs `notify clear --pane`. Items
+(focus-events already on, `32_visual.conf`) runs `notify clear --pane`. Items
 keep both `window_id` and `pane_id`: bell items (window-scoped — tmux has no
 per-pane bell) clear on any pane in the window; agent items clear when their
 own pane is focused. Headless agents have no pane and clear on
@@ -94,7 +94,7 @@ price of no polling).
 **Events.**
 
 - `alert-bell` → `notify add --kind bell` (this hook moves out of
-  `31_visual.conf` into the plugin).
+  `32_visual.conf` into the plugin).
 - Claude Code hooks in `~/.config/claude/settings.json`, registered beside but
   **perpendicular to** the harness's lifecycle hooks (harness.md): same
   carrier (the `hooks` block), different axis — outward telemetry vs behavior
@@ -111,7 +111,7 @@ price of no polling).
 ## Replacements
 
 `scripts/bell-flash` (its detach-ringing folds into `notify add`'s bell path),
-`scripts/bell-menu`, `BELL_TRAY`, and `31_visual.conf`'s `alert-bell` hook all
+`scripts/bell-menu`, `BELL_TRAY`, and `32_visual.conf`'s `alert-bell` hook all
 retire. The `window_bell_flag` tab blink (`window-status-bell-style`) and the
 `session_alerts` title stay — the per-window complement to a server-wide tray.
 
@@ -140,7 +140,7 @@ tmux ≥ 3.8 installed (this box currently runs 3.7c).
    output, toast `new-pane -d` geometry and auto-close, clear-on-focus, no
    double hook registration across `reload-config`; stub the agent jump
    actions with `echo` so nothing real is spawned.
-4. Wire the glue (`90_plugins.conf` run-shell, `31_visual.conf` tray slot,
+4. Wire the glue (`90_plugins.conf` run-shell, `32_visual.conf` tray slot,
    `20_keybinds.conf` `Prefix n`, `22_mouse.conf` `MouseUp1Control7`) and the
    claude hooks; run `/hooks` once if they don't fire on the next real event —
    the settings-file watcher only tracks directories that had a settings file

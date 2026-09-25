@@ -110,17 +110,24 @@ run '/home/you/.config/tmux/scripts/scratchpad --client #{client_tty} 2>&1'
 ```
 Then `run` expands `#{client_tty}` when it executes.
 
-### Example 3: `30_gruvbox.conf` + `31_visual.conf`
+### Example 3: theme roles across the palette and visual files
 ```bash
 # In 30_gruvbox.conf:
 %hidden BG0="#282828"
 
-# In 31_visual.conf:
-set -g window-active-style fg=$FG0,bg=$BG0
+# In 31_palette.conf:
+set-environment -gh PANE_BG "$BG0"
+source-file -q "$HOME/.local/state/omarchy/current/theme/tmux-palette.conf"
+
+# In the Omarchy-rendered file, when present:
+set-environment -gh PANE_BG "#FFFCF0"
+
+# In 32_visual.conf:
+set -gF window-active-style "bg=#{PANE_BG}"
 ```
-- `$BG0` is expanded at parse time → `fg=#fbf1c7,bg=#282828`
-- The hex color is baked into the option permanently
-- `%hidden` is perfect here: colors are constants, not runtime state
+- Gruvbox gives the role a default value at parse time.
+- The optional Omarchy source overrides that role directly.
+- `set -F` expands `#{PANE_BG}` after both assignments.
 
 ### Example 4: The `pane-exited` hook
 ```bash

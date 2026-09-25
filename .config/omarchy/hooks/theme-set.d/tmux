@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config_dir="$HOME/.config/tmux/conf.d"
+socket=default
+if [[ -n ${TMUX:-} ]]; then
+  socket=$(tmux display-message -p '#{b:socket_path}')
+fi
+main_socket=${socket%_scratchpad}
+
+for socket in "$main_socket" "${main_socket}_scratchpad"; do
+  # has-session does not create a server when this socket is absent.
+  if env -u TMUX tmux -L "$socket" has-session 2>/dev/null; then
+    env -u TMUX tmux -L "$socket" source-file "$config_dir/30_gruvbox.conf"
+    env -u TMUX tmux -L "$socket" source-file "$config_dir/31_palette.conf"
+    env -u TMUX tmux -L "$socket" source-file "$config_dir/32_visual.conf"
+  fi
+done
