@@ -1,12 +1,18 @@
-# Omarchy preinstalls not wanted here, removed by `mise bootstrap` through pacman.
-# Their launchers and wrappers are yadm/bootstrap.d/omarchy/packages.sh's.
+# Omarchy's preinstalls, kept or removed, applied by `mise bootstrap` through pacman.
+# Their launchers and wrappers are yadm/bootstrap.d/omarchy/preinstalls.sh's.
 [bootstrap.packages]
+"pacman:aether" = "latest"
+"pacman:libreoffice-fresh" = "latest"
+"pacman:omacalc" = "latest"
+"pacman:pinta" = "latest"
 "pacman:cliamp" = { state = "absent" }
-"pacman:xournalpp" = { state = "absent" }
-"pacman:obsidian" = { state = "absent" }
-"pacman:obs-studio" = { state = "absent" }
 "pacman:kdenlive" = { state = "absent" }
-"pacman:moonlight-qt" = { state = "absent" }
 "pacman:lazydocker" = { state = "absent" }
+"pacman:moonlight-qt" = { state = "absent" }
+"pacman:obs-studio" = { state = "absent" }
+"pacman:obsidian" = { state = "absent" }
 "pacman:omacut" = { state = "absent" }
 "pacman:omawrite" = { state = "absent" }
+"pacman:xournalpp" = { state = "absent" }
+# Conflicts with tealdeer; mise removes absent packages before installing present ones
+"pacman:tldr" = { state = "absent" }

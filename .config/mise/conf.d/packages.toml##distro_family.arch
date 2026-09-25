@@ -18,7 +18,3 @@
 "pacman:tealdeer" = "latest"
 "pacman:tmux" = "latest"
 "pacman:yadm" = "latest"
-
-[bootstrap.hooks]
-# Omarchy's tldr conflicts with tealdeer
-pre-packages = "! pacman -Q tldr >/dev/null 2>&1 || sudo pacman -R --noconfirm tldr"
