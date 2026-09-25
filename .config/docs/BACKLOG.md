@@ -29,7 +29,6 @@
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
 - tmux | Decide whether to keep or locally override Omarchy's `omarchy-theme-set-tmux` after the Foot/tmux live checks in `docs/STATE.md`.
   It writes window styles before our hook does; a wrapper could prevent that but would also skip Gum environment, `COLORFGBG`, pane OSC, cursor fallback and redraw updates.
-- omarchy | Decide how bootstrap should expose Omarchy's agent skills. Omarchy links them into `~/.claude/skills`, `~/.codex/skills` and `~/.pi/agent/skills`, which `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `PI_CODING_AGENT_DIR` make invisible; ignore them or link them into the XDG dirs.
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.

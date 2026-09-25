@@ -20,3 +20,5 @@
 node_modules/
 __pycache__/
 *.pyc
+agent/skills/omarchy/
+agent/skills/diagnose-crash/

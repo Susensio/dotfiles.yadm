@@ -22,3 +22,5 @@ __pycache__/
 .claude/
 # Anthropic skills synced from the claude.ai account, not hand-maintained.
 skills/synced/
+skills/omarchy/
+skills/diagnose-crash/
