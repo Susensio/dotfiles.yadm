@@ -24,6 +24,12 @@
 
 ## Omarchy migration
 
+- omarchy | Replace HEY as the desktop `mailto:` handler after the preinstall cleanup, and consider adding a Gmail web app.
+  Omarchy sets `HEY.desktop` unconditionally, while the cleanup removes its launcher; `omarchy-refresh-applications` can restore it.
+  Test Gmail's Chromium protocol handler and desktop `mailto:` links on the laptop, then choose a user MIME association for bootstrap; a Gmail app shortcut alone does not handle `mailto:`.
+- omarchy | Decide whether opening text files from the desktop should use Helix instead of Omarchy's `nvim.desktop` MIME defaults.
+  Changing Omarchy's default editor updates its editor state, and our watcher updates `EDITOR`; neither changes MIME associations.
+  Check the Helix desktop entry and `xdg-mime query default text/plain` on the laptop before adding a user override.
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
   Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
