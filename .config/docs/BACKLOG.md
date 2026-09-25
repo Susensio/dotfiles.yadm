@@ -32,7 +32,6 @@
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
 - tmux | `omarchy-theme-set-tmux` runs on every theme change and sets `window-style`, `window-active-style` and `cursor-colour` globally on the live server, overriding our theme until the config is reloaded; decide whether to adopt Omarchy's colours or neutralise the hook.
-- mise | Omarchy's agent wrappers in `~/.local/bin` (`claude`, `codex`, `pi`, …) run `mise use -g` on every call, so a tool also in `tools.toml` prints mise's duplicate warning each time (ADR-0045); `omarchy-remove-preinstalls` deletes them.
 - env | `omarchy/editor.sh sync` copies only terminal editors into `EDITOR`; a GUI pick (`code`, `cursor`, `zeditor`, `sublime_text`) could be copied with its wait flag (`code --wait`, …) so git and `sudoedit` block on it.
   Undecided; it costs a per-editor flag map tied to Omarchy's menu list.
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
