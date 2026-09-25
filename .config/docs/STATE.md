@@ -25,6 +25,8 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   Check `tmux show-environment -g GUM_FILTER_MATCH_FOREGROUND` and `tmux show-environment -g COLORFGBG` after switching light and dark themes, then inspect the environment in a newly created pane; these values are separate from tmux's visual roles.
   Watch whether an app such as Neovim resets the cursor to the old Foot color, and whether the updater's `cursor-colour` fallback prevents it.
   After those observations, decide whether to keep Omarchy's tmux updater, shadow it with a local wrapper while restoring useful updates, or seek a narrower upstream opt-out.
+  `omarchy/mime.sh` has never run: `xdg-mime query default x-scheme-handler/mailto` should print `Gmail.desktop` and `text/plain` `Helix.desktop`; click a `mailto:` link with a subject and check Gmail's compose fills in, and open a text file from Nautilus.
+  Picking nvim in Omarchy's editor menu leaves text files on Helix; `omarchy-editor-sync` changes `EDITOR` only.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
 

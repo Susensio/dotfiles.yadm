@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Open a mailto: link, or the inbox without one, in the Gmail web app.
+# The desktop mailto handler; ../mime.sh installs it into ~/.local/libexec.
+url=https://mail.google.com/mail/
+if [[ ${1-} == mailto:* ]]; then
+  url+="?extsrc=mailto&url=$(jq -rn --arg url "$1" '$url | @uri')"
+fi
+exec omarchy-launch-webapp "$url"
