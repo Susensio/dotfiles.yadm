@@ -4,9 +4,6 @@ function env_reload -d "Hot-reload environment.d variables into systemctl and cu
         return 1
     end
 
-    log info "Unpinning dynamic variables..."
-    _env_unpin
-
     log info "Updating systemctl --user environment..."
     systemctl --user daemon-reload
 

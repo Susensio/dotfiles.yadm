@@ -1,6 +1,6 @@
 # ADR-0002: Unset dynamic systemd overrides to keep environment.d authoritative
 
-Status: Accepted
+Status: Superseded by [ADR-0050](0050-unpin-x11-at-session-start.md)
 Date: 2026-06-02
 
 ## Context

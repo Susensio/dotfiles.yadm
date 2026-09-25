@@ -1,14 +1,14 @@
 # Linux Environment Variable Architecture (The "Mess" Explained)
 
-This document explains how environment variables are synchronized across different process hierarchies in this system (Cinnamon + systemd + Fish).
-It also details how we maintain strict XDG compliance and the exact boot sequence.
+This document explains how environment variables move between systemd, the Mint Cinnamon session, and Fish, with the Omarchy uwsm path described separately.
+It also details the XDG setup and the relevant boot sequences.
 
 **Historical Context:** This architecture was born during the transition period where Linux desktops moved background services to `systemd --user`, but the UI session remained managed by X11/LightDM.
 These two worlds do not naturally share an environment, leading to "stale" variables in terminals and background services.
 This setup bridges that gap.
 
-**Note on X11 vs Wayland:** This architecture is specifically designed for X11 environments (like Cinnamon).
-Wayland-based compositors often handle environment synchronization differently.
+Sections 1–6 describe Mint's X11/LightDM setup.
+Section 8 describes the planned Omarchy Wayland/uwsm setup.
 
 ## 1. The Core Problem: Two Hierarchies
 On a modern Linux desktop, there isn't a single "root" process for everything.
@@ -37,14 +37,14 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
 ### Phase 1: The PAM/Systemd Layer (The Foundation)
 1.  **PAM Login:** When you enter your password, `pam_systemd` starts the `systemd --user` manager.
 2.  **Environment Generators:** `systemd --user` immediately runs generators, including `systemd-environment-d-generator`.
-    *   **Source of Truth:** `~/.config/environment.d/*.conf` are loaded NOW.
+    *   **Static base:** `~/.config/environment.d/*.conf` are loaded now.
     *   **XDG Foundation:** `10_xdg.conf` sets up the base paths.
 
 ### Phase 2: The LightDM Layer (The UI Branch)
 1.  **`lightdm-session`:** Starts and sources global and user profiles:
     *   Sourced: `/etc/profile`
     *   Sourced: `~/.config/profile` (Redirected via our XDG bootstrap)
-2.  **`Xsession`:** The session script takes over and runs scripts in `/etc/X11/Xsession.d/`:
+2.  **Xsession scripts:** The same Bash wrapper sources `/etc/X11/Xsession.d/` in filename order:
     *   **Step A: The Pull (`00xdg-compliance` -> `40x11-common_xsessionrc`):**
         *   `00xdg-compliance` redirects `USERXSESSIONRC` to `~/.config/X11/xsessionrc`.
         *   **Action:** `xsessionrc` runs `source <(systemctl --user show-environment)` to pull the systemd variables into the X session, filtering out shell-managed names first (`PWD`, `USER`, `HOME`, `SHELL`, `SHLVL`, `_`) since this process `exec`s onward into `cinnamon-session` — see [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md).
@@ -52,8 +52,8 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
         *   **Action:** Runs `dbus-update-activation-environment --systemd --all`.
             This pushes the X11 environment (containing `DISPLAY`, `XAUTHORITY`, etc.) back into `systemd --user`.
     *   **Step C: The Unpin (`96fix-env-precedence`):**
-        *   **Action:** Runs `_env_unpin` (calling `systemctl --user unset-environment`).
-            This unsets the dynamic overrides from Step B for the names `environment.d`'s generator owns, so `environment.d` remains the master for hot-reloads on those names — see [ADR-0002](adr/0002-unset-systemd-overrides.md).
+        *   **Action:** Calls `systemctl --user unset-environment` for the names `environment.d`'s generator owns.
+            This clears the dynamic overrides from Step B once at X11 session startup, so later `environment.d` reloads can take effect — see [ADR-0050](adr/0050-unpin-x11-at-session-start.md).
             `DISPLAY` and `XAUTHORITY` are not generator-owned, so they are deliberately left pinned, not unset.
 
 ### Phase 3: The Shell Layer (The Interactive Experience)
@@ -61,10 +61,11 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
     `gnome-terminal-server` (child of systemd) spawns a shell.
 2.  **The Fish Transition:** `~/.config/bash/bashrc` detects an interactive session and `exec fish --login`.
 3.  **The Final Sync:** `01_environment.fish` detects a login shell and calls `_env_pull`.
-    *   **Action:** Fetches the absolute latest environment from `systemd --user`, ensuring your shell matches the "Source of Truth".
+    *   **Action:** Fetches the current environment from `systemd --user`, including session overrides.
 
-## 3. The Single Source of Truth: `environment.d`
-We use `systemd-environment-d-generator(8)` to maintain a single, static configuration point.
+## 3. The Static Base: `environment.d`
+We use `systemd-environment-d-generator(8)` to maintain the static configuration shared by user services.
+Session managers can override individual names in the same user manager.
 *   **Location:** `~/.config/environment.d/*.conf`
 *   **The Foundation (`10_xdg.conf`):** This is the cornerstone of our XDG compliance.
     It:
@@ -117,29 +118,47 @@ Not self-truncating — worth an occasional manual check.
 ## 7. Hot-Reloading (`env_reload`)
 The `env_reload` function is the manual "Sync Now" button.
 It:
-1.  Unsets dynamic overrides to prevent pinning (`_env_unpin`).
-2.  Tells systemd to re-read `environment.d` (`systemctl --user daemon-reload`).
-3.  Imports those variables into the *current* shell (`_env_pull`).
+1.  Tells systemd to re-read `environment.d` (`systemctl --user daemon-reload`).
+2.  Imports the resulting manager environment into the *current* shell (`_env_pull`).
+3.  If called inside tmux, pushes it to the current server and its scratchpad server (`_env_sync_tmux`).
 
-## 8. Cheat Sheet & Verification (For the Future)
+It preserves dynamic session values, including values exported by uwsm.
+The X11 blanket import is cleared separately at session startup by `96fix-env-precedence`.
+The user manager is shared across sessions, so a reload cannot infer ownership from the calling shell's X11 or Wayland variables.
+
+## 8. Omarchy: Wayland via uwsm
+
+This account was checked against Omarchy 4.0.4 and still needs a live check on the laptop.
+SDDM starts Omarchy's `omarchy.desktop` session, which runs `uwsm start` for Hyprland.
+The systemd user manager loads `environment.d` as its static base, and uwsm sources Omarchy's `/usr/share/uwsm/env.d/10-omarchy` during session setup.
+That script sets `EDITOR=omarchy-launch-editor --inline` and `TERMINAL=xdg-terminal-exec`, then runs mise activation, which can change `PATH`.
+uwsm exports the resulting changes into the user manager.
+uwsm also exports compositor variables such as `WAYLAND_DISPLAY` when the session starts; it tracks its exports for cleanup when the session ends.
+This path does not run Mint's Xsession scripts or their blanket import and unpin steps.
+
+`env_reload` reruns the `environment.d` generator and pulls the resulting manager environment into the current shell.
+It does not rerun uwsm's session files or remove their overrides.
+An `environment.d` change to an overridden name stays masked until the session owner changes or removes its value.
+Omarchy's launcher remains the manager's `EDITOR` while `SUDO_EDITOR` follows the selected terminal editor tracked in `tools.conf`.
+See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md); this behavior still needs a live Omarchy check.
+
+## 9. Cheat Sheet & Verification (For the Future)
 
 ### Key Commands
-*   `env_reload`: The "Sync Everything" button.
+*   `env_reload`: Reload `environment.d` into the user manager and current shell.
     Use this after editing `~/.config/environment.d/*.conf`.
-*   `systemctl --user show-environment`: See what the Systemd/DBus world currently believes.
+*   `systemctl --user show-environment`: See the systemd user manager's current environment.
 *   `env`: See what your current Shell process believes.
 
 ### How to Verify the Sync is Working
-1.  **Systemd -> X11:** Run `xprop -root | grep PULSE_SERVER`.
-    If it's set in `environment.d`, it should show up here (synced via `xsessionrc`).
-2.  **X11 -> Systemd:** Run `systemctl --user show-environment | grep DISPLAY`.
+1.  **X11 -> Systemd:** Run `systemctl --user show-environment | grep DISPLAY`.
     It should be set (synced via Script 95).
-3.  **Systemd -> Shell:** Open a **new** terminal window and run `echo $EDITOR`.
-    It should match your `tools.conf`.
+2.  **Systemd -> Shell on Mint:** Open a **new** terminal window and run `echo $EDITOR`.
+    It should match `tools.conf` after the login-shell pull.
 
 ### Troubleshooting "Stale" Variables
 If a variable isn't updating in your terminal:
 1.  **Check if it's a login shell:** Run `status is-login` in Fish.
     If it says `no`, your terminal isn't calling `_env_pull`.
-2.  **Check for "Pinning":** Run `systemctl --user show-environment`.
-    If the old value is there, run `env_reload`.
+2.  **Check the manager value:** Run `systemctl --user show-environment`.
+    If it is stale after `env_reload`, check for a later dynamic override; the reload no longer removes session values.
