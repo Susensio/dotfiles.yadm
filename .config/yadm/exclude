@@ -30,6 +30,9 @@
 /.config/.claude/settings.local.json
 !/.config/claude/
 !/.config/pi/
+!/.config/omarchy/
+!/.config/hypr/
+!/.config/foot/
 !/.local/share/yadm/archive
 !/.github
 !/bin

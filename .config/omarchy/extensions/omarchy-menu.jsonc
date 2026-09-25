@@ -1,0 +1,6 @@
+{
+  // mise/conf.d/omarchy.toml and yadm/bootstrap.d/omarchy/preinstalls.sh manage the
+  // preinstalls instead: both upstream scripts overwrite the tools mise links into ~/.local/bin
+  "remove.preinstalls": { "when": "false" },
+  "install.preinstalls": { "when": "false" }
+}
