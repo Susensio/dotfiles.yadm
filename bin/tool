@@ -8,7 +8,7 @@ set -euo pipefail
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/mise
 TOOLS_CONFIG=$CONFIG_DIR/conf.d/tools.toml
 PACKAGES_MISE=$CONFIG_DIR/conf.d/packages.toml##default
-PACKAGES_ARCH=$CONFIG_DIR/conf.d/packages.toml##distro.arch
+PACKAGES_ARCH=$CONFIG_DIR/conf.d/packages.toml##distro_family.arch
 
 # @cmd Add global tools, or promote ones installed with plain `mise use -g`
 # @flag --lsp Install into the global LSP config

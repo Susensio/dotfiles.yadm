@@ -1,5 +1,5 @@
 # Distro-sourced tools, installed through mise on machines without a variant for their distro.
-# Keep in sync with packages.toml##distro.arch; `tool` writes both (docs/adr/0046).
+# Keep in sync with packages.toml##distro_family.arch; `tool` writes both (docs/adr/0046).
 [tools]
 bat = "latest"
 delta = { version = "latest", pacman = "git-delta", extra_assets = [
