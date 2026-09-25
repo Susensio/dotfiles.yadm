@@ -16,6 +16,7 @@ if ! type -P yadm &> /dev/null; then
     tarball_url=$(curl -s https://api.github.com/repos/${REPO}/tags | jq -r '.[0].tarball_url')
 
     log info "Downloading and extracting yadm..."
+    mkdir --parents "${LIB_HOME}/yadm"
     curl -sL "$tarball_url" | tar -xz -C "${LIB_HOME}/yadm" --strip-components=1
   fi
 
@@ -29,10 +30,14 @@ if ! type -P yadm &> /dev/null; then
   ln -srfv "$(realpath "${LIB_HOME}"/yadm/completion/fish/yadm.fish)" "$FISH_COMPLETIONS_DIR/"
 fi
 
+# Whichever yadm is on PATH (pacman's on Arch, mise's elsewhere), else the one just
+# installed: on a fresh clone BIN_HOME may not be on PATH yet
+YADM=$(type -P yadm || echo "${BIN_HOME}/yadm")
+
 # Version controlled gitconfig
-${BIN_HOME}/yadm gitconfig include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
+"$YADM" gitconfig include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
 # Do not pollute $HOME with github stuff
-${BIN_HOME}/yadm -C $HOME sparse-checkout set --no-cone "/*" "!/README.md" "!/.github"
+"$YADM" -C "$HOME" sparse-checkout set --no-cone "/*" "!/README.md" "!/.github"
 
 # Let plain git work inside .config, for tooling that shells out to it and
 # cannot be told about yadm. Git refuses to track a path named .git, so this
@@ -40,6 +45,6 @@ ${BIN_HOME}/yadm -C $HOME sparse-checkout set --no-cone "/*" "!/README.md" "!/.g
 CONFIG_GITFILE="${XDG_CONFIG_HOME:-${HOME}/.config}/.git"
 if [[ ! -e $CONFIG_GITFILE ]]; then
   log info "Pointing .config/.git at the yadm repo..."
-  printf 'gitdir: %s\n' "$(${BIN_HOME}/yadm rev-parse --absolute-git-dir)" >"$CONFIG_GITFILE"
+  printf 'gitdir: %s\n' "$("$YADM" rev-parse --absolute-git-dir)" >"$CONFIG_GITFILE"
 fi
 
