@@ -11,6 +11,8 @@ set -euo pipefail
 # Directory to look for bootstrap executables in
 BOOTSTRAP_DIR="${BASH_SOURCE[0]}.d"
 
+mkdir -p "$HOME/Projects"
+
 if [[ ! -d "$BOOTSTRAP_DIR" ]]; then
   log error "Error: bootstrap directory '$BOOTSTRAP_DIR' not found"
   exit 1
