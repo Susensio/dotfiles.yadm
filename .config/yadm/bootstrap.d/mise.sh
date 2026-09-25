@@ -19,7 +19,6 @@ FISH_COMPLETIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completio
 mkdir --parents --verbose "$FISH_COMPLETIONS_DIR" &&
   mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 
-# Distro packages from the active packages.toml variant, then everything mise manages
+# mise exec supplies argc before tool dispatches its bootstrap command.
 log info "Installing tools..."
-mise bootstrap --only packages --yes
-mise install
+mise exec argc -- "$HOME/bin/tool" bootstrap

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @describe Manage global tools using mise with an apt-like interface.
+# @describe Manage global tools with an apt-like interface.
 set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && set -x
 
@@ -38,6 +38,11 @@ install() {
     mise unuse --global --no-prune "$tool"
   done
   mise run system-install --only-prune
+}
+
+# @cmd Install tracked system packages and mise tools on this machine
+bootstrap() {
+  mise bootstrap --only packages,tools --yes
 }
 
 # @cmd Upgrade all or specific installed tools
