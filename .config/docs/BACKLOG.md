@@ -34,4 +34,6 @@
 - tmux | `omarchy-theme-set-tmux` runs on every theme change and sets `window-style`, `window-active-style` and `cursor-colour` globally on the live server, overriding our theme until the config is reloaded; decide whether to adopt Omarchy's colours or neutralise the hook.
 - env | `omarchy/editor.sh sync` copies only terminal editors into `EDITOR`; a GUI pick (`code`, `cursor`, `zeditor`, `sublime_text`) could be copied with its wait flag (`code --wait`, …) so git and `sudoedit` block on it.
   Undecided; it costs a per-editor flag map tied to Omarchy's menu list.
+- omarchy | Track the Omarchy-seeded config on the laptop: `omarchy`, `hypr` and `foot` are already allowed in `yadm/exclude`; the other desktop dirs join the allowlist as they are adopted.
+  Every one of them is a target of `omarchy update` migrations, so each widens the `yadm diff` review above.
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
