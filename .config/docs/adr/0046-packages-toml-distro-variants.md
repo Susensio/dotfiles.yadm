@@ -1,6 +1,6 @@
 # ADR-0046: Source CLI tools per distro through packages.toml variants, decided on the machine with a choice, instead of a generated disable list or a pacman key on every tool
 
-Status: Accepted
+Status: Superseded by [ADR-0048](0048-direct-arch-tool-install.md)
 Date: 2026-09-24
 
 ## Context

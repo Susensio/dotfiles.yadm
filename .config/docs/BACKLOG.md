@@ -24,6 +24,8 @@
 
 ## Omarchy migration
 
+- mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
+  Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
   Then revisit `_env_unpin`: it unsets every name environment.d defines, which under uwsm also discards uwsm's deliberate `EDITOR` and `PATH`.
 - docs | Add a Wayland/uwsm section to `environment-architecture.md`: SDDM's login shell does the pull, uwsm pushes only what it changed, no Xsession.

@@ -2,7 +2,7 @@
 # Keep in sync with packages.toml##distro.arch; `tool` writes both (docs/adr/0046).
 [tools]
 bat = "latest"
-delta = { version = "latest", extra_assets = [
+delta = { version = "latest", pacman = "git-delta", extra_assets = [
   "raw://etc/completion/completion.fish",
 ] }
 eza = { version = "latest", extra_assets = [
@@ -20,7 +20,7 @@ helix = { version = "latest", extra_assets = ["raw://languages.toml"], postinsta
 just = "latest"
 lazygit = "latest"
 neovim = "latest"
-pandoc = "latest"
+pandoc = { version = "latest", pacman = "pandoc-cli" }
 ripgrep = "latest"
 tealdeer = { version = "latest", extra_assets = [
   "release://v@completions_fish>tldr.fish",
