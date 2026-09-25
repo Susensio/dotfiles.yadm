@@ -19,7 +19,7 @@ It is not on `PATH`, so bind it once and use that:
 
 ```bash
 t=${CLAUDE_SKILL_DIR}/scripts/tmux-test    # $t --help lists the subcommands
-s=$($t spawn conf.d/31_visual.conf)        # fresh socket, name printed
+s=$($t spawn conf.d/32_visual.conf)        # fresh socket, name printed
 w=$($t window "$s" nvim git)               # panes reporting those commands
 $t eval "$s" '#{E:automatic-rename-format}' "$w"
 $t kill "$s"                               # server killed, socket file removed

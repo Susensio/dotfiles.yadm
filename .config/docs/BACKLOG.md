@@ -27,13 +27,12 @@
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
   Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
 - env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
-  Then revisit `_env_unpin`: it unsets every name environment.d defines, which under uwsm also discards uwsm's deliberate `EDITOR` and `PATH`.
-- docs | Add a Wayland/uwsm section to `environment-architecture.md`: SDDM's login shell does the pull, uwsm pushes only what it changed, no Xsession.
-- omarchy | Omarchy links its agent skills into `~/.claude/skills`, `~/.codex/skills` and `~/.pi/agent/skills`, which `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `PI_CODING_AGENT_DIR` make invisible; ignore them or link them into the XDG dirs.
+- tmux | Decide whether to keep or locally override Omarchy's `omarchy-theme-set-tmux` after the Foot/tmux live checks in `docs/STATE.md`.
+  It writes window styles before our hook does; a wrapper could prevent that but would also skip Gum environment, `COLORFGBG`, pane OSC, cursor fallback and redraw updates.
+- omarchy | Decide how bootstrap should expose Omarchy's agent skills. Omarchy links them into `~/.claude/skills`, `~/.codex/skills` and `~/.pi/agent/skills`, which `CLAUDE_CONFIG_DIR`, `CODEX_HOME` and `PI_CODING_AGENT_DIR` make invisible; ignore them or link them into the XDG dirs.
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
-- tmux | `omarchy-theme-set-tmux` runs on every theme change and sets `window-style`, `window-active-style` and `cursor-colour` globally on the live server, overriding our theme until the config is reloaded; decide whether to adopt Omarchy's colours or neutralise the hook.
 - env | `omarchy/editor.sh sync` copies only terminal editors into `EDITOR`; a GUI pick (`code`, `cursor`, `zeditor`, `sublime_text`) could be copied with its wait flag (`code --wait`, …) so git and `sudoedit` block on it.
   Undecided; it costs a per-editor flag map tied to Omarchy's menu list.
   Upstream has the same gap in `omarchy-launch-editor --inline` ([omarchy#13037](https://github.com/omacom/omarchy/issues/13037), fixes open in #13044 and #13094); once merged, the terminal-editor filter could go.
