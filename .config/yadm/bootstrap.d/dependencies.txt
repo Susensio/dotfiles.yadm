@@ -2,4 +2,3 @@
 curl
 git
 jq
-help2man
