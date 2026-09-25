@@ -40,11 +40,6 @@ install() {
   mise run system-install --only-prune
 }
 
-# @cmd Install tracked system packages and mise tools on this machine
-bootstrap() {
-  mise bootstrap --only packages,tools --yes
-}
-
 # @cmd Upgrade all or specific installed tools
 # @arg tools* Tools to upgrade
 upgrade() {
