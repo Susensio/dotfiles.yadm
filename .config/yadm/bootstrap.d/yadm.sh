@@ -1,43 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO=yadm-dev/yadm
-
-BIN_HOME=${XDG_BIN_HOME:-$HOME/.local/bin}
-LIB_HOME=${XDG_LIB_HOME:-$HOME/.local/lib}
-MAN_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/man"
-FISH_COMPLETIONS_DIR=${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d
-mkdir --parents --verbose "$BIN_HOME" "$LIB_HOME" "$MAN_HOME/man1" "$FISH_COMPLETIONS_DIR"
-
-
-if ! type -P yadm &> /dev/null; then
-  if [[ ! -d ${LIB_HOME}/yadm ]]; then
-    log info "Fetching latest yadm release URL..."
-    tarball_url=$(curl -s https://api.github.com/repos/${REPO}/tags | jq -r '.[0].tarball_url')
-
-    log info "Downloading and extracting yadm..."
-    mkdir --parents "${LIB_HOME}/yadm"
-    curl -sL "$tarball_url" | tar -xz -C "${LIB_HOME}/yadm" --strip-components=1
-  fi
-
-  log info "Creating yadm symlink..."
-  ln -srfv "$(realpath "${LIB_HOME}"/yadm/yadm)" "${BIN_HOME}/"
-
-  log info "Updating manpages..."
-  ln -srfv "$(realpath "${LIB_HOME}"/yadm/yadm.1)" "${MAN_HOME}/man1/"
-
-  log info "Updating fish completions..."
-  ln -srfv "$(realpath "${LIB_HOME}"/yadm/completion/fish/yadm.fish)" "$FISH_COMPLETIONS_DIR/"
-fi
-
-# Whichever yadm is on PATH (pacman's on Arch, mise's elsewhere), else the one just
-# installed: on a fresh clone BIN_HOME may not be on PATH yet
-YADM=$(type -P yadm || echo "${BIN_HOME}/yadm")
+# Plain git on yadm's repo: this may run from a remote yadm (bootstrap.yadm.io),
+# before any local one is installed or on PATH
+YADM_REPO=${XDG_DATA_HOME:-$HOME/.local/share}/yadm/repo.git
+yadm_git() { git --git-dir="$YADM_REPO" --work-tree="$HOME" "$@"; }
 
 # Version controlled gitconfig
-"$YADM" gitconfig include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
+yadm_git config include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
 # Do not pollute $HOME with github stuff
-"$YADM" -C "$HOME" sparse-checkout set --no-cone "/*" "!/README.md" "!/.github"
+yadm_git sparse-checkout set --no-cone "/*" "!/README.md" "!/.github"
 
 # Let plain git work inside .config, for tooling that shells out to it and
 # cannot be told about yadm. Git refuses to track a path named .git, so this
@@ -45,6 +17,6 @@ YADM=$(type -P yadm || echo "${BIN_HOME}/yadm")
 CONFIG_GITFILE="${XDG_CONFIG_HOME:-${HOME}/.config}/.git"
 if [[ ! -e $CONFIG_GITFILE ]]; then
   log info "Pointing .config/.git at the yadm repo..."
-  printf 'gitdir: %s\n' "$("$YADM" rev-parse --absolute-git-dir)" >"$CONFIG_GITFILE"
+  printf 'gitdir: %s\n' "$YADM_REPO" >"$CONFIG_GITFILE"
 fi
 
