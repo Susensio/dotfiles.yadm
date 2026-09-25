@@ -19,6 +19,12 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   In a new terminal, `status is-login`: if terminals start non-login shells, `_env_pull` never runs.
   On Omarchy, verify `env_reload` applies an `environment.d` edit without clearing uwsm's session values.
   Reapply the active Omarchy theme once after cloning so the new tmux palette template is rendered; verify tmux startup and a later theme switch update the pane and status colors.
+  During a live switch in Foot inside tmux, watch whether Omarchy's window-style write followed by our hook causes a visible flash, especially on inactive panes.
+  Compare the Foot palette and ANSI colors inside tmux with the outer terminal; check whether Omarchy's pane OSC write is needed in addition to `omarchy-theme-set-foot` before removing it.
+  Check `bash -lc 'type -a omarchy-theme-set-tmux'`: `~/bin/overrides` must resolve before `/usr/bin` for a local opt-out wrapper.
+  Check `tmux show-environment -g GUM_FILTER_MATCH_FOREGROUND` and `tmux show-environment -g COLORFGBG` after switching light and dark themes, then inspect the environment in a newly created pane; these values are separate from tmux's visual roles.
+  Watch whether an app such as Neovim resets the cursor to the old Foot color, and whether the updater's `cursor-colour` fallback prevents it.
+  After those observations, decide whether to keep Omarchy's tmux updater, shadow it with a local wrapper while restoring useful updates, or seek a narrower upstream opt-out.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
 
