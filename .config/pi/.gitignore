@@ -20,3 +20,7 @@
 node_modules/
 __pycache__/
 *.pyc
+# Omarchy's skills, which omarchy/skills.sh links in. No trailing slash: to git
+# a symlink is a file, not a directory.
+agent/skills/omarchy
+agent/skills/diagnose-crash
