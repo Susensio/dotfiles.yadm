@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#MISE quiet=true
 # Sync global tools to ~/.local/ either manually or via a global postinstall hook.
 set -euo pipefail
 
