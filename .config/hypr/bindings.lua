@@ -19,7 +19,7 @@ o.bind("SUPER + L", "Focus right", hl.dsp.focus({ direction = "r" }))
 -- keep the digits independent of the keyboard layout.
 o.bind("SUPER + I", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
 o.bind("SUPER + O", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
-o.bind("SUPER + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
+o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
 for workspace = 1, 9 do
   local key = "code:" .. tostring(workspace + 9)
   o.bind("SUPER + " .. key, "Workspace " .. workspace, hl.dsp.focus({ workspace = tostring(workspace) }))
@@ -32,7 +32,17 @@ o.bind("SUPER + SHIFT + grave", "Move window to scratchpad", hl.dsp.window.move(
 
 -- Window
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
-o.bind("SUPER + Z", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
+-- Cycling reaches floating windows, which directional focus skips from a tiled one
+o.bind("SUPER + TAB", "Next window", function()
+  hl.dispatch(hl.dsp.window.cycle_next())
+  hl.dispatch(hl.dsp.window.bring_to_top())
+end)
+o.bind("SUPER + SHIFT + TAB", "Previous window", function()
+  hl.dispatch(hl.dsp.window.cycle_next({ next = false }))
+  hl.dispatch(hl.dsp.window.bring_to_top())
+end)
+o.bind("SUPER + Z", "Maximize", hl.dsp.window.fullscreen({ mode = "maximized" }))
+o.bind("SUPER + SHIFT + Z", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 o.bind("SUPER + T", "Float or tile", hl.dsp.window.float({ action = "toggle" }))
 o.bind("SUPER + backslash", "Switch split direction", hl.dsp.layout("togglesplit"))
 o.bind("SUPER + mouse:272", "Move window", hl.dsp.window.drag(), { mouse = true })
