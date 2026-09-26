@@ -10,8 +10,7 @@ APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
 MIMEAPPS=${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list
 
 MAILTO=$HOME/.local/libexec/gmail-mailto
-ASSET=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/gmail-mailto
-cmp -s "$ASSET" "$MAILTO" || install -Dv --mode=755 "$ASSET" "$MAILTO"
+install -DCv --mode=755 "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/gmail-mailto" "$MAILTO"
 if [[ ! -f $APPS/Gmail.desktop ]]; then
   omarchy-webapp-install "Gmail" https://mail.google.com/ "" "$MAILTO %u" "x-scheme-handler/mailto;"
 fi
