@@ -18,3 +18,4 @@
 "pacman:tealdeer" = "latest"
 "pacman:tmux" = "latest"
 "pacman:yadm" = "latest"
+"pacman:hyperfine" = "latest"

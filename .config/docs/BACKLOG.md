@@ -60,4 +60,4 @@
   Needs `~/bin/overrides` ahead of Omarchy's bin in the session `PATH`, the same ordering as the uwsm shims item above.
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
-  Until then `tool` cannot record distro packages; hyperfine was installed through pacman on the laptop and declared in neither variant.
+  Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.

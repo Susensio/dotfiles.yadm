@@ -29,3 +29,4 @@ tmux = { version = "latest", extra_assets = [
   "raw://tmux/tmux:tmux.1",
 ] }
 yadm = { version = "latest", extra_assets = ["raw://@completion/fish/yadm.fish", "raw://@yadm.1"] }
+hyperfine = "latest"
