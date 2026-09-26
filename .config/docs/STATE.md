@@ -4,9 +4,8 @@
 
 The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR-0044, 0045, 0048, 0049, 0050, 0051 and 0052, written against Omarchy 4.0.4; what remains happens on that laptop.
 
-- Push the yadm repo first: the laptop clones from GitHub, and everything since `c41f054` is local on `wip`.
-  `master` is about 280 commits behind `wip`, so the laptop clones `wip`, or `wip` is merged into `master` first.
-- Setting up the laptop: `yadm clone -b wip <url>`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap, which trims Omarchy's preinstalls; never `omarchy-remove-preinstalls`, whose blanket `rm` hits the tools mise links into `~/.local/bin`, and never `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
+- Push the local `master` first: GitHub's `master` is behind, and the laptop clones from GitHub.
+- Setting up the laptop: in Bash, `source <(curl -fsSL https://bootstrap.yadm.io)`, then `yadm clone --no-bootstrap -b master <url>`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap, which installs yadm and trims Omarchy's preinstalls; never `omarchy-remove-preinstalls`, whose blanket `rm` hits the tools mise links into `~/.local/bin`, and never `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
   After every `omarchy update`, `yadm diff`: its migrations edit the tracked tmux and herdr configs.
 - The first run on Arch verifies what ADR-0048 was written without: the `packages.toml##distro_family.arch` installs, `tool install`'s direct pacman branch, and `mise config set` writing a bootstrap package into a `##`-named file.
   `keyd.sh` has never run on Arch either: group creation, enabling the service, seeding `/etc/keyd/default.conf`.
