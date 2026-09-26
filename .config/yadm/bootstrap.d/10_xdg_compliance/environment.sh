@@ -17,5 +17,6 @@ fi
 
 CONFIG_FILES=( /etc/X11/Xsession.d/{00xdg-compliance,96fix-env-precedence} )
 for config_file in "${CONFIG_FILES[@]}"; do
-  sudo install --mode 644 --compare -D --verbose "${ASSETS_DIR}${config_file}" "${config_file}"
+  cmp -s "${ASSETS_DIR}${config_file}" "${config_file}" ||
+    sudo install -Dv --mode 644 "${ASSETS_DIR}${config_file}" "${config_file}"
 done

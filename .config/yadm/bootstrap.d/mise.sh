@@ -16,9 +16,8 @@ fi
 
 # Integrate with fish. User vendor dir, so it never overwrites a packaged copy.
 FISH_COMPLETIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d"
-mkdir --parents --verbose "$FISH_COMPLETIONS_DIR" &&
-  mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
+mkdir --parents "$FISH_COMPLETIONS_DIR"
+mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 
 # Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files
-log info "Installing tools..."
-mise bootstrap --only packages,tools --yes
+mise bootstrap --only packages,tools --yes --quiet

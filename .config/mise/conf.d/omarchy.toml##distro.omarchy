@@ -14,5 +14,8 @@
 "pacman:omacut" = { state = "absent" }
 "pacman:omawrite" = { state = "absent" }
 "pacman:xournalpp" = { state = "absent" }
-# Conflicts with tealdeer; mise removes absent packages before installing present ones
-"pacman:tldr" = { state = "absent" }
+
+[bootstrap.hooks]
+# Omarchy's tldr conflicts with tealdeer. Not `absent`: tealdeer provides tldr,
+# so mise would remove tealdeer on every run
+pre-packages = "if pacman -Qq tldr 2>/dev/null | grep -qx tldr; then sudo pacman -R --noconfirm tldr; fi"

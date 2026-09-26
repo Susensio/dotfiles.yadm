@@ -11,7 +11,8 @@ command -v lightdm &>/dev/null || exit 0
 
 # https://askubuntu.com/questions/960793/whats-the-right-place-to-set-the-xauthority-environment-variable/961459#961459
 if [[ -f "${FILE}" ]]; then
+  grep -q "^${CONF}=true" "${FILE}" && exit 0
   sudo sed -i -e "/#${CONF}/s/^#//g" -e "/${CONF}/s/=false/=true/g" "${FILE}"
 else
-  sudo install --mode 644 --compare -D --verbose "${ASSETS_DIR}${FILE}" "${FILE}"
+  sudo install -Dv --mode 644 "${ASSETS_DIR}${FILE}" "${FILE}"
 fi

@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch Omarchy's default editor
+
+[Path]
+PathChanged=%h/.local/state/omarchy/defaults/editor
+
+[Install]
+WantedBy=default.target

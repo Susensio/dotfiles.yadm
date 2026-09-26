@@ -13,6 +13,11 @@ VERSION_FILE="${FONT_DIR}/.version"
 LATEST_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest"
 DOWNLOAD_URL="${LATEST_URL}/download/NerdFontsSymbolsOnly.tar.xz"
 
+# Check for a release weekly, not on every run
+if [[ -n $(find "$VERSION_FILE" -mtime -7 2>/dev/null) ]]; then
+  exit 0
+fi
+
 # Follow redirect to get to tag version, this is way faster than Github API
 remote_url=$(curl -sIL -o /dev/null -w '%{url_effective}' "$LATEST_URL")
 remote_version=$(basename "$remote_url")
@@ -22,6 +27,7 @@ if [[ -f "$VERSION_FILE" ]]; then
 
   if [[ "$(cat "$VERSION_FILE")" == "$remote_version" ]]; then
     log debug "Nerd Fonts are up to date."
+    touch "$VERSION_FILE"
     exit 0
   fi
 fi
@@ -29,15 +35,15 @@ fi
 temp_dir=$(mktemp --directory)
 trap "rm -rf $temp_dir" EXIT
 
-log info "Installig Nerd Fonts Symbols..."
-curl --fail --location --output "$temp_dir/symbols.tar.xz" "$DOWNLOAD_URL"
+log info "Installing Nerd Fonts Symbols $remote_version..."
+curl --fail --silent --show-error --location --output "$temp_dir/symbols.tar.xz" "$DOWNLOAD_URL"
 
 # Extract the tar.xz file directly into the temp folder
 tar --extract --file "$temp_dir/symbols.tar.xz" --directory "$temp_dir"
 
-mkdir --parents --verbose "$FONT_DIR" "$CONF_DIR"
-cp --verbose "${temp_dir}"/*.ttf --target-directory "$FONT_DIR/"
-cp --verbose "${temp_dir}"/*.conf --target-directory "$CONF_DIR/"
+mkdir --parents "$FONT_DIR" "$CONF_DIR"
+cp "${temp_dir}"/*.ttf --target-directory "$FONT_DIR/"
+cp "${temp_dir}"/*.conf --target-directory "$CONF_DIR/"
 
 echo "$remote_version" > "$VERSION_FILE"
-fc-cache --force --verbose
+fc-cache --force

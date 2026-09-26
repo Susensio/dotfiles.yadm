@@ -1,0 +1,6 @@
+[Unit]
+Description=Copy Omarchy's default editor into environment.d
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/libexec/omarchy-editor-sync
