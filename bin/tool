@@ -29,8 +29,10 @@ install() {
 
     if [[ "${argc_mise:-}" != 1 ]] && is_pacman_package "$tool"; then
       sudo pacman -S --needed --noconfirm "$tool"
-      mise config set --file "$PACKAGES_MISE" "tools.$tool" latest
-      mise config set --file "$PACKAGES_ARCH" "bootstrap.packages.pacman:$tool" latest
+      local key=$tool
+      [[ $tool =~ ^[A-Za-z0-9_-]+$ ]] || key="\"$tool\""
+      set_latest "$PACKAGES_MISE" "tools.$tool" "$key"
+      set_latest "$PACKAGES_ARCH" "bootstrap.packages.pacman:$tool" "\"pacman:$tool\""
     else
       mise use --global --path "$TOOLS_CONFIG" "$tool"
     fi
@@ -57,7 +59,7 @@ alias() {
 # @cmd Remove one or more global tools
 # @arg tools+ Tool names; versioned specifications are unsupported
 remove() {
-  local tool file package
+  local tool package
   for tool in "${argc_tools[@]}"; do
     if is_pacman_tool "$tool"; then
       package=$(pacman_package "$tool")
@@ -67,11 +69,18 @@ remove() {
       # mise has no command to drop a [bootstrap.packages] entry.
       sed -i "\|^\"pacman:$package\" = |d" "$PACKAGES_ARCH"
     fi
-    for file in "$TOOLS_CONFIG" "$PACKAGES_MISE"; do
-      if declared "$file" "$tool"; then
-        mise unuse --path "$file" "$tool"
+    if declared "$TOOLS_CONFIG" "$tool"; then
+      mise unuse --path "$TOOLS_CONFIG" "$tool"
+    fi
+    if declared "$PACKAGES_MISE" "$tool"; then
+      if mise unuse --path "$PACKAGES_MISE" "$tool" 2>/dev/null; then
+        fallback_obsolete
+      elif grep -qxF "$tool = \"latest\"" "$PACKAGES_MISE"; then
+        sed -i "/^$tool = \"latest\"\$/d" "$PACKAGES_MISE"
+      else
+        echo "tool: remove $tool from $PACKAGES_MISE by hand" >&2
       fi
-    done
+    fi
   done
   mise run system-install --only-prune
 }
@@ -98,6 +107,21 @@ show() {
 # @arg tools+ Tools to resync
 sync() {
   mise run system-install "${argc_tools[@]}"
+}
+
+# mise config set and unuse reject ## names (docs/BACKLOG.md): fall back to
+# editing the variant, whose only table ends the file, and say when mise stops
+# failing so the fallback can go
+set_latest() {
+  if mise config set --file "$1" "$2" latest 2>/dev/null; then
+    fallback_obsolete
+  else
+    printf '%s = "latest"\n' "$3" >>"$1"
+  fi
+}
+
+fallback_obsolete() {
+  echo "tool: mise now edits ## files; drop the fallback in ~/bin/tool" >&2
 }
 
 declared() {

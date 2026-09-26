@@ -8,8 +8,6 @@ antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
 claude = "latest"
 codex = { version = "latest", symlink_bins = true }
-gh = "latest"
-go = "latest"
 herdr = { version = "latest", gen_completions = "completion fish", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
@@ -17,13 +15,9 @@ herdr = { version = "latest", gen_completions = "completion fish", extra_assets 
   { name = "herdr", file = "SKILL.md", global = true },
   { name = "herdr-config", file = "SKILL-config.md", references = "*.mdx" },
 ] }
-node = "latest"
 opencode = "latest"
 pi = "latest"
-python = "latest"
-rust = "latest"
 usage = "latest"
-uv = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
 

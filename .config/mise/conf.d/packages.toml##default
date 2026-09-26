@@ -13,19 +13,26 @@ fd = "latest"
 fzf = { version = "latest", extra_assets = [
   "raw://v@man/man1/fzf.1",
 ] }
+gh = { version = "latest", pacman = "github-cli" }
 glow = "latest"
+go = "latest"
 gum = "latest"
 # Upstream ships only hx; helix is the name EDITOR and Arch use (docs/adr/0047)
 helix = { version = "latest", extra_assets = ["raw://languages.toml"], postinstall = 'cd "$MISE_TOOL_INSTALL_PATH"/helix-*/ && ln -sfn hx helix' }
+hyperfine = "latest"
 just = "latest"
 lazygit = "latest"
 neovim = "latest"
+node = { version = "latest", pacman = "nodejs" }
 pandoc = { version = "latest", pacman = "pandoc-cli" }
+python = "latest"
 ripgrep = "latest"
+rust = { version = "latest", pacman = "rustup" }
 tealdeer = { version = "latest", extra_assets = [
   "release://v@completions_fish>tldr.fish",
 ] }
 tmux = { version = "latest", extra_assets = [
   "raw://tmux/tmux:tmux.1",
 ] }
+uv = "latest"
 yadm = { version = "latest", extra_assets = ["raw://@completion/fish/yadm.fish", "raw://@yadm.1"] }
