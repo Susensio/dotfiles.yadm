@@ -12,8 +12,7 @@ TOOLS_ENV=${XDG_CONFIG_HOME:-${HOME}/.config}/environment.d/tools.conf
 USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 SYNC=$HOME/.local/libexec/omarchy-editor-sync
 
-cmp -s "$ASSETS_DIR/omarchy-editor-sync" "$SYNC" ||
-  install -Dv --mode=755 "$ASSETS_DIR/omarchy-editor-sync" "$SYNC"
+install -DCv --mode=755 "$ASSETS_DIR/omarchy-editor-sync" "$SYNC"
 
 units_changed=false
 for unit in omarchy-editor-sync.path omarchy-editor-sync.service; do
