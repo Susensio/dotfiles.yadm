@@ -23,6 +23,10 @@ When neither applies, it warns that the patch is stale, so the PR can be checked
 
 ## Consequences
 
-A package update restores the unpatched file, so the fix is gone until the next bootstrap run; `yadm pull` runs one, and `omarchy update` does not.
+A package update restores the unpatched file, so the fix is gone until the next bootstrap run; `yadm pull` runs one, and so does `omarchy update` through a `post-update.d` hook.
 A step stays silent once the fix ships upstream, so it has to be deleted by hand when its PR merges.
 A patch that no longer applies because Omarchy changed the file warns on every bootstrap until someone looks at it.
+
+## Corrections
+
+2026-09-26: the first Consequence said `omarchy update` did not rerun the bootstrap; a `post-update.d` hook added the same day made it do so.

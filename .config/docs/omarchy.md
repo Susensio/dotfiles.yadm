@@ -19,6 +19,7 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
 
 - `omarchy update` runs migrations that edit the tmux and herdr configs, among others.
   Omarchy has a `post-update` hook but no pre-update one; review the diff by hand.
+  The post-update hook reruns `yadm bootstrap`, which reapplies what the update undid.
 - The editor menu writes `EDITOR` into `environment.d/tools.conf` ([ADR-0047](adr/0047-helix-canonical-editor-name.md)).
 - The text-size slider (`omarchy display text size`) sets three things at once: `[font] base-size` in `omarchy/shell.toml`, the font size in `foot/foot.ini`, and GTK's `text-scaling-factor` in dconf, which is not tracked.
 
@@ -32,7 +33,7 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Patching Omarchy bugs
 
 A bug in an Omarchy system file that has a PR upstream gets a step in `bootstrap.d/omarchy/bugfix/`, one per PR, linking it ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)).
-`omarchy update` restores the unpatched files until the next bootstrap.
+`omarchy update` restores the unpatched files, and its `post-update.d/yadm-bootstrap.hook` reruns the bootstrap to patch them again.
 
 ## Editor
 
