@@ -34,6 +34,38 @@
 
 [rebase]
 	autoStash = true
+	autoSquash = true        # Reorder fixup!/squash! commits automatically
+	updateRefs = true        # Move stacked branches along when rebasing
+
+[fetch]
+	prune = true             # Drop refs to branches deleted on the remote
+
+[diff]
+	algorithm = histogram    # Clearer diffs on moved/edited lines
+	colorMoved = plain       # Highlight moved blocks in diffs
+	mnemonicPrefix = true    # i/ w/ c/ instead of a/ b/
+
+[merge]
+	conflictStyle = zdiff3   # Show common ancestor in conflict markers
+
+[commit]
+	verbose = true           # Include diff in commit message editor
+
+[column]
+	ui = auto                # Output in columns when possible
+
+[branch]
+	sort = -committerdate    # Most recently used branches first
+
+[tag]
+	sort = -version:refname  # Sort version numbers as expected
+
+[rerere]
+	enabled = true           # Record and reuse conflict resolutions
+	autoupdate = true        # Stage reused resolutions automatically
+
+[help]
+	autocorrect = prompt     # Offer to run the corrected command on typos
 
 [blame]
 	coloring = highlightRecent
