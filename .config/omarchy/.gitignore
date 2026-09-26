@@ -1,0 +1,5 @@
+# Omarchy's documentation copies of its hooks and templates; the ones in use
+# drop the suffix
+*.sample
+# Omarchy's logo art for its about screen and screensaver
+branding/
