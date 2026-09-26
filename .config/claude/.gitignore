@@ -22,5 +22,7 @@ __pycache__/
 .claude/
 # Anthropic skills synced from the claude.ai account, not hand-maintained.
 skills/synced/
-skills/omarchy/
-skills/diagnose-crash/
+# Omarchy's skills, which omarchy/skills.sh links in. No trailing slash: to git
+# a symlink is a file, not a directory.
+skills/omarchy
+skills/diagnose-crash
