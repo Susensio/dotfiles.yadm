@@ -1,0 +1,6 @@
+# Helix roots a language server at the topmost marker, and .git counts for Lua:
+# ~/.config/.git, the pointer yadm.sh writes, outranked hypr/.luarc.json, so
+# Hyprland's `hl` and `o` went undeclared. Here only, Lua roots skip .git.
+[[language]]
+name = "lua"
+roots = [".luarc.json", ".luacheckrc", ".stylua.toml", "selene.toml"]
