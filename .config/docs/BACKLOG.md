@@ -63,3 +63,4 @@
 - hypr | Capture bindings beyond PrtSc: region, window and screen screenshots, screen recording, OCR and QR scanning, and Omarchy's dictation (voxtype); pick keys for the ones worth a binding.
 - foot | In Claude Code under Foot, Ctrl + J for a newline in the prompt also adds a stray line at the bottom of the screen.
 - upstream | Omarchy: [#13351](https://github.com/omacom/omarchy/pull/13351) drops the `PATH` prepend from `default/hypr/envs.lua`; once it ships, delete `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh`.
+- hypr | Super + W's slim Chromium window (app mode) sends new-tab links to the full browser. Installed web apps with Chromium's tab strip (`#enable-desktop-pwas-tab-strip` and `-settings`) would keep them in the slim window, but Chromium 152 on Linux offered no "Tabbed window" opening mode for an app installed from its menu; revisit if it does.
