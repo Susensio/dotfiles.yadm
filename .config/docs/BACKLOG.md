@@ -24,7 +24,7 @@
 
 ## Omarchy migration
 
-- omarchy | Replace HEY as the desktop `mailto:` handler after the preinstall cleanup, and consider adding a Gmail web app.
+- omarchy | Replace HEY as the desktop `mailto:` handler after the preinstall cleanup.
   Omarchy sets `HEY.desktop` unconditionally, while the cleanup removes its launcher; `omarchy-refresh-applications` can restore it.
   Test Gmail's Chromium protocol handler and desktop `mailto:` links on the laptop, then choose a user MIME association for bootstrap; a Gmail app shortcut alone does not handle `mailto:`.
 - omarchy | Decide whether opening text files from the desktop should use Helix instead of Omarchy's `nvim.desktop` MIME defaults.

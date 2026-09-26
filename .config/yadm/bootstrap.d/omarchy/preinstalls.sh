@@ -31,7 +31,9 @@ if [[ ! -e $MARKER ]]; then
   hyprctl reload &>/dev/null || true
 fi
 
-# Icons are the ones Omarchy bundles under /usr/share/icons/hicolor
+# Empty icon argument fetches Gmail's favicon.
+omarchy-webapp-install "Gmail" https://mail.google.com/ ""
+# The other icons are bundled under /usr/share/icons/hicolor.
 omarchy-webapp-install "Google Maps" https://maps.google.com google-maps
 omarchy-webapp-install "Google Photos" https://photos.google.com/ google-photos
 omarchy-webapp-install "WhatsApp" https://web.whatsapp.com/ whatsapp
