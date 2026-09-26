@@ -20,13 +20,6 @@
       "Bash(claude --version)"
     ],
     "deny": [
-      "Bash(git push:*)",
-      "Bash(yadm push:*)",
-      "Bash(rm -r:*)",
-      "Bash(rm -R:*)",
-      "Bash(rm -fr:*)",
-      "Bash(rm -fR:*)",
-      "Bash(rm --recursive:*)",
       "Agent(leader)",
       "Artifact",
       "CronCreate",
@@ -166,9 +159,7 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "network": {
-      "allowedDomains": [
-        "*"
-      ]
+      "allowedDomains": ["*"]
     },
     "filesystem": {
       "allowWrite": [
