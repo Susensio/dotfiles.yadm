@@ -1,42 +1,27 @@
-function _fzf
-    command fzf --height=40% --style=minimal --info=hidden --preview-border=rounded $argv
+function _fzf_smart_widget
+    set -l token (commandline -ct)
+
+    if string match -q '$*' -- $token
+        _fzf_variable_widget $token
+    else
+        _fzf_path_widget
+    end
+
+    commandline -f repaint
 end
 
+# Exact prefix match; the trailing space lets further typing fuzzy-filter the rest
 function _fzf_anchored_query
     if test -n "$argv[1]"
         echo "^$argv[1] "
     end
 end
 
-function _fzf_existing_directory
-    set -l directory "$argv[1]"
-    if test -z "$directory"
-        echo .
-        return
-    end
-
-    while not path is -d $directory
-        set directory (path dirname $directory)
-    end
-
-    echo $directory
-end
-
-function _set_show_lean
-    set -l varname $argv[1]
-
-    set --show $varname |
-        string replace --regex '^\$'"$varname" '' |
-        string replace ':' '' |
-        string replace --regex '\|(.*)\|' '$1' |
-        string trim
-end
-
 function _fzf_variable_widget
     set -l name_prefix (string sub --start=2 -- $argv[1])
     set -l query (_fzf_anchored_query "$name_prefix")
 
-    set -l preview "fish -c '_set_show_lean {}'"
+    set -l preview "fish -c '_fzf_variable_preview {}'"
     set -l result (set --names | _fzf --prompt="VAR> " --query="$query" --preview=$preview --scheme="path")
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
@@ -44,11 +29,11 @@ function _fzf_variable_widget
     end
 end
 
+# Lists directories on an empty line or after cd, files otherwise; ctrl+f toggles
 function _fzf_path_widget
-    set -l path_token (commandline --current-token --tokens-expanded)
-    set -l base_directory (_fzf_existing_directory "$path_token")
-    set -l relative_query (string replace -r "^"(string escape --style=regex -- $base_directory)"/?" "" -- $path_token)
-    set -l query (_fzf_anchored_query "$relative_query")
+    set -l token_parts (_fzf_split_token (commandline --current-token --tokens-expanded))
+    set -l base_directory $token_parts[1]
+    set -l query (_fzf_anchored_query "$token_parts[2]")
 
     set -l entry_type file
     set -l buffer (commandline -b)
@@ -91,19 +76,15 @@ function _fzf_path_widget
     )
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
-        set -l selected_path (path normalize -- $base_directory/$result)
-        commandline -rt -- (string join ' ' (string escape -- $selected_path))
+        set -l selected_paths
+        for entry in $result
+            set -l selected_path (path normalize -- $base_directory/$entry)
+            # path normalize drops the trailing slash fd puts on directories
+            if string match -q '*/' -- $entry
+                set selected_path $selected_path/
+            end
+            set -a selected_paths $selected_path
+        end
+        commandline -rt -- (string join ' ' (string escape -- $selected_paths))
     end
-end
-
-function _fzf_smart_widget
-    set -l token (commandline -ct)
-
-    if string match -q '$*' -- $token
-        _fzf_variable_widget $token
-    else
-        _fzf_path_widget
-    end
-
-    commandline -f repaint
 end
