@@ -130,7 +130,7 @@ The user manager is shared across sessions, so a reload cannot infer ownership f
 
 ## 8. Omarchy: Wayland via uwsm
 
-This account was checked against Omarchy 4.0.4 and still needs a live check on the laptop.
+This account was checked live on the laptop with Omarchy 4.0.4.
 SDDM starts Omarchy's `omarchy.desktop` session, which runs `uwsm start` for Hyprland.
 The systemd user manager loads `environment.d` as its static base, and uwsm sources Omarchy's `/usr/share/uwsm/env.d/10-omarchy` during session setup.
 That script sets `EDITOR=omarchy-launch-editor --inline` and `TERMINAL=xdg-terminal-exec`, then runs mise activation, which can change `PATH`.
@@ -148,7 +148,7 @@ The session `PATH` is then `environment.d`'s order behind the mise shims that `1
 It does not rerun uwsm's session files or remove their overrides.
 An `environment.d` change to an overridden name stays masked until the session owner changes or removes its value.
 Omarchy's launcher remains the manager's `EDITOR` while `SUDO_EDITOR` follows the selected terminal editor tracked in `tools.conf`.
-See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md); this behavior still needs a live Omarchy check.
+See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md).
 
 `PATH` is one of those overridden names: uwsm exports it after mise activation, so a `PATH` change in `environment.d` reaches nothing until the next login, `env_reload` included.
 The first bootstrap writes `environment.d` inside a session that started without it, so `yadm/bootstrap` ends by warning to log out when any `environment.d` file is newer than the user manager.

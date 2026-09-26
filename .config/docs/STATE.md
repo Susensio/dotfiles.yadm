@@ -27,11 +27,9 @@ Setup and the standing oddities are in `docs/omarchy.md`.
 
 Cloned and bootstrapped; foot now starts login shells, and the Goodix reader works through `omarchy/fingerprint.sh`.
 
-- After the reboot: a new terminal's `PATH` starts with `~/bin/overrides:~/bin`, `status is-login` says yes, `systemctl status fprintd` is already running, sudo takes a fingerprint, and bootstrap no longer warns about `environment.d`.
-  Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
-- `yadm push`: `master` is 27 commits ahead of GitHub.
+- Checked after a reboot (2026-09-26): terminals run `fish --login` with `~/bin/overrides:~/bin` right behind the mise shims, fprintd runs at boot and sudo takes a fingerprint, the bootstrap is silent, the manager holds `EDITOR=omarchy-launch-editor --inline` and `SUDO_EDITOR=env helix`, and the Hyprland `PATH` patch and capture folders are in place.
+- `yadm push`: `master` is 40-odd commits ahead of GitHub.
 - Sizing: scale 1.25 with bar 12 and Foot 9pt, or scale 1 with bar 15 and Foot 11pt; pick one, then track `omarchy/shell.toml`.
-- After the next login, `RUSTUP_TOOLCHAIN` (exported by the old session's mise) is gone; then `rustup toolchain uninstall 1.98.1`.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.
