@@ -39,7 +39,6 @@ Cloned and bootstrapped; foot now starts login shells, and the Goodix reader wor
 - After the reboot: a new terminal's `PATH` starts with `~/bin/overrides:~/bin`, `status is-login` says yes, `systemctl status fprintd` is already running, sudo takes a fingerprint, and bootstrap no longer warns about `environment.d`.
   Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
 - `yadm push`: `master` is 4 commits ahead.
-- Bootstrap reruns are silent (ADR-0056); next, run it from a yadm `post_merge` hook, and flag Omarchy migrations' edits to tracked files from a `post-update.d` hook.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# A pull can bring new bootstrap steps or assets; a bootstrap with nothing to do is silent
+[[ $YADM_HOOK_EXIT == 0 ]] || exit 0
+exec "$YADM_HOOK_DIR/bootstrap"
