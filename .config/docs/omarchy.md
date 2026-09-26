@@ -45,3 +45,10 @@ The menu changes `EDITOR` only: text files keep opening in the editor set as the
 
 yadm alternates such as `##distro.omarchy` and `##distro_family.arch` read `/etc/os-release`, which says `ID=omarchy`, `ID_LIKE=arch`.
 An installed `lsb_release` takes precedence and would change what they match.
+
+## Chromium stays running
+
+`chromium.service`, installed by `bootstrap.d/omarchy/chromium.sh`, starts Chromium without a window at login, so a new window opens in about 0.5 s instead of a 1.3 s cold start, for about 0.5 GB of memory.
+Chromium exits with no window open unless started with `--keep-alive-for-test`, a switch meant for its own tests; if a release drops it, the service just exits and launches go back to cold starts.
+A change to `chromium-flags.conf` applies after `systemctl --user restart chromium`, and quitting Chromium from its menu stops the service until the next login.
+

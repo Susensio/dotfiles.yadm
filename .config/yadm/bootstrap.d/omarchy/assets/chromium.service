@@ -1,0 +1,13 @@
+[Unit]
+Description=Chromium kept running so new windows open without a cold start
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+# Chromium exits without a window unless kept alive; the switch is its test-only one
+ExecStart=/usr/bin/chromium --no-startup-window --keep-alive-for-test
+Restart=on-failure
+Slice=app-graphical.slice
+
+[Install]
+WantedBy=graphical-session.target
