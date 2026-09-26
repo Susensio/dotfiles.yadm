@@ -142,7 +142,7 @@ uwsm sources every `uwsm/env.d/*` file in each config directory, the system ones
 Variables that mean something only in the Omarchy session, like `OMARCHY_SCREENSHOT_DIR` in `uwsm/env.d/capture`, go there rather than into `environment.d`, which Mint and SSH or TTY logins also load ([ADR-0058](adr/0058-omarchy-session-env-uwsm.md)).
 Hyprland then applies Omarchy's `default/hypr/envs.lua` to everything it starts, and `autostart.lua` imports Hyprland's whole environment into the user manager at session start, so a `hl.env` there overrides both layers above.
 That is how `/usr/share/omarchy/bin` came first on the session `PATH`; `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` patches it out until Omarchy PR #13351 ships.
-The session `PATH` is then `environment.d`'s order behind the mise shims that `10-omarchy` prepends.
+`10-omarchy` also runs `mise activate bash --shims`, which put the shims first; `bugfix/uwsm-mise-shims.sh` patches it out until Omarchy PR #13364 ships, leaving the session `PATH` in `environment.d`'s order with the shims appended last by `env-bootstrap`.
 
 `env_reload` reruns the `environment.d` generator and pulls the resulting manager environment into the current shell.
 It does not rerun uwsm's session files or remove their overrides.

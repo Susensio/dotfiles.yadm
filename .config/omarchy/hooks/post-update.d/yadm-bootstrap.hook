@@ -1,0 +1,5 @@
+#!/bin/bash
+# An update can restore what the bootstrap patches or removes (docs/adr/0057)
+set -e
+
+yadm bootstrap
