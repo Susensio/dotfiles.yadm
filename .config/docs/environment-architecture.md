@@ -77,11 +77,13 @@ Session managers can override individual names in the same user manager.
     See [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md) for why each of the three keeps its own copy instead of sharing one.
 
 ## 4. Why `_env_pull` and Login Shells are Mandatory
-`gnome-terminal-server` functionally inherits its environment from the session that first triggered its activation (usually Cinnamon).
-* **The Finding:** The terminal server process is often "stuck" with the environment it had at startup.
-* **The Consequence:** If you update your environment (e.g., via `env_reload`), the already-running terminal server process does **not** see these changes.
-  Every new terminal tab will inherit the server's *stale* environment.
+A new terminal inherits its environment from whatever launched it, and that launcher's environment was fixed when the session started.
+On Mint that is `gnome-terminal-server`, activated once by Cinnamon; on Omarchy it is Hyprland, started once by uwsm.
+* **The Consequence:** If you update your environment (e.g., via `env_reload`), the launcher does **not** see these changes.
+  Every new terminal would inherit its *stale* environment.
 * **The Solution:** By starting a login shell and calling `_env_pull`, we bypass the stale process tree and fetch variables directly from the `systemd --user` manager.
+* **The Limit:** Only shells get this.
+  Anything else Hyprland or Cinnamon launches (apps, launchers, menus) keeps the session-start environment until the next login.
 
 ## 5. Shell Lifecycle & Transitions
 
@@ -141,6 +143,12 @@ It does not rerun uwsm's session files or remove their overrides.
 An `environment.d` change to an overridden name stays masked until the session owner changes or removes its value.
 Omarchy's launcher remains the manager's `EDITOR` while `SUDO_EDITOR` follows the selected terminal editor tracked in `tools.conf`.
 See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md); this behavior still needs a live Omarchy check.
+
+`PATH` is one of those overridden names: uwsm exports it after mise activation, so a `PATH` change in `environment.d` reaches nothing until the next login, `env_reload` included.
+The first bootstrap writes `environment.d` inside a session that started without it, so `yadm/bootstrap` ends by warning to log out when any `environment.d` file is newer than the user manager.
+
+foot, Omarchy's terminal, starts a non-login shell by default, so `bashrc` would relay into a non-login `fish` and `_env_pull` would never run.
+`foot/foot.ini` sets `shell=/usr/bin/bash --login` for §4 to hold; its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
 
 ## 9. Cheat Sheet & Verification (For the Future)
 
