@@ -23,7 +23,7 @@ jobs:
       - name: Install ShellCheck and shfmt
         run: sudo apt-get update && sudo apt-get install --yes shellcheck shfmt
       - name: Run Bash checks
-        run: just --justfile .config/justfile bash-syntax shellcheck
+        run: just --justfile .config/justfile shellcheck
 
   data-syntax:
     runs-on: ubuntu-latest

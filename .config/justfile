@@ -1,25 +1,34 @@
-set lazy
-set shell := ["bash", "-euo", "pipefail", "-c"]
+set script-interpreter := ["bash", "-euo", "pipefail"]
 
-# Shell by extension or shebang; sourced fragments declare theirs with a
-# `# shellcheck shell=` directive, which shfmt --find does not read
-shell_files := `{ shfmt --find yadm ../bin; grep -rl '^# shellcheck shell=' yadm ../bin; } | sort -u | xargs`
+# `git ls-files` skips the untracked JSON and fish files other tools keep in
+# .config. File lists split on whitespace, which no tracked path has.
 
-check: fish-syntax bash-syntax shellcheck json-syntax toml-syntax
+check: fish-syntax shellcheck json-syntax toml-syntax
 
-# fish --no-execute checks only its first file and passes the rest as argv
+# `fish --no-execute` checks only its first argument, hence the loop.
+[script]
 fish-syntax:
-    { git ls-files -- '*.fish'; grep -rl '^#!.*fish' ../bin; } | xargs -n1 fish --no-execute
+    files=$(git ls-files '*.fish')
+    scripts=$(grep -rl '^#!.*fish' ../bin || true)
+    for file in $files $scripts; do fish --no-execute "$file"; done
 
-bash-syntax:
-    for f in {{shell_files}}; do bash -n "$f"; done
-
+# shfmt --find misses sourced fragments, whose only shell marker is their
+# `# shellcheck shell=` line. Shellcheck parses each file in that shell, so it
+# is the syntax check too.
+[script]
 shellcheck:
-    shellcheck --severity=error {{shell_files}}
+    scripts=$(shfmt --find yadm ../bin)
+    fragments=$(grep -rl '^# shellcheck shell=' yadm ../bin || true)
+    shellcheck --severity=error $scripts $fragments
 
-# Tracked files only: .config also holds untracked JSON from the agent CLIs
+[script]
 json-syntax:
-    git ls-files -z -- '*.json' '*.json##*' | xargs -0 -n1 jq empty
+    files=$(git ls-files '*.json' '*.json##*')
+    for file in $files; do jq empty "$file"; done
 
+[script]
 toml-syntax:
-    git ls-files -z -- '*.toml' '*.toml##*' | xargs -0 -n1 python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))'
+    files=$(git ls-files '*.toml' '*.toml##*')
+    for file in $files; do
+      python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
+    done
