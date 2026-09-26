@@ -72,7 +72,10 @@ end)
 
 -- Apps; anything else is a search away in the Omarchy menu
 o.bind("SUPER + RETURN", "Terminal", { omarchy = "terminal" })
-o.bind("SUPER + W", "Browser", { omarchy = "browser" })
+o.bind("SUPER + SHIFT + RETURN", "Tmux", { omarchy = "terminal-tmux" })
+-- An app window: no tabs or address bar
+o.bind("SUPER + W", "Slim browser", { webapp = "https://www.google.com/" })
+o.bind("SUPER + SHIFT + W", "Browser", { omarchy = "browser" })
 o.bind("SUPER + E", "File manager", { omarchy = "nautilus" })
 o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
