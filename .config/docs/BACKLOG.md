@@ -38,6 +38,8 @@
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
+  A `post-update.d` hook could notify when that happens, but Omarchy has no pre-update hook, so it cannot tell a migration's edits from uncommitted ones.
+  Candidates: list every modified tracked file after each update; do that only when a new marker appeared in `~/.local/state/omarchy/migrations`; or wrap `omarchy-update` to snapshot first, which the desktop's `PATH` order defeats.
 - env | `omarchy-editor-sync` copies only terminal editors into `EDITOR`; a GUI pick (`code`, `cursor`, `zeditor`, `sublime_text`) could be copied with its wait flag (`code --wait`, …) so git and `sudoedit` block on it.
   Undecided; it costs a per-editor flag map tied to Omarchy's menu list.
   Upstream has the same gap in `omarchy-launch-editor --inline` ([omarchy#13037](https://github.com/omacom/omarchy/issues/13037), fixes open in #13044 and #13094); once merged, the terminal-editor filter could go.
