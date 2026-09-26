@@ -29,3 +29,12 @@ for script in "${scripts[@]}"; do
     exit 1
   fi
 done
+
+# environment.d only applies from the next login
+login=$(date -d "$(systemctl --user show -P UserspaceTimestamp)" +%s)
+for conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
+  if (($(stat -c %Y "$conf") > login)); then
+    log warn "environment.d changed since login: log out and back in to apply it"
+    break
+  fi
+done
