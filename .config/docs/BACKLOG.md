@@ -53,7 +53,6 @@
 - hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
   Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
 - omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
-- hypr | Super + Z zooms too far: it is full fullscreen, hiding the bar and gaps (`hypr/bindings.lua`); `mode = "maximized"` would keep both.
 - omarchy | Claude Code does not follow the Omarchy theme.
 - omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
   An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line), but the Omarchy shell's `PATH` starts `/usr/share/omarchy/bin:~/.local/share/mise/shims:~/bin/overrides`, so the slider never reaches it.
@@ -61,5 +60,4 @@
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
-- hypr | No binding moves focus between a floating window and the tiled ones.
 - omarchy | Screenshots into a subfolder: `omarchy-capture-screenshot` writes to `${OMARCHY_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-~/Pictures}}`, so set `OMARCHY_SCREENSHOT_DIR` in `environment.d`.
