@@ -1,0 +1,11 @@
+diff --git a/default/uwsm/env.d/10-omarchy b/default/uwsm/env.d/10-omarchy
+index d5395dd5..82e6d469 100644
+--- a/default/uwsm/env.d/10-omarchy
++++ b/default/uwsm/env.d/10-omarchy
+@@ -14,6 +14,3 @@ fi
+ 
+ # Optional user overrides kept for compatibility with older installs.
+ [ -f "$HOME/.config/uwsm/default" ] && . "$HOME/.config/uwsm/default"
+-
+-# Activate mise if present on the system
+-omarchy-cmd-present mise && eval "$(mise activate bash --shims)"

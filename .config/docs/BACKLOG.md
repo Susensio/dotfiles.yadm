@@ -32,7 +32,7 @@
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
   Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
-- env | uwsm's `mise activate bash --shims` (Omarchy's `/usr/share/uwsm/env.d/10-omarchy`) puts mise shims first on `PATH`, against ADR-0007; decide whether to accept or strip them.
+- upstream | Omarchy: [#13364](https://github.com/omacom/omarchy/pull/13364) drops `10-omarchy`'s `mise activate bash --shims`, which put the shims ahead of `environment.d`'s `PATH`; once it ships, delete `bootstrap.d/omarchy/bugfix/uwsm-mise-shims.sh`.
 - tmux | Decide whether to keep or locally override Omarchy's `omarchy-theme-set-tmux` after the Foot/tmux live checks in `docs/STATE.md`.
   It writes window styles before our hook does; a wrapper could prevent that but would also skip Gum environment, `COLORFGBG`, pane OSC, cursor fallback and redraw updates.
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
