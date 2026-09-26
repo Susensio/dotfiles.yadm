@@ -54,3 +54,4 @@
   Set `os.editPreset` or an `os.edit` template in `lazygit/config.yml`, keeping Omarchy's editor pick in mind (ADR-0047).
 - omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
 - hypr | Super + Z zooms too far: it is full fullscreen, hiding the bar and gaps (`hypr/bindings.lua`); `mode = "maximized"` would keep both.
+- omarchy | Claude Code does not follow the Omarchy theme.
