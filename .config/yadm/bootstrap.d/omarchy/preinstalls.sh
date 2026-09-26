@@ -33,8 +33,10 @@ fi
 
 # Icons are the ones Omarchy bundles under /usr/share/icons/hicolor; Gmail, the
 # mailto: handler, is installed by mime.sh
-omarchy-webapp-install "Google Maps" https://maps.google.com google-maps
-omarchy-webapp-install "Google Photos" https://photos.google.com/ google-photos
-omarchy-webapp-install "WhatsApp" https://web.whatsapp.com/ whatsapp
-omarchy-webapp-install "YouTube" https://youtube.com/ youtube
-omarchy-tui-install "Disk Usage" 'bash -c "dua i /"' float disk-usage
+APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
+webapp() { [[ -f $APPS/$1.desktop ]] || omarchy-webapp-install "$@"; }
+webapp "Google Maps" https://maps.google.com google-maps
+webapp "Google Photos" https://photos.google.com/ google-photos
+webapp "WhatsApp" https://web.whatsapp.com/ whatsapp
+webapp "YouTube" https://youtube.com/ youtube
+[[ -f $APPS/Disk\ Usage.desktop ]] || omarchy-tui-install "Disk Usage" 'bash -c "dua i /"' float disk-usage

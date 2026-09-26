@@ -6,11 +6,27 @@ set -euo pipefail
 
 command -v omarchy-webapp-install &>/dev/null || exit 0
 
+APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
+MIMEAPPS=${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list
+
 MAILTO=$HOME/.local/libexec/gmail-mailto
-install -D --mode=755 "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/gmail-mailto" "$MAILTO"
-omarchy-webapp-install "Gmail" https://mail.google.com/ "" "$MAILTO %u" "x-scheme-handler/mailto;"
-xdg-mime default Gmail.desktop x-scheme-handler/mailto
+ASSET=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/gmail-mailto
+cmp -s "$ASSET" "$MAILTO" || install -Dv --mode=755 "$ASSET" "$MAILTO"
+if [[ ! -f $APPS/Gmail.desktop ]]; then
+  omarchy-webapp-install "Gmail" https://mail.google.com/ "" "$MAILTO %u" "x-scheme-handler/mailto;"
+fi
+
+# Set a default only where mimeapps.list names another handler
+set_default() {
+  local app=$1 type
+  shift
+  for type; do
+    grep -qxF "$type=$app" "$MIMEAPPS" 2>/dev/null || xdg-mime default "$app" "$type"
+  done
+}
+
+set_default Gmail.desktop x-scheme-handler/mailto
 
 # The types Omarchy's system mimeapps.list gives nvim; Arch's helix ships Helix.desktop
 readarray -t text_types < <(sed -n 's/=nvim\.desktop$//p' /usr/share/applications/mimeapps.list)
-xdg-mime default Helix.desktop "${text_types[@]}"
+set_default Helix.desktop "${text_types[@]}"

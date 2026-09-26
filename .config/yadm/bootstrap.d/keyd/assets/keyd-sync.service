@@ -1,0 +1,6 @@
+[Unit]
+Description=Sync keyd config to system space
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/cp --update %h/.config/keyd/default.conf /etc/keyd/default.conf

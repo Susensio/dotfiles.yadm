@@ -15,13 +15,12 @@ ETC_PROFILE_XDG_FILE="${ETC_PROFILE_DIR}/bash_xdg.sh"
 if ! grep --quiet "${ETC_BASHRC_DIR}" ${ETC_BASHRC_FILE}; then
   log info "Patching /etc/bash.bashrc to support /etc/bashrc.d/*..."
   cat "${ASSETS_DIR}${ETC_BASHRC_FILE}.patch" | sudo tee --append ${ETC_BASHRC_FILE} > /dev/null
-else
-  log debug "/etc/bash.bashrc is already patched. Skipping."
 fi
 
 # Install the asset files directly into /etc
-sudo install --mode 644 --compare -D --verbose "${ASSETS_DIR}${ETC_BASHRC_XDG_FILE}" "${ETC_BASHRC_XDG_FILE}"
-sudo install --mode 644 --compare -D --verbose "${ASSETS_DIR}${ETC_PROFILE_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}"
+for file in "${ETC_BASHRC_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}"; do
+  cmp -s "${ASSETS_DIR}${file}" "${file}" || sudo install -Dv --mode 644 "${ASSETS_DIR}${file}" "${file}"
+done
 
 
 ### USER SPACE

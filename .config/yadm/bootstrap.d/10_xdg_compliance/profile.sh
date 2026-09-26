@@ -9,7 +9,8 @@ ASSETS_DIR="${SCRIPT_DIR}/assets"
 ETC_PROFILE_DIR="/etc/profile.d"
 ETC_PROFILE_XDG_FILE="${ETC_PROFILE_DIR}/profile_xdg.sh"
 
-sudo install --mode 644 --compare -D --verbose "${ASSETS_DIR}${ETC_PROFILE_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}"
+cmp -s "${ASSETS_DIR}${ETC_PROFILE_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}" ||
+  sudo install -Dv --mode 644 "${ASSETS_DIR}${ETC_PROFILE_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}"
 
 
 ### USER SPACE

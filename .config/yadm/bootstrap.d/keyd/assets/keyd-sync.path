@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch for keyd config changes in home dir
+
+[Path]
+PathModified=%h/.config/keyd/default.conf
+
+[Install]
+WantedBy=default.target

@@ -22,12 +22,15 @@ fi
 scripts=()
 readarray -t scripts < <(find -L "$BOOTSTRAP_DIR" -type f -executable ! -name '*##*' | sort)
 
+# Steps print only what they change
 for script in "${scripts[@]}"; do
-  log debug "Bootstraping file $script)..."
+  start=${EPOCHREALTIME//[!0-9]/}
   if ! "$script"; then
     log error "Error: bootstrap $script failed"
     exit 1
   fi
+  ms=$(((${EPOCHREALTIME//[!0-9]/} - start) / 1000))
+  log debug "$(printf '%6dms %s' "$ms" "${script#"$BOOTSTRAP_DIR"/}")"
 done
 
 # environment.d only applies from the next login
