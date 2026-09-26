@@ -38,7 +38,7 @@ Cloned and bootstrapped; foot now starts login shells, and the Goodix reader wor
 - After the reboot: a new terminal's `PATH` starts with `~/bin/overrides:~/bin`, `status is-login` says yes, `systemctl status fprintd` is already running, sudo takes a fingerprint, and bootstrap no longer warns about `environment.d`.
   Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
 - `yadm push`: `master` is 4 commits ahead.
-- Bootstrap reruns are noisy and slow: every step should check first as the user, reach for `sudo` only to change something, and print nothing when there is nothing to do; then run it from a yadm `post_merge` hook and flag Omarchy migrations' edits from a `post-update.d` hook.
+- Bootstrap reruns are silent (ADR-0056); next, run it from a yadm `post_merge` hook, and flag Omarchy migrations' edits to tracked files from a `post-update.d` hook.
 - `system-install` linked nothing: `~/.local/bin` is empty (mtime 15:44), so every mise tool resolves through uwsm's shims instead (backlog: uwsm shims).
   Find out whether `mise.sh` skipped the postinstall hook, `check_execution_context` refused it, or something emptied the directory afterwards.
 - Python: mise's global `python` shadowed `/usr/bin/python3`, and `g-ir-scanner`'s `env python3` failed without distutils while building `libfprint-tod`.

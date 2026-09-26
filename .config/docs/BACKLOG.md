@@ -46,3 +46,11 @@
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
 - omarchy | Bold, larger bar clock. `shell.json` holds only its formats: the size comes from the bar, and the label, private to `Ui/WidgetButton.qml`, is never bold.
   It takes `omarchy plugin clone omarchy.clock`, tracked under `omarchy/plugins/`: `fontSize` on its button, plus a bold label of its own in place of the button's; the clone then stops receiving upstream clock fixes.
+- hypr | Omarchy's keybindings menu lists no submap bindings, so window mode (Super + P) is invisible there; and nothing shows that a submap is active.
+  Candidates: a bar indicator fed by Hyprland's `submap` event, and a way to put submap bindings into the menu.
+- hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
+  Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
+- lazygit | Edit opens vim: lazygit picks an editor preset from `$EDITOR`'s command name, and uwsm's `omarchy-launch-editor --inline` (ADR-0051) matches none, so it falls back to vim.
+  Set `os.editPreset` or an `os.edit` template in `lazygit/config.yml`, keeping Omarchy's editor pick in mind (ADR-0047).
+- omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
+- hypr | Super + Z zooms too far: it is full fullscreen, hiding the bar and gaps (`hypr/bindings.lua`); `mode = "maximized"` would keep both.
