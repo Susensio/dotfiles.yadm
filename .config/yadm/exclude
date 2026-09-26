@@ -37,3 +37,9 @@
 !/.local/share/yadm/archive
 !/.github
 !/bin
+
+
+# Junk inside the folders above, wherever it appears. Last so it wins over
+# their re-includes; yadm reads this file instead of ~/.config/git/ignore.
+__pycache__/
+.cc-writes/
