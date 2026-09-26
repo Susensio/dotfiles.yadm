@@ -1,3 +1,7 @@
+os:
+  # omarchy-editor-sync keeps this on Omarchy's editor pick; lazygit cannot
+  # read it through $EDITOR (https://github.com/omacom/omarchy/pull/7821)
+  editPreset: helix
 gui:
   scrollHeight: 10
 promptToReturnFromSubprocess: false

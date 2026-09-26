@@ -5,6 +5,7 @@ set -euo pipefail
 
 STATE=${XDG_STATE_HOME:-${HOME}/.local/state}/omarchy/defaults/editor
 TOOLS_ENV=${XDG_CONFIG_HOME:-${HOME}/.config}/environment.d/tools.conf
+LAZYGIT_CONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/lazygit/config.yml
 
 read -r editor <"$STATE"
 
@@ -18,3 +19,11 @@ esac
 # SUDO_EDITOR follows, since tools.conf defines it from $EDITOR
 sed -i "s|^EDITOR=.*|EDITOR=$editor|" "$TOOLS_ENV"
 systemctl --user daemon-reload
+
+# lazygit names its presets by command, except hx's; it has none for fresh
+case ${editor##*/} in
+  hx) preset="helix (hx)" ;;
+  fresh) exit 0 ;;
+  *) preset=${editor##*/} ;;
+esac
+sed -i "s|^  editPreset: .*|  editPreset: $preset|" "$LAZYGIT_CONFIG"
