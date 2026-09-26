@@ -5,12 +5,13 @@ Written against Omarchy 4.0.4; the session environment is §8 of `environment-ar
 
 ## Setting up a machine
 
-In Bash, `source <(curl -fsSL https://bootstrap.yadm.io)`, then `yadm clone --no-bootstrap -b master <url>`.
-Omarchy seeds its own copies of some configs through `/etc/skel`, so restore ours before bootstrapping: `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy,hypr}`.
-Then run `yadm bootstrap`, which installs the tools and trims Omarchy's preinstalls ([ADR-0049](adr/0049-omarchy-preinstalls-mise-bootstrap.md)).
+Follow the README in `~/.github`, which covers the clone, restoring the configs Omarchy seeds through `/etc/skel`, and the bootstrap.
+The bootstrap trims Omarchy's preinstalls itself ([ADR-0049](adr/0049-omarchy-preinstalls-mise-bootstrap.md)), so two Omarchy commands are not needed, and each breaks something a bootstrap rerun does not repair:
 
-Never run `omarchy-remove-preinstalls`: its blanket `rm` hits the tools mise links into `~/.local/bin`.
-Never run `omarchy-reinstall-configs`: it copies `/etc/skel` over the tracked configs again.
+- `omarchy-remove-preinstalls` deletes mise's links in `~/.local/bin`, such as `claude` and `pi`.
+  They come from the `system-install` task, which runs only when mise installs a tool; `mise run system-install` restores them.
+- `omarchy-reinstall-configs` copies `/etc/skel` over the tracked configs.
+  `yadm checkout -- ~/.config` restores them, after `yadm diff` to keep any local edit.
 
 ## Omarchy writes into tracked files
 

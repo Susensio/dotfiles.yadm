@@ -13,7 +13,7 @@ source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b m
 On Omarchy, review any pre-existing files reported by the clone, then check out the tracked versions:
 
 ```bash
-yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy}
+yadm checkout -- ~/.config
 ```
 
 Finally:
