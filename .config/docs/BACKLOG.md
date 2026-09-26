@@ -61,3 +61,5 @@
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
+- hypr | No binding moves focus between a floating window and the tiled ones.
+- omarchy | Screenshots into a subfolder: `omarchy-capture-screenshot` writes to `${OMARCHY_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-~/Pictures}}`, so set `OMARCHY_SCREENSHOT_DIR` in `environment.d`.
