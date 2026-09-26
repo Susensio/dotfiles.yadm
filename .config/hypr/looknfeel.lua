@@ -1,7 +1,8 @@
--- Overrides on Omarchy's default/hypr/looknfeel.lua. Border colors come from
--- the theme's accent, in omarchy/themes/.
+-- Overrides on Omarchy's default/hypr/looknfeel.lua
 hl.config({
   decoration = {
     rounding = 5,
+    dim_inactive = true,
+    dim_strength = 0.15,
   },
 })
