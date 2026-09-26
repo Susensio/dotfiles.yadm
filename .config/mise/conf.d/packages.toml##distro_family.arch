@@ -1,21 +1,33 @@
 # Distro-sourced tools on Arch, installed by `mise bootstrap` through pacman.
 # distro_family, not distro: Omarchy's os-release has ID=omarchy, ID_LIKE=arch.
 # Keep in sync with packages.toml##default; `tool` writes both (docs/adr/0046).
+[bootstrap.hooks]
+# pacman's rustup installs no toolchain
+post-packages = "rustup default >/dev/null 2>&1 || rustup default stable"
+
+# Last table: `tool` appends to it
 [bootstrap.packages]
 "pacman:bat" = "latest"
 "pacman:git-delta" = "latest"
 "pacman:eza" = "latest"
 "pacman:fd" = "latest"
 "pacman:fzf" = "latest"
+"pacman:github-cli" = "latest"
 "pacman:glow" = "latest"
+"pacman:go" = "latest"
 "pacman:gum" = "latest"
 "pacman:helix" = "latest"
+"pacman:hyperfine" = "latest"
 "pacman:just" = "latest"
 "pacman:lazygit" = "latest"
 "pacman:neovim" = "latest"
+"pacman:nodejs" = "latest"
+"pacman:npm" = "latest"
 "pacman:pandoc-cli" = "latest"
+"pacman:python" = "latest"
 "pacman:ripgrep" = "latest"
+"pacman:rustup" = "latest"
 "pacman:tealdeer" = "latest"
 "pacman:tmux" = "latest"
+"pacman:uv" = "latest"
 "pacman:yadm" = "latest"
-"pacman:hyperfine" = "latest"

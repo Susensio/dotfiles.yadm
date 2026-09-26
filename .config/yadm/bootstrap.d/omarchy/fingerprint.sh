@@ -23,9 +23,7 @@ if ! pacman -Q libfprint-tod "$DRIVER" &>/dev/null; then
   log info "Installing Goodix 53xc fingerprint driver from the AUR..."
   # --ask 4 accepts replacing the conflicting libfprint-git, which --noconfirm
   # alone would refuse; --nocheck skips libfprint-tod's umockdev test suite.
-  # System PATH only: g-ir-scanner runs `env python3`, and mise's Python lacks
-  # the distutils shim Arch's setuptools provides
-  PATH=/usr/local/bin:/usr/bin yay -S --needed --noconfirm --ask 4 --mflags --nocheck libfprint-tod "$DRIVER"
+  yay -S --needed --noconfirm --ask 4 --mflags --nocheck libfprint-tod "$DRIVER"
   sudo udevadm control --reload
   sudo udevadm trigger --subsystem-match=usb --attr-match=idVendor=27c6
   log success "Goodix 53xc fingerprint driver installed"

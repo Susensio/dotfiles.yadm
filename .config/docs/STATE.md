@@ -40,10 +40,6 @@ Cloned and bootstrapped; foot now starts login shells, and the Goodix reader wor
   Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
 - `yadm push`: `master` is 4 commits ahead.
 - Bootstrap reruns are silent (ADR-0056); next, run it from a yadm `post_merge` hook, and flag Omarchy migrations' edits to tracked files from a `post-update.d` hook.
-- Python: mise's global `python` shadowed `/usr/bin/python3`, and `g-ir-scanner`'s `env python3` failed without distutils while building `libfprint-tod`.
-  Arch requires `python` (meson, gobject-introspection, gdb), so move it into `packages.toml`: `pacman:python` in the Arch variant, mise `python` in the default one.
-  Then weigh `uv`, `go`, `rust` and `node` the same way, and drop `fingerprint.sh`'s `PATH=` workaround once nothing shadows system tools.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
-- `~/Work/bin` is still on `PATH` from Omarchy's `Work/.mise.toml`, though `omarchy/workdir.sh` removes `~/Work`.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.
