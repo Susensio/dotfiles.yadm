@@ -1,11 +1,8 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-on: 
+on:
   - push
   - pull_request
-  # Allows you to run this workflow manually from the Actions tab
   - workflow_dispatch
 
 jobs:
@@ -14,10 +11,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: fish-actions/install-fish@v1
-      - uses: fish-actions/syntax-check@v1
-  # fish-format:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: fish-actions/install-fish@v1
-  #     - uses: fish-actions/format-check@v1
+      - uses: extractions/setup-just@v4
+      - name: Run Fish checks
+        run: just --justfile .config/justfile fish-syntax
+
+  bash-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v4
+      - name: Install ShellCheck and shfmt
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck shfmt
+      - name: Run Bash checks
+        run: just --justfile .config/justfile shellcheck
+
+  data-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v4
+      - name: Run JSON and TOML checks
+        run: just --justfile .config/justfile json-syntax toml-syntax

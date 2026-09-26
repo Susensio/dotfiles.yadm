@@ -7,6 +7,12 @@
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."
   Get the pattern narrow enough to not false-positive on legitimate `-L`/`-S` usage.
   See `tmux-testing` skill's SKILL.md section 0 for the incident writeup.
+- ci | Explore [Boeing/config-file-validator](https://github.com/Boeing/config-file-validator) to replace `json-syntax` and `toml-syntax`; held back for its small following (about 500 stars).
+  v2.3.0 passed all 28 tracked config files, naming each, and covered what the one-liners do not: YAML, the `.jsonc`, `.editorconfig`, and the `##` alternates through `-type-map='**/*.toml##*:toml'`.
+  Skip its `validate-configs-action` wrapper: it has no `type-map` input and only scans directories.
+  CI could install it with `shfmt` through `jdx/mise-action`'s inline `mise_toml`; the Ubuntu runner already ships shellcheck, `jq` and Python.
+- tmux | `just check` has no tmux config check.
+  tmux 3.7c's `source-file -n` returned 0 for an unknown option and an unterminated quote, so a parse-only check caught nothing; a full load on a throwaway `-L` server caught the unknown option, but depends on the tmux version and Omarchy's palette, so it could only run locally, not on CI's Ubuntu tmux.
 - harness | Harness testing/probing (`audit-harness`, verification subagents) should default to a lower-tier model, not Opus, for quota preservation.
   Most of what these probes do is mechanical verification (does a file exist, does a binding fire, does a check pass) rather than judgment calling for Opus-level reasoning.
   Where to state this is itself open: candidates are `audit-harness`'s own skill body (the moment this applies), or a model-selection note in `harness-design` under R-enforcement's "fastest/cheapest layer" framing.

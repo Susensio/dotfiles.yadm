@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Make .profile follow the XDG_CONFIG_HOME specification
 _confdir=${XDG_CONFIG_HOME:-$HOME/.config}
 _profile=${_confdir}/profile

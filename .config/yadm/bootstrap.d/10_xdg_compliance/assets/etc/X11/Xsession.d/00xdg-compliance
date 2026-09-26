@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 USERXSESSION=${XDG_CONFIG_HOME:-$HOME/.config}/X11/xsession
 USERXSESSIONRC=${XDG_CONFIG_HOME:-$HOME/.config}/X11/xsessionrc
 ALTUSERXSESSION=${XDG_CONFIG_HOME:-$HOME/.config}/X11/Xsession

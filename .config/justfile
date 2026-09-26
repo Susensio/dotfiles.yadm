@@ -1,0 +1,34 @@
+set script-interpreter := ["bash", "-euo", "pipefail"]
+
+# `git ls-files` skips the untracked JSON and fish files other tools keep in
+# .config. File lists split on whitespace, which no tracked path has.
+
+check: fish-syntax shellcheck json-syntax toml-syntax
+
+# `fish --no-execute` checks only its first argument, hence the loop.
+[script]
+fish-syntax:
+    files=$(git ls-files '*.fish')
+    scripts=$(grep -rl '^#!.*fish' ../bin || true)
+    for file in $files $scripts; do fish --no-execute "$file"; done
+
+# shfmt --find misses sourced fragments, whose only shell marker is their
+# `# shellcheck shell=` line. Shellcheck parses each file in that shell, so it
+# is the syntax check too.
+[script]
+shellcheck:
+    scripts=$(shfmt --find yadm ../bin)
+    fragments=$(grep -rl '^# shellcheck shell=' yadm ../bin || true)
+    shellcheck --severity=error $scripts $fragments
+
+[script]
+json-syntax:
+    files=$(git ls-files '*.json' '*.json##*')
+    for file in $files; do jq empty "$file"; done
+
+[script]
+toml-syntax:
+    files=$(git ls-files '*.toml' '*.toml##*')
+    for file in $files; do
+      python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
+    done
