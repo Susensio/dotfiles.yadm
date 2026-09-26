@@ -15,7 +15,7 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   `omarchy/preinstalls.sh` has never run: the launcher removal and restore, the wrapper cleanup; nor has `omarchy.toml##distro.omarchy`, whose `absent` packages need mise 2026.9.2+ and whose `tldr` must go before `tealdeer` installs.
   Both alternates assume yadm reads `/etc/os-release`; an installed `lsb_release` would take precedence.
   `omarchy/extensions/omarchy-menu.jsonc` should hide Install and Remove › Preinstalls; unchecked against a live menu.
-  In a new terminal, `status is-login`: if terminals start non-login shells, `_env_pull` never runs.
+  foot started non-login shells, so `_env_pull` never ran; `foot.ini` now sets `login-shell=yes`.
   On Omarchy, verify `env_reload` applies an `environment.d` edit without clearing uwsm's session values.
   Reapply the active Omarchy theme once after cloning so the new tmux palette template is rendered; verify tmux startup and a later theme switch update the pane and status colors.
   During a live switch in Foot inside tmux, watch whether Omarchy's window-style write followed by our hook causes a visible flash, especially on inactive panes.
@@ -30,5 +30,22 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   Check Super + P enters window mode and Escape leaves it, Super + I/O skip empty workspaces, the lid and power button still act, and PrtSc's region picker takes Return and the arrows.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
+
+### Next, on the laptop (2026-09-26)
+
+Cloned and bootstrapped; foot now starts login shells, and the Goodix reader works through `omarchy/fingerprint.sh`.
+
+- After the reboot: a new terminal's `PATH` starts with `~/bin/overrides:~/bin`, `status is-login` says yes, `systemctl status fprintd` is already running, sudo takes a fingerprint, and bootstrap no longer warns about `environment.d`.
+  Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
+- `yadm push`: `master` is 4 commits ahead.
+- Bootstrap reruns are silent (ADR-0056); next, run it from a yadm `post_merge` hook, and flag Omarchy migrations' edits to tracked files from a `post-update.d` hook.
+- `system-install` linked nothing: `~/.local/bin` is empty (mtime 15:44), so every mise tool resolves through uwsm's shims instead (backlog: uwsm shims).
+  Find out whether `mise.sh` skipped the postinstall hook, `check_execution_context` refused it, or something emptied the directory afterwards.
+- Python: mise's global `python` shadowed `/usr/bin/python3`, and `g-ir-scanner`'s `env python3` failed without distutils while building `libfprint-tod`.
+  Arch requires `python` (meson, gobject-introspection, gdb), so move it into `packages.toml`: `pacman:python` in the Arch variant, mise `python` in the default one.
+  Then weigh `uv`, `go`, `rust` and `node` the same way, and drop `fingerprint.sh`'s `PATH=` workaround once nothing shadows system tools.
+- `hyperfine` is missing: `tool install hyperfine` (extra has 1.20.0, so it lands in both `packages.toml` variants).
+- `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
+- `~/Work/bin` is still on `PATH` from Omarchy's `Work/.mise.toml`, though `omarchy/workdir.sh` removes `~/Work`.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.

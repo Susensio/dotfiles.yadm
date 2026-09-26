@@ -44,3 +44,17 @@
 - omarchy | Track the Omarchy-seeded config on the laptop: `omarchy`, `hypr` and `foot` are already allowed in `yadm/exclude`; the other desktop dirs join the allowlist as they are adopted.
   Every one of them is a target of `omarchy update` migrations, so each widens the `yadm diff` review above.
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
+- omarchy | Bold, larger bar clock. `shell.json` holds only its formats: the size comes from the bar, and the label, private to `Ui/WidgetButton.qml`, is never bold.
+  It takes `omarchy plugin clone omarchy.clock`, tracked under `omarchy/plugins/`: `fontSize` on its button, plus a bold label of its own in place of the button's; the clone then stops receiving upstream clock fixes.
+- hypr | Omarchy's keybindings menu lists no submap bindings, so window mode (Super + P) is invisible there; and nothing shows that a submap is active.
+  Candidates: a bar indicator fed by Hyprland's `submap` event, and a way to put submap bindings into the menu.
+- hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
+  Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
+- lazygit | Edit opens vim: lazygit picks an editor preset from `$EDITOR`'s command name, and uwsm's `omarchy-launch-editor --inline` (ADR-0051) matches none, so it falls back to vim.
+  Set `os.editPreset` or an `os.edit` template in `lazygit/config.yml`, keeping Omarchy's editor pick in mind (ADR-0047).
+- omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
+- hypr | Super + Z zooms too far: it is full fullscreen, hiding the bar and gaps (`hypr/bindings.lua`); `mode = "maximized"` would keep both.
+- omarchy | Claude Code does not follow the Omarchy theme.
+- omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
+  An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line), but the Omarchy shell's `PATH` starts `/usr/share/omarchy/bin:~/.local/share/mise/shims:~/bin/overrides`, so the slider never reaches it.
+  Needs `~/bin/overrides` ahead of Omarchy's bin in the session `PATH`, the same ordering as the uwsm shims item above.
