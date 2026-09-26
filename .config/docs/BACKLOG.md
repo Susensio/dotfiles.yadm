@@ -52,8 +52,6 @@
   Candidates: a bar indicator fed by Hyprland's `submap` event, and a way to put submap bindings into the menu.
 - hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
   Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
-- lazygit | Edit opens vim: lazygit picks an editor preset from `$EDITOR`'s command name, and uwsm's `omarchy-launch-editor --inline` (ADR-0051) matches none, so it falls back to vim.
-  Set `os.editPreset` or an `os.edit` template in `lazygit/config.yml`, keeping Omarchy's editor pick in mind (ADR-0047).
 - omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
 - hypr | Super + Z zooms too far: it is full fullscreen, hiding the bar and gaps (`hypr/bindings.lua`); `mode = "maximized"` would keep both.
 - omarchy | Claude Code does not follow the Omarchy theme.
