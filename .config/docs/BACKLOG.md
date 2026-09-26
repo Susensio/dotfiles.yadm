@@ -55,13 +55,11 @@
 - omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
 - omarchy | Claude Code does not follow the Omarchy theme.
 - omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
-  An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line), but the Omarchy shell's `PATH` starts `/usr/share/omarchy/bin:~/.local/share/mise/shims:~/bin/overrides`, so the slider never reaches it.
-  Needs `~/bin/overrides` ahead of Omarchy's bin in the session `PATH`, the same ordering as the uwsm shims item above.
+  An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line).
+  Reachable from the slider once `bugfix/hypr-envs-path.sh` has run and the session restarted.
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
 - hypr | Capture bindings beyond PrtSc: region, window and screen screenshots, screen recording, OCR and QR scanning, and Omarchy's dictation (voxtype); pick keys for the ones worth a binding.
 - foot | In Claude Code under Foot, Ctrl + J for a newline in the prompt also adds a stray line at the bottom of the screen.
-- upstream | Omarchy: `default/hypr/envs.lua` always puts `$OMARCHY_PATH/bin` first on `PATH` for everything Hyprland starts, and `autostart.lua` imports that into the user manager, so no user directory can shadow an `omarchy-*` command from the desktop.
-  It came with hot dev-link (4f031e10c); 64581ec28 removed hot dev-link and made `env-bootstrap` prepend only in dev-link mode, but left `envs.lua` unconditional.
-  Open a PR dropping the prepend from `envs.lua`, or making it dev-link-only like `env-bootstrap`; uwsm already sources `env-bootstrap` through `10-omarchy`.
+- upstream | Omarchy: [#13351](https://github.com/omacom/omarchy/pull/13351) drops the `PATH` prepend from `default/hypr/envs.lua`; once it ships, delete `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh`.
