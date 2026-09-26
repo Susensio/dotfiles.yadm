@@ -1,0 +1,14 @@
+root := justfile_directory()
+
+check: fish-syntax bash-syntax shellcheck
+
+fish-syntax:
+    find "{{root}}/fish" -type f -name '*.fish' -exec fish --no-execute {} +
+
+bash-syntax:
+    bash -n "{{root}}/yadm/bootstrap"
+    find "{{root}}/yadm/bootstrap.d" -type f -name '*.sh' -exec bash -n {} +
+
+shellcheck:
+    shellcheck --severity=error "{{root}}/yadm/bootstrap"
+    find "{{root}}/yadm/bootstrap.d" -type f -name '*.sh' ! -path '*/assets/*' -exec shellcheck --severity=error {} +

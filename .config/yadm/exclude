@@ -2,6 +2,7 @@
 !/.gitignore
 !/.config
 /.config/*
+!/.config/justfile
 !/.config/git/
 !/.config/lazygit/
 !/.config/bat/

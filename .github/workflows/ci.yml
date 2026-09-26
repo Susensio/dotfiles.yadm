@@ -11,19 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: fish-actions/install-fish@v1
-      - uses: fish-actions/syntax-check@v1
+      - uses: extractions/setup-just@v4
+      - name: Run Fish checks
+        run: just --justfile .config/justfile fish-syntax
 
   bash-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v4
       - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-      - name: Check Bash syntax
-        run: |
-          bash -n .config/yadm/bootstrap
-          find .config/yadm/bootstrap.d -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
-      - name: Check bootstrap scripts with ShellCheck
-        run: |
-          shellcheck --severity=error .config/yadm/bootstrap
-          find .config/yadm/bootstrap.d -type f -name '*.sh' ! -path '*/assets/*' -print0 | xargs -0 -r shellcheck --severity=error
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck
+      - name: Run Bash checks
+        run: just --justfile .config/justfile bash-syntax shellcheck
