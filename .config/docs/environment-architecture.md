@@ -138,6 +138,12 @@ uwsm exports the resulting changes into the user manager.
 uwsm also exports compositor variables such as `WAYLAND_DISPLAY` when the session starts; it tracks its exports for cleanup when the session ends.
 This path does not run Mint's Xsession scripts or their blanket import and unpin steps.
 
+uwsm sources every `uwsm/env.d/*` file in each config directory, the system ones first, so `~/.config/uwsm/env.d/*` runs after `10-omarchy`, and a same-named file adds to Omarchy's rather than masking it.
+Variables that mean something only in the Omarchy session, like `OMARCHY_SCREENSHOT_DIR` in `uwsm/env.d/capture`, go there rather than into `environment.d`, which Mint and SSH or TTY logins also load ([ADR-0058](adr/0058-omarchy-session-env-uwsm.md)).
+Hyprland then applies Omarchy's `default/hypr/envs.lua` to everything it starts, and `autostart.lua` imports Hyprland's whole environment into the user manager at session start, so a `hl.env` there overrides both layers above.
+That is how `/usr/share/omarchy/bin` came first on the session `PATH`; `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` patches it out until Omarchy PR #13351 ships.
+The session `PATH` is then `environment.d`'s order behind the mise shims that `10-omarchy` prepends.
+
 `env_reload` reruns the `environment.d` generator and pulls the resulting manager environment into the current shell.
 It does not rerun uwsm's session files or remove their overrides.
 An `environment.d` change to an overridden name stays masked until the session owner changes or removes its value.

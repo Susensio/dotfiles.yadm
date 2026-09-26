@@ -35,6 +35,7 @@
 !/.config/omarchy/
 !/.config/hypr/
 !/.config/foot/
+!/.config/uwsm/
 !/.local/share/yadm/archive
 !/.github
 !/bin
