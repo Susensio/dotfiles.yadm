@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Xsession sources this file after 95dbus_update-activation-env imports the
 # entire X11 environment. Clear its overrides for environment.d names here.
 GEN=/usr/lib/systemd/user-environment-generators/30-systemd-environment-d-generator

@@ -20,7 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: extractions/setup-just@v4
-      - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install --yes shellcheck
+      - name: Install ShellCheck and shfmt
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck shfmt
       - name: Run Bash checks
         run: just --justfile .config/justfile bash-syntax shellcheck
+
+  data-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v4
+      - name: Run JSON and TOML checks
+        run: just --justfile .config/justfile json-syntax toml-syntax

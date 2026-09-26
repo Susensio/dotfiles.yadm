@@ -1,14 +1,25 @@
-root := justfile_directory()
+set lazy
+set shell := ["bash", "-euo", "pipefail", "-c"]
 
-check: fish-syntax bash-syntax shellcheck
+# Shell by extension or shebang; sourced fragments declare theirs with a
+# `# shellcheck shell=` directive, which shfmt --find does not read
+shell_files := `{ shfmt --find yadm ../bin; grep -rl '^# shellcheck shell=' yadm ../bin; } | sort -u | xargs`
 
+check: fish-syntax bash-syntax shellcheck json-syntax toml-syntax
+
+# fish --no-execute checks only its first file and passes the rest as argv
 fish-syntax:
-    find "{{root}}/fish" -type f -name '*.fish' -exec fish --no-execute {} +
+    { git ls-files -- '*.fish'; grep -rl '^#!.*fish' ../bin; } | xargs -n1 fish --no-execute
 
 bash-syntax:
-    bash -n "{{root}}/yadm/bootstrap"
-    find "{{root}}/yadm/bootstrap.d" -type f -name '*.sh' -exec bash -n {} +
+    for f in {{shell_files}}; do bash -n "$f"; done
 
 shellcheck:
-    shellcheck --severity=error "{{root}}/yadm/bootstrap"
-    find "{{root}}/yadm/bootstrap.d" -type f -name '*.sh' ! -path '*/assets/*' -exec shellcheck --severity=error {} +
+    shellcheck --severity=error {{shell_files}}
+
+# Tracked files only: .config also holds untracked JSON from the agent CLIs
+json-syntax:
+    git ls-files -z -- '*.json' '*.json##*' | xargs -0 -n1 jq empty
+
+toml-syntax:
+    git ls-files -z -- '*.toml' '*.toml##*' | xargs -0 -n1 python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))'

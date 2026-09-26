@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Make bash follow the XDG_CONFIG_HOME specification
 _confdir=${XDG_CONFIG_HOME:-$HOME/.config}/bash
 _datadir=${XDG_DATA_HOME:-$HOME/.local/share}/bash
