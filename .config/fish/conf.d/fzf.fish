@@ -91,8 +91,16 @@ function _fzf_path_widget
     )
     set -l fzf_status $status
     if test $fzf_status -eq 0 && test -n "$result"
-        set -l selected_path (path normalize -- $base_directory/$result)
-        commandline -rt -- (string join ' ' (string escape -- $selected_path))
+        set -l selected_paths
+        for entry in $result
+            set -l selected_path (path normalize -- $base_directory/$entry)
+            # path normalize drops the trailing slash fd puts on directories
+            if string match -q '*/' -- $entry
+                set selected_path $selected_path/
+            end
+            set -a selected_paths $selected_path
+        end
+        commandline -rt -- (string join ' ' (string escape -- $selected_paths))
     end
 end
 
