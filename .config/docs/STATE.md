@@ -5,7 +5,7 @@
 The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR-0044, 0045, 0048, 0049, 0050, 0051 and 0052, written against Omarchy 4.0.4; what remains happens on that laptop.
 
 - Push the local `master` first: GitHub's `master` is behind, and the laptop clones from GitHub.
-- Setting up the laptop: in Bash, `source <(curl -fsSL https://bootstrap.yadm.io)`, then `yadm clone --no-bootstrap -b master <url>`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap, which installs yadm and trims Omarchy's preinstalls; never `omarchy-remove-preinstalls`, whose blanket `rm` hits the tools mise links into `~/.local/bin`, and never `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
+- Setting up the laptop: in Bash, `source <(curl -fsSL https://bootstrap.yadm.io)`, then `yadm clone --no-bootstrap -b master <url>`; `yadm checkout -- ~/.config/{git,tmux,herdr,lazygit,omarchy,hypr}`, since Omarchy seeds its own copies of those through `/etc/skel`; run the bootstrap, which installs yadm and trims Omarchy's preinstalls; never `omarchy-remove-preinstalls`, whose blanket `rm` hits the tools mise links into `~/.local/bin`, and never `omarchy-reinstall-configs`, which copies `/etc/skel` over them again.
   After every `omarchy update`, `yadm diff`: its migrations edit the tracked tmux and herdr configs.
 - The first run on Arch verifies what ADR-0048 was written without: the `packages.toml##distro_family.arch` installs, `tool install`'s direct pacman branch, and `mise config set` writing a bootstrap package into a `##`-named file.
   `keyd.sh` has never run on Arch either: group creation, enabling the service, seeding `/etc/keyd/default.conf`.
@@ -26,6 +26,8 @@ The dotfiles are ready for an Omarchy laptop (Arch, Hyprland under uwsm) per ADR
   After those observations, decide whether to keep Omarchy's tmux updater, shadow it with a local wrapper while restoring useful updates, or seek a narrower upstream opt-out.
   `omarchy/mime.sh` has never run: `xdg-mime query default x-scheme-handler/mailto` should print `Gmail.desktop` and `text/plain` `Helix.desktop`; click a `mailto:` link with a subject and check Gmail's compose fills in, and open a text file from Nautilus.
   Picking nvim in Omarchy's editor menu leaves text files on Helix; `omarchy-editor-sync` changes `EDITOR` only.
+  ADR-0055's bindings have never loaded in Hyprland: `hyprctl binds` should list no Omarchy default beyond media and clipboard, and `hyprctl configerrors` should be empty.
+  Check Super + P enters window mode and Escape leaves it, Super + I/O skip empty workspaces, the lid and power button still act, and PrtSc's region picker takes Return and the arrows.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
 
