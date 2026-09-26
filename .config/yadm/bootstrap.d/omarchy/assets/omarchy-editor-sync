@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Copy the editor picked in Omarchy's menu into tools.conf (docs/adr/0047).
+# ../editor.sh installs it into ~/.local/libexec, run by its omarchy-editor-sync units.
+set -euo pipefail
+
+STATE=${XDG_STATE_HOME:-${HOME}/.local/state}/omarchy/defaults/editor
+TOOLS_ENV=${XDG_CONFIG_HOME:-${HOME}/.config}/environment.d/tools.conf
+
+read -r editor <"$STATE"
+
+# $EDITOR readers wait on a terminal editor; these are the ones omarchy-launch-editor
+# runs in the terminal. A GUI pick keeps the previous value.
+case ${editor##*/} in
+  nvim | vim | nano | micro | hx | helix | fresh) ;;
+  *) exit 0 ;;
+esac
+
+# SUDO_EDITOR follows, since tools.conf defines it from $EDITOR
+sed -i "s|^EDITOR=.*|EDITOR=$editor|" "$TOOLS_ENV"
+systemctl --user daemon-reload

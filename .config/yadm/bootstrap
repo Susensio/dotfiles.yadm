@@ -5,7 +5,8 @@ set -euo pipefail
 [[ :$PATH: == *":$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
 
 # Execute all executable files (excluding templates and editor backups) in the
-# ~/.config/yadm/bootstrap.d directory when run.
+# ~/.config/yadm/bootstrap.d directory when run. Files a step installs live
+# under its assets/ directory, non-executable so they never run as steps.
 # https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir
 
 # Directory to look for bootstrap executables in
