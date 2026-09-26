@@ -44,3 +44,5 @@
 - omarchy | Track the Omarchy-seeded config on the laptop: `omarchy`, `hypr` and `foot` are already allowed in `yadm/exclude`; the other desktop dirs join the allowlist as they are adopted.
   Every one of them is a target of `omarchy update` migrations, so each widens the `yadm diff` review above.
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
+- omarchy | Bold, larger bar clock. `shell.json` holds only its formats: the size comes from the bar, and the label, private to `Ui/WidgetButton.qml`, is never bold.
+  It takes `omarchy plugin clone omarchy.clock`, tracked under `omarchy/plugins/`: `fontSize` on its button, plus a bold label of its own in place of the button's; the clone then stops receiving upstream clock fixes.
