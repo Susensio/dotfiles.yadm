@@ -39,8 +39,6 @@ Cloned and bootstrapped; foot now starts login shells, and the Goodix reader wor
   Then drop the "needs a live check" lines from §8 of `environment-architecture.md`.
 - `yadm push`: `master` is 4 commits ahead.
 - Bootstrap reruns are silent (ADR-0056); next, run it from a yadm `post_merge` hook, and flag Omarchy migrations' edits to tracked files from a `post-update.d` hook.
-- `system-install` linked nothing: `~/.local/bin` is empty (mtime 15:44), so every mise tool resolves through uwsm's shims instead (backlog: uwsm shims).
-  Find out whether `mise.sh` skipped the postinstall hook, `check_execution_context` refused it, or something emptied the directory afterwards.
 - Python: mise's global `python` shadowed `/usr/bin/python3`, and `g-ir-scanner`'s `env python3` failed without distutils while building `libfprint-tod`.
   Arch requires `python` (meson, gobject-introspection, gdb), so move it into `packages.toml`: `pacman:python` in the Arch variant, mise `python` in the default one.
   Then weigh `uv`, `go`, `rust` and `node` the same way, and drop `fingerprint.sh`'s `PATH=` workaround once nothing shadows system tools.
