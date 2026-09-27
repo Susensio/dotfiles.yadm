@@ -9,8 +9,9 @@
     "npm:@tintinweb/pi-subagents",
     "npm:@juicesharp/rpiv-web-tools",
     "npm:pi-footer",
-    "../../../src/pi-automode",
-    "npm:pi-quota-monitoring"
+    "npm:@gotgenes/pi-permission-system",
+    "npm:@narumitw/pi-usage",
+    "npm:@mzwing/pi-permission-auto-review"
   ],
   "hideThinkingBlock": true
 }
