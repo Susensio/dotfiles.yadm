@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#MISE quiet=true
+# Install herdr's agent-state integrations into the agent harnesses on this
+# machine. Declared as a tool-level postinstall on herdr (so integrations
+# refresh when herdr is installed or upgraded) and on pi and claude
+# (tools.toml), so a harness installed after herdr still gets its own
+# integration. Idempotent, and install-only: the claude uninstaller rewrites
+# herdr's own hook entry in the tracked settings.json (normalizes its
+# matcher), so an uninstall+install cycle churns the file on every run.
+set -u
+
+# environment.d/10_xdg.conf is the single source of these variables
+# (docs/environment-architecture.md §3): it defines the XDG base and the agent
+# roots (CLAUDE_CONFIG_DIR, PI_CODING_AGENT_DIR) herdr's installers read —
+# neither installer consults XDG_CONFIG_HOME itself. systemd sources the whole
+# directory lexically at login, but sibling files may not be shell-safe
+# (ls_colors.conf's line continuations execute as commands in bash), so source
+# only the file that owns the agent roots instead of duplicating the defaults
+# here. It ships in the same yadm checkout as the harness configs, so a bare
+# machine without it has no harnesses to integrate and skips below.
+set -a
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf ]] \
+	&& . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf"
+set +a
+
+# Prefer the binary the hook runs for (MISE_TOOL_INSTALL_PATH is set only in
+# the tool postinstall context); the PATH mise run provides also carries it.
+herdr_bin="$(command -v herdr || echo "${MISE_TOOL_INSTALL_PATH:-/nonexistent}/herdr")"
+if [[ ! -x "$herdr_bin" ]]; then
+	echo "herdr-integrations: herdr binary not found, skipping" >&2
+	exit 0
+fi
+
+# Integrate only harnesses whose dotfiles checkout is present. herdr's pi
+# installer creates no directories (it exits asking to install pi first) and
+# otherwise falls back to ~/.pi/agent/extensions, which this layout does not
+# use; its claude installer would seed a fresh settings.json that a later yadm
+# checkout would have to overwrite around.
+if [[ -d "${PI_CODING_AGENT_DIR:-/nonexistent}/extensions" ]]; then
+	"$herdr_bin" integration install pi >&2 || :
+else
+	echo "herdr-integrations: skip pi (extensions dir absent)" >&2
+fi
+
+if [[ -f "${CLAUDE_CONFIG_DIR:-/nonexistent}/settings.json" ]]; then
+	"$herdr_bin" integration install claude >&2 || :
+else
+	echo "herdr-integrations: skip claude (settings.json absent)" >&2
+fi

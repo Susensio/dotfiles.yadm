@@ -6,9 +6,9 @@ aichat = { version = "latest", extra_assets = [
 ] }
 antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
-claude = "latest"
+claude = { version = "latest", postinstall = "mise run herdr-integrations" }
 codex = { version = "latest", symlink_bins = true }
-herdr = { version = "latest", gen_completions = "completion fish", extra_assets = [
+herdr = { version = "latest", gen_completions = "completion fish", postinstall = "mise run herdr-integrations", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
 ], skills = [
@@ -16,7 +16,7 @@ herdr = { version = "latest", gen_completions = "completion fish", extra_assets 
   { name = "herdr-config", file = "SKILL-config.md", references = "*.mdx" },
 ] }
 opencode = "latest"
-pi = "latest"
+pi = { version = "latest", postinstall = "mise run herdr-integrations" }
 usage = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
