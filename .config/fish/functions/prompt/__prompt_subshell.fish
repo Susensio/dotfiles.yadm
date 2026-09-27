@@ -1,9 +1,9 @@
 function __prompt_subshell
-    set -l max_shlvl 1
-    if test -n "$TMUX" || test -n "$ZELLIJ" || test -n "$HERDR_ENV" || test "$TERM_PROGRAM" = vscode
-        set max_shlvl (math $max_shlvl + 1)
+    if not set -q __prompt_subshell_parent
+        set -l ppid (ps -o ppid= -p $fish_pid | string trim)
+        set -g __prompt_subshell_parent (ps -o comm= -p $ppid | string trim)
     end
-    if test $SHLVL -gt $max_shlvl
+    if contains -- $__prompt_subshell_parent fish bash zsh sh
         echo -n (set_color --bold yellow)"⑂"(set_color normal)
     end
 end
