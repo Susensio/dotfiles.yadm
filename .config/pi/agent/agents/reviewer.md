@@ -1,10 +1,10 @@
 ---
 name: reviewer
 description: Independently reviews consequential code or design when the user requests it or an explicit delegation review trigger applies; returns evidence-backed findings.
-model: openai-codex/gpt-5.6-sol
+model: opencode-go/glm-5.3-flash
 thinking: high
 tools: read, grep, find, ls, bash, ext:rpiv-web-tools/web_search, ext:rpiv-web-tools/web_fetch
-extensions: [pi-automode, rpiv-web-tools, pi-model-fallback]
+extensions: [pi-automode, rpiv-web-tools]
 skills: true
 prompt_mode: replace
 ---
