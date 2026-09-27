@@ -288,6 +288,18 @@ link_skills() {
       )
     fi
 
+    # "file" resolves against the tool install dir, or against the repo root
+    # with a repo: prefix — for hand-maintained entrypoints that outlive tool
+    # versions (the references stay install-linked).
+    local src=""
+    if [[ -n "$file" ]]; then
+      if [[ "$file" == repo:* ]]; then
+        src="${HOME}/.config/${file#repo:}"
+      else
+        src="${tool[path]}/${file}"
+      fi
+    fi
+
     for skill_root in "${skill_roots[@]}"; do
       # Mirrors are plain symlinks and are tracked like any other config:
       # their content never diffs, only the target path on tool upgrades. No
@@ -297,7 +309,7 @@ link_skills() {
       # .agents, .opencode) keep their mirrors untracked by dir-level policy.
       if [[ -n "$file" ]]; then
         mkdir -p "$skill_root"
-        symlink "${tool[path]}/${file}" "$skill_root/SKILL.md"
+        symlink "$src" "$skill_root/SKILL.md"
       fi
 
       if [[ -n "$references" ]]; then

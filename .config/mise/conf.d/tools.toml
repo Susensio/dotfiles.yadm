@@ -13,7 +13,7 @@ herdr = { version = "latest", gen_completions = "completion fish", postinstall =
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
 ], skills = [
   { name = "herdr", file = "SKILL.md", global = true },
-  { name = "herdr-config", file = "SKILL-config.md", references = "*.mdx" },
+  { name = "herdr-config", file = "repo:herdr/SKILL-config.md", references = "*.mdx" },
 ] }
 opencode = "latest"
 pi = { version = "latest", postinstall = "mise run herdr-integrations" }

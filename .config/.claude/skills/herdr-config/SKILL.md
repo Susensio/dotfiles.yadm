@@ -1,1 +1,1 @@
-../../../../.local/share/mise/installs/herdr/0.9.1/SKILL-config.md
+../../../herdr/SKILL-config.md
