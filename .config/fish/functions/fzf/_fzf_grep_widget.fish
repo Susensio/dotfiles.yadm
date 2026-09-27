@@ -25,6 +25,8 @@ function _fzf_grep_widget
     if _fish_command_in helix hx
         set -a f_grep_args --accept-nth=1,2
     end
+    # Inline like _fzf: f-grep appends these last, overriding opts-file --popup
+    set -a f_grep_args --height=40% --style=minimal --info=hidden --preview-border=rounded
 
     set -l result (f-grep $f_grep_args $query)
     set -l fzf_status $status
