@@ -5,6 +5,8 @@ After=graphical-session.target
 
 [Service]
 # Chromium exits without a window unless kept alive; the switch is its test-only one
+# Apply a pending bootstrap zoom change before Chromium reads its profile.
+ExecStartPre=-/usr/bin/python3 %h/.config/yadm/bootstrap.d/omarchy/assets/chromium-zoom.py apply-pending %h/.config/chromium/Default/Preferences
 ExecStart=/usr/bin/chromium --no-startup-window --keep-alive-for-test
 Restart=on-failure
 Slice=app-graphical.slice

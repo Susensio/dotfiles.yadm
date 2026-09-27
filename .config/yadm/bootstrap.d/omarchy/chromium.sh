@@ -6,13 +6,30 @@ set -euo pipefail
 command -v omarchy-install-chromium-google-account &>/dev/null || exit 0
 
 FLAGS=${XDG_CONFIG_HOME:-$HOME/.config}/chromium-flags.conf
+ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets
 if ! grep -q -- --oauth2-client-id "$FLAGS" 2>/dev/null; then
   # The account script only appends to an existing file
   [[ -f $FLAGS ]] || omarchy-refresh-config chromium-flags.conf
   omarchy-install-chromium-google-account
 fi
 
-ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets
+# Keep Chromium's chrome small on a 125% scaled monitor. The flags file stays
+# local because Omarchy appends Google account credentials to it.
+SCALE_FLAG=--force-device-scale-factor=0.9
+if ! grep -qxF -- "$SCALE_FLAG" "$FLAGS"; then
+  if grep -q '^--force-device-scale-factor=' "$FLAGS"; then
+    sed -i "s/^--force-device-scale-factor=.*/$SCALE_FLAG/" "$FLAGS"
+  else
+    printf '%s\n' "$SCALE_FLAG" >>"$FLAGS"
+  fi
+fi
+
+# Set the default page zoom once per bootstrap. If Chromium is running, the
+# helper queues the change for the service's next start instead of touching
+# Chromium's live profile.
+python3 "$ASSETS_DIR/chromium-zoom.py" bootstrap \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/chromium/Default/Preferences"
+
 UNIT_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user
 if ! cmp -s "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"; then
   install -Dv --mode=644 "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"
