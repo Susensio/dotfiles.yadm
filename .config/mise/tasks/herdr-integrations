@@ -43,6 +43,60 @@ if [[ -n ${MISE_TOOL_NAME:-} && $MISE_TOOL_NAME != herdr ]]; then
 	exit 0
 fi
 
+# Full sync from here on: herdr's own postinstall or a manual run.
+# --- skill mirrors ----------------------------------------------------------
+# Herdr ships one agent skill (SKILL.md, install-shipped); this repo hand-
+# maintains a second entrypoint (herdr/SKILL-config.md) that routes into the
+# install-linked references/. Both are mirrored as plain symlinks and tracked
+# in yadm where the tree is admitted; trees the root exclude does not re-
+# include (codex, opencode, the dot-dirs) keep their mirrors untracked by
+# dir-level policy. No .gitignore is shipped beside mirrors: agents disagree
+# on what it should hide (pi honors ignore files while scanning skills and
+# would drop the mirror). Runs on full syncs only â install-side content
+# changes only when herdr itself does.
+link_skill() {
+	local src=$1 dest=$2
+	if [[ -e $dest && ! -L $dest ]]; then
+		echo "herdr-integrations: skipping '$dest': not a managed symlink" >&2
+		return 0
+	fi
+	[[ -L $dest && $(readlink -f -- "$dest") == "$(readlink -f -- "$src")" ]] && return 0
+	mkdir --parents -- "$(dirname -- "$dest")"
+	ln --symbolic --relative --force "$src" "$dest"
+}
+
+skill_mirrors() {
+	local install src_herdr src_config ref
+	install=$(dirname -- "$herdr_bin")
+	src_herdr="$install/SKILL.md"
+	src_config="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/SKILL-config.md"
+
+	# Global skill: guarded on the harness being set up, mirroring how the
+	# integration installs above skip absent harnesses.
+	local harness_root
+	for harness_root in \
+		"${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}" \
+		"${CODEX_HOME:-$HOME/.config/codex}" \
+		"${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}" \
+		"${PI_CODING_AGENT_DIR:-$HOME/.config/pi/agent}"
+	do
+		[[ -d $harness_root ]] || continue
+		link_skill "$src_herdr" "$harness_root/skills/herdr/SKILL.md"
+	done
+
+	# Project-scoped entrypoint: mirrors into this repo's own dot-dirs.
+	local config_home=${XDG_CONFIG_HOME:-$HOME/.config} dot_dir
+	for dot_dir in .agents .claude .opencode; do
+		link_skill "$src_config" "$config_home/$dot_dir/skills/herdr-config/SKILL.md"
+		for ref in "$install"/*.mdx; do
+			[[ -f $ref ]] || continue
+			link_skill "$ref" "$config_home/$dot_dir/skills/herdr-config/references/$(basename -- "$ref")"
+		done
+	done
+}
+
+skill_mirrors
+
 status=$("$herdr_bin" integration status 2>/dev/null) || {
 	echo "herdr-integrations: herdr integration status failed, skipping" >&2
 	exit 0

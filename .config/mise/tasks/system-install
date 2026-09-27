@@ -259,70 +259,6 @@ link_tool_assets() {
   done
 }
 
-link_skills() {
-  local skills=()
-  readarray -t skills < <(echo "${tool[info]}" | jq --compact-output '.tool_options.skills[]?')
-
-  for skill_json in "${skills[@]}"; do
-    local name file references is_global
-    name=$(echo "$skill_json" | jq --raw-output '.name')
-    file=$(echo "$skill_json" | jq --raw-output '.file // empty')
-    references=$(echo "$skill_json" | jq --raw-output '.references // empty')
-    is_global=$(echo "$skill_json" | jq --raw-output '.global // false')
-
-    # Project-scoped skills mirror into this repo's own agent-config dirs;
-    # global ones go where each agent actually looks from any project.
-    local skill_roots=()
-    if [[ "$is_global" == "true" ]]; then
-      skill_roots=(
-        "$HOME/.config/claude/skills/$name"
-        "$HOME/.config/codex/skills/$name"
-        "$HOME/.config/opencode/skills/$name"
-        "$HOME/.config/pi/agent/skills/$name"
-      )
-    else
-      skill_roots=(
-        "$HOME/.config/.agents/skills/$name"
-        "$HOME/.config/.claude/skills/$name"
-        "$HOME/.config/.opencode/skills/$name"
-      )
-    fi
-
-    # "file" resolves against the tool install dir, or against the repo root
-    # with a repo: prefix — for hand-maintained entrypoints that outlive tool
-    # versions (the references stay install-linked).
-    local src=""
-    if [[ -n "$file" ]]; then
-      if [[ "$file" == repo:* ]]; then
-        src="${HOME}/.config/${file#repo:}"
-      else
-        src="${tool[path]}/${file}"
-      fi
-    fi
-
-    for skill_root in "${skill_roots[@]}"; do
-      # Mirrors are plain symlinks and are tracked like any other config:
-      # their content never diffs, only the target path on tool upgrades. No
-      # .gitignore is shipped here — agents disagree on what it should hide
-      # (pi honors ignore files while scanning skills and would drop the
-      # mirror). Trees the root exclude does not re-include (codex, opencode,
-      # .agents, .opencode) keep their mirrors untracked by dir-level policy.
-      if [[ -n "$file" ]]; then
-        mkdir -p "$skill_root"
-        symlink "$src" "$skill_root/SKILL.md"
-      fi
-
-      if [[ -n "$references" ]]; then
-        mkdir -p "$skill_root/references"
-        local ref
-        for ref in "${tool[path]}"/$references; do
-          [[ -f "$ref" ]] && symlink "$ref" "$skill_root/references/"
-        done
-      fi
-    done
-  done
-}
-
 link_node_modules() {
   local node_modules_dir=${tool[path]}/lib/node_modules
   [[ ! -d "$node_modules_dir" ]] && return 0
@@ -379,7 +315,6 @@ main() {
     generate_completions
     generate_shell_init
     link_tool_assets
-    link_skills
     link_node_modules
   done
 
