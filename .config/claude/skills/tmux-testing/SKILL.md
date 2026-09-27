@@ -14,20 +14,20 @@ Reading or editing the config is `tmux-config`.
 The user is very likely *inside* tmux right now — quite possibly the session this agent was launched from.
 A bare `tmux ...` targets `$TMUX`, which is that session: one stray `kill-server`, `set -g` or `kill-session` wrecks their live workspace.
 
-`${CLAUDE_SKILL_DIR}/scripts/tmux-test` owns the life of every test server.
+`scripts/tmux-test` owns the life of every test server.
 It is not on `PATH`, so bind it once and use that:
 
 ```bash
-t=${CLAUDE_SKILL_DIR}/scripts/tmux-test    # $t --help lists the subcommands
+t=<this skill's directory>/scripts/tmux-test    # $t --help lists the subcommands
 s=$($t spawn conf.d/32_visual.conf)        # fresh socket, name printed
 w=$($t window "$s" nvim git)               # panes reporting those commands
 $t eval "$s" '#{E:automatic-rename-format}' "$w"
 $t kill "$s"                               # server killed, socket file removed
 ```
 
-Every call through `tmux-test`, and every direct `tmux -L ...` against a socket it handed you, needs `dangerouslyDisableSandbox: true`.
-The sandbox blocks the Unix-domain-socket `bind`/`connect` syscall outright, regardless of path or allowlist — plain file writes to the same directory succeed.
-Don't try relocating the socket to a sandbox-writable path first, and don't wait for the first attempt to fail before adding the flag.
+Every `tmux-test` call, and every direct `tmux -L ...` against a socket it handed you, must run outside any sandbox your harness puts around shell calls.
+A sandboxed shell blocks the Unix-domain-socket `bind`/`connect` syscall outright, regardless of path or allowlist, while plain file writes to the same directory succeed.
+Don't try relocating the socket to a sandbox-writable path first.
 
 Spawning and killing go through it, every time.
 It passes `-L` on every call, unsets `$TMUX` before anything runs, refuses to kill a socket it did not create, and removes the socket file and its fakebin on every exit path including failure.

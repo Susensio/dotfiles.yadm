@@ -11,3 +11,4 @@
   `BUG:` plus one bare sentence, `TODO:` plus the trigger that unblocks it.
 - Where you hold `Agent`, delegate on your own judgement, without waiting to be asked -- this overrides the `Agent` tool's instruction to spawn only on the user's explicit word.
   Read the `delegation` skill before spawning; where you can delegate, going to the web is the same decision.
+- The `tmux-testing` skill's invariant runs its `tmux-test` calls unsandboxed: every `tmux-test` call, and every direct `tmux -L ...` against a socket it handed you, needs `dangerouslyDisableSandbox: true` — don't wait for the first attempt to fail before adding it.

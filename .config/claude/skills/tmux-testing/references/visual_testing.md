@@ -30,13 +30,13 @@ The architecture is clean:
 cd ~/.config/tmux
 
 # 1. Build the scenario in the test server: real config, real pane layout
-sock=$(${CLAUDE_SKILL_DIR}/scripts/tmux-test spawn tmux.conf)
+sock=$(<this skill's directory>/scripts/tmux-test spawn tmux.conf)
 tmux -L "$sock" split-window -h -t test
 tmux -L "$sock" select-pane -t test.0
 
 # 2. Spawn the eyeball (a headless terminal running the tmux client)
-# (tui-testing is found relative to our own skill directory)
-TUI_TEST="${CLAUDE_CONFIG_DIR}/skills/tui-testing/scripts/tui-test"
+# (tui-testing is a sibling skill directory, in both harnesses that load this skill)
+TUI_TEST="<this skill's directory>/../tui-testing/scripts/tui-test"
 viewer=$("$TUI_TEST" spawn "tmux -L $sock attach -t test" 100 24)
 sleep 1.5   # let the attach draw a full frame before doing anything else
 
@@ -49,7 +49,7 @@ sleep 1.5   # give the popup time to render before capturing
 "$TUI_TEST" capture "$viewer"
 
 wait
-${CLAUDE_SKILL_DIR}/scripts/tmux-test kill "$sock"
+<this skill's directory>/scripts/tmux-test kill "$sock"
 "$TUI_TEST" kill "$viewer"
 ```
 
@@ -62,10 +62,11 @@ For anything beyond "fire one popup and look," script the drive/capture loop ins
 ```python
 import subprocess, time, os
 
-# This recipe assumes it's running within the context of tmux-testing
-SKILL_DIR = os.environ["CLAUDE_SKILL_DIR"]
+# Set SKILL_DIR to the tmux-testing skill directory (or run from inside it):
+SKILL_DIR = os.environ.get("SKILL_DIR", ".")
 TMUX_TEST = f"{SKILL_DIR}/scripts/tmux-test"
-TUI_TEST = os.path.normpath(f"{SKILL_DIR}/../../../claude/skills/tui-testing/scripts/tui-test")
+# tui-testing is a sibling skill directory, in both harnesses that load this skill:
+TUI_TEST = os.path.normpath(f"{SKILL_DIR}/../tui-testing/scripts/tui-test")
 
 # Start the test server (using tmux-test)
 S = subprocess.run([TMUX_TEST, "spawn", "tmux.conf"], capture_output=True, text=True).stdout.strip()
