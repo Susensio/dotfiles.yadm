@@ -54,6 +54,8 @@ Skills are knowledge loaded only when it's relevant, instead of sitting in conte
 Some are user-invocable (`/adr`, `/git-commit`, `/grow-project-docs`...), others fire only when an agent's own judgement calls for them (`delegation`, `project-docs`, `harness-design`).
 `claude/skills/` has the full list; each `SKILL.md` says in its own description when to reach for it.
 Four of them (`report-issue`, `tmux-config`, `tmux-testing`, `tui-testing`) are shared with the pi harness by symlink from its agent skills directory -- the copies stay canonical here, and the skills stay harness-neutral so one file serves both.
+Six more share names (`adr`, `coding`, `delegation`, `git-commit`, `harness-design`, `project-docs`) but are deliberately independent: the pi harness is a slim variant of this one, and where a skill's full depth exceeds pi's context budget pi keeps its own terser rewrite instead of the symlink.
+Neither copy is canonical for the other; editing one is not an edit to the other, and an edit should not be propagated unless both harnesses actually need it.
 
 ## Rules
 

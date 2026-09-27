@@ -9,6 +9,7 @@ XDG config repo for `~/.config`, managed with yadm.
   Read it before investigating the process tree by hand.
 - Omarchy's quirks -- setting up a machine, Omarchy commands that write into tracked files, overriding `omarchy-*` commands -- are in `docs/omarchy.md`.
 - Before writing config syntax you have not verified in this session, check the tool's manpage or `--help`.
+- Keep comments concise: one line for the constraint the code or config cannot say itself, no prose paragraphs.
 - Fan out along config domains -- `tmux`, `fish`, `nvim`, `mise`, `keyd`.
   That is the seam that divides this repo.
   Not layers, not phases.
@@ -22,8 +23,11 @@ XDG config repo for `~/.config`, managed with yadm.
 - The `report-issue` skill files upstream, never against this repo.
 - Commit messages here are `domain: imperative`, lowercase after the prefix, no trailing period -- `tmux: fix copy-mode bugs`, `fish: add fenv`.
   The prefix names the config domain touched, never a conventional-commit type like `feat:` or `fix:`.
-  A change and the doc it produces commit together -- a port plus the STATE.md note recording it is one commit under the feature's domain prefix, not two.
+- One concern, one commit: a change and the doc it produces commit together -- a port plus the STATE.md note recording it is one commit under the feature's domain prefix, not two -- and a follow-up to something already committed unpushed amends that commit instead of stacking a second one.
+  This repo runs far ahead of origin, so amending is always safe here.
   Stage by explicit path; this tree carries in-flight edits across several config domains at once -- never stage a hunk another agent wrote.
+- What the setup optimizes for -- fast, idempotent, declarative, bootstrapped, and the trade-offs that fall out of each -- is `docs/principles.md`.
+  Read it before proposing a new tool, service or generation mechanism; ADRs are instances of these principles.
 
 ## claude/
 
