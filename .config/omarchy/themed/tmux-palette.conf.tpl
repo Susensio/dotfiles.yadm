@@ -24,5 +24,7 @@ set-environment -gh SELECT_BG "{{ bright_magenta }}"
 set-environment -gh BADGE_FG "{{ background }}"
 set-environment -gh PREFIX_BG "{{ blue }}"
 set-environment -gh PREFIX_ACTIVE_BG "{{ bright_blue }}"
-set-environment -gh MESSAGE_BG "{{ mix yellow background 50% }}"
+# Mixed toward the foreground, not the background: black text needs the lighter
+# half of yellow, and a light theme darkens it the same way.
+set-environment -gh MESSAGE_BG "{{ mix yellow foreground 25% }}"
 set-environment -gh MESSAGE_FG "{{ background }}"
