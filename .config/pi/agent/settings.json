@@ -1,14 +1,16 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.87.1",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-luna",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "glm-5.3-flash",
   "packages": [
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:@juicesharp/rpiv-todo",
-    "npm:@czottmann/pi-automode",
     "npm:@tintinweb/pi-subagents",
     "npm:@juicesharp/rpiv-web-tools",
-    "npm:pi-model-fallback"
-  ]
+    "npm:pi-footer",
+    "../../../src/pi-automode",
+    "npm:pi-quota-monitoring"
+  ],
+  "hideThinkingBlock": true
 }
