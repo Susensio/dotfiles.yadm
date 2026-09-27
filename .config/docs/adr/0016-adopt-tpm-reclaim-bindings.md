@@ -1,6 +1,6 @@
 # ADR-0016: Adopt TPM but reclaim its hardcoded bindings
 
-Status: Accepted
+Status: Superseded by [ADR-0061](0061-adopt-tpack-for-plugins.md)
 Date: 2026-06-02
 
 ## Context

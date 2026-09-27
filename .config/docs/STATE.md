@@ -28,6 +28,8 @@ Setup and the standing oddities are in `docs/omarchy.md`.
 
 ### Next, on the laptop (2026-09-26)
 
+- tpm replaced by tpack 2026-09-27, per ADR-0061: tpm's text parser cannot see `@plugin` lines behind the `-F` wildcard include, so installs silently did nothing; tpack resolves the config the way tmux runs it. `tools.toml` carries the binary via mise's `github:` backend (the `go:` backend pins v1, which lacks the parser); decls live in `conf.d/90_plugins.conf`. `99_tpack.conf` self-bootstraps through `mise exec` -- a `/usr/bin` binary, so it works from a broken session PATH; it auto-installs tpack when missing, `tpack install` clones missing plugins (~250 ms when nothing is), and the `I`/`U`/`M-u` unbinds sit as plain lines after it (`run` blocks the parse, so they land after tpack's binds). tpack's TUI key is a throwaway chord its resolver always binds (empty falls back to `T`) that 99 unbinds; the TUI lives in the config table on `T`. Unexercised live: the first real server start doing the bootstrap, and the leftover `~/.local/share/tmux/plugins/tpm` directory that `tpack clean` (config table M-u) should remove.
+
 Cloned and bootstrapped; foot now starts login shells, and the Goodix reader works through `omarchy/fingerprint.sh`.
 
 - Checked after a reboot (2026-09-26): terminals run `fish --login` with `~/bin/overrides:~/bin` right behind the mise shims, fprintd runs at boot and sudo takes a fingerprint, the bootstrap is silent, the manager holds `EDITOR=omarchy-launch-editor --inline` and `SUDO_EDITOR=env helix`, and the Hyprland `PATH` patch and capture folders are in place.
