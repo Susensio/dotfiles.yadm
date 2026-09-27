@@ -30,6 +30,16 @@ case "$mimetype" in
       bat_args=(--line-range=:500)
     fi
 
+    # yadm alternate/template suffixes break bat's syntax detection
+    # (e.g. packages.toml##default, tmux-palette.conf.tpl); ignore them so
+    # the underlying file type gets highlighted
+    case "${file_path##*/}" in
+      *'##'*) bat_args+=(--ignored-suffix="##${file_path##*##}") ;;
+    esac
+    case "${file_path##*/}" in
+      *.tpl) bat_args+=(--ignored-suffix=.tpl) ;;
+    esac
+
     bat --color=always --style=plain --paging=never \
       --terminal-width="$pv_width" "${bat_args[@]}" \
       "$file_path"
