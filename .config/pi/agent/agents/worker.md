@@ -1,11 +1,10 @@
 ---
 name: worker
 description: Implements one settled change in a fresh subagent context. Use for a plan leaf with defined boundaries, completion criteria, and checks; returns changed paths and verification evidence.
-model: openai-codex/gpt-5.6-terra
+model: opencode-go/deepseek-v4-flash
 thinking: high
 tools: read, grep, find, ls, bash, edit, write
-extensions: [pi-automode, pi-model-fallback]
-disallowed_tools: model_fallback_config
+extensions: [pi-automode]
 skills: true
 prompt_mode: replace
 ---

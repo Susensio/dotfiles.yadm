@@ -19,19 +19,19 @@ Four subagents provide distinct execution containers:
 
 Their descriptions and prompts remain model-neutral so model tiers can change without redesigning the harness.
 
-## Model tiers and fallback
+## Model tiers
 
 Use the cheapest model likely to complete each execution bundle reliably.
-Codex is preferred while its subscription quota is available, with OpenCode Go as fallback.
+Everything runs on the OpenCode Go subscription; there is no second provider and no model-fallback layer.
 
-| Agents | Codex | OpenCode Go |
-| --- | --- | --- |
-| `explorer`, `tester` | Luna | MiMo V2.5 Free |
-| `worker` | Terra | DeepSeek V4 Flash |
-| `reviewer` | Sol | GLM 5.3 Flash |
+| Agents | OpenCode Go |
+| --- | --- |
+| `explorer`, `tester` | MiMo V2.6 Flash |
+| `worker` | DeepSeek V4 Flash |
+| `reviewer` | GLM 5.3 Flash |
 
-`pi-model-fallback` applies these mappings as configured in `model-fallback/config.json`.
-Benchmark them on representative tasks rather than assuming the models are equivalent.
+The automode classifier runs `opencode-go/mimo-v2.6-flash`. Its task is a narrow 0/1 gate behind deterministic tiers, capped at 512/1200 tokens, so a Flash-tier model is enough — and a parse miss fails closed to manual review, not damage.
+Benchmark the tiers on representative tasks rather than assuming the models are equivalent.
 
 ## Delegation policy
 
@@ -68,7 +68,7 @@ The retained packages are:
 - `@czottmann/pi-automode` for allow, ask, and block guardrails around agent tool calls.
 - `@tintinweb/pi-subagents` for background agents, parallel dispatch, and optional worktrees.
 - `@juicesharp/rpiv-web-tools` for `web_search` and `web_fetch`.
-- `pi-model-fallback` for subscription-first Codex use with explicit OpenCode fallback mappings.
+- `pi-footer` for the configurable statusline footer.
 
 Automode is not a sandbox.
 
@@ -94,7 +94,7 @@ These features can return only after a repeated observed need justifies their ro
 
 Run `/web-tools` once to configure a search provider before using `web_search`.
 
-The current harness has been validated for JSON syntax, clean Pi startup without a model call, installed package consistency, configured model resolution, fallback-rule loading, custom reviewer execution, and isolated tester execution.
+The current harness has been validated for JSON syntax, clean Pi startup without a model call, installed package consistency, configured model resolution, custom reviewer execution, and isolated tester execution.
 
 `bash_readonly` requires Linux with `bubblewrap`, unprivileged user namespaces, and unprivileged OverlayFS support.
 
@@ -103,7 +103,7 @@ The remaining representative checks are:
 1. Run an explorer retrieval task after configuring web search.
 2. Run a bounded worker implementation task.
 3. Run parallel workers in worktrees and integrate their branches.
-4. Benchmark the proposed Codex and OpenCode tier pairs on representative tasks.
+4. Benchmark the OpenCode Go tier pairs on representative tasks.
 
 Do not expand the harness merely to complete this list.
 
