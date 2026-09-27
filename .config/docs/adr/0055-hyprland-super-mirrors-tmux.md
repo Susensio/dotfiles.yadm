@@ -27,3 +27,4 @@ Upstream fixes to the media and clipboard bindings arrive with Omarchy updates; 
 Hyprland shows nothing while a submap is active, so a forgotten window mode turns `hjkl` into resizing until Escape.
 `hypr/hyprland.lua` became a tracked copy of Omarchy's seeded template, so a later change to that template reaches the laptop only by hand.
 None of this ran against a live Hyprland when written; `docs/STATE.md` carries the checks.
+The letters themselves are the live reference's business, not this record's: `docs/keybinds.md` holds the cross-layer scheme, including tmux, herdr and helix's side of it.

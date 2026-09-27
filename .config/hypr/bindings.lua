@@ -1,7 +1,7 @@
--- Super drives the desktop the way Alt drives tmux and herdr panes: the same
--- letters mean the same thing one layer up (docs/adr/0055). Omarchy's default
--- bindings are off in hypr/hyprland.lua; its self-contained files are loaded
--- below, and the few lines kept from its utilities.lua are copied here.
+-- Keybinds follow the cross-layer scheme in docs/keybinds.md; ADR-0055 has the
+-- decision. Omarchy's default bindings are off in hypr/hyprland.lua; its
+-- self-contained files are loaded below, and the few lines kept from its
+-- utilities.lua are copied here.
 
 -- Volume, brightness, keyboard backlight and media keys
 require("default.hypr.bindings.media")
@@ -9,14 +9,13 @@ require("default.hypr.bindings.media")
 require("default.hypr.bindings.clipboard")
 hl.unbind("SUPER + A") -- clipboard.lua's select-all; Super + A opens agents
 
--- Focus, like Alt + hjkl across tmux panes; crosses monitors too
+-- Focus; crosses monitors too
 o.bind("SUPER + H", "Focus left", hl.dsp.focus({ direction = "l" }))
 o.bind("SUPER + J", "Focus down", hl.dsp.focus({ direction = "d" }))
 o.bind("SUPER + K", "Focus up", hl.dsp.focus({ direction = "u" }))
 o.bind("SUPER + L", "Focus right", hl.dsp.focus({ direction = "r" }))
 
--- Workspaces, like Alt + i/o and Alt + digits across tmux windows. Keycodes
--- keep the digits independent of the keyboard layout.
+-- Workspaces. Keycodes keep the digits independent of the keyboard layout.
 o.bind("SUPER + I", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
 o.bind("SUPER + O", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
 o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
@@ -27,7 +26,7 @@ for workspace = 1, 9 do
     hl.dsp.window.move({ workspace = tostring(workspace) }))
 end
 
--- Scratchpad, like Alt + ` in tmux
+-- Scratchpad
 o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special("scratchpad"))
 o.bind("SUPER + SHIFT + grave", "Move window to scratchpad",
   hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
@@ -52,8 +51,7 @@ o.bind("SUPER + mouse:273", "Resize window", hl.dsp.window.resize(), { mouse = t
 o.bind("SUPER + mouse_down", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
 o.bind("SUPER + mouse_up", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
 
--- Window mode, like tmux's pane table: stays active until Escape or Return so
--- held keys keep resizing
+-- Window mode: stays active until Escape or Return so held keys keep resizing
 o.bind("SUPER + P", "Window mode", hl.dsp.submap("window"))
 hl.define_submap("window", function()
   o.bind("H", "Shrink width", hl.dsp.window.resize({ x = -40, y = 0, relative = true }), { repeating = true })
@@ -90,8 +88,7 @@ o.bind("switch:off:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { loc
 o.bind("SUPER + comma", "Dismiss last notification", "omarchy-shell notifications dismissOne")
 o.bind("SUPER + SHIFT + comma", "Dismiss all notifications", "omarchy-shell notifications dismissAll")
 
--- Screenshot, and the keys that act while picking its region; copied from
--- Omarchy's default/hypr/bindings/utilities.lua
+-- Screenshot; the region-picker keys below are the utilities.lua copy
 o.bind("PRINT", "Screenshot", "omarchy-capture-screenshot")
 
 local selection_layers = 0
