@@ -1,7 +1,0 @@
-{
-  "autoMode": {
-    "classifierModel": "opencode-go/mimo-v2.6-flash",
-    "allowInsideWorkingDirectory": true,
-    "classifierReasoningLevel": "low"
-  }
-}

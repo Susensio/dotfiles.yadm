@@ -1,6 +1,6 @@
 # Pi harness
 
-This directory contains a deliberately small personal Pi harness.
+This directory (`~/.config/pi/agent/`) contains a deliberately small personal Pi harness; `~/.config/pi/README.md` documents what yadm tracks in that tree and what stays ignored.
 
 The design keeps universal behaviour short, loads reusable knowledge through skills, and uses subagents only when an independent context is worth its startup cost.
 
@@ -30,8 +30,9 @@ Everything runs on the OpenCode Go subscription; there is no second provider and
 | `worker` | DeepSeek V4 Flash |
 | `reviewer` | GLM 5.3 Flash |
 
-The automode classifier runs `opencode-go/mimo-v2.6-flash`. Its task is a narrow 0/1 gate behind deterministic tiers, capped at 512/1200 tokens, so a Flash-tier model is enough — and a parse miss fails closed to manual review, not damage.
 Benchmark the tiers on representative tasks rather than assuming the models are equivalent.
+
+The dormant `pi-automode` classifier config (`agent/extensions/pi-automode/config.json`, tracked) documents the narrow 0/1 gate tier: `opencode-go/mimo-v2.6-flash`, a parse miss fails closed to manual review, not damage.
 
 ## Delegation policy
 
@@ -65,16 +66,26 @@ The retained packages are:
 
 - `@juicesharp/rpiv-ask-user-question` for structured clarification.
 - `@juicesharp/rpiv-todo` for visible task state.
-- `@czottmann/pi-automode` for allow, ask, and block guardrails around agent tool calls.
 - `@tintinweb/pi-subagents` for background agents, parallel dispatch, and optional worktrees.
 - `@juicesharp/rpiv-web-tools` for `web_search` and `web_fetch`.
+- `@narumitw/pi-usage` for the footer usage widget.
 - `pi-footer` for the configurable statusline footer.
+- `@gotgenes/pi-permission-system` for tool-call and path access gating.
+- `@mzwing/pi-permission-auto-review` as its authorizer (a `codex-auto-review` pass over each ask decision).
 
-Automode is not a sandbox.
+(An earlier gate, `@czottmann/pi-automode`, was replaced by the permission system; see the model-tiers section for its kept classifier config.)
 
-The worker and reviewer explicitly load it in their child sessions because they have raw Bash access.
+The permission system's ask gate is `*: ask` with a deny list for secrets (`*.env*`, `*.pem`, `*.key`, `~/.ssh/*`, `~/.pi/agent/auth.json`), a deny on `sudo *`, an allow list for common read-mostly shell commands, and per-directory external-directory rules. Its `yoloMode` plus auto-review means an ask resolves through the reviewer model rather than a human prompt unless the policy defers it.
 
-The explorer and tester instead receive `bash_readonly`, a read-only-agent prototype loaded by an explicit path.
+The system's hand-maintained config lives at `extensions/pi-permission-system/config.json`, auto-review's at `extensions/pi-permission-auto-review/config.json`; both are tracked. The permission decision log the system writes to `extensions/pi-permission-system/logs/*.jsonl` is ignored as runtime churn.
+
+Everything else under `extensions/` is tracked:
+
+- `herdr-agent-state.ts` (installed by `herdr integration install pi`, overwritten on every herdr update) and `herdr-ask-user-bridge.ts` pipe ask-user questionnaires and permission-dialog waits onto herdr's `herdr:blocked` channel so a blocked session stops looking like it is still working in herdr.
+- `pi-footer.json` is the hand-edited config for the `pi-footer` statusline package.
+
+
+`bash-readonly/` (loaded by the explorer and tester only, via explicit path) is a read-only-agent prototype in `bash-readonly.ts` + `runner.mjs`.
 
 Its nested `bash-readonly.ts` filename deliberately avoids Pi's automatic `extensions/*.ts` and `extensions/*/index.ts` discovery patterns, so the main session does not load it.
 

@@ -1,0 +1,78 @@
+{
+  "debugLog": false,
+  "permissionReviewLog": true,
+  "yoloMode": true,
+  "doublePressToConfirm": false,
+  "authorizerChain": [
+    "auto-review"
+  ],
+  "permission": {
+    "*": "ask",
+    "path": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.pem": "deny",
+      "*.key": "deny",
+      "~/.ssh/*": "deny",
+      "~/.pi/agent/auth.json": "deny"
+    },
+    "external_directory": {
+      "*": "ask",
+      "~/.config/*": "allow",
+      "~/.local/*": "allow",
+      "~/Projects/*": "allow",
+      "/tmp": "allow",
+      "/tmp/*": "allow"
+    },
+    "external_directory_read": {
+      "*": "ask",
+      "/tmp/*": "allow",
+      "~/*": "allow"
+    },
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "yadm status*": "allow",
+      "yadm diff*": "allow",
+      "yadm list*": "allow",
+      "yadm add*": "allow",
+      "git add*": "allow",
+      "rg*": "allow",
+      "ls*": "allow",
+      "which *": "allow",
+      "rm /tmp/*": "allow",
+      "rm -f /tmp/*": "allow",
+      "sudo *": {
+        "action": "deny",
+        "reason": "No sudo from the agent"
+      },
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "sed -n *": "allow",
+      "wc *": "allow",
+      "stat *": "allow",
+      "file *": "allow",
+      "du *": "allow",
+      "df *": "allow",
+      "diff *": "allow",
+      "sort *": "allow",
+      "uniq *": "allow",
+      "mkdir *": "allow",
+      "touch *": "allow",
+      "git branch*": "allow",
+      "git remote*": "allow",
+      "yadm alt*": "allow"
+    },
+    "read": "allow",
+    "grep": "allow",
+    "find": "allow",
+    "ls": "allow",
+    "write": "allow",
+    "edit": "allow"
+  }
+}
