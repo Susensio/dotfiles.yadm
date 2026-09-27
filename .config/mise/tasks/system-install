@@ -289,15 +289,19 @@ link_skills() {
     fi
 
     for skill_root in "${skill_roots[@]}"; do
+      # Mirrors are plain symlinks and are tracked like any other config:
+      # their content never diffs, only the target path on tool upgrades. No
+      # .gitignore is shipped here — agents disagree on what it should hide
+      # (pi honors ignore files while scanning skills and would drop the
+      # mirror). Trees the root exclude does not re-include (codex, opencode,
+      # .agents, .opencode) keep their mirrors untracked by dir-level policy.
       if [[ -n "$file" ]]; then
         mkdir -p "$skill_root"
-        echo "*" > "$skill_root/.gitignore"
         symlink "${tool[path]}/${file}" "$skill_root/SKILL.md"
       fi
 
       if [[ -n "$references" ]]; then
         mkdir -p "$skill_root/references"
-        echo "*" > "$skill_root/references/.gitignore"
         local ref
         for ref in "${tool[path]}"/$references; do
           [[ -f "$ref" ]] && symlink "$ref" "$skill_root/references/"
