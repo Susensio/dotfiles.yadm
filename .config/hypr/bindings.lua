@@ -23,12 +23,14 @@ o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "pre
 for workspace = 1, 9 do
   local key = "code:" .. tostring(workspace + 9)
   o.bind("SUPER + " .. key, "Workspace " .. workspace, hl.dsp.focus({ workspace = tostring(workspace) }))
-  o.bind("SUPER + SHIFT + " .. key, "Move window to workspace " .. workspace, hl.dsp.window.move({ workspace = tostring(workspace) }))
+  o.bind("SUPER + SHIFT + " .. key, "Move window to workspace " .. workspace,
+    hl.dsp.window.move({ workspace = tostring(workspace) }))
 end
 
 -- Scratchpad, like Alt + ` in tmux
 o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special("scratchpad"))
-o.bind("SUPER + SHIFT + grave", "Move window to scratchpad", hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
+o.bind("SUPER + SHIFT + grave", "Move window to scratchpad",
+  hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
 
 -- Window
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
@@ -100,15 +102,20 @@ hl.on("layer.opened", function(layer)
     selection_layers = selection_layers + 1
     if selection_layers == 1 then
       selection_binds = {
-        hl.bind("RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-window"), { description = "Capture highlighted window" }),
-        hl.bind("CTRL + RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-fullscreen"), { description = "Capture entire screen" }),
-        hl.bind("TAB", hl.dsp.exec_cmd("omarchy-capture-region --select-window next"), { description = "Select next window to capture" }),
-        hl.bind("CTRL + TAB", hl.dsp.exec_cmd("omarchy-capture-region --select-window prev"), { description = "Select previous window to capture" }),
+        hl.bind("RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-window"),
+          { description = "Capture highlighted window" }),
+        hl.bind("CTRL + RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-fullscreen"),
+          { description = "Capture entire screen" }),
+        hl.bind("TAB", hl.dsp.exec_cmd("omarchy-capture-region --select-window next"),
+          { description = "Select next window to capture" }),
+        hl.bind("CTRL + TAB", hl.dsp.exec_cmd("omarchy-capture-region --select-window prev"),
+          { description = "Select previous window to capture" }),
       }
       for _, direction in ipairs({ "left", "right", "up", "down" }) do
         table.insert(
           selection_binds,
-          hl.bind(direction:upper(), hl.dsp.exec_cmd("omarchy-capture-region --select-window " .. direction), { description = "Select window to capture" })
+          hl.bind(direction:upper(), hl.dsp.exec_cmd("omarchy-capture-region --select-window " .. direction),
+            { description = "Select window to capture" })
         )
       end
     end
