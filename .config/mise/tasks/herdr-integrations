@@ -23,10 +23,13 @@ set -a
 	&& . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf"
 set +a
 
-# Prefer the binary the hook runs for (MISE_TOOL_INSTALL_PATH is set only in
-# the tool postinstall context); the PATH mise run provides also carries it.
-herdr_bin="$(command -v herdr || echo "${MISE_TOOL_INSTALL_PATH:-/nonexistent}/herdr")"
-if [[ ! -x "$herdr_bin" ]]; then
+# Prefer the binary this hook runs for: MISE_TOOL_INSTALL_PATH is set only in
+# the tool postinstall context and names the version that just landed, and a
+# distro copy of herdr on PATH (this machine carries a stale pacman herdr
+# 0.8.2 in /usr/bin) must never win over it. Manual runs fall back to PATH.
+herdr_bin="${MISE_TOOL_INSTALL_PATH:-}/herdr"
+[[ -x $herdr_bin ]] || herdr_bin="$(command -v herdr || true)"
+if [[ -z "$herdr_bin" || ! -x "$herdr_bin" ]]; then
 	echo "herdr-integrations: herdr binary not found, skipping" >&2
 	exit 0
 fi
