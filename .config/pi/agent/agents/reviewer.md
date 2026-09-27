@@ -4,7 +4,7 @@ description: Independently reviews consequential code or design when the user re
 model: opencode-go/glm-5.3-flash
 thinking: high
 tools: read, grep, find, ls, bash, ext:rpiv-web-tools/web_search, ext:rpiv-web-tools/web_fetch
-extensions: [pi-automode, rpiv-web-tools]
+extensions: [pi-permission-system, pi-permission-auto-review, rpiv-web-tools]
 skills: true
 prompt_mode: replace
 ---

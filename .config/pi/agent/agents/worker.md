@@ -1,10 +1,10 @@
 ---
 name: worker
 description: Implements one settled change in a fresh subagent context. Use for a plan leaf with defined boundaries, completion criteria, and checks; returns changed paths and verification evidence.
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/deepseek-v4.1-flash
 thinking: high
 tools: read, grep, find, ls, bash, edit, write
-extensions: [pi-automode]
+extensions: [pi-permission-system, pi-permission-auto-review]
 skills: true
 prompt_mode: replace
 ---
