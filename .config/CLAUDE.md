@@ -22,7 +22,8 @@ XDG config repo for `~/.config`, managed with yadm.
 - The `report-issue` skill files upstream, never against this repo.
 - Commit messages here are `domain: imperative`, lowercase after the prefix, no trailing period -- `tmux: fix copy-mode bugs`, `fish: add fenv`.
   The prefix names the config domain touched, never a conventional-commit type like `feat:` or `fix:`.
-  Stage by explicit path; this tree carries in-flight edits across several config domains at once.
+  A change and the doc it produces commit together -- a port plus the STATE.md note recording it is one commit under the feature's domain prefix, not two.
+  Stage by explicit path; this tree carries in-flight edits across several config domains at once -- never stage a hunk another agent wrote.
 
 ## claude/
 
