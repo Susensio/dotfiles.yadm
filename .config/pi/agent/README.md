@@ -27,8 +27,10 @@ Everything runs on the OpenCode Go subscription; there is no second provider and
 | Agents | OpenCode Go |
 | --- | --- |
 | `explorer`, `tester` | MiMo V2.6 Flash |
-| `worker` | DeepSeek V4 Flash |
+| `worker` | DeepSeek V4.1 Flash |
 | `reviewer` | GLM 5.3 Flash |
+
+The worker's 4× usage-limit promo on V4.1 Flash is limited-time; when it ends, re-check whether the tier still beats V4 Flash's quota (13,000 vs 6,500 req/5h) on real leaves.
 
 Benchmark the tiers on representative tasks rather than assuming the models are equivalent.
 
