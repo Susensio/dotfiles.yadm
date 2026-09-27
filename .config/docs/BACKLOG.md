@@ -28,6 +28,12 @@
 - claude | `audit-harness` could mechanize ADR-0041's identity-only rule for a project's `CLAUDE.md` record-file lines — flag one that restates a boundary or edit/append rule instead of naming location/kind/writer only, rather than leaving the check to whoever next reads that `CLAUDE.md` under `project-docs` step 1.
   One incident (`maniac`'s 186-line `docs/STATE.md`) is not yet enough to justify building this; revisit if it recurs.
 
+- pi | The `ask_user_question` overlay `[last-modified: 2026-09-27]` covers the latest conversation lines; we chose to leave the local patch (delete the `overlay:true`/`overlayOptions` object in `~/.config/pi/agent/npm/node_modules/@juicesharp/rpiv-ask-user-question/ask-user-question.ts`'s `ctx.ui.custom` call) unapplied for now, but revisit if the trade stops being acceptable.
+  Upstream tracks it as juicesharp/rpiv-mono [#47](https://github.com/juicesharp/rpiv-mono/issues/47), [#205](https://github.com/juicesharp/rpiv-mono/issues/205), [#221](https://github.com/juicesharp/rpiv-mono/issues/221) (has a validated bottom-pane design: `overlay: false`, optionally `maxHeightPercent`) and [#253](https://github.com/juicesharp/rpiv-mono/issues/253).
+  The installed package has no config knob beyond `collapseKey` (`~/.config/rpiv-ask-user-question/config.json`); the v2.11.0 `Ctrl+]` collapse is the shipped stopgap.
+  Trade-offs to re-check before applying the patch: non-overlay input routing in fullscreen mode is only community-verified on pi-tui, not here (see #253's reproduction); any applied patch gets wiped on package updates, so it would need an npm `postinstall` hook or a repo-tracked script with an anchor-match that fails loudly when upstream restructures the file; retirement signal is #221/#205 closing or a v2.12+ release-note overlay change.
+  Also unfiled upstream: Enter on the multi-question Submit tab is a silent no-op when a tab's custom draft was never confirmed on its own tab, so the dialog waits until Esc; partial answers are never returned by design (`orderedAnswers`).
+
 ## Omarchy migration
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
@@ -57,6 +63,9 @@
 - omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
   An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line).
   Reachable from the slider once `bugfix/hypr-envs-path.sh` has run and the session restarted.
+- upstream | herdr: consume `rpiv:ask-user:blocked` — the stable channel `@juicesharp/rpiv-ask-user-question` emits while its questionnaire waits for input — in herdr's pi integration for the pane's blocked state (today it listens for a `herdr:blocked` event nothing emits), and consider a `herdr integration sync` that installs outdated integrations for present harnesses natively.
+  Either would retire our bridge extension (`.config/pi/agent/extensions/herdr-ask-user-bridge.ts`) and shrink `mise/tasks/herdr-integrations` to one line.
+  See ADR-0060.
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
