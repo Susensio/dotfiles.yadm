@@ -259,54 +259,6 @@ link_tool_assets() {
   done
 }
 
-link_skills() {
-  local skills=()
-  readarray -t skills < <(echo "${tool[info]}" | jq --compact-output '.tool_options.skills[]?')
-
-  for skill_json in "${skills[@]}"; do
-    local name file references is_global
-    name=$(echo "$skill_json" | jq --raw-output '.name')
-    file=$(echo "$skill_json" | jq --raw-output '.file // empty')
-    references=$(echo "$skill_json" | jq --raw-output '.references // empty')
-    is_global=$(echo "$skill_json" | jq --raw-output '.global // false')
-
-    # Project-scoped skills mirror into this repo's own agent-config dirs;
-    # global ones go where each agent actually looks from any project.
-    local skill_roots=()
-    if [[ "$is_global" == "true" ]]; then
-      skill_roots=(
-        "$HOME/.config/claude/skills/$name"
-        "$HOME/.config/codex/skills/$name"
-        "$HOME/.config/opencode/skills/$name"
-        "$HOME/.config/pi/agent/skills/$name"
-      )
-    else
-      skill_roots=(
-        "$HOME/.config/.agents/skills/$name"
-        "$HOME/.config/.claude/skills/$name"
-        "$HOME/.config/.opencode/skills/$name"
-      )
-    fi
-
-    for skill_root in "${skill_roots[@]}"; do
-      if [[ -n "$file" ]]; then
-        mkdir -p "$skill_root"
-        echo "*" > "$skill_root/.gitignore"
-        symlink "${tool[path]}/${file}" "$skill_root/SKILL.md"
-      fi
-
-      if [[ -n "$references" ]]; then
-        mkdir -p "$skill_root/references"
-        echo "*" > "$skill_root/references/.gitignore"
-        local ref
-        for ref in "${tool[path]}"/$references; do
-          [[ -f "$ref" ]] && symlink "$ref" "$skill_root/references/"
-        done
-      fi
-    done
-  done
-}
-
 link_node_modules() {
   local node_modules_dir=${tool[path]}/lib/node_modules
   [[ ! -d "$node_modules_dir" ]] && return 0
@@ -363,7 +315,6 @@ main() {
     generate_completions
     generate_shell_init
     link_tool_assets
-    link_skills
     link_node_modules
   done
 

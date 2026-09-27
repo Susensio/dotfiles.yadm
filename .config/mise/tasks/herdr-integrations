@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+#MISE quiet=true
+# Install herdr's agent-state integrations for every agent harness whose
+# config lives on this machine. Harness-agnostic: the harness list, state and
+# target path come from `herdr integration status`, so adding a harness never
+# requires editing this task. Idempotent and install-only — the claude
+# uninstaller rewrites herdr's own hook entry in the tracked settings.json
+# (normalizes its matcher), so an uninstall+install cycle churns the file.
+set -u
+
+# environment.d/10_xdg.conf is the single source of these variables
+# (docs/environment-architecture.md §3): it defines the XDG base and the agent
+# roots (CLAUDE_CONFIG_DIR, PI_CODING_AGENT_DIR, ...) herdr's installers read —
+# neither installer consults XDG_CONFIG_HOME itself. systemd sources the whole
+# directory lexically at login, but sibling files may not be shell-safe
+# (ls_colors.conf's line continuations execute as commands in bash), so source
+# only the file that owns the agent roots instead of duplicating the defaults
+# here. It ships in the same yadm checkout as the harness configs, so a bare
+# machine without it has no harnesses to integrate and skips below.
+set -a
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf ]] \
+	&& . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf"
+set +a
+
+# Prefer the binary this hook runs for: MISE_TOOL_INSTALL_PATH is set only in
+# the tool postinstall context and names the version that just landed, and a
+# distro copy of herdr on PATH (this machine carries a stale pacman herdr
+# 0.8.2 in /usr/bin) must never win over it. Manual runs fall back to PATH.
+herdr_bin="${MISE_TOOL_INSTALL_PATH:-}/herdr"
+[[ -x $herdr_bin ]] || herdr_bin="$(command -v herdr || true)"
+if [[ -z "$herdr_bin" || ! -x "$herdr_bin" ]]; then
+	echo "herdr-integrations: herdr binary not found, skipping" >&2
+	exit 0
+fi
+
+# The tool postinstall context names the harness that fired (MISE_TOOL_NAME):
+# pi's hook integrates pi, claude's integrates claude — installing one harness
+# never touches another harness's config. herdr's own hook (and a manual run)
+# integrates every harness present here: herdr's content changed, or a full
+# sync was asked for.
+if [[ -n ${MISE_TOOL_NAME:-} && $MISE_TOOL_NAME != herdr ]]; then
+	"$herdr_bin" integration install "$MISE_TOOL_NAME" >&2 || :
+	exit 0
+fi
+
+# Full sync from here on: herdr's own postinstall or a manual run.
+# --- skill mirrors ----------------------------------------------------------
+# Herdr ships one agent skill (SKILL.md, install-shipped); this repo hand-
+# maintains a second entrypoint (herdr/SKILL-config.md) that routes into the
+# install-linked references/. Both are mirrored as plain symlinks and tracked
+# in yadm where the tree is admitted; trees the root exclude does not re-
+# include (codex, opencode, the dot-dirs) keep their mirrors untracked by
+# dir-level policy. No .gitignore is shipped beside mirrors: agents disagree
+# on what it should hide (pi honors ignore files while scanning skills and
+# would drop the mirror). Runs on full syncs only â install-side content
+# changes only when herdr itself does.
+link_skill() {
+	local src=$1 dest=$2
+	if [[ -e $dest && ! -L $dest ]]; then
+		echo "herdr-integrations: skipping '$dest': not a managed symlink" >&2
+		return 0
+	fi
+	[[ -L $dest && $(readlink -f -- "$dest") == "$(readlink -f -- "$src")" ]] && return 0
+	mkdir --parents -- "$(dirname -- "$dest")"
+	ln --symbolic --relative --force "$src" "$dest"
+}
+
+skill_mirrors() {
+	local install src_herdr src_config ref
+	install=$(dirname -- "$herdr_bin")
+	src_herdr="$install/SKILL.md"
+	src_config="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/SKILL-config.md"
+
+	# Global skill: guarded on the harness being set up, mirroring how the
+	# integration installs above skip absent harnesses.
+	local harness_root
+	for harness_root in \
+		"${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}" \
+		"${CODEX_HOME:-$HOME/.config/codex}" \
+		"${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}" \
+		"${PI_CODING_AGENT_DIR:-$HOME/.config/pi/agent}"
+	do
+		[[ -d $harness_root ]] || continue
+		link_skill "$src_herdr" "$harness_root/skills/herdr/SKILL.md"
+	done
+
+	# Project-scoped entrypoint: mirrors into this repo's own dot-dirs.
+	local config_home=${XDG_CONFIG_HOME:-$HOME/.config} dot_dir
+	for dot_dir in .agents .claude .opencode; do
+		link_skill "$src_config" "$config_home/$dot_dir/skills/herdr-config/SKILL.md"
+		for ref in "$install"/*.mdx; do
+			[[ -f $ref ]] || continue
+			link_skill "$ref" "$config_home/$dot_dir/skills/herdr-config/references/$(basename -- "$ref")"
+		done
+	done
+}
+
+skill_mirrors
+
+status=$("$herdr_bin" integration status 2>/dev/null) || {
+	echo "herdr-integrations: herdr integration status failed, skipping" >&2
+	exit 0
+}
+
+# Full status (--outdated-only drops "not installed" entries, which are exactly
+# the fresh-machine case). Each line is
+#	<name>[ (experimental)]: <state>[ (vX < vY)] (<target file>)
+# and herdr's installer is the final authority on harness presence: it refuses
+# with "install X first" for absent ones, and refuses the pi/omp
+# shared-directory collision — so a failure here is never fatal for the hook.
+while IFS= read -r line; do
+	name=${line%%:*}
+	name=${name%% \(*}
+	target=${line##*'('}
+	target=${target%')'}
+
+	# current: already matches this herdr; a repeat install only churns mtimes.
+	[[ $line == *" current "* ]] && continue
+
+	# The target file's parent is the harness config directory herdr's
+	# installer requires; skip silently when the harness is not set up here.
+	[[ -d ${target%/*} ]] || continue
+	"$herdr_bin" integration install "$name" >&2 || :
+done <<<"$status"
