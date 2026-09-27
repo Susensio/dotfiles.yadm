@@ -3,6 +3,8 @@
 # omarchy-remove-preinstalls without its prompt, and without its blanket rm over
 # ~/.local/bin, where mise.sh links our own claude, codex, gh... The packages are
 # mise/conf.d/omarchy.toml##distro.omarchy's, applied by mise.sh.
+# The launcher entries we keep or add ourselves are installed by webapps.sh and
+# tui-apps.sh, which run after this so the remove-all sweeps cannot take them.
 set -euo pipefail
 
 command -v omarchy-webapp-remove-all &>/dev/null || exit 0
@@ -30,16 +32,3 @@ if [[ ! -e $MARKER ]]; then
   touch "$MARKER"
   hyprctl reload &>/dev/null || true
 fi
-
-# Icons are the ones Omarchy bundles under /usr/share/icons/hicolor; Gmail, the
-# mailto: handler, is installed by mime.sh
-APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
-webapp() { [[ -f $APPS/$1.desktop ]] || omarchy-webapp-install "$@"; }
-webapp "ChatGPT" https://chatgpt.com/ chatgpt
-webapp "Gemini" https://gemini.google.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/google-gemini.png
-webapp "GitHub" https://www.github.com
-webapp "Google Maps" https://maps.google.com google-maps
-webapp "Google Photos" https://photos.google.com/ google-photos
-webapp "WhatsApp" https://web.whatsapp.com/ whatsapp
-webapp "YouTube" https://youtube.com/ youtube
-[[ -f $APPS/Disk\ Usage.desktop ]] || omarchy-tui-install "Disk Usage" 'bash -c "dua i /"' float disk-usage
