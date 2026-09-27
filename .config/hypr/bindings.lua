@@ -72,7 +72,8 @@ end)
 
 -- Apps; anything else is a search away in the Omarchy menu
 o.bind("SUPER + RETURN", "Terminal", { omarchy = "terminal" })
-o.bind("SUPER + SHIFT + RETURN", "Tmux", { omarchy = "terminal-tmux" })
+-- tm creates/attaches `main`, or opens sessionizer when called from $HOME
+o.bind("SUPER + SHIFT + RETURN", "Tmux", { launch = "omarchy-launch-terminal tm" })
 o.bind("SUPER + CTRL + RETURN", "Herdr", { omarchy = "terminal-herdr" })
 -- An app window: no tabs or address bar
 o.bind("SUPER + W", "Slim browser", { webapp = "https://www.google.com/" })
