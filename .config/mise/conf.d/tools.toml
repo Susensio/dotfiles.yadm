@@ -7,7 +7,7 @@ aichat = { version = "latest", extra_assets = [
 antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
 claude = { version = "latest", postinstall = "mise run herdr-integrations" }
-codex = { version = "latest", symlink_bins = true }
+codex = { version = "latest", symlink_bins = true, postinstall = "mise run herdr-integrations" }
 herdr = { version = "latest", gen_completions = "completion fish", postinstall = "mise run herdr-integrations", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",

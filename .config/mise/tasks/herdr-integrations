@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 #MISE quiet=true
-# Install herdr's agent-state integrations into the agent harnesses on this
-# machine. Declared as a tool-level postinstall on herdr (so integrations
-# refresh when herdr is installed or upgraded) and on pi and claude
-# (tools.toml), so a harness installed after herdr still gets its own
-# integration. Idempotent, and install-only: the claude uninstaller rewrites
-# herdr's own hook entry in the tracked settings.json (normalizes its
-# matcher), so an uninstall+install cycle churns the file on every run.
+# Install herdr's agent-state integrations for every agent harness whose
+# config lives on this machine. Harness-agnostic: the harness list, state and
+# target path come from `herdr integration status`, so adding a harness never
+# requires editing this task. Idempotent and install-only — the claude
+# uninstaller rewrites herdr's own hook entry in the tracked settings.json
+# (normalizes its matcher), so an uninstall+install cycle churns the file.
 set -u
 
 # environment.d/10_xdg.conf is the single source of these variables
 # (docs/environment-architecture.md §3): it defines the XDG base and the agent
-# roots (CLAUDE_CONFIG_DIR, PI_CODING_AGENT_DIR) herdr's installers read —
+# roots (CLAUDE_CONFIG_DIR, PI_CODING_AGENT_DIR, ...) herdr's installers read —
 # neither installer consults XDG_CONFIG_HOME itself. systemd sources the whole
 # directory lexically at login, but sibling files may not be shell-safe
 # (ls_colors.conf's line continuations execute as commands in bash), so source
@@ -34,19 +33,38 @@ if [[ -z "$herdr_bin" || ! -x "$herdr_bin" ]]; then
 	exit 0
 fi
 
-# Integrate only harnesses whose dotfiles checkout is present. herdr's pi
-# installer creates no directories (it exits asking to install pi first) and
-# otherwise falls back to ~/.pi/agent/extensions, which this layout does not
-# use; its claude installer would seed a fresh settings.json that a later yadm
-# checkout would have to overwrite around.
-if [[ -d "${PI_CODING_AGENT_DIR:-/nonexistent}/extensions" ]]; then
-	"$herdr_bin" integration install pi >&2 || :
-else
-	echo "herdr-integrations: skip pi (extensions dir absent)" >&2
+# The tool postinstall context names the harness that fired (MISE_TOOL_NAME):
+# pi's hook integrates pi, claude's integrates claude — installing one harness
+# never touches another harness's config. herdr's own hook (and a manual run)
+# integrates every harness present here: herdr's content changed, or a full
+# sync was asked for.
+if [[ -n ${MISE_TOOL_NAME:-} && $MISE_TOOL_NAME != herdr ]]; then
+	"$herdr_bin" integration install "$MISE_TOOL_NAME" >&2 || :
+	exit 0
 fi
 
-if [[ -f "${CLAUDE_CONFIG_DIR:-/nonexistent}/settings.json" ]]; then
-	"$herdr_bin" integration install claude >&2 || :
-else
-	echo "herdr-integrations: skip claude (settings.json absent)" >&2
-fi
+status=$("$herdr_bin" integration status 2>/dev/null) || {
+	echo "herdr-integrations: herdr integration status failed, skipping" >&2
+	exit 0
+}
+
+# Full status (--outdated-only drops "not installed" entries, which are exactly
+# the fresh-machine case). Each line is
+#	<name>[ (experimental)]: <state>[ (vX < vY)] (<target file>)
+# and herdr's installer is the final authority on harness presence: it refuses
+# with "install X first" for absent ones, and refuses the pi/omp
+# shared-directory collision — so a failure here is never fatal for the hook.
+while IFS= read -r line; do
+	name=${line%%:*}
+	name=${name%% \(*}
+	target=${line##*'('}
+	target=${target%')'}
+
+	# current: already matches this herdr; a repeat install only churns mtimes.
+	[[ $line == *" current "* ]] && continue
+
+	# The target file's parent is the harness config directory herdr's
+	# installer requires; skip silently when the harness is not set up here.
+	[[ -d ${target%/*} ]] || continue
+	"$herdr_bin" integration install "$name" >&2 || :
+done <<<"$status"
