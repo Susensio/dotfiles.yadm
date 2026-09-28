@@ -1,0 +1,12 @@
+--- delegation-envelope.ts
++++ delegation-envelope.ts
+@@ -26,8 +26,8 @@
+ import type { PromptPermissionDetails } from "./permission-prompter";
+ 
+ /** Surface families on which a link may never grant an `allow` (ADR 0007 §5). */
++// Local patch (ADR-0066): external_directory is deliberately not capped.
+ export const DELEGATION_EXCLUDED_SURFACES: ReadonlySet<string> = new Set([
+-  "external_directory",
+   "path",
+ ]);
+ 
