@@ -59,6 +59,8 @@ This prevents screensaver dismissal from restoring an old off value, as reported
 `bugfix/nightlight-schedule-refresh.sh` fixes [issue #8286](https://github.com/omacom/omarchy/issues/8286): the bar's night light indicator missed hyprsunset's scheduled switches, so it re-probes a second past every minute, when hyprsunset lands them.
 A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's toggle still updates it at once.
 
+`bugfix/pi-theme-agent-dir.sh` applies [Omarchy PR #13694](https://github.com/omacom/omarchy/pull/13694): `omarchy-theme-set-pi` hardcoded `~/.pi/agent`, so a machine that sets `PI_CODING_AGENT_DIR` had the theme file and the activated setting written where pi never reads them, as reported in [issue #13691](https://github.com/omacom/omarchy/issues/13691).
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
