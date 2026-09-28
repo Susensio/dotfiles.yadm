@@ -6,6 +6,12 @@ Note that this doc describes the global userspace harness, not a project-local h
 
 All of it lives under `~/.config/claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
 That tree is the only source of truth: anything elsewhere that reads as harness config is a compiled copy, so edit it here.
+Keep the hand-maintained config here as real files.
+`CLAUDE_CONFIG_DIR` also puts credentials, session transcripts and plugins in this directory; `yadm/exclude` and `claude/.gitignore` keep those out of version control.
+
+Hooks and statuslines in `settings.json` use `$CLAUDE_CONFIG_DIR` and survive a directory move.
+The write paths under `sandbox.filesystem.allowWrite` are literal; update them when moving the directory so the new location stays writable.
+A stale path can silently deny writes.
 
 ## Two entry points
 
