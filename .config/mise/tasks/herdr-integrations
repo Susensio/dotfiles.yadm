@@ -49,7 +49,7 @@ fi
 # maintains a second entrypoint (herdr/SKILL-config.md) that routes into the
 # install-linked references/. Both are mirrored as plain symlinks and tracked
 # in yadm where the tree is admitted; trees the root exclude does not re-
-# include (codex, opencode, the dot-dirs) keep their mirrors untracked by
+# include (opencode, the dot-dirs) keep their mirrors untracked by
 # dir-level policy. No .gitignore is shipped beside mirrors: agents disagree
 # on what it should hide (pi honors ignore files while scanning skills and
 # would drop the mirror). Runs on full syncs only â install-side content

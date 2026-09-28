@@ -47,7 +47,8 @@ Use a worker only after design decisions are settled and the brief has clear bou
 Keep routine verification with the implementer.
 Use a tester when an isolated pass/fail check is a standalone task because of runtime behavior, cost, output volume, parallelism, or the need for independent observation.
 
-Give parallel writers disjoint responsibilities and invoke each with `isolation: "worktree"`.
+Give parallel writers disjoint responsibilities and separate worktrees or equivalent isolated checkouts.
+Use the harness's documented isolation facility when available; otherwise prepare isolated checkouts before dispatch, or run writers sequentially.
 
 Worktrees start from committed `HEAD` and cannot see uncommitted main-session changes.
 
@@ -62,6 +63,11 @@ Agent definitions hold execution boundaries; skills hold conditional procedures 
 `agent/prompts/` holds prompt templates — one Markdown file per `/`-command. `/perm-report` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
 `settings.json` selects packages, while `subagents.json` removes unused orchestration features.
 Runtime credentials, model metadata, package files, and session history are not harness documentation.
+
+Codex loads this harness's global working-style instructions through `~/.config/codex/AGENTS.md`, a symlink to this harness's `AGENTS.md`.
+It discovers these skills through `~/.config/codex/skills/shared`, a directory symlink to this harness's `skills/` directory.
+Adding or removing a skill here updates both catalogs.
+Codex keeps its bundled skills under its own `skills/.system/` directory and its agent definitions and runtime configuration in its own format.
 
 ## Extensions
 

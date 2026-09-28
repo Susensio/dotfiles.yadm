@@ -1,0 +1,16 @@
+# Hand-maintained config only; runtime state stays local.
+*
+!.gitignore
+!AGENTS.md
+!config.toml
+!hooks.json
+!herdr-agent-state.sh
+!rules/
+!rules/**
+!skills/
+!skills/**
+
+# Bundled skills are managed by Codex.
+skills/.system/
+__pycache__/
+*.pyc

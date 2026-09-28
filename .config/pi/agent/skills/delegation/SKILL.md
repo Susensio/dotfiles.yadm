@@ -7,6 +7,10 @@ description: Routes broad discovery, standalone verification, planned implementa
 
 Work directly when the target and relevant context are bounded. Delegation buys an independent context but pays a cold start, so use observable task structure rather than estimating tokens.
 
+The roles below describe responsibilities rather than required agent names.
+Use the available delegation tool and an agent whose capabilities and permissions fit the brief; state the role in the brief when no matching named agent exists.
+If delegation is unavailable or disallowed, work directly and report any required independent review that could not be obtained.
+
 ## Route work
 
 Without a plan, keep work local except for broad discovery, web research, bulky evidence, or a test-only task that meets the boundary below. Use independent review only when a trigger below applies.
@@ -28,13 +32,20 @@ A worker leaf is ready when no design decision remains, its responsibility does 
 
 ## Parallel work
 
-Readers can run concurrently. Give parallel writers disjoint responsibilities and invoke each with `isolation: "worktree"`. Worktrees start from committed `HEAD` and cannot see uncommitted main-session changes, so required inputs must exist in `HEAD`. Integrate returned branches before building further work on them.
+Readers can run concurrently.
+Give parallel writers disjoint responsibilities and a separate worktree or equivalent isolated checkout each.
+Use the harness's documented isolation facility when available; otherwise prepare isolated checkouts before dispatch.
+Run writers sequentially when isolated working trees cannot be provided.
+
+Check which revision and local changes each child receives; required inputs must exist in its checkout.
+Worktrees created from committed `HEAD` do not include uncommitted main-session changes.
+Integrate returned changes before building further work on them.
 
 The main session does not repeat delegated research. It checks the returned evidence and inspects file changes before accepting them.
 
 ## Review once
 
-Review the integrated change rather than every worker leaf. Use `reviewer` when at least one condition holds:
+Review the integrated change rather than every worker leaf. Delegate to an independent reviewer when at least one condition holds:
 
 - The user requests independent review.
 - The change affects authentication, authorization, secrets, destructive operations, money, or privacy.
