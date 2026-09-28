@@ -34,6 +34,12 @@ Setup and the standing oddities are in `docs/omarchy.md`.
   Applied to the installed command on 2026-09-28; the patched file matched the tested copy and a second bootstrap-step run was silent.
   Observe the next normal screensaver dismissal and lock/unlock cycle; neither was forced during testing.
   The upstream PR remains open; delete the step once its fix ships.
+- Bugfix step `yadm/bootstrap.d/omarchy/bugfix/nightlight-schedule-refresh.sh` (new 2026-09-28, ADR-0057 pattern): the bar's night light service probed hyprsunset only at start and after an Omarchy toggle, so the 07:00/20:00 schedule switches left the indicator stale ([issue #8286](https://github.com/omacom/omarchy/issues/8286)); the patch re-probes a second past every wall-clock minute, when hyprsunset lands its switches.
+  Applied live 2026-09-28: a raw `hyprctl hyprsunset temperature` change reached `omarchy-shell nightlight status` at the next minute boundary, both directions; the step is silent on rerun.
+  Filed upstream as [omacom/omarchy#13684](https://github.com/omacom/omarchy/pull/13684) 2026-09-28 (branch `nightlight-follow-schedule`, worktree `~/Projects/omarchy-nightlight`); delete the step once it ships.
+  `nightlight-probe-guard.patch` (2026-09-29, from the PR review) drops a probe result that lands while a toggle is still applying, so an in-flight probe can't flip the bar back; applied live 2026-09-29.
+  Observe the next scheduled 07:00 and 20:00 switches, including one crossed while suspended.
+  The polling is a stopgap: if [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) ships, `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` replaces it.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
 
