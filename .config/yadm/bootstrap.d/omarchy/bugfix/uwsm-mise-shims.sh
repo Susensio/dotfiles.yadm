@@ -6,5 +6,5 @@ set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 apply_omarchy_patch \
-  "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/uwsm-mise-shims.patch" \
+  uwsm-mise-shims.patch \
   /usr/share/uwsm/env.d/10-omarchy 0
