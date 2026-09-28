@@ -56,6 +56,9 @@ Each step sources `lib.sh` and passes its patch filename; the helper resolves it
 `bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
 This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
 
+`bugfix/nightlight-schedule-refresh.sh` fixes [issue #8286](https://github.com/omacom/omarchy/issues/8286): the bar's night light indicator missed hyprsunset's scheduled switches, so it re-probes a second past every minute, when hyprsunset lands them.
+A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's toggle still updates it at once.
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.

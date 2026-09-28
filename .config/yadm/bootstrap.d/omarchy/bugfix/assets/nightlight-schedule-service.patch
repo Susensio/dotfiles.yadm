@@ -1,0 +1,24 @@
+diff --git a/shell/plugins/services/nightlight/Service.qml b/shell/plugins/services/nightlight/Service.qml
+index 18ed7d16..e38c3619 100644
+--- a/shell/plugins/services/nightlight/Service.qml
++++ b/shell/plugins/services/nightlight/Service.qml
+@@ -71,6 +71,19 @@ Item {
+     }
+   }
+ 
++  // hyprsunset switches its schedule profiles without telling anyone, and
++  // always on a minute boundary, so probe again just after each one.
++  Timer {
++    id: minuteProbe
++    running: true
++    interval: NightlightModel.msUntilNextMinuteProbe(new Date())
++    onTriggered: {
++      if (!applyProcess.running) root.refresh()
++      interval = NightlightModel.msUntilNextMinuteProbe(new Date())
++      start()
++    }
++  }
++
+   Process {
+     id: applyProcess
+     onExited: function() {
