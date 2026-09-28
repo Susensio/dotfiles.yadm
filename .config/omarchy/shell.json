@@ -1,8 +1,8 @@
 {
   "version": 1,
   "idle": {
-    "screensaver": 150,
-    "lock": 300
+    "screensaver": 300,
+    "lock": 900
   },
   "bar": {
     "position": "top",
@@ -19,6 +19,9 @@
         },
         {
           "id": "susensio.scratchpad"
+        },
+        {
+          "id": "io.github.poctek.hyprland-submap"
         }
       ],
       "center": [
@@ -29,7 +32,9 @@
           "id": "omarchy.clock",
           "format": "HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm"
+          "verticalFormat": "HH\n—\nmm",
+          "birthYear": 1990,
+          "lifeExpectancy": 90
         },
         {
           "id": "omarchy.keyboard-layout"
@@ -43,7 +48,9 @@
       ],
       "right": [
         {
-          "id": "omarchy.tray"
+          "id": "omarchy.tray",
+          "pinned": [],
+          "hidden": ["chrome_status_icon_1"]
         },
         {
           "id": "omarchy.agents"

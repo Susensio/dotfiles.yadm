@@ -30,6 +30,7 @@ After `yadm pull`, the `post_pull` hook reruns the bootstrap, which is silent wh
 Omarchy renders `omarchy/themed/` into `~/.local/state/omarchy/current/theme`, state yadm ignores, only during a theme set ([ADR-0052](adr/0052-direct-omarchy-tmux-palette.md)).
 Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` requires the rendered `hypr-palette.lua`, and a clone that predates the template fails its config rather than merely losing styling.
 `bootstrap.d/omarchy/theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.
+`themed/shell.toml.tpl` pins only the bar surface to the theme's `darker_background`, shadowing the stock shell template that renders every other surface; a machine-level `omarchy/shell.toml` key would win over the rendered file.
 The step renders files only: running apps retint through Omarchy's theme-set hook, and the rest of what a theme ships — backgrounds, icons — still arrives only with a theme set, so editing one of those wants an explicit `omarchy-theme-refresh`.
 
 ## Overriding Omarchy commands
