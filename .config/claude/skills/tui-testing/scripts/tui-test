@@ -24,6 +24,9 @@ socket_path() { echo "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$1"; }
 # Hide our own tmux from the TUI being tested
 unset TMUX
 
+# A spawned TUI is not the pane's agent: strip herdr identity so its integration cannot claim the pane (ADR-0063)
+unset "${!HERDR_@}"
+
 cmd_spawn() {
     local cmd=${1:?usage: spawn <cmd> [width] [height]}
     local w=${2:-100} h=${3:-24}

@@ -38,3 +38,4 @@ scripts/tui-test kill "$id"
 - **Literal vs Control keys**: When sending text strings (especially those with spaces or dashes), use `-l --` so tmux doesn't parse them as special keys: `scripts/tui-test send-keys "$id" -l -- "text to type"`.
 - **Python REPLs**: If your test involves spawning an interactive python shell, always export `PYTHON_BASIC_REPL=1` first. Modern Python's advanced readline and auto-indent will scramble `send-keys` and screen captures.
 - **The captured frame is plain text**, with ANSI colors stripped. It's for verifying layout, text, popups, and borders, not color styling.
+- **Nested agents**: `tui-test spawn` strips `HERDR_*`, because a TUI launched inside a herdr pane that inherits the pane's identity reports agent state for that pane and freezes the real agent's state at `working` (ADR-0063); never pass the identity through by hand.

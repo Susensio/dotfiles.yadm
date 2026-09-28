@@ -66,6 +66,9 @@
 - upstream | herdr: consume `rpiv:ask-user:blocked` — the stable channel `@juicesharp/rpiv-ask-user-question` emits while its questionnaire waits for input — in herdr's pi integration for the pane's blocked state (today it listens for a `herdr:blocked` event nothing emits), and consider a `herdr integration sync` that installs outdated integrations for present harnesses natively.
   Either would retire our bridge extension (`.config/pi/agent/extensions/herdr-ask-user-bridge.ts`) and shrink `mise/tasks/herdr-integrations` to one line.
   See ADR-0060.
+- upstream | herdr: its pi integration reports pane state from whatever process holds the pane's `HERDR_*` env, so a `pi` started inside the pane (a `tui-test` TUI before ADR-0063, a hand-rolled one still) claims the pane and its larger `seq` base makes herdr silently ignore the real agent's reports for the rest of that process, freezing the dot at `working` (`socket-api.mdx`, "Agent state reporting"; nothing clears the watermark, not `pane.clear_agent_authority`, not `pane.release_agent`, not `/reload`).
+  Wanted: an ownership check (only the pane's foreground process may report), sequencing per reporter rather than per source, or at least a diagnostic when a report is ignored.
+  See ADR-0063.
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
