@@ -11,6 +11,7 @@ Only the hand-maintained harness is tracked here by yadm; runtime state is ignor
 - `pi/agent/AGENTS.md` — universal behaviour and pre-routing triggers
 - `pi/agent/README.md` — harness overview, model tiers, delegation policy
 - `pi/agent/settings.json` — theme, default provider/model, package list
+- `pi/agent/keybindings.json` — disables the stock thinking-level shortcut in favor of Shift+Up/Down from `thinking-direction.ts`
 - `pi/agent/subagents.json` — hand-edited global subagent feature flags
 - `pi/agent/agents/*` — subagent definitions
 - `pi/agent/prompts/*` — prompt templates; each file becomes a `/`-command (`/permission-audit` briefs the session to analyze the permission log and propose rule changes)
