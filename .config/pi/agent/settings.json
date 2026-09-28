@@ -13,5 +13,14 @@
     "npm:@narumitw/pi-usage",
     "npm:@mzwing/pi-permission-auto-review"
   ],
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "enabledModels": [
+    "opencode-go/mimo-v2.6-pro",
+    "opencode-go/qwen3.8-max",
+    "opencode-go/glm-5.3",
+    "opencode-go/glm-5.3-flash",
+    "opencode-go/deepseek-v4.1-flash",
+    "opencode-go/gpt-6-luna",
+    "opencode-go/kimi-k2.7-code"
+  ]
 }
