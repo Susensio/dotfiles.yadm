@@ -18,6 +18,8 @@
 !agent/extensions/**
 !agent/patches/
 !agent/patches/**
+!agent/bundler/
+!agent/bundler/**
 
 # Knockouts last: the last matching rule wins.
 node_modules/
