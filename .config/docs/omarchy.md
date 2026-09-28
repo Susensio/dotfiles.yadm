@@ -25,6 +25,13 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
 
 After `yadm pull`, the `post_pull` hook reruns the bootstrap, which is silent when there is nothing to do ([ADR-0056](adr/0056-silent-idempotent-bootstrap.md)).
 
+## Theme templates
+
+Omarchy renders `omarchy/themed/` into `~/.local/state/omarchy/current/theme`, state yadm ignores, only during a theme set ([ADR-0052](adr/0052-direct-omarchy-tmux-palette.md)).
+Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` requires the rendered `hypr-palette.lua`, and a clone that predates the template fails its config rather than merely losing styling.
+`bootstrap.d/omarchy/theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.
+The step renders files only: running apps retint through Omarchy's theme-set hook, and the rest of what a theme ships — backgrounds, icons — still arrives only with a theme set, so editing one of those wants an explicit `omarchy-theme-refresh`.
+
 ## Overriding Omarchy commands
 
 Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` for everything Hyprland starts, and its `autostart.lua` imports that into the user manager, so a wrapper in `~/bin/overrides` would never be reached in the session.
