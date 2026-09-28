@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Set Chromium's default page zoom once per yadm bootstrap."""
+"""Ensure 125% default page zoom during yadm bootstrap."""
 
 import argparse
 import json
@@ -25,6 +25,9 @@ def set_zoom(preferences):
     data = json.loads(preferences.read_text()) if preferences.exists() else {}
     if zoom_is_target(data):
         return
+    if chromium_running():
+        print("Chromium is running; set Page zoom to 125% in chrome://settings/appearance.")
+        return
 
     data.setdefault("partition", {}).setdefault("default_zoom_level", {})["x"] = math.log(1.25) / math.log(1.2)
     preferences.parent.mkdir(parents=True, exist_ok=True)
@@ -41,23 +44,6 @@ def set_zoom(preferences):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("action", choices=("bootstrap", "apply-pending"))
 parser.add_argument("preferences", type=Path)
 args = parser.parse_args()
-
-pending = args.preferences.parent / ".yadm-default-zoom-pending"
-if args.action == "bootstrap":
-    if chromium_running():
-        data = json.loads(args.preferences.read_text()) if args.preferences.exists() else {}
-        if zoom_is_target(data):
-            pending.unlink(missing_ok=True)
-        else:
-            pending.parent.mkdir(parents=True, exist_ok=True)
-            pending.touch(mode=0o600)
-            print("Chromium is running; 125% page zoom will apply at its next start.")
-    else:
-        set_zoom(args.preferences)
-        pending.unlink(missing_ok=True)
-elif pending.exists() and not chromium_running():
-    set_zoom(args.preferences)
-    pending.unlink()
+set_zoom(args.preferences)

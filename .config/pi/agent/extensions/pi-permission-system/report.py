@@ -5,10 +5,15 @@ Standalone, stdlib-only: the deterministic parsing lives here so the agent
 (or a terminal) only reads the output. The heavy lifting — correlation,
 grouping, rule evaluation — is not something a model should redo each time.
 
-Usage: report.py [denied|review]
-  (no arg)  full optimization report
+By default the report covers only decisions made under the CURRENT config
+(window starts at config.json's mtime), so evidence never mixes config
+generations. --all lifts the window to the whole log history.
+
+Usage: report.py [denied|review] [--all]
+  (no arg)  full optimization report over the current-config window
   denied    only the denial clusters section
   review    only the reviewer section
+  --all     ignore the config-change window, report the whole log
 """
 
 import json
@@ -16,6 +21,7 @@ import os
 import re
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -29,7 +35,7 @@ WHO = {
 TERMINAL = {"auto_approved", "approved", "session_approved", "infrastructure_auto_allowed", "denied", "blocked"}
 
 
-def load():
+def load(window_epoch=None):
     recs = {}
     since = None
     with open(LOG) as f:
@@ -41,8 +47,15 @@ def load():
                 j = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            ts = j.get("timestamp")
+            if window_epoch and ts:
+                try:
+                    if datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp() < window_epoch:
+                        continue
+                except ValueError:
+                    pass
             if since is None:
-                since = j.get("timestamp")
+                since = ts
             rid = j.get("requestId")
             if not rid:
                 continue
@@ -207,10 +220,27 @@ def section_reviewer(done, lines):
 def main():
     if not LOG.exists():
         sys.exit(f"no log at {LOG}")
+    args = [a for a in sys.argv[1:]]
+    show_all = "--all" in args
+    args = [a for a in args if a != "--all"]
+    mode = (args[0] if args else "all").lstrip("-")
+
+    # Default window: decisions made under the CURRENT config. The config is
+    # hand-edited only, so its mtime is the config-generation marker — without
+    # it a report after a change mixes evidence from older configs.
+    window = None
+    if not show_all:
+        window = CONFIG.stat().st_mtime
     cfg = json.loads(Path(CONFIG).read_text()).get("permission", {})
-    done, opens, since = load()
-    mode = (sys.argv[1] if len(sys.argv) > 1 else "all").lstrip("-")
+    done, opens, since = load(window)
     lines = []
+    if not done:
+        print(
+            f"No decisions since the config changed at "
+            f"{datetime.fromtimestamp(window, timezone.utc).isoformat()}."
+            " Use --all for the full log history.\n"
+        )
+        return
     if mode == "denied":
         section_denials(done, lines)
     elif mode == "review":
@@ -222,6 +252,11 @@ def main():
         section_asks(done, cfg, lines)
         section_denials(done, lines)
         section_reviewer(done, lines)
+    if not show_all:
+        lines.append(
+            f"(window: decisions since the config changed at "
+            f"{datetime.fromtimestamp(window, timezone.utc).isoformat()}; --all for full history)"
+        )
     print("\n".join(lines) + "\n", end="")
 
 

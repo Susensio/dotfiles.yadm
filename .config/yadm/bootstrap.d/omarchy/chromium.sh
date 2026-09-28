@@ -24,10 +24,9 @@ if ! grep -qxF -- "$SCALE_FLAG" "$FLAGS"; then
   fi
 fi
 
-# Set the default page zoom once per bootstrap. If Chromium is running, the
-# helper queues the change for the service's next start instead of touching
-# Chromium's live profile.
-python3 "$ASSETS_DIR/chromium-zoom.py" bootstrap \
+# Ensure 125% default page zoom on each bootstrap. If Chromium is running and
+# needs a change, print the setting to adjust manually.
+python3 "$ASSETS_DIR/chromium-zoom.py" \
   "${XDG_CONFIG_HOME:-$HOME/.config}/chromium/Default/Preferences"
 
 UNIT_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user

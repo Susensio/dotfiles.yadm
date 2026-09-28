@@ -52,3 +52,6 @@ An installed `lsb_release` takes precedence and would change what they match.
 Chromium exits with no window open unless started with `--keep-alive-for-test`, a switch meant for its own tests; if a release drops it, the service just exits and launches go back to cold starts.
 A change to `chromium-flags.conf` applies after `systemctl --user restart chromium`, and quitting Chromium from its menu stops the service until the next login.
 
+Each bootstrap ensures `--force-device-scale-factor=0.9` and checks for 125% default page zoom.
+If the zoom differs, it updates `Default/Preferences` when Chromium is stopped; while Chromium is running, it prints an instruction to set **Page zoom → 125%** in `chrome://settings/appearance`.
+There is no zoom startup hook or saved bootstrap marker; when the zoom already matches, the check is silent and leaves the profile untouched.
