@@ -1,0 +1,13 @@
+# Undocked DevTools shares popup hints; keep its original class and normal tiling.
+[[rule]]
+app_id = ["chromium"]
+when.decorations = "server_side"
+when.title_contains = "DevTools"
+then.app_id = "{app_id}"
+
+# Chromium main windows declare a 500px minimum; popups declare 179px (docs/omarchy.md).
+[[rule]]
+app_id = ["chromium"]
+when.decorations = "server_side"
+when.min_width_below = 400
+then.app_id = "chromium-popup"

@@ -3,6 +3,8 @@
 !/.config
 /.config/*
 !/.config/justfile
+!/.config/chromium-flags.conf
+!/.config/wl-relabel/
 !/.config/git/
 !/.config/lazygit/
 !/.config/bat/

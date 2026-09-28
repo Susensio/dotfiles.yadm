@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# shellcheck source=/home/susensio/bin/overrides/_super
+source "$(dirname -- "${BASH_SOURCE[0]}")/_super"
+
+# The proxy must own Chromium's first Wayland connection; see ~/.config/docs/omarchy.md.
+if [[ -z ${WAYLAND_DISPLAY:-} ]] || ! command -v wl-relabel >/dev/null; then
+    super "$@"
+fi
+exec wl-relabel -- "$(super_bin)" "$@"

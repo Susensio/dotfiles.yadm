@@ -1,38 +1,26 @@
 #!/usr/bin/env bash
-# Chromium signs in to Google only with Chrome's OAuth client in its flags, and
-# stays running in the background so a new window skips the cold start.
+# Keep Chromium warm and route desktop launches through the user PATH.
 set -euo pipefail
 
-command -v omarchy-install-chromium-google-account &>/dev/null || exit 0
+command -v chromium &>/dev/null || exit 0
 
-FLAGS=${XDG_CONFIG_HOME:-$HOME/.config}/chromium-flags.conf
 ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets
-if ! grep -q -- --oauth2-client-id "$FLAGS" 2>/dev/null; then
-  # The account script only appends to an existing file
-  [[ -f $FLAGS ]] || omarchy-refresh-config chromium-flags.conf
-  omarchy-install-chromium-google-account
-fi
-
-# Keep Chromium's chrome small on a 125% scaled monitor. The flags file stays
-# local because Omarchy appends Google account credentials to it.
-SCALE_FLAG=--force-device-scale-factor=0.9
-if ! grep -qxF -- "$SCALE_FLAG" "$FLAGS"; then
-  if grep -q '^--force-device-scale-factor=' "$FLAGS"; then
-    sed -i "s/^--force-device-scale-factor=.*/$SCALE_FLAG/" "$FLAGS"
-  else
-    printf '%s\n' "$SCALE_FLAG" >>"$FLAGS"
+APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
+# Preserve the packaged launcher and its actions while allowing a PATH override.
+if [[ -f /usr/share/applications/chromium.desktop ]]; then
+  desktop=$(mktemp)
+  trap 'rm -f "$desktop"' EXIT
+  sed 's|^Exec=/usr/bin/chromium|Exec=chromium|' /usr/share/applications/chromium.desktop >"$desktop"
+  if ! cmp -s "$desktop" "$APPS/chromium.desktop"; then
+    install -Dv --mode=644 "$desktop" "$APPS/chromium.desktop"
   fi
 fi
-
-# Ensure 125% default page zoom on each bootstrap. If Chromium is running and
-# needs a change, print the setting to adjust manually.
-python3 "$ASSETS_DIR/chromium-zoom.py" \
-  "${XDG_CONFIG_HOME:-$HOME/.config}/chromium/Default/Preferences"
 
 UNIT_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user
 if ! cmp -s "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"; then
   install -Dv --mode=644 "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"
   systemctl --user daemon-reload
+  systemctl --user try-restart chromium.service
 fi
 if ! systemctl --user is-enabled --quiet chromium.service; then
   systemctl --user enable chromium.service
