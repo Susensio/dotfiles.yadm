@@ -84,7 +84,13 @@ The retained packages are:
 
 (An earlier gate, `@czottmann/pi-automode`, was replaced by the permission system; see the model-tiers section for its kept classifier config.)
 
-The permission system's ask gate is `*: ask` with a deny list for secrets (`*.env*`, `*.pem`, `*.key`, `~/.ssh/*`, `~/.pi/agent/auth.json`), a deny on `sudo *`, an allow list for common read-mostly shell commands, and per-directory external-directory rules. Its `yoloMode` plus auto-review means an ask resolves through the reviewer model rather than a human prompt unless the policy defers it.
+The permission system's ask gate is `*: ask` with a deny list for secrets (`*.env*`, `*.pem`, `*.key`, `~/.ssh/*`, `~/.pi/agent/auth.json`), a deny on `sudo *` directing the agent to `pkexec`, an ask on `pkexec *`, an allow list for common read-mostly shell commands, and per-directory external-directory rules.
+Its `authorizerChain` sends asks to the auto-reviewer; `yoloMode` stays off, so a deferred review reaches the human permission prompt.
+
+Privileged commands use `pkexec`, matching the successful Codex execution path on this workstation.
+After Pi's permission review, polkit opens the desktop authentication dialog; `/etc/pam.d/polkit-1` loads `pam_fprintd.so` for fingerprints.
+This avoids the invisible wait observed with plain sudo: Pi's pipes held its fingerprint prompt until verification timed out.
+Use `pkexec /usr/bin/id -u` for a harmless root identity check, with a bash-tool timeout of at least 60 seconds for authentication.
 
 The system's hand-maintained config lives at `extensions/pi-permission-system/config.json`, auto-review's at `extensions/pi-permission-auto-review/config.json`; both are tracked. The permission decision log the system writes to `extensions/pi-permission-system/logs/*.jsonl` is ignored as runtime churn.
 

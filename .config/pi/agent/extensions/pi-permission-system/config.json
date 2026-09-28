@@ -78,8 +78,9 @@
       "set -eu": "allow",
       "sudo *": {
         "action": "deny",
-        "reason": "No sudo from the agent"
+        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
       },
+      "pkexec *": "ask",
       "cat *": "allow",
       "head *": "allow",
       "tail *": "allow",
