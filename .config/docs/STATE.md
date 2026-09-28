@@ -40,6 +40,9 @@ Setup and the standing oddities are in `docs/omarchy.md`.
   `nightlight-probe-guard.patch` (2026-09-29, from the PR review) drops a probe result that lands while a toggle is still applying, so an in-flight probe can't flip the bar back; applied live 2026-09-29.
   Observe the next scheduled 07:00 and 20:00 switches, including one crossed while suspended.
   The polling is a stopgap: if [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) ships, `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` replaces it.
+- Bugfix step `yadm/bootstrap.d/omarchy/bugfix/pi-theme-agent-dir.sh` (new 2026-09-29, ADR-0057 pattern) applies [Omarchy PR #13693](https://github.com/omacom/omarchy/pull/13693): `omarchy-theme-set-pi` hardcoded `~/.pi/agent` while its `-claude` and `-hermes` siblings read their agent's variable, so a pi rehomed by `PI_CODING_AGENT_DIR` never received the Omarchy palette ([issue #13691](https://github.com/omacom/omarchy/issues/13691)); our own [PR #13694](https://github.com/omacom/omarchy/pull/13694) was closed for it as the duplicate.
+  Applied live 2026-09-29 by `yadm bootstrap`; the step also syncs the theme into the agent dir once, because the patch changes the command and not the copy written before pi moved to XDG. `~/.pi` was removed after the patch landed — only the next `omarchy update` migration and `omarchy-provision-user` recreate it, and `skills.sh` strips those links again.
+  Delete the step once #13693 ships.
 - Verified on Mint so far: the same 53 tools resolve after the `conf.d` split; every `tool` command against a scratch config with stub `mise` and `pacman`.
   After the X11 startup-script update and a reboot, `env_reload` added and removed a temporary `environment.d` variable while preserving `EDITOR`, `PATH`, `DISPLAY` and `XAUTHORITY` in the user manager.
 
