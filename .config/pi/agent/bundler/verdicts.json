@@ -1,0 +1,48 @@
+{
+  "pi-footer": {
+    "decision": "bundle",
+    "reason": "clean: no asset-locating construct in 119 inlined modules",
+    "measured": "import 896ms -> 20ms (PI_TIMING, warm jiti cache)"
+  },
+  "@juicesharp/rpiv-web-tools": {
+    "decision": "bundle",
+    "reason": "clean: no asset-locating construct in 697 inlined modules"
+  },
+  "@juicesharp/rpiv-todo": {
+    "decision": "bundle",
+    "reason": "import.meta.url reaches registerLocalesFromDir only, and that call sits inside the try whose dynamic import of @juicesharp/rpiv-i18n/loader rejects, so the URL is never consumed and the UI stays English-only.",
+    "reviewedKinds": ["@juicesharp/rpiv-todo/index.ts:import.meta.url×1"],
+    "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
+  },
+  "@juicesharp/rpiv-ask-user-question": {
+    "decision": "bundle",
+    "reason": "import.meta.url reaches registerLocalesFromDir only, and the surrounding dynamic import of @juicesharp/rpiv-i18n/loader rejects, so the surviving path is dead.",
+    "reviewedKinds": ["@juicesharp/rpiv-ask-user-question/index.ts:import.meta.url×1"],
+    "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
+  },
+  "@tintinweb/pi-subagents": {
+    "decision": "bundle",
+    "reason": "new Worker takes WORKER_SOURCE with eval:true; worker-source.ts states the source is an inlined template literal precisely so it survives bundling, so no path is relocated.",
+    "reviewedKinds": ["@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"]
+  },
+  "@narumitw/pi-usage": {
+    "decision": "bundle",
+    "reason": "createRequire(import.meta.url) is used only as require(\"highlight.js\"), a bare specifier, which still resolves upward from <pkg>/.pi-bundler/.",
+    "reviewedKinds": [
+      "@narumitw/pi-tui-kit/dist/components/syntax-highlighting.js:import.meta.url×1",
+      "@narumitw/pi-tui-kit/dist/components/syntax-highlighting.js:createRequire×1"
+    ]
+  },
+  "pi-claude-bridge": {
+    "decision": "skip",
+    "reason": "inlined @anthropic-ai/claude-agent-sdk locates its native CLI via import.meta.url and would throw \"Native CLI binary for <platform>-<arch> not found\" once relocated; no pathToClaudeCodeExecutable is configured, so the SDK relies on that URL. Externalizing the SDK and the MCP SDK was measured: 631 source modules load in ~590ms, the externalized bundle in ~390ms, so the win is ~100ms of a ~1000ms wall clock. Not worth the upkeep."
+  },
+  "@gotgenes/pi-permission-system": {
+    "decision": "skip",
+    "reason": "gate P: patching a bundle would land the patch in a file nobody loads. Also fails gate A (#src/* subpath imports)."
+  },
+  "@mzwing/pi-permission-auto-review": {
+    "decision": "skip",
+    "reason": "gate A: esbuild cannot resolve #src/service/permission-events"
+  }
+}
