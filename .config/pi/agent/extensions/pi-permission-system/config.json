@@ -15,7 +15,9 @@
       "*.pem": "deny",
       "*.key": "deny",
       "~/.ssh/*": "deny",
-      "~/.pi/agent/auth.json": "deny"
+      "~/.pi/agent/auth.json": "deny",
+      "~/.gnupg/*": "deny",
+      "~/.config/pi/agent/auth.json": "deny"
     },
     "external_directory": {
       "*": "ask",
@@ -66,7 +68,13 @@
       "touch *": "allow",
       "git branch*": "allow",
       "git remote*": "allow",
-      "yadm alt*": "allow"
+      "yadm alt*": "allow",
+      "grep *": "allow",
+      "cd *": "allow",
+      "printf *": "allow",
+      "echo *": "allow",
+      "true": "allow",
+      "node --version*": "allow"
     },
     "read": "allow",
     "grep": "allow",
@@ -74,5 +82,13 @@
     "ls": "allow",
     "write": "allow",
     "edit": "allow"
-  }
+  },
+  "piInfrastructureReadPaths": [
+    "~/Projects/*",
+    "/usr/share/omarchy/*",
+    "/usr/lib/systemd/*",
+    "/sys/class/power_supply/*",
+    "/tmp/*",
+    "~/.local/share/*"
+  ]
 }
