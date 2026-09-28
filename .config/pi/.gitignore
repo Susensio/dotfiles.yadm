@@ -1,128 +1,4 @@
-# Pi harness
-
-This directory is a deliberately small personal Pi harness. Only the
-hand-maintained config is tracked by yadm; runtime state is ignored. The
-ignore mirror is `.gitignore`, `model-fallback/` exists in it as
-over-defensive (nothing in this harness uses model fallback), and the
-whitelisted path list is otherwise exhaustive. Run:
-
-    git --git-dir="$HOME/.local/share/yadm/repo.git" ls-files -- .config/pi
-
-to see the tracked set, and `yadm status` within this tree to confirm
-nothing runtime-generated is untracked there.
-
-## Runtime (ignored) state
-
-There are two gitignore layers, and `git check-ignore -v` reads the outer
-one: this file whitelists only hand-maintained paths with `!` rules, while
-the tracked `.gitignore` in this same directory (shown below) knocks out
-regenerable subdirectories inside the whitelisted trees — never re-add
-those subpaths by surprise (e.g. `auth.json` is already caught).
-
-`agent/auth.json` (0600) has provider credentials. `agent/trust.json`
-holds trusted-directory markers. `agent/sessions/` has per-project session
-transcripts. `pi.bin` is the compiled binary itself. `.pi/` holds a
-pi-regenerated runtime copy of the subagent feature flags — the tracked
-`agent/subagents.json` is the hand-edited authoritative copy.
-`agent/npm/` is the package checkout for extensions declared in
-`settings.json`'s `packages` list plus two extras present in
-`package.json` but not wired to pi: `@latentminds/pi-quotas` and
-`pi-quota-monitoring`. `agent/patches/` is a local patch library:
-`apply.sh` reapplies stored patches onto pi's `node_modules` after every
-pi update, and the whole tree is ignored until a real patch dir justifies
-tracking. The harness intentionally has no model fallback; the
-`agent/model-fallback/config.json` whitelist entry is
-over-defensive and stays only so a future fallback config lands tracked
-by default rather than by surprise.
-
-Configs and code under `agent/extensions/` are all tracked except the
-regenerated permission-decision log, whose ignore rule is
-`agent/extensions/pi-permission-system/logs/` in the rules block below
-(no leading `!` — it wins as the last matching rule there). Run
-`yadm status --ignored=matching -- ~/.config/pi` to see the full
-ignored list.
-
-Track a file by adding it to this whitelist (and keeping it out of the
-regenerable knockouts below), not by `git add -f`.
-
-## Modes and feature flags
-
-`agent/subagents.json` is the hand-edited copy; pi regenerates a runtime
-copy at `.pi/subagents.json` (ignored), whose lists diverge (latest:
-`viewerMarkdown: all`). Treat the tracked file as authoritative. When pi
-grows a new flag, the tracked copy is updated by hand.
-
-`agent/settings.json` lists the installed packages. Two current entries
-have no tracked config file: `@narumitw/pi-usage` (its footer widget
-wiring lives in `agent/extensions/pi-footer.json`) and `pi-footer`
-itself (tracked config at the same path).
-
-## Extensions and the permission system
-
-Extensions are discovered by pi in `agent/extensions/` plus the packages
-in `settings.json`. Everything here is hand-maintained; the herdr bridge
-files (`herdr-agent-state.ts` upstream-installed via
-`herdr integration install pi`, and `herdr-ask-user-bridge.ts`) make herdr
-reflect ask-user and permission dialogs, which would otherwise be
-invisible in the herdr pane indicator.
-
-The permission gate is:
-- `@gotgenes/pi-permission-system` with `yoloMode: true`, `*: ask`,
-  deny on secrets (`*.env*`, `*.pem`, `*.key`, `~/.ssh/*`,
-  `~/.pi/agent/auth.json`), deny `sudo *`, allow-list of common safe
-  commands, and per-directory external-directory rules.
-- `@mzwing/pi-permission-auto-review` as its only authorizer, delegating
-  to `codex-auto-review` (reasoning: low, 45 s timeout); its
-  `additionalPolicy` states the operator policy for this YADM-dotfiles
-  single-user Arch workstation.
-
-Both config files and the herdr bridge are tracked; the JSONL decision
-log under `pi-permission-system/logs/` is not.
-
-`bash-readonly/` is a read-only-agent prototype: Bubblewrap mounts the
-host filesystem read-only, an unprivileged OverlayFS gives each command a
-disposable writable project view, and `/tmp` and cache state stay
-writable. Network remains enabled (not read-only). Its nested filename
-`bash-readonly.ts` deliberately avoids pi's auto-discovery patterns
-(`extensions/*.ts`, `extensions/*/index.ts`) so only explorer and tester
-agents load it via an explicit path; the main session never loads it.
-
-## Omarchy-provided skills
-
-`agent/skills/omarchy` and `agent/skills/diagnose-crash` are symlinks
-into `/usr/share/omarchy/default/agents/skills/` created by Omarchy's
-skills.sh and ignored by git (to git a symlink is a file, not a
-directory). They do not belong in the tracked whitelist.
-
-## Deliberately removed
-
-`pi-automode` was replaced by the permission system in `settings.json`
-packages, but its tracked config `agent/extensions/pi-automode/config.json`
-stays: the classifier config (`opencode-go/mimo-v2.6-flash`,
-`allowInsideWorkingDirectory`, reasoning `low`) is harness documentation
-for an intentionally dormant component, not runtime state.
-
-Also deliberately removed are separate leader and general modes,
-`pi-plan`, default subagents, fallback agents, workflows, schedules,
-nested delegation, agent mentions, fleet UI, persistent agent memory, and
-output transcripts. Features return only after a repeated observed need
-justifies their routing, context and maintenance cost.
-
-## Setup and validation
-
-- Run `/web-tools` once to configure a search provider.
-- `bash-readonly` requires Linux with `bubblewrap`, unprivileged user
-  namespaces, and unprivileged OverlayFS.
-- `pi.bin` is current for pi 0.87.1 (`settings.json`'s
-  `lastChangelogVersion` matches). Shell and environment details live in
-  the dotfiles repo's `docs/environment-architecture.md`, and the
-  overall harness in `~/.config/docs/harness.md`; agent-facing
-  workflow lives in `agent/AGENTS.md` and `agent/skills/`.
-
----
-
-# Only the hand-maintained config is version controlled. Everything else here
-# is credentials, session transcripts, caches, or churn.
+# Hand-maintained config only; docs in README.md.
 *
 !.gitignore
 !README.md
@@ -137,15 +13,12 @@ justifies their routing, context and maintenance cost.
 !agent/skills/**
 !agent/extensions/
 !agent/extensions/**
-!agent/model-fallback/
-!agent/model-fallback/config.json
 
-# Regenerable, even inside the whitelisted config dirs (last match wins).
+# Knockouts last: the last matching rule wins.
 node_modules/
 __pycache__/
 *.pyc
-agent/extensions/pi-permission-system/logs/
-# Omarchy's skills, which omarchy/skills.sh links in. No trailing slash: to git
-# a symlink is a file, not a directory.
+agent/extensions/**/logs/
+# Omarchy-linked; no trailing slash: a symlink is a file, not a directory.
 agent/skills/omarchy
 agent/skills/diagnose-crash
