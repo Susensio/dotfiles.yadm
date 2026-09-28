@@ -6,6 +6,7 @@
 !agent/AGENTS.md
 !agent/README.md
 !agent/settings.json
+!agent/keybindings.json
 !agent/subagents.json
 !agent/agents/
 !agent/agents/**
