@@ -8,7 +8,7 @@
   "worktreeIsolation": true,
   "maxSubagentDepth": 1,
   "agentMentions": "off",
-  "fleetView": false,
+  "fleetView": true,
   "widgetMode": "off",
   "rememberAgents": false,
   "outputTranscript": false,

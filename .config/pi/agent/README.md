@@ -99,7 +99,7 @@ Network access remains enabled and is not made read-only by this filesystem boun
 
 ## Deliberately removed
 
-The harness does not include separate leader and general modes, `pi-plan`, default subagents, fallback agents, workflows, schedules, nested delegation, agent mentions, fleet UI, persistent agent memory, or output transcripts.
+The harness does not include separate leader and general modes, `pi-plan`, default subagents, fallback agents, workflows, schedules, nested delegation, agent mentions, persistent agent memory, or output transcripts.
 
 These features can return only after a repeated observed need justifies their routing, context, and maintenance cost.
 
