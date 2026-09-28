@@ -6,5 +6,5 @@ set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 apply_omarchy_patch \
-  "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/keybindings-menu-submaps.patch" \
+  keybindings-menu-submaps.patch \
   /usr/bin/omarchy-menu-keybindings 0

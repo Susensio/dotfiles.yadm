@@ -7,5 +7,5 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 # The omarchy package owns default/, so the patch is -p1 relative to it.
 apply_omarchy_patch \
-  "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/hypr-envs-path.patch" \
+  hypr-envs-path.patch \
   /usr/share/omarchy/default/hypr/envs.lua 1

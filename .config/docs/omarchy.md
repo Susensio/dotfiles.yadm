@@ -33,7 +33,11 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Patching Omarchy bugs
 
 A bug in an Omarchy system file that has a PR upstream gets a step in `bootstrap.d/omarchy/bugfix/`, one per PR, linking it ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)).
+Each step sources `lib.sh` and passes its patch filename; the helper resolves it from its own `assets/` directory.
 `omarchy update` restores the unpatched files, and its `post-update.d/yadm-bootstrap.hook` reruns the bootstrap to patch them again.
+
+`bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
+This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
 
 ## Editor
 
