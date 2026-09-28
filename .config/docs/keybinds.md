@@ -82,6 +82,7 @@ Hyprland's window mode is the direct mirror of tmux's pane table, including the 
 - Hyprland's digits are keycodes (`code:10` and up), not symbols, so workspace keys survive keyboard-layout changes; tmux and herdr use plain Alt digits.
 - Alt + n / Alt + p mean "next / previous sibling" in each tool's own dimension: tmux sessions, herdr agents. Hyprland has no session dimension; it cycles windows with Super + Tab instead.
 - The prefix is F12, not an Alt chord, so it works identically inside and outside tmux, and herdr's prefix never collides with the shell's Alt usage.
+- Hyprland's mode leaves on an explicit key (Escape, Return) because it cannot leave on an unknown one: a catchall fires on a bare modifier press before Shift + hjkl or Ctrl + hjkl can complete (upstream #5073, unfixed on 0.56.2), so tmux's one-shot table exit has no equivalent here.
 - herdr's stock resize mode lives on prefix+r; `config.toml` moves it to p so the pane-table letter matches tmux.
 
 ## Upkeep
