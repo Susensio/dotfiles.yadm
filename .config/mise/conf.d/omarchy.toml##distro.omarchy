@@ -1,3 +1,7 @@
+[tools]
+# Pin the browser's Wayland proxy until a newer version is tested (docs/omarchy.md).
+"cargo:wl-relabel" = "0.1.1"
+
 # Omarchy's preinstalls, kept or removed, applied by `mise bootstrap` through pacman.
 # Their launchers and wrappers are yadm/bootstrap.d/omarchy/preinstalls.sh's.
 [bootstrap.packages]

@@ -19,5 +19,8 @@ require("hypr.bindings")
 require("hypr.looknfeel")
 require("hypr.autostart")
 
+-- wl-relabel identifies browser popups before mapping (docs/omarchy.md).
+o.window("chromium-popup", { float = true, center = true })
+
 -- Toggle config flags dynamically.
 require("default.hypr.toggles")

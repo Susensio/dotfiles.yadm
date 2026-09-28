@@ -64,5 +64,35 @@ Chromium exits with no window open unless started with `--keep-alive-for-test`, 
 A change to `chromium-flags.conf` applies after `systemctl --user restart chromium`, and quitting Chromium from its menu stops the service until the next login.
 
 `chromium-flags.conf` is tracked directly, including `--force-device-scale-factor=0.9` and Omarchy's bundled Google OAuth flags.
-The Chromium bootstrap only installs and enables the background service.
+The Chromium bootstrap installs and enables the background service and refreshes a user-local desktop entry from the packaged launcher, changing all its `Exec` commands to `chromium`.
 Set **Page zoom → 125%** manually in `chrome://settings/appearance`; later zoom changes stay in Chromium's profile and are not managed by bootstrap.
+
+## Chromium popup windows
+
+The workaround is contained in the commit titled `omarchy: float native chromium popups`.
+Revert that commit to remove it.
+
+`~/bin/overrides/chromium` launches native Wayland Chromium through [wl-relabel](https://github.com/valentin-morice/wl-relabel), pinned to 0.1.1 in mise's Omarchy tools.
+The existing mise `system-install` hook links the proxy into `~/.local/bin`.
+The override uses `_super` to find the underlying Chromium without recursion and passes every argument through.
+It runs Chromium directly outside Wayland or when the proxy is missing; proxy errors otherwise surface rather than silently restarting the browser.
+
+`wl-relabel/rules.toml` labels Chromium windows requesting server-side decorations with a minimum width below 400 as `chromium-popup` before their first mapping commit.
+Normal windows declared a 500px minimum and popups 179px when checked with Chromium 152.
+Undocked DevTools is claimed first and keeps its original class.
+The popup label avoids Omarchy's forced browser tiling rule, and `hypr/hyprland.lua` floats and centres it without overriding Chromium's requested geometry.
+Title-change handlers were rejected because they briefly tiled the popup and rearranged existing windows before floating it.
+
+Both the service (`/usr/bin/env chromium`) and the local desktop entry (`Exec=chromium`) resolve the session PATH, whose overrides directory precedes system directories.
+Omarchy's browser and web-app launchers read the desktop entry's first executable, so it must remain `chromium`, rather than a multiword proxy command.
+The first process for a Chromium profile must use the proxy; later launches reuse that process.
+Installing or bypassing the override therefore takes effect after Chromium restarts, or at the next login.
+
+The proxy remains in the browser's Wayland connection for its lifetime, and a proxy failure disconnects that display connection.
+Its protocol library hides unsupported compositor protocols, and browser updates can change the classification hints, so test a newer proxy or Chromium version with a disposable profile before changing this workaround.
+A roughly five-second page-loading pause was reported after enabling the proxy, but disposable-profile comparisons did not reproduce a consistent proxy-only delay and encountered network failures with both launch paths.
+The cause remains unconfirmed.
+
+[Chromium's Linux window setup](https://github.com/chromium/chromium/blob/main/chrome/browser/ui/views/frame/browser_native_widget_aura_linux.cc) exposes `browser`/`pop-up` roles for X11 but assigns ordinary browser and login popup windows the same Wayland app ID.
+No Chromium issue tracking this exact fix was found; the [related upstream browser bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1864115) belongs to Firefox.
+Remove the workaround when Chromium exposes popup identity before mapping, for example through [the Wayland toplevel-tag protocol](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/xdg-toplevel-tag/xdg-toplevel-tag-v1.xml), which would let a compositor rule distinguish these windows directly.

@@ -5,7 +5,8 @@ After=graphical-session.target
 
 [Service]
 # Chromium exits without a window unless kept alive; the switch is its test-only one
-ExecStart=/usr/bin/chromium --no-startup-window --keep-alive-for-test
+# env resolves the user PATH so renaming ~/bin/overrides/chromium bypasses the proxy.
+ExecStart=/usr/bin/env chromium --no-startup-window --keep-alive-for-test
 Restart=on-failure
 Slice=app-graphical.slice
 
