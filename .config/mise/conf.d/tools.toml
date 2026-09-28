@@ -4,7 +4,6 @@
 aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
 ] }
-antigravity = { version = "latest", rename_exe = "agy", filter_bins = "agy" }
 argc = "latest"
 claude = { version = "latest", postinstall = "mise run herdr-integrations" }
 codex = { version = "latest", symlink_bins = true, postinstall = "mise run herdr-integrations" }
@@ -20,7 +19,6 @@ xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
 
 [tool_alias]
-antigravity = "github:google-antigravity/antigravity-cli"
 llm = "pipx:llm"
 pastel = "aqua:sharkdp/pastel"
 xdg-ninja = "aqua:b3nj5m1n/xdg-ninja"

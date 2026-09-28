@@ -17,7 +17,7 @@ if [[ ! -e $MARKER ]]; then
   # Omarchy's mise wrappers, which run `mise use -g` on every call; a real install
   # or one of our links at the same path is left alone. Omarchy's migrations skip
   # re-adding them once the marker exists.
-  for wrapper in codex claude agy gemini copilot gh opencode playwright playwright-cli \
+  for wrapper in codex claude gemini copilot gh opencode playwright playwright-cli \
     pi omp ori grok crush ghui hunk cursor-agent muse hey basecamp cf; do
     wrapper=${XDG_BIN_HOME:-${HOME}/.local/bin}/$wrapper
     if [[ -f $wrapper && ! -L $wrapper ]] && grep -q '^mise use -g' "$wrapper"; then

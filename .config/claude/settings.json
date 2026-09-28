@@ -167,7 +167,6 @@
         "/home/susensio/.config/claude/jobs/*/tmp",
         "/home/susensio/.config/codex",
         "/home/susensio/.local/share/yadm/repo.git",
-        "/home/susensio/.local/state/agy-sandbox",
         "/home/susensio/.cache"
       ]
     }
