@@ -11,6 +11,8 @@
 !agent/agents/**
 !agent/skills/
 !agent/skills/**
+!agent/prompts/
+!agent/prompts/**
 !agent/extensions/
 !agent/extensions/**
 

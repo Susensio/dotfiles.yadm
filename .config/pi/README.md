@@ -13,6 +13,7 @@ Only the hand-maintained harness is tracked here by yadm; runtime state is ignor
 - `pi/agent/settings.json` — theme, default provider/model, package list
 - `pi/agent/subagents.json` — hand-edited global subagent feature flags
 - `pi/agent/agents/*` — subagent definitions
+- `pi/agent/prompts/*` — prompt templates; each file becomes a `/`-command (`/perm-report` briefs the session to analyze the permission log and propose rule changes)
 - `pi/agent/skills/*` — hand-written skills; the two Omarchy-provided symlinks (`omarchy`, `diagnose-crash`) are ignored, Omarchy's skills.sh links them in
 - `pi/agent/extensions/**` — including the hand-maintained permission-system and auto-review configs and the kept-dormant `pi-automode/config.json`
 

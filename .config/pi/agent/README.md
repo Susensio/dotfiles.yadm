@@ -59,6 +59,7 @@ Use a reviewer only when the user requests one or an explicit risk trigger in `s
 
 `AGENTS.md` holds universal behaviour and pre-routing triggers.
 Agent definitions hold execution boundaries; skills hold conditional procedures and preferences.
+`agent/prompts/` holds prompt templates — one Markdown file per `/`-command. `/perm-report` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
 `settings.json` selects packages, while `subagents.json` removes unused orchestration features.
 Runtime credentials, model metadata, package files, and session history are not harness documentation.
 
@@ -85,7 +86,6 @@ Everything else under `extensions/` is tracked:
 
 - `herdr-agent-state.ts` (installed by `herdr integration install pi`, overwritten on every herdr update) and `herdr-ask-user-bridge.ts` pipe ask-user questionnaires and permission-dialog waits onto herdr's `herdr:blocked` channel so a blocked session stops looking like it is still working in herdr.
 - `pi-footer.json` is the hand-edited config for the `pi-footer` statusline package.
-- `perm-audit.ts` registers `/perm-audit [denied|review]` (browse recent decisions; `Enter` opens the matched pattern, deciding authority, and authorizer rationale) and `/perm-report` (analyzes the log against `config.json`: dead rules, hottest patterns, repeated asks worth an allow entry, denial clusters, reviewer risk spread — also written to `/tmp/perm-report.txt` for the agent to act on). The inspection surface pi-automode's SQL audit used to provide.
 
 
 `bash-readonly/` (loaded by the explorer and tester only, via explicit path) is a read-only-agent prototype in `bash-readonly.ts` + `runner.mjs`.
