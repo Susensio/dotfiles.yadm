@@ -92,6 +92,7 @@ Everything else under `extensions/` is tracked:
 
 - `herdr-agent-state.ts` (installed by `herdr integration install pi`, overwritten on every herdr update) and `herdr-ask-user-bridge.ts` pipe ask-user questionnaires and permission-dialog waits onto herdr's `herdr:blocked` channel so a blocked session stops looking like it is still working in herdr.
 - `pi-footer.json` is the hand-edited config for the `pi-footer` statusline package.
+- `session-name.ts` names each session from its first prompt, so `pi-footer` and `/resume` show a title instead of a truncated prompt; a `/name` set by hand always wins. The same one-shot call asks for a second line, a single lowercase word, which renames the herdr tab over the socket while that tab still carries its default numeric label; a hand-named tab always wins. It pins `opencode-go/gpt-6-luna` for the title and falls back to the session model when that model is out of scope. It exists rather than a patched package because it works around two provider bugs: opencode-go rejects extension side calls without `x-opencode-session` (pi maps it from `sessionId` since 0.87.1 but never sets one on the extension path), and it drops a bare system prompt, so the title instruction has to ride in the user turn. Delete it once a naming package passes a session id and keeps its instruction where the provider reads it.
 
 
 `bash-readonly/` (loaded by the explorer and tester only, via explicit path) is a read-only-agent prototype in `bash-readonly.ts` + `runner.mjs`.

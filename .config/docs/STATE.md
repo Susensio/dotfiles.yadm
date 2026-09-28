@@ -49,3 +49,12 @@ Cloned and bootstrapped; foot now starts login shells, and the Goodix reader wor
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.
+
+## pi session naming
+
+Committed 2026-09-28 (`pi: name sessions from the first prompt`, ADR-0062): sessions are named from their first prompt by a tracked extension, `pi/agent/extensions/session-name.ts`, after every published namer turned out unusable on opencode-go (one built the missing header by hand but put its instruction where the provider drops it; the rest made header-less side calls that 400 and resolve empty).
+
+- [TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19), filed 2026-09-28, passes the session id its naming call was missing; branch `fix/auto-session-name-session-id` on our fork, whose checkout sits in `/tmp/pi-agent-extensions` until it merges. When it ships, point `settings.json` back at the package and delete the extension.
+- No pi report: the residual gap is [earendil-works/pi#9290](https://github.com/earendil-works/pi/issues/9290) (closed no-action) and [#10053](https://github.com/earendil-works/pi/issues/10053) (closed not planned), and pi-ai 0.87.1 already derives `x-opencode-session` from `options.sessionId` ([#9326](https://github.com/earendil-works/pi/issues/9326), fixed and shipped).
+- Naming runs on the pinned `opencode-go/gpt-6-luna`, falling back to the session model when scoped out.
+- A first turn that ends in an unanswered `ask_user_question` defers the name to the next `agent_end` (observed; `agent_end` does not fire while a tool blocks on input).
