@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "susensio.scratchpad",
+  "name": "Scratchpad",
+  "version": "1.0.0",
+  "author": "susensio",
+  "description": "Scratchpad occupancy and visibility indicator, drawn in the language of the default workspace indicator",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Scratchpad.qml"
+  },
+  "barWidget": {
+    "displayName": "Scratchpad",
+    "description": "Dim when the scratchpad is empty, foreground when it holds windows, themed accent while it is shown",
+    "category": "Compositor",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}
