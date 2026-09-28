@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# Render Omarchy's theme templates into the current theme, so the tracked
-# templates in omarchy/themed/ and any stock template Omarchy updated are live
-# without a manual omarchy-theme-refresh (docs/adr/0052). Rendering is otherwise
-# triggered only by a theme set, which never happens on a fresh clone, and a
-# config that requires a rendered file fails until it exists. Only rendered files
-# change here; running apps still retint through Omarchy's theme-set hook.
+# Render Omarchy's theme files into the current theme, so the tracked templates
+# in omarchy/themed/, the current theme's colors.toml and any stock file Omarchy
+# updated are live without a manual omarchy-theme-refresh (docs/adr/0052).
+# Rendering is otherwise triggered only by a theme set, which never happens on a
+# fresh clone, and a config that requires a rendered file fails until it exists.
+# Only rendered files change here; running apps still retint through Omarchy's
+# theme-set hook.
 set -euo pipefail
 
 command -v omarchy-theme-set &>/dev/null || exit 0
 
 STOCK_DIR=${OMARCHY_PATH:-/usr/share/omarchy}/default/themed
+STOCK_THEMES_DIR=${OMARCHY_PATH:-/usr/share/omarchy}/themes
 USER_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/themed
+USER_THEMES_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/themes
 THEME_STATE_DIR=${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current
 THEME_DIR=$THEME_STATE_DIR/theme
 
@@ -38,9 +41,23 @@ for template in "${stock_templates[@]}"; do
   [[ -f $rendered && ! $template -nt $rendered ]] || stale+=("$(basename "$template")")
 done
 
+# The palette feeds every render, so an edited colors.toml is stale too. Omarchy
+# overlays the user's theme on the stock one, so the user's file wins.
+palette=
+for candidate in "$USER_THEMES_DIR/$theme_name/colors.toml" "$STOCK_THEMES_DIR/$theme_name/colors.toml"; do
+  if [[ -f $candidate ]]; then
+    palette=$candidate
+    break
+  fi
+done
+if [[ -n $palette ]]; then
+  rendered=$THEME_DIR/colors.toml
+  [[ -f $rendered && ! $palette -nt $rendered ]] || stale+=("colors.toml")
+fi
+
 ((${#stale[@]})) || exit 0
 
-log info "Rendering Omarchy theme templates: ${stale[*]}"
+log info "Re-rendering the Omarchy theme: ${stale[*]}"
 OMARCHY_THEME_HEADLESS=1 OMARCHY_THEME_SKIP_BACKGROUND=1 omarchy-theme-set "$theme_name"
 
 # Headless mode skips Omarchy's post-theme reload, and a hypr config that failed
