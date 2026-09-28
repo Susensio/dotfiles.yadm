@@ -34,6 +34,7 @@
 /.config/.claude/settings.local.json
 !/.config/claude/
 !/.config/pi/
+!/.config/codex/
 !/.config/omarchy/
 !/.config/hypr/
 !/.config/foot/
