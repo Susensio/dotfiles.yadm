@@ -59,6 +59,7 @@ Use a reviewer only when the user requests one or an explicit risk trigger in `s
 
 `AGENTS.md` holds universal behaviour and pre-routing triggers.
 Agent definitions hold execution boundaries; skills hold conditional procedures and preferences.
+`agent/prompts/` holds prompt templates — one Markdown file per `/`-command. `/perm-report` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
 `settings.json` selects packages, while `subagents.json` removes unused orchestration features.
 Runtime credentials, model metadata, package files, and session history are not harness documentation.
 
