@@ -1,8 +1,9 @@
 {
   "debugLog": false,
   "permissionReviewLog": true,
-  "yoloMode": true,
+  "yoloMode": false,
   "doublePressToConfirm": false,
+  "piInfrastructureReadPaths": [],
   "authorizerChain": [
     "auto-review"
   ],
@@ -10,14 +11,26 @@
     "*": "ask",
     "path": {
       "*": "allow",
+      "~/.config/google-chrome/*": "ask",
+      "~/.config/chromium/*": "ask",
       "*.env": "deny",
       "*.env.*": "deny",
       "*.pem": "deny",
       "*.key": "deny",
+      "*.keyring": "deny",
+      "*auth.json": "deny",
       "~/.ssh/*": "deny",
-      "~/.pi/agent/auth.json": "deny",
       "~/.gnupg/*": "deny",
-      "~/.config/pi/agent/auth.json": "deny"
+      "~/.local/share/gnupg/*": "deny",
+      "~/.config/gh/*": "deny",
+      "*.envrc": "deny",
+      "~/.local/share/keyrings/*": "deny",
+      "~/.aws/*": "deny",
+      "~/.netrc": "deny",
+      "~/.git-credentials": "deny",
+      "~/.config/gcloud/*": "deny",
+      "~/.kube/config": "deny",
+      "~/.docker/config.json": "deny"
     },
     "external_directory": {
       "*": "ask",
@@ -29,8 +42,18 @@
     },
     "external_directory_read": {
       "*": "ask",
+      "~": "allow",
+      "~/*": "allow",
+      "/tmp": "allow",
       "/tmp/*": "allow",
-      "~/*": "allow"
+      "/usr": "allow",
+      "/usr/*": "allow",
+      "/etc": "allow",
+      "/etc/*": "allow",
+      "/opt": "allow",
+      "/opt/*": "allow",
+      "/home": "allow",
+      "/sys/class/power_supply/*": "allow"
     },
     "bash": {
       "*": "ask",
@@ -48,6 +71,11 @@
       "which *": "allow",
       "rm /tmp/*": "allow",
       "rm -f /tmp/*": "allow",
+      "herdr api*": "allow",
+      "herdr --session* pane read*": "allow",
+      "strings *": "allow",
+      "rm -rf /tmp/*": "allow",
+      "set -eu": "allow",
       "sudo *": {
         "action": "deny",
         "reason": "No sudo from the agent"
@@ -81,14 +109,14 @@
     "find": "allow",
     "ls": "allow",
     "write": "allow",
-    "edit": "allow"
-  },
-  "piInfrastructureReadPaths": [
-    "~/Projects/*",
-    "/usr/share/omarchy/*",
-    "/usr/lib/systemd/*",
-    "/sys/class/power_supply/*",
-    "/tmp/*",
-    "~/.local/share/*"
-  ]
+    "edit": "allow",
+    "path_write": {
+      "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
+    },
+    "todo": "allow",
+    "ask_user_question": "allow",
+    "web_fetch": "allow",
+    "web_search": "allow",
+    "skill": "allow"
+  }
 }
