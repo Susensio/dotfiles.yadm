@@ -12,6 +12,13 @@
       "left": [
         {
           "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.spacer",
+          "size": 6
+        },
+        {
+          "id": "susensio.scratchpad"
         }
       ],
       "center": [
