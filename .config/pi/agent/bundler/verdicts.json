@@ -15,10 +15,8 @@
     "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
   },
   "@juicesharp/rpiv-ask-user-question": {
-    "decision": "bundle",
-    "reason": "import.meta.url reaches registerLocalesFromDir only, and the surrounding dynamic import of @juicesharp/rpiv-i18n/loader rejects, so the surviving path is dead.",
-    "reviewedKinds": ["@juicesharp/rpiv-ask-user-question/index.ts:import.meta.url×1"],
-    "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
+    "decision": "skip",
+    "reason": "the lazily imported questionnaire graph has top-level await, so esbuild wraps it in async __esm initializers, and view/dialog-builder.ts and view/tab-content-strategy.ts import each other: each awaits the other's pending init, so the first ask_user_question call never resolves, shows no UI, and ignores Esc."
   },
   "@tintinweb/pi-subagents": {
     "decision": "bundle",
