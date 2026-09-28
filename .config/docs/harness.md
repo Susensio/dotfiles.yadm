@@ -52,7 +52,7 @@ Run `/codex:setup` once per machine to authenticate.
 The plugin also registers `SessionStart`/`SessionEnd` hooks of its own (job bookkeeping, not counted among the five first-party hooks below) and an opt-in `Stop` review gate, off until `/codex:setup --enable-review-gate` — left off deliberately, since `Stop` fires at the end of every turn, not at session end.
 
 `independent-code-review` (a skill, not a plugin command) reaches the same native reviewer automatically: `coding`'s own check-and-fix loop calls for it once per finished non-trivial change, by reading `review.md`'s current invocation and running the equivalent directly rather than through the gated command.
-That is now the harness's default for a routine review, ahead of `agy` or Claude's own judgement, on the reasoning that a model that did not write the diff sees what its author cannot — worth flagging against `agy`'s own record, which measured the opposite conclusion for a different vendor: a non-Claude second opinion that raised no high-severity finding a Claude auditor didn't already have.
+That is now the harness's default for a routine review, ahead of Claude's own judgement, on the reasoning that a model that did not write the diff sees what its author cannot.
 
 ## Skills
 
