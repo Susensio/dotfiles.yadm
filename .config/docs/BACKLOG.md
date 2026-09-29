@@ -1,5 +1,9 @@
 # Backlog
 
+- yadm | gpg: **urgent** — `GNUPGHOME` points at `~/.local/share/gnupg`, which holds no keyring: `gpg --list-keys` reports 0 keys and creates an empty `pubring.kbx` there (seen 2026-09-29), while the real keyring — `pubring.kbx` at 80K, `pubring.kbx~`, `trustdb.gpg` — is still in `~/.gnupg`.
+  Nothing secret is at risk: `~/.local/share/gnupg/private-keys-v1.d` is empty, so these are imported public keys, and today nothing can reach them.
+  Fix: `install -d -m 700 ~/.local/share/gnupg`, `mv ~/.gnupg/{pubring.kbx,pubring.kbx~,trustdb.gpg} ~/.local/share/gnupg/`, `rmdir ~/.gnupg`, then `gpgconf --kill all` so no agent keeps the old home, and check `gpg --list-keys`.
+  Needs a human shell: `pi-permission-system` denies `~/.gnupg/*` as key material (rule `~/.gnupg/*`), so the agent cannot move it. The alternative is dropping `GNUPGHOME` from `environment.d/10_xdg.conf` and keeping the keyring where it is, which gives up the XDG goal for one directory.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `tmux/PROPOSAL-tmux-notify.md`.
 - tmux | `PreToolUse` hook on `Bash` that blocks `tmux kill-server`/`kill-session`/`kill-window` when the command has no explicit `-L`/`-S`, message pointing at the `tmux-testing` skill's `scripts/tmux-test`.
