@@ -33,7 +33,7 @@ The write paths under `sandbox.filesystem.allowWrite` are literal; update them w
 A stale path can silently deny writes.
 
 Root commands go through `pkexec`, behind an ask in the agent's pane: `Bash(pkexec *)` is a `permissions.ask` rule, so Claude asks even in auto mode, and polkit's fingerprint dialog opens only after you answer ([ADR-0071](adr/0071-ask-before-pkexec.md)).
-`pkexec` is in `sandbox.excludedCommands`, which matches a bare command only: keep redirections off the line (`pkexec install`, `pkexec tee`, `pkexec sh -c`).
+The sandbox strips setuid, so `claude/CLAUDE.md` has Claude run pkexec unsandboxed from the first call; `sandbox.excludedCommands` cannot do it, as Claude Code ignores that key outside trusted settings tiers.
 
 ## Two entry points
 
