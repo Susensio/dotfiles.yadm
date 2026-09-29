@@ -1,7 +1,7 @@
 // Names a session from its first prompt, so /resume and the footer show a title
-// instead of a truncated prompt. A name set by hand (`/name`, `--name`) wins.
+// instead of a truncated prompt. A hand-set name wins unless `/rename` is used.
 // The same call also yields a one-word herdr tab label, renamed over the socket
-// only while the tab still carries its default number label.
+// only while the tab still carries its default number label, unless `/rename` is used.
 //
 // Two provider facts this file depends on, both verified here on pi 0.87.1:
 // opencode gateways reject extension side calls with 400 MissingSessionID
@@ -109,23 +109,23 @@ function herdrRequest(method: string, params: Record<string, unknown>) {
 
 // An unnamed tab is labelled with a bare number (its creation position in the
 // workspace, not the global tab number), so a numeric label is the only signal
-// that the tab name is still free; a hand-set name always wins. Outside herdr,
-// or when the tab was renamed meanwhile, this is a no-op.
-async function renameTab(label: string) {
+// that the tab name is still free; a hand-set name wins by default. Outside herdr,
+// or when the tab was renamed meanwhile, this is a no-op unless forced.
+async function renameTab(label: string, force = false) {
 	const tabId = process.env.HERDR_TAB_ID;
 	if (process.env.HERDR_ENV !== "1" || !tabId || !label) return;
 
 	const info = (await herdrRequest("tab.get", { tab_id: tabId })) as
 		| { result?: { tab?: { label?: string } } }
 		| undefined;
-	if (!/^\d+$/.test(info?.result?.tab?.label ?? "")) return;
+	if (!info?.result?.tab || (!force && !/^\d+$/.test(info.result.tab.label ?? ""))) return;
 
 	await herdrRequest("tab.rename", { tab_id: tabId, label });
 }
 
-async function nameSession(pi: ExtensionAPI, ctx: ExtensionContext, prompt: string) {
+async function nameSession(pi: ExtensionAPI, ctx: ExtensionContext, prompt: string, force = false) {
 	const model = pickModel(ctx);
-	if (!model) return;
+	if (!model) return "";
 
 	const response = await ctx.modelRegistry.complete(
 		model,
@@ -156,15 +156,41 @@ async function nameSession(pi: ExtensionAPI, ctx: ExtensionContext, prompt: stri
 	// A model that answers with one line still leaves the tab a single word.
 	const label = tabLabel(lines[1] ?? title.split(/\s+/)[0] ?? "");
 	// A manual name set while the title was in flight outranks the generated one.
-	if (title && !pi.getSessionName()) {
+	if (title && (force || !pi.getSessionName())) {
 		pi.setSessionName(title);
 	}
-	await renameTab(label);
+	await renameTab(label, force);
+	return title;
 }
 
 export default function (pi: ExtensionAPI) {
 	// Set once naming has started, so later turns never start it again.
-	let naming: Promise<void> | undefined;
+	let naming: Promise<string | void> | undefined;
+
+	pi.registerCommand("rename", {
+		description: "Regenerate the session and Herdr tab names from the first prompt",
+		handler: async (_args, ctx) => {
+			// Wait for the automatic title so an in-flight result cannot overwrite this one.
+			await naming;
+			const firstMessage = ctx.sessionManager.getBranch().find((entry) => entry.type === "message" && entry.message.role === "user");
+			const content = firstMessage?.type === "message" ? firstMessage.message.content : undefined;
+			const prompt = typeof content === "string"
+				? content
+				: Array.isArray(content)
+					? content.filter((block) => block.type === "text").map((block) => block.text).join("\n")
+					: "";
+			if (!prompt.trim()) {
+				ctx.ui.notify("No first prompt to rename from", "warning");
+				return;
+			}
+			try {
+				const title = await nameSession(pi, ctx, prompt.trim().slice(0, MAX_PROMPT_CHARS), true);
+				ctx.ui.notify(title ? `Session renamed: ${title}` : "No name generated", title ? "info" : "warning");
+			} catch {
+				ctx.ui.notify("Could not regenerate session name", "error");
+			}
+		},
+	});
 
 	// The expanded prompt, so a skill or template invocation is titled by its own
 	// text rather than by the slash command that pulled it in. Starting the call
