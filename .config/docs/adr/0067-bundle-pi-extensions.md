@@ -110,3 +110,10 @@ Accepted limitations:
 - A freshly built bundle has no `jiti` cache entry, so the first start after a build pays it once (~5.4 s observed). That cache lives in `/tmp`, which is `tmpfs` here, so a cold cache after reboot still costs ~9.4 s regardless of bundling.
 - The screen must be re-run whenever pi or a package changes graph, which is why it runs inside the hook rather than once by hand.
 - A package that fails gate A is not permanently unbundleable: `--alias:#src=./src` would very likely make the two `#src/*` packages build, and the screen would then have to judge them like any other rather than refusing them on proof.
+
+## Corrections
+
+2026-09-29: a paired review pass (five runs per state, back to back) narrowed the bundled set from six packages to two, `pi-footer` and `@tintinweb/pi-subagents`, which carried nearly all of the saving: startup went from 1417 ms to 758 ms on the profiler's total, and those two imports from 527 ms to 13 ms and from 245 ms to 52 ms.
+Every other bundle saved under ~100 ms, the bar below which the relocation risk is not worth taking, so `@juicesharp/rpiv-web-tools` (47 ms), `@juicesharp/rpiv-todo` (22 ms) and `pi-model-fallback-alias` (2 ms) now carry `skip` verdicts, as does `@narumitw/pi-usage`, whose bundle imported slower than its source (22 ms against 5 ms).
+`@juicesharp/rpiv-ask-user-question` no longer keeps its `bundle` verdict, contrary to the Consequences above: its source import is ~55 ms, so it would not earn a bundle even once upstream breaks the gate C cycle, which 2.11.0 still carries.
+`pi-model-fallback-alias` has also become a patch target since this record, so gate P refuses it regardless of its verdict.

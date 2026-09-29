@@ -1,41 +1,38 @@
 {
   "pi-footer": {
     "decision": "bundle",
-    "reason": "clean: no asset-locating construct in 119 inlined modules",
-    "measured": "import 896ms -> 20ms (PI_TIMING, warm jiti cache)"
+    "reason": "clean: no asset-locating construct in 119 inlined modules; the saving justifies the bundle, and the statusline rendering on start is the behaviour check",
+    "measured": "import 527ms -> 13ms (paired PI_TIMING pass, 2026-09-29)"
   },
   "@juicesharp/rpiv-web-tools": {
-    "decision": "bundle",
-    "reason": "clean: no asset-locating construct in 697 inlined modules"
+    "decision": "skip",
+    "reason": "clean, but saves ~47ms (71 -> 24ms paired, 2026-09-29); under the ~100ms bar for a bundle"
   },
   "@juicesharp/rpiv-todo": {
-    "decision": "bundle",
-    "reason": "import.meta.url reaches registerLocalesFromDir only, and that call sits inside the try whose dynamic import of @juicesharp/rpiv-i18n/loader rejects, so the URL is never consumed and the UI stays English-only.",
-    "reviewedKinds": ["@juicesharp/rpiv-todo/index.ts:import.meta.url×1"],
-    "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
+    "decision": "skip",
+    "reason": "saves ~22ms (60 -> 38ms paired, 2026-09-29); the import.meta.url hazard is inert while @juicesharp/rpiv-i18n is absent, but the saving does not earn a bundle"
   },
   "@juicesharp/rpiv-ask-user-question": {
-    "decision": "bundle",
-    "reason": "import.meta.url reaches registerLocalesFromDir only, and the surrounding dynamic import of @juicesharp/rpiv-i18n/loader rejects, so the surviving path is dead.",
-    "reviewedKinds": ["@juicesharp/rpiv-ask-user-question/index.ts:import.meta.url×1"],
-    "reopenIf": { "installed": ["@juicesharp/rpiv-i18n"] }
+    "decision": "skip",
+    "reason": "gate C: awaited init cycle dialog-builder <-> tab-content-strategy is still present in 2.11.0, the latest release; source import is ~55ms, so even fixed it would not earn a bundle"
   },
   "@tintinweb/pi-subagents": {
     "decision": "bundle",
     "reason": "new Worker takes WORKER_SOURCE with eval:true; worker-source.ts states the source is an inlined template literal precisely so it survives bundling, so no path is relocated.",
-    "reviewedKinds": ["@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"]
+    "reviewedKinds": ["@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"],
+    "measured": "import 245ms -> 52ms (paired PI_TIMING pass, 2026-09-29)"
   },
   "@narumitw/pi-usage": {
-    "decision": "bundle",
-    "reason": "createRequire(import.meta.url) is used only as require(\"highlight.js\"), a bare specifier, which still resolves upward from <pkg>/.pi-bundler/.",
-    "reviewedKinds": [
-      "@narumitw/pi-tui-kit/dist/components/syntax-highlighting.js:import.meta.url×1",
-      "@narumitw/pi-tui-kit/dist/components/syntax-highlighting.js:createRequire×1"
-    ]
+    "decision": "skip",
+    "reason": "bundled import is slower than source (22ms vs 5ms paired, 2026-09-29), probably because the bundle loads what source defers; the createRequire hazard is only require(\"highlight.js\"), a bare specifier"
+  },
+  "pi-model-fallback-alias": {
+    "decision": "skip",
+    "reason": "gate P: patches/pi-model-alias-shared-registry targets index.ts; before that patch it screened clean and saved only ~2ms (7 -> 5ms paired, 2026-09-29), so it would not earn a bundle either"
   },
   "pi-claude-bridge": {
     "decision": "skip",
-    "reason": "inlined @anthropic-ai/claude-agent-sdk locates its native CLI via import.meta.url and would throw \"Native CLI binary for <platform>-<arch> not found\" once relocated; no pathToClaudeCodeExecutable is configured, so the SDK relies on that URL. Externalizing the SDK and the MCP SDK was measured: 631 source modules load in ~590ms, the externalized bundle in ~390ms, so the win is ~100ms of a ~1000ms wall clock. Not worth the upkeep."
+    "reason": "inlined @anthropic-ai/claude-agent-sdk locates its native CLI via import.meta.url and would throw \"Native CLI binary for <platform>-<arch> not found\" once relocated; no pathToClaudeCodeExecutable is configured, so the SDK relies on that URL. Source now imports in ~167ms (paired, 2026-09-29), so externalizing the SDK could save under 100ms. Not worth the upkeep."
   },
   "@gotgenes/pi-permission-system": {
     "decision": "skip",
@@ -43,6 +40,6 @@
   },
   "@mzwing/pi-permission-auto-review": {
     "decision": "skip",
-    "reason": "gate A: esbuild cannot resolve #src/service/permission-events"
+    "reason": "gate A: esbuild cannot resolve #src/service/permission-events; source import is ~7ms, so there is nothing to win"
   }
 }
