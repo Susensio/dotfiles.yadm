@@ -16,6 +16,12 @@ Its hand-maintained rule and authorizer configs live beside their extensions.
 For privileged commands use `pkexec`, not `sudo`: polkit opens a visible authentication dialog, while sudo's fingerprint prompt can wait invisibly in Pi's pipes and time out.
 Use `pkexec /usr/bin/id -u` for a harmless root check, with a shell timeout of at least 60 seconds.
 
+## Extension bundling
+
+`bundler/` replaces screened packages' sources with esbuild bundles after every install, roughly halving startup ([ADR-0067](../../docs/adr/0067-bundle-pi-extensions.md)).
+It is fragile: bundling changes module loading, not just file layout, and its gates catch only failure modes already seen — an approved bundle once deadlocked `ask_user_question`.
+When an extension hangs or misbehaves, run `node bundler/bundle.mjs --revert` and retest before debugging the extension; `node bundler/screen.mjs` shows each package's gate and hazards.
+
 ## Validation boundaries
 
 Run `/web-tools` once to configure search before using `web_search` or `web_fetch`.

@@ -51,8 +51,10 @@ Ordering composes with the patch library rather than fighting it: patches run fi
 `apply.sh`'s drift detection is untouched because `src/` is never written.
 
 `run.sh` is the postinstall entry point in the [ADR-0057](0057-omarchy-bugfix-patch-steps.md) and ADR-0066 shape: silent when nothing changed, never failing an install.
-The gate lives inside `bundle.mjs`, which runs `screen.mjs` itself and refuses to touch `node_modules` when the screen is unhappy.
+The gate lives inside `bundle.mjs`, which calls the screen in-process (`screenAll()` in `lib.mjs`) and refuses to touch `node_modules` when the screen is unhappy.
 Putting it there rather than in the shell wrapper is the point: invoked directly, `bundle.mjs` cannot skip the gate.
+`screen.mjs` is only the human view of the same function: it prints each package's gate and hazards, plus the `reviewedKinds` keys to paste when a verdict needs updating, and writes nothing.
+An earlier revision ran it as a subprocess that handed its result over through a `screen-report.json` file; that file had no other reader, was rewritten just before it was read, and duplicated what `reviewedKinds` and the printout already record, so it was removed rather than kept as an audit trail.
 The lock it takes excludes other bundler runs, so the graph cannot change between screening and building *among those*; it does not exclude a concurrent `npm install` replacing a package in that window, which on this machine would require two pi processes installing at once.
 An earlier revision had `run.sh` screen and then call the bundler, which left the gate skippable and left a window between the two steps.
 

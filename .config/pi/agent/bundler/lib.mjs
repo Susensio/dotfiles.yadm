@@ -23,9 +23,7 @@ export const STATE_DIR = ".pi-bundler";
 // Written into the state dir so a revert can tell our directory from one an
 // upstream package happened to ship under the same name.
 export const MARKER = "owner";
-// Written by screen.mjs; read by bundle.mjs, which runs the screen itself so the
-// gate cannot be skipped and the graph cannot change between the two.
-export const REPORT_PATH = new URL("./screen-report.json", import.meta.url).pathname;
+export const VERDICTS_PATH = new URL("./verdicts.json", import.meta.url).pathname;
 
 // Pi supplies these to extensions as virtual modules; they must never be inlined.
 export const ESBUILD_EXTERNALS = ["--external:@earendil-works/*", "--external:@mariozechner/*"];
@@ -265,6 +263,107 @@ export function analyze(esbuild, entry, externals = []) {
   const cycles = awaitedInitCycles(readFileSync(out, "utf8"));
   rmSync(dir, { recursive: true, force: true });
   return { ok: true, inputs, cycles };
+}
+
+// Whose code a hit lives in is context for the reviewer, not a gate: inlined
+// dependency code is relocated by bundling exactly like the package's own.
+function isOwnSource(input, pkgDir) {
+  if (!input.startsWith(pkgDir + "/")) return false;
+  return !input.slice(pkgDir.length).includes("/node_modules/");
+}
+
+function label(input) {
+  return input.startsWith(MODULES_DIR + "/") ? input.slice(MODULES_DIR.length + 1) : input;
+}
+
+// Occurrence counts belong in the key: a second hit of a known kind in a known
+// file is new evidence, and a set of file:kind alone would not notice it.
+export function hitKinds(hits) {
+  const counts = new Map();
+  for (const h of hits) {
+    const k = `${h.file}:${h.kind}`;
+    counts.set(k, (counts.get(k) ?? 0) + (h.count ?? 1));
+  }
+  return [...counts].map(([k, n]) => `${k}×${n}`);
+}
+
+// Classify every enabled package through the gates, in memory. bundle.mjs calls
+// this itself so the gate cannot be skipped by invoking it directly, and the
+// graph cannot change between screening and building.
+// Fails closed: a package with a hazard and no matching verdict is a problem.
+export function screenAll(esbuild) {
+  const verdicts = existsSync(VERDICTS_PATH) ? readJson(VERDICTS_PATH) : {};
+  const patched = patchedPackages();
+  const report = {};
+  const problems = [];
+
+  for (const name of enabledPackages()) {
+    const found = packageEntries(name);
+    if (!found) {
+      report[name] = { gate: "absent", detail: "not installed" };
+      continue;
+    }
+    if (patched.has(name)) {
+      report[name] = { gate: "P", decision: "skip", detail: "patch target (patches/*/target)" };
+      continue;
+    }
+    if (found.entries.length === 0) {
+      report[name] = { gate: "A", decision: "skip", detail: "manifest declares no existing entry" };
+      continue;
+    }
+
+    const verdict = verdicts[name];
+    // The same externals the bundle would use, so the screen measures the graph
+    // that actually ships.
+    const a = analyze(esbuild, found.entries[0], verdict?.externals ?? []);
+    if (!a.ok) {
+      report[name] = { gate: "A", decision: "skip", detail: a.error };
+      continue;
+    }
+    // Ahead of the verdict check: a recorded verdict cannot approve a deadlock.
+    if (a.cycles.length > 0) {
+      const detail = `awaited init cycle: ${a.cycles.map((c) => c.join(" <-> ")).join("; ")}`;
+      report[name] = { gate: "C", decision: "skip", modules: a.inputs.length, detail };
+      continue;
+    }
+
+    const hits = [];
+    for (const input of a.inputs) {
+      // Built JS that ships as-is is still inlined; scan everything that is.
+      let src;
+      try {
+        src = readFileSync(input, "utf8");
+      } catch {
+        continue;
+      }
+      for (const h of scanSource(src)) {
+        hits.push({ file: label(input), own: isOwnSource(input, found.dir), ...h });
+      }
+    }
+
+    const kinds = hitKinds(hits);
+    if (hits.length > 0 && !verdict) problems.push(name);
+    if (verdict?.decision === "bundle") {
+      const recorded = new Set(verdict.reviewedKinds ?? []);
+      if (kinds.some((k) => !recorded.has(k))) problems.push(name);
+      // A hazard can be inert only because something else is absent. Recording
+      // that absence mechanically beats a comment saying so.
+      for (const need of verdict.reopenIf?.installed ?? []) {
+        if (isInstalled(need)) problems.push(name);
+      }
+    }
+
+    report[name] = {
+      gate: hits.length === 0 ? "clean" : "B",
+      modules: a.inputs.length,
+      decision: verdict?.decision ?? (hits.length === 0 ? "bundle" : "unjudged"),
+      reason: verdict?.reason,
+      hits,
+      kinds,
+    };
+  }
+
+  return { report, problems: [...new Set(problems)] };
 }
 
 export { execFileSync };

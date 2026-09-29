@@ -16,25 +16,22 @@
 // guess, and a fresh install overwrites both, so the hook is idempotent.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
-  AGENT_DIR,
-  ESBUILD_EXTERNALS,
   esbuildArgs,
   findEsbuild,
   MODULES_DIR,
   NPM_DIR,
   PACKAGE_NAME,
   MARKER,
-  REPORT_PATH,
   STATE_DIR,
+  VERDICTS_PATH,
   packageEntries,
   patchedPackages,
+  screenAll,
 } from "./lib.mjs";
 
-const VERDICTS = new URL("./verdicts.json", import.meta.url).pathname;
 const OUT = `${STATE_DIR}/bundle.mjs`;
 
 const argv = process.argv.slice(2);
@@ -49,7 +46,7 @@ if (!esbuild && !revert) {
   console.error("bundle: esbuild not found. Set PI_BUNDLER_ESBUILD or put esbuild on PATH.");
   process.exit(2);
 }
-const verdicts = JSON.parse(readFileSync(VERDICTS, "utf8"));
+const verdicts = JSON.parse(readFileSync(VERDICTS_PATH, "utf8"));
 const patched = patchedPackages();
 
 // A postinstall run can race a manual one. Only tool-owned state is at stake,
@@ -196,14 +193,13 @@ for (const name of Object.keys(verdicts)) {
 // this file directly and the graph cannot change between screening and building.
 // Revert never screens: undoing must not depend on esbuild or on a passing gate.
 function screenNow() {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const r = spawnSync(process.execPath, [join(here, "screen.mjs"), "--quiet"], { encoding: "utf8" });
-  if (r.status !== 0) {
-    if (r.stderr) process.stderr.write(r.stderr);
-    console.error("bundle: screen refused; leaving node_modules alone");
+  const { report, problems } = screenAll(esbuild);
+  if (problems.length > 0) {
+    console.error(`bundle: ${problems.length} package(s) need a verdict in verdicts.json: ${problems.join(", ")}`);
+    console.error("bundle: screen refused; leaving node_modules alone; run `node screen.mjs` for details");
     process.exit(0);
   }
-  return JSON.parse(readFileSync(REPORT_PATH, "utf8"));
+  return report;
 }
 
 const names = revert
@@ -235,7 +231,7 @@ if (!revert) {
 }
 
 if (only && !revert && !names.includes(only)) {
-  console.error(`bundle: ${only} is not bundleable per the screen; see screen-report.json`);
+  console.error(`bundle: ${only} is not bundleable per the screen; run \`node screen.mjs\` for why`);
   process.exit(1);
 }
 

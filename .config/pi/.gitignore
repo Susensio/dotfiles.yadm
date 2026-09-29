@@ -25,8 +25,6 @@
 node_modules/
 __pycache__/
 *.pyc
-# Derived from installed versions; screen.mjs rewrites it before bundle.mjs reads it.
-agent/bundler/screen-report.json
 agent/extensions/**/logs/
 # Omarchy-linked; no trailing slash: a symlink is a file, not a directory.
 agent/skills/omarchy
