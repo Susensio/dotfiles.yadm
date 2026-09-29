@@ -1,3 +1,7 @@
+# Only tmux has a grammar outside the system/release set, so hx --grammar
+# fetch/build stays one small clone instead of all ~250 built-in grammars.
+use-grammars = { only = ["tmux"] }
+
 [language-server.biome]
 command = "biome"
 args = ["lsp-proxy"]
@@ -44,9 +48,13 @@ file-types = [
   { glob = "tmux/conf.d/*.conf" },
 ]
 
+# Pinned, not "main": the tracked runtime/queries/tmux files are this
+# revision's queries with gruvbox scope names, and the next commit renames
+# nodes they reference (:boom: inject format string by tmuxf). A rev bump here
+# means re-copying that revision's queries.
 [[grammar]]
 name = "tmux"
-source = { git = "https://github.com/Freed-Wu/tree-sitter-tmux", rev = "main" }
+source = { git = "https://github.com/Freed-Wu/tree-sitter-tmux", rev = "0507eeb340c91f67713c711cdad54e1a3fb6e2e0" }
 
 [[language]]
 name = "nu"
