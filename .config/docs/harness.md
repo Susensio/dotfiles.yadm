@@ -1,10 +1,29 @@
-# Claude Harness
+# Agent harnesses
 
-This explains the global userspace Claude Code configuration, which applies across all projects for this user: the two ways to start a session, what each piece of `~/.config/claude/` does, and the hooks that quietly fix behaviour the model would otherwise get wrong.
-Land here first if you're an agent picking up work in `~/.config/claude/`, or a human trying to understand what's running globally.
-Note that this doc describes the global userspace harness, not a project-local harness (like `.claude/` in a specific repository).
+The global userspace harnesses live under `~/.config/claude/` and `~/.config/pi/agent/`; Codex reuses Pi's shared guidance and skills.
+This document explains the boundaries and design choices common to them, then the Claude-specific setup that needs operational explanation.
+For Pi-specific operating notes see [`pi/agent/README.md`](../pi/agent/README.md); for tracked files and runtime state see [`pi/README.md`](../pi/README.md).
+These are user-global configurations, not project-local harnesses such as a repository's `.claude/` directory.
 
-All of it lives under `~/.config/claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
+## Shared approach
+
+Keep instructions that every session needs short; load conditional procedures through skills and use subagents when an independent execution context pays for itself.
+The main session owns decisions, sequencing, integration, and final correctness.
+Agents provide execution boundaries, skills provide on-demand knowledge, and extensions or hooks handle behavior prose cannot enforce reliably.
+The live configuration and skills, not this document, govern which agents, models, tools, and packages run today.
+
+Pi uses the ordinary session as its sole main entry point and keeps its subagents as independent task containers.
+Claude also offers a dedicated `leader` entry point for project orchestration; its role and hooks differ from Pi's, so they are not mirrored automatically.
+Codex shares Pi's global working-style instructions via `~/.config/codex/AGENTS.md` → `~/.config/pi/agent/AGENTS.md`, and discovers shared skills through `~/.config/codex/skills/shared` → `~/.config/pi/agent/skills/`.
+Codex keeps its own agent definitions, permissions, and runtime settings; the symlinks share guidance, not behavior or model configuration.
+
+Some Claude and Pi skills are symlinked when one harness-neutral procedure serves both; others have the same name but separate implementations because their workflows and context budgets differ.
+A change to an independently maintained skill should not be copied to the other harness merely for symmetry.
+
+## Claude Code
+
+Claude's configuration applies across projects for this user.
+It lives under `~/.config/claude/`, pointed at by `CLAUDE_CONFIG_DIR`.
 That tree is the only source of truth: anything elsewhere that reads as harness config is a compiled copy, so edit it here.
 Keep the hand-maintained config here as real files.
 `CLAUDE_CONFIG_DIR` also puts credentials, session transcripts and plugins in this directory; `yadm/exclude` and `claude/.gitignore` keep those out of version control.

@@ -1,141 +1,24 @@
-# Pi harness
+# Pi harness: operating notes
 
-This directory (`~/.config/pi/agent/`) contains a deliberately small personal Pi harness; `~/.config/pi/README.md` documents what yadm tracks in that tree and what stays ignored.
+This is the Pi-specific companion to [`docs/harness.md`](../../docs/harness.md), which explains the shared harness philosophy and the Claude/Pi/Codex boundaries.
+[`../README.md`](../README.md) explains what yadm tracks and how to configure the Pi environment.
+The live agent definitions, skills, extensions, and settings are authoritative for their own behavior; this file records only operational details that are easy to miss.
 
-The design keeps universal behaviour short, loads reusable knowledge through skills, and uses subagents only when an independent context is worth its startup cost.
+## Provider and permissions
 
-## Architecture
+Everything runs on the OpenCode Go subscription, without a second provider or model-fallback layer.
+An extension may make its own model call outside the main turn; `extensions/session-name.ts` does so for the first-prompt title and `/rename`.
+It passes the session ID explicitly because opencode-go rejects headerless side calls, and places its instruction in the user turn because that gateway drops a bare system prompt.
+See [ADR-0062](../../docs/adr/0062-session-naming-in-own-extension.md) for the decision to own the extension instead of patching a package.
 
-The normal Pi session is the only entry point.
+The permission system asks by default and sends eligible requests to its auto-review authorizer; deferred requests still reach the human.
+Its hand-maintained rule and authorizer configs live beside their extensions.
+For privileged commands use `pkexec`, not `sudo`: polkit opens a visible authentication dialog, while sudo's fingerprint prompt can wait invisibly in Pi's pipes and time out.
+Use `pkexec /usr/bin/id -u` for a harmless root check, with a shell timeout of at least 60 seconds.
 
-It owns decisions, sequencing, shared interfaces, integration, and final correctness.
+## Validation boundaries
 
-Four subagents provide distinct execution containers:
-
-- `explorer` gathers repository and web evidence with read-only built-ins and a disposable sandboxed shell.
-- `worker` implements one settled, independently checkable plan leaf.
-- `tester` runs one isolated verification and returns a pass/fail verdict without modifying live state.
-- `reviewer` independently judges consequential code or design without implementing fixes.
-
-Their descriptions and prompts remain model-neutral so model tiers can change without redesigning the harness.
-
-## Model tiers
-
-Use the cheapest model likely to complete each execution bundle reliably.
-Everything runs on the OpenCode Go subscription; there is no second provider and no model-fallback layer.
-
-| Agents | OpenCode Go |
-| --- | --- |
-| `explorer`, `tester` | MiMo V2.6 Flash |
-| `worker` | DeepSeek V4.1 Flash |
-| `reviewer` | GLM 5.3 Flash |
-
-The worker's 4× usage-limit promo on V4.1 Flash is limited-time; when it ends, re-check whether the tier still beats V4 Flash's quota (13,000 vs 6,500 req/5h) on real leaves.
-
-Benchmark the tiers on representative tasks rather than assuming the models are equivalent.
-
-The dormant `pi-automode` classifier config (`agent/extensions/pi-automode/config.json`, tracked) documents the narrow 0/1 gate tier: `opencode-go/mimo-v2.6-flash`, a parse miss fails closed to manual review, not damage.
-
-## Delegation policy
-
-Work directly when the target and relevant context are bounded.
-
-Use an explorer for broad discovery, web research, or bulky evidence.
-
-Use a worker only after design decisions are settled and the brief has clear boundaries and checks.
-
-Keep routine verification with the implementer.
-Use a tester when an isolated pass/fail check is a standalone task because of runtime behavior, cost, output volume, parallelism, or the need for independent observation.
-
-Give parallel writers disjoint responsibilities and separate worktrees or equivalent isolated checkouts.
-Use the harness's documented isolation facility when available; otherwise prepare isolated checkouts before dispatch, or run writers sequentially.
-
-Worktrees start from committed `HEAD` and cannot see uncommitted main-session changes.
-
-Review the integrated result rather than every worker leaf.
-
-Use a reviewer only when the user requests one or an explicit risk trigger in `skills/delegation/SKILL.md` applies.
-
-## Configuration
-
-`AGENTS.md` holds universal behaviour and pre-routing triggers.
-Agent definitions hold execution boundaries; skills hold conditional procedures and preferences.
-`agent/prompts/` holds prompt templates — one Markdown file per `/`-command. `/perm-report` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
-`settings.json` selects packages, while `subagents.json` removes unused orchestration features.
-Runtime credentials, model metadata, package files, and session history are not harness documentation.
-
-Codex loads this harness's global working-style instructions through `~/.config/codex/AGENTS.md`, a symlink to this harness's `AGENTS.md`.
-It discovers these skills through `~/.config/codex/skills/shared`, a directory symlink to this harness's `skills/` directory.
-Adding or removing a skill here updates both catalogs.
-Codex keeps its bundled skills under its own `skills/.system/` directory and its agent definitions and runtime configuration in its own format.
-
-## Extensions
-
-The retained packages are:
-
-- `@juicesharp/rpiv-ask-user-question` for structured clarification.
-- `@juicesharp/rpiv-todo` for visible task state.
-- `@tintinweb/pi-subagents` for background agents, parallel dispatch, and optional worktrees.
-- `@juicesharp/rpiv-web-tools` for `web_search` and `web_fetch`.
-- `@narumitw/pi-usage` for the footer usage widget.
-- `pi-footer` for the configurable statusline footer.
-- `@gotgenes/pi-permission-system` for tool-call and path access gating.
-- `@mzwing/pi-permission-auto-review` as its authorizer (a `codex-auto-review` pass over each ask decision).
-
-(An earlier gate, `@czottmann/pi-automode`, was replaced by the permission system; see the model-tiers section for its kept classifier config.)
-
-The permission system's ask gate is `*: ask` with a deny list for secrets (`*.env*`, `*.pem`, `*.key`, `~/.ssh/*`, `~/.pi/agent/auth.json`), a deny on `sudo *` directing the agent to `pkexec`, an ask on `pkexec *`, an allow list for common read-mostly shell commands, and per-directory external-directory rules.
-Its `authorizerChain` sends asks to the auto-reviewer; `yoloMode` stays off, so a deferred review reaches the human permission prompt.
-
-Privileged commands use `pkexec`, matching the successful Codex execution path on this workstation.
-After Pi's permission review, polkit opens the desktop authentication dialog; `/etc/pam.d/polkit-1` loads `pam_fprintd.so` for fingerprints.
-This avoids the invisible wait observed with plain sudo: Pi's pipes held its fingerprint prompt until verification timed out.
-Use `pkexec /usr/bin/id -u` for a harmless root identity check, with a bash-tool timeout of at least 60 seconds for authentication.
-
-The system's hand-maintained config lives at `extensions/pi-permission-system/config.json`, auto-review's at `extensions/pi-permission-auto-review/config.json`; both are tracked. The permission decision log the system writes to `extensions/pi-permission-system/logs/*.jsonl` is ignored as runtime churn.
-
-Everything else under `extensions/` is tracked:
-
-- `herdr-agent-state.ts` (installed by `herdr integration install pi`, overwritten on every herdr update) and `herdr-ask-user-bridge.ts` pipe ask-user questionnaires and permission-dialog waits onto herdr's `herdr:blocked` channel so a blocked session stops looking like it is still working in herdr.
-- `pi-footer.json` is the hand-edited config for the `pi-footer` statusline package.
-- `herdr-exit-width.ts` keeps the exit transcript intact when Herdr reclaims its one-column scrollbar gutter after Pi leaves fullscreen.
-  It reads `[ui] pane_scrollbars` from Herdr's config at Pi session start (default `true`), activates only with `HERDR_ENV=1`, and temporarily narrows Pi's reported width until the PTY resize arrives.
-  It uses Pi TUI internals via an invisible widget, so recheck it after Pi upgrades and restart Pi if Herdr's scrollbar setting changes during a session.
-  Tested with Pi 0.87.1 and Herdr 0.9.1.
-- `session-name.ts` names each session from its first prompt, so `pi-footer` and `/resume` show a title instead of a truncated prompt; a `/name` set by hand always wins. The same one-shot call asks for a second line, a single lowercase word, which renames the herdr tab over the socket while that tab still carries its default numeric label; a hand-named tab always wins. It pins `opencode-go/gpt-6-luna` for the title and falls back to the session model when that model is out of scope. It exists rather than a patched package because it works around two provider bugs: opencode-go rejects extension side calls without `x-opencode-session` (pi maps it from `sessionId` since 0.87.1 but never sets one on the extension path), and it drops a bare system prompt, so the title instruction has to ride in the user turn. Delete it once a naming package passes a session id and keeps its instruction where the provider reads it.
-
-
-`bash-readonly/` (loaded by the explorer and tester only, via explicit path) is a read-only-agent prototype in `bash-readonly.ts` + `runner.mjs`.
-
-Its nested `bash-readonly.ts` filename deliberately avoids Pi's automatic `extensions/*.ts` and `extensions/*/index.ts` discovery patterns, so the main session does not load it.
-
-It uses Bubblewrap to mount the host filesystem read-only and an unprivileged OverlayFS to give each command a disposable writable project view.
-
-It also provides writable `/tmp` and cache state so routine checks can create artifacts without changing the host.
-
-Network access remains enabled and is not made read-only by this filesystem boundary.
-
-## Deliberately removed
-
-The harness does not include separate leader and general modes, `pi-plan`, default subagents, fallback agents, workflows, schedules, nested delegation, agent mentions, persistent agent memory, or output transcripts.
-
-These features can return only after a repeated observed need justifies their routing, context, and maintenance cost.
-
-## Setup and validation
-
-Run `/web-tools` once to configure a search provider before using `web_search`.
-
-The current harness has been validated for JSON syntax, clean Pi startup without a model call, installed package consistency, configured model resolution, custom reviewer execution, and isolated tester execution.
-
-`bash_readonly` requires Linux with `bubblewrap`, unprivileged user namespaces, and unprivileged OverlayFS support.
-
-The remaining representative checks are:
-
-1. Run an explorer retrieval task after configuring web search.
-2. Run a bounded worker implementation task.
-3. Run parallel workers in worktrees and integrate their branches.
-4. Benchmark the OpenCode Go tier pairs on representative tasks.
-
-Do not expand the harness merely to complete this list.
-
-Change it only in response to observed behaviour, and use `skills/harness-design/SKILL.md` to decide where a justified addition belongs.
+Run `/web-tools` once to configure search before using `web_search` or `web_fetch`.
+`bash-readonly/` is loaded explicitly by the explorer and tester, not auto-discovered by the main session.
+It uses Bubblewrap and unprivileged OverlayFS for a disposable writable view, but does **not** isolate the network; it requires Linux with unprivileged user namespaces and OverlayFS support.
+When testing session-bound behavior, use a disposable session rather than attaching to a live one.
