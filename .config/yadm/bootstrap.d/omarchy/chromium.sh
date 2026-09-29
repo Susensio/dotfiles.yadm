@@ -20,6 +20,7 @@ UNIT_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user
 if ! cmp -s "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"; then
   install -Dv --mode=644 "$ASSETS_DIR/chromium.service" "$UNIT_DIR/chromium.service"
   systemctl --user daemon-reload
+  systemctl --user try-restart chromium.service
 fi
 if ! systemctl --user is-enabled --quiet chromium.service; then
   systemctl --user enable chromium.service
