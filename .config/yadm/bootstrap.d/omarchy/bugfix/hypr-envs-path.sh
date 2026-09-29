@@ -6,6 +6,14 @@ set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 # The omarchy package owns default/, so the patch is -p1 relative to it.
-apply_omarchy_patch \
-  hypr-envs-path.patch \
-  /usr/share/omarchy/default/hypr/envs.lua 1
+target=/usr/share/omarchy/default/hypr/envs.lua
+patch_file=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/hypr-envs-path.patch
+needs_patch=false
+if patch -p1 -N -f -s -F0 --dry-run "$target" < "$patch_file" &>/dev/null; then
+  needs_patch=true
+fi
+apply_omarchy_patch hypr-envs-path.patch "$target" 1
+
+if $needs_patch && [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+  omarchy-restart-hyprctl
+fi
