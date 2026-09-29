@@ -2,17 +2,54 @@
 set -euo pipefail
 
 config=$HOME/.config/tmux/tmux.conf
-socket=default
-if [[ -n ${TMUX:-} ]]; then
-  socket=$(tmux display-message -p '#{b:socket_path}')
-fi
-main_socket=${socket%_scratchpad}
+theme_dir=$HOME/.local/state/omarchy/current/theme
+socket_dir=${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)
 
-# default too: a switch run from inside herdr's scratchpad derives a main socket that does not exist
-for socket in $(printf '%s\n' "$main_socket" "${main_socket}_scratchpad" default default_scratchpad | awk '!seen[$0]++'); do
-  # has-session does not create a server when this socket is absent.
-  env -u TMUX tmux -L "$socket" has-session 2>/dev/null || continue
-  # Only servers that loaded tmux.conf; herdr's scratchpad shim deliberately skips it
-  env -u TMUX tmux -L "$socket" show-environment -gh TMUX_CONFIG_DIR &>/dev/null || continue
-  env -u TMUX tmux -L "$socket" source-file "$config"
+# Omarchy's own tmux updater is disabled by an override in ~/bin/overrides
+# (docs/adr/0075), so this hook is the only writer. Sourcing the config applies
+# the palette, styles and cursor colour; the environment values below only
+# reach panes started after the switch, which is why they are pushed here.
+
+set_environment() {
+  local socket=$1 key=$2 value=$3 session
+  shift 3
+  env -u TMUX tmux -S "$socket" set-environment -g "$key" "$value" 2>/dev/null || return 0
+  # A session holds the copy it was created with, so it needs its own update.
+  for session in "$@"; do
+    [[ -n $session ]] || continue
+    env -u TMUX tmux -S "$socket" set-environment -t "$session" "$key" "$value" 2>/dev/null || true
+  done
+}
+
+sync_theme_environment() {
+  local socket=$1 key value
+  shift
+  [[ -f $theme_dir/gum_env.lua ]] || return 0
+  while IFS=$'\t' read -r key value; do
+    [[ -n $key && -n $value ]] || continue
+    set_environment "$socket" "$key" "$value" "$@"
+  done < <(awk -F'"' '/hl\.env\("[A-Z0-9_]+", "[^"]+"\)/ { print $2 "\t" $4 }' "$theme_dir/gum_env.lua")
+}
+
+sync_colorfgbg() {
+  local socket=$1 mode colorfgbg
+  shift
+  [[ -f $theme_dir/colors.toml ]] || return 0
+  mode=$(omarchy-theme-color --file "$theme_dir/colors.toml" mode 2>/dev/null) || mode=
+  [[ -n $mode ]] || return 0
+  colorfgbg="15;0"
+  [[ $mode == light ]] && colorfgbg="0;15"
+  set_environment "$socket" COLORFGBG "$colorfgbg" "$@"
+}
+
+# -L sockets live here; arbitrary -S paths need separate configuration.
+for socket in "$socket_dir"/*; do
+  [[ -S $socket ]] || continue
+  env -u TMUX tmux -S "$socket" has-session 2>/dev/null || continue
+  # Only servers that loaded our full config, not herdr's bare shim.
+  env -u TMUX tmux -S "$socket" show-environment -gh TMUX_CONFIG_DIR &>/dev/null || continue
+  env -u TMUX tmux -S "$socket" source-file "$config"
+  mapfile -t sessions < <(env -u TMUX tmux -S "$socket" list-sessions -F '#{session_id}' 2>/dev/null)
+  sync_theme_environment "$socket" "${sessions[@]}"
+  sync_colorfgbg "$socket" "${sessions[@]}"
 done

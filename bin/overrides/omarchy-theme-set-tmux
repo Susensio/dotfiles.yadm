@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Disabled deliberately: this updater wrote window styles that our own
+# theme-set hook overwrites a moment later, and its plain `tmux` calls reached
+# only the current server while the hook reaches every configured one.
+# The hook now owns live tmux theming, cursor colour included (docs/adr/0075).
+exit 0
