@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-config_dir="$HOME/.config/tmux/conf.d"
+config=$HOME/.config/tmux/tmux.conf
 socket=default
 if [[ -n ${TMUX:-} ]]; then
   socket=$(tmux display-message -p '#{b:socket_path}')
@@ -14,11 +14,5 @@ for socket in $(printf '%s\n' "$main_socket" "${main_socket}_scratchpad" default
   env -u TMUX tmux -L "$socket" has-session 2>/dev/null || continue
   # Only servers that loaded tmux.conf; herdr's scratchpad shim deliberately skips it
   env -u TMUX tmux -L "$socket" show-environment -gh TMUX_CONFIG_DIR &>/dev/null || continue
-  env -u TMUX tmux -L "$socket" source-file "$config_dir/30_gruvbox.conf"
-  env -u TMUX tmux -L "$socket" source-file "$config_dir/31_palette.conf"
-  env -u TMUX tmux -L "$socket" source-file "$config_dir/32_visual.conf"
-  # 32 resets what the scratchpad branch of 50 overrides
-  if [[ $socket == *_scratchpad ]]; then
-    env -u TMUX tmux -L "$socket" source-file "$config_dir/50_scratchpad.conf"
-  fi
+  env -u TMUX tmux -L "$socket" source-file "$config"
 done
