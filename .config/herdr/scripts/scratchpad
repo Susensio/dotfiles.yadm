@@ -3,10 +3,8 @@ set -euo pipefail
 [[ "${DEBUG:-}" == "1" ]] && { exec 2>>/tmp/herdr-scratchpad.env.log; env | grep '^HERDR' >>/tmp/herdr-scratchpad.env.log; }
 unset TMUX TMUX_PANE
 
-# Strict mirror of the tmux-native scratchpad (ADR-0015): one shared server
-# on a `_scratchpad`-suffixed socket (so the native guard in
-# conf.d/50_scratchpad.conf recognizes it), one session per herdr
-# workspace. The mapping key is the workspace ID, which herdr guarantees
+# One shared persistence server, one session per herdr workspace.
+# The mapping key is the workspace ID, which herdr guarantees
 # never to reuse - so a session name permanently identifies its workspace,
 # dead or alive, and orphaned sessions stay unambiguous.
 #
@@ -28,14 +26,10 @@ if [[ -z "$WK_ID" ]]; then
   exit 1
 fi
 
-# Shim lives next to this script and sources tmux's own
-# conf.d/50_scratchpad.conf (chrome off, detach handling) without the main
-# config's plugins and key surface.
+# The shim lives next to this script and loads no main tmux config.
 SCRATCH_CONF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scratchpad.tmux.conf"
 [[ -r "$SCRATCH_CONF" ]] || { echo "scratchpad: missing helper config $SCRATCH_CONF" >&2; exit 1; }
 
-# The `_scratchpad` suffix is load-bearing: the tmux-native guard keys on
-# #{b:socket_path}, and it is the pairing convention ADR-0015 established.
 SOCK="herdr_scratchpad"
 
 # Session per workspace, addressed ONLY by exact match: tmux target

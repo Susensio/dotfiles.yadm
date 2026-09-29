@@ -1,6 +1,6 @@
 # ADR-0059: Keys the herdr scratchpad on workspace-ID sessions under a shared `_scratchpad` socket, with no cleanup and a shim instead of the full tmux config
 
-Status: Accepted
+Status: Superseded by [ADR-0073](0073-bare-herdr-scratchpad.md)
 Date: 2026-09-27
 
 ## Context
