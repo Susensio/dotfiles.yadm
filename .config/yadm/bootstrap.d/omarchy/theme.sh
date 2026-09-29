@@ -2,8 +2,8 @@
 # Render Omarchy's theme files into the current theme, so the tracked templates
 # in omarchy/themed/, the current theme's colors.toml and any stock file Omarchy
 # updated are live without a manual omarchy-theme-refresh (docs/adr/0052).
-# Rendering is otherwise triggered only by a theme set, which never happens on a
-# fresh clone, and a config that requires a rendered file fails until it exists.
+# Re-rendering also catches changed templates when the selected theme itself
+# already matches the tracked choice.
 # Only rendered files change here; running apps still retint through Omarchy's
 # theme-set hook.
 set -euo pipefail
@@ -14,10 +14,25 @@ STOCK_DIR=${OMARCHY_PATH:-/usr/share/omarchy}/default/themed
 STOCK_THEMES_DIR=${OMARCHY_PATH:-/usr/share/omarchy}/themes
 USER_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/themed
 USER_THEMES_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/themes
+SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/theme.name
 THEME_STATE_DIR=${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current
 THEME_DIR=$THEME_STATE_DIR/theme
+[[ -d $STOCK_DIR ]] || exit 0
 
-# No theme rendered yet: omarchy-theme-set seeds the first one during install.
+if [[ -s $SELECTION ]]; then
+  desired=$(< "$SELECTION")
+  current=$(cat "$THEME_STATE_DIR/theme.name" 2>/dev/null) || current=
+  if [[ $desired != "$current" || ! -d $THEME_DIR ]]; then
+    log info "Selecting the tracked Omarchy theme: $desired"
+    if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+      omarchy-theme-set "$desired"
+    else
+      OMARCHY_THEME_HEADLESS=1 omarchy-theme-set "$desired"
+    fi
+  fi
+fi
+
+# Without a recorded choice, Omarchy's installer seeds the first theme.
 [[ -d $STOCK_DIR && -d $THEME_DIR ]] || exit 0
 theme_name=$(cat "$THEME_STATE_DIR/theme.name" 2>/dev/null) || exit 0
 [[ -n $theme_name ]] || exit 0

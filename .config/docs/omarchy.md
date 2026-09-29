@@ -34,6 +34,8 @@ After `yadm pull`, the `post_pull` hook reruns the bootstrap, which is silent wh
 
 ## Theme templates
 
+`omarchy/theme.name` records the selected theme slug in yadm: the `theme-set.d/record-theme` hook updates it on a normal theme switch, so commit that change to carry the choice to another machine ([ADR-0070](adr/0070-omarchy-theme-selection-hook.md)).
+Bootstrap selects it through Omarchy when the current theme is absent or different; a headless first run applies the background link and renders files for the next login without retinting running applications.
 Omarchy renders `omarchy/themed/` into `~/.local/state/omarchy/current/theme`, state yadm ignores, only during a theme set ([ADR-0052](adr/0052-direct-omarchy-tmux-palette.md)).
 Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` requires the rendered `hypr-palette.lua`, and a clone that predates the template fails its config rather than merely losing styling.
 `bootstrap.d/omarchy/theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.

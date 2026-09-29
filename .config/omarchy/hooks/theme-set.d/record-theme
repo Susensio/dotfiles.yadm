@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/theme.name
+# Omarchy releases this lock before hooks; serialize the state check and write with new switches.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/omarchy-theme-set.lock"
+flock 9
+# A newer theme set may have finished while this hook was waiting.
+[[ $(< "$HOME/.local/state/omarchy/current/theme.name") == "$1" ]] || exit 0
+[[ -f $selection && $(< "$selection") == "$1" ]] && exit 0
+printf '%s\n' "$1" > "$selection"
