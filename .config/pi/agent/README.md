@@ -11,10 +11,9 @@ It passes the session ID explicitly because opencode-go rejects headerless side 
 See [ADR-0062](../../docs/adr/0062-session-naming-in-own-extension.md) for the decision to own the extension instead of patching a package.
 
 The permission system asks by default and sends eligible requests to its auto-review authorizer; deferred requests still reach the human.
-The authorizer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `model-alias.json`), so an exhausted Codex quota fails over to the OpenCode Go subscription instead of deferring every ask to the human.
-Its last fallback, `claude-bridge/claude-haiku-4-5`, cannot actually serve: the bridge refuses system prompts it has not captured from a real session, and the reviewer sends the Guardian policy, so that target only bites if the bridge relaxes the rule.
-The same file holds the `alias/top`, `alias/mid` and `alias/fast` tiers for session use; nothing points at them yet (see BACKLOG).
-The `pi-model-alias-shared-registry` patch keeps the alias working after a subagent loads its own copy of the extension in the same process; delete it once [unrelentingfox/pi-model-fallback-alias#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) ships.
+The authorizer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `model-alias.json`), so an exhausted Codex quota fails over to fast opencode-go models, then Haiku, instead of deferring every ask to the human.
+The `pi-model-alias-shared-registry` patch keeps the alias working after a subagent loads its own copy of the extension in the same process.
+The `pi-claude-bridge-standalone-*` patches add `provider.allowExtensionSystemPrompts`; `true` in `claude-bridge.json` serves the reviewer's own system prompt instead of refusing it. Session turns keep Claude Code's prompt either way.
 Only provider failures advance the chain; a reviewer's `defer` verdict is final.
 `models.json` registers `openai-codex/codex-auto-review`, which the authorizer otherwise synthesizes outside the registry where the alias cannot reach it.
 Its hand-maintained rule and authorizer configs live beside their extensions.
