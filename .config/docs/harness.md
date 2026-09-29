@@ -32,6 +32,8 @@ Hooks and statuslines in `settings.json` use `$CLAUDE_CONFIG_DIR` and survive a 
 The write paths under `sandbox.filesystem.allowWrite` are literal; update them when moving the directory so the new location stays writable.
 A stale path can silently deny writes.
 
+`Bash(pkexec *)` is allowed and `pkexec` is excluded from the sandbox, so Claude can run root commands; polkit's fingerprint prompt is the approval gate for each call.
+
 ## Two entry points
 
 **`claude`** — the default session, on `sonnet`.
