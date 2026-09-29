@@ -1,0 +1,16 @@
+{
+  "providers": {
+    "openai-codex": {
+      "models": [
+        {
+          "$comment": "Hidden model the auto-reviewer synthesizes ad hoc; registered so alias/reviewer can target it.",
+          "id": "codex-auto-review",
+          "name": "Codex Auto Review",
+          "api": "openai-codex-responses",
+          "reasoning": true,
+          "input": ["text"]
+        }
+      ]
+    }
+  }
+}

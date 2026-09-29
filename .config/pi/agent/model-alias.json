@@ -1,0 +1,11 @@
+{
+  "$comment": "reviewer: permission auto-review chain; claude-bridge is excluded because it refuses system prompts it has not captured from a pi session.",
+  "reviewer": {
+    "targets": [
+      "openai-codex/codex-auto-review",
+      "opencode-go/deepseek-v4.1-flash",
+      "opencode-go/glm-5.3-flash"
+    ],
+    "timeouts": { "firstEventMs": 15000 }
+  }
+}

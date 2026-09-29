@@ -1,6 +1,6 @@
 {
-  "provider": "openai-codex",
-  "model": "codex-auto-review",
+  "provider": "alias",
+  "model": "reviewer",
   "reasoning": "low",
   "timeoutMs": 45000,
   "includeBaselinePolicy": true,
