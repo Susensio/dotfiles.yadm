@@ -3,4 +3,6 @@ Description=Sync keyd config to system space
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/cp --update %h/.config/keyd/default.conf /etc/keyd/default.conf
+ExecStart=/usr/bin/cp %h/.config/keyd/default.conf /etc/keyd/default.conf
+# Newly added keyd-group membership takes effect for the user service after relogin.
+ExecStartPost=/usr/bin/keyd reload

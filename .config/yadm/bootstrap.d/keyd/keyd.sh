@@ -30,9 +30,14 @@ if ! systemctl is-enabled --quiet keyd || ! systemctl is-active --quiet keyd; th
   sudo systemctl enable --now keyd
 fi
 
-# setfacl below needs the file, and the sync unit only copies on a later edit
+# setfacl below needs the file; reconcile drift even before the next edit.
+config_changed=false
 if [[ ! -f $SYSTEM_CONFIG ]]; then
   sudo install --mode 644 -D "$USER_CONFIG" "$SYSTEM_CONFIG"
+  config_changed=true
+elif ! cmp -s "$USER_CONFIG" "$SYSTEM_CONFIG"; then
+  sudo cp "$USER_CONFIG" "$SYSTEM_CONFIG"
+  config_changed=true
 fi
 
 # I want `keyd` to be managed by user and tracked by yadm
@@ -49,6 +54,9 @@ fi
 # Give $USER permissions to manage keyd
 if ! getfacl --omit-header "$SYSTEM_CONFIG" 2>/dev/null | grep -q "^user:$USER:rw"; then
   sudo setfacl -m "u:$USER:rw" "$SYSTEM_CONFIG"
+fi
+if $config_changed; then
+  sudo keyd reload
 fi
 
 # --- Systemd Sync Setup ---
