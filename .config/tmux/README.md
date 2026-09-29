@@ -35,29 +35,23 @@ One key (`f`, from the prefix table or the mouse menu) fuzzy-finds a directory a
 
 Gruvbox is the default palette. On Omarchy, tmux follows the active Omarchy theme.
 `30_gruvbox.conf` defines Gruvbox colors. `31_palette.conf` maps them to tmux roles, then optionally sources the active palette rendered from `omarchy/themed/tmux-palette.conf.tpl` to override those roles. `32_visual.conf` uses the roles.
-The Omarchy theme-set hook reapplies the palette to running main and scratchpad servers after Omarchy's own tmux retint.
+The Omarchy theme-set hook scans the standard tmux socket directory and reapplies the palette, styles and cursor colour to every running server that loaded this config, including native scratchpads but not Herdr's bare shim.
+Omarchy's own tmux updater is disabled by a no-op override in `~/bin/overrides` ([ADR-0075](../docs/adr/0075-omit-omarchy-tmux-updater.md)), so the hook is the only writer.
 Pane borders double as a status signal at a glance: yellow means the pane is in a mode (e.g. copy mode), red means synchronized-panes is on, green means normal.
 Window/session activity and bell events are highlighted in the status line, and terminal titles reflect the current tmux position.
 
-### Omarchy's live tmux update
+### Live theme updates
 
-In Omarchy 4.0.4, `omarchy-theme-set` renders the current theme, runs `omarchy-theme-set-foot` and `omarchy-theme-set-tmux` among its live updates, waits for them, then runs `omarchy-hook theme-set`.
-Our `theme-set.d/tmux` hook runs at that last step.
-Omarchy's tmux updater does the following:
+In Omarchy 4.0.4, `omarchy-theme-set` renders the current theme, runs one updater per application, waits for them, then runs `omarchy-hook theme-set`; our `theme-set.d/tmux` hook runs at that last step.
+`omarchy-theme-set-tmux` is among those updaters and is disabled here by a no-op override in `~/bin/overrides` ([ADR-0075](../docs/adr/0075-omit-omarchy-tmux-updater.md)): it wrote pane styles that `32_visual.conf` overwrote a moment later, and it reached only one tmux server.
+The hook replaces it:
 
-| Update | Purpose and overlap with this config |
-| --- | --- |
-| `window-style`, `window-active-style` | Recolors tmux panes immediately. `32_visual.conf` sets both again from our palette, preserving its separate inactive style. This can cause a visible intermediate redraw. |
-| `FOREGROUND`, `BACKGROUND`, `GUM_*`, `COLORFGBG` | Copies the rendered `gum_env.lua` colors and light/dark indicator into tmux's global and existing session environments for future processes. `gum_env.lua` comes from Omarchy's Gum prompt/menu theme. Already-running shells do not change. Our palette does not replace this. |
-| OSC colors to pane TTYs | Sends foreground, background, cursor, selection and ANSI 0–15 colors into each pane. Omarchy separately sends the same palette to running Foot terminals; whether both paths are needed with Foot and tmux is unverified. Our tmux styles do not set the terminal's ANSI palette. |
-| `cursor-colour` | Gives tmux a fallback cursor color when an app resets its own cursor color with OSC 112. Our `prompt-cursor-color` applies only to tmux's command prompt. |
-| `SIGWINCH`, `refresh-client` | Prompts pane applications and tmux clients to redraw after the live color update. Whether this is needed with our hook is unverified. |
+- it reloads this config on every configured server found under `$TMUX_TMPDIR` (or `/tmp`) that carries the `TMUX_CONFIG_DIR` marker, which is what reapplies the palette, styles and `cursor-colour`;
+- it copies the theme's `gum_env.lua` values and `COLORFGBG` into those servers' global and session environments, for panes started after the switch — a running shell keeps the environment it was started with.
 
-Omarchy 4.0.4 has no switch for only the tmux updater; headless mode skips all live updates and user hooks.
-This repo's `environment.d/11_path.conf` puts `~/bin/overrides` ahead of `/usr/bin`, and `profile` imports the user manager's PATH for `bash -lc`.
-On the Omarchy machine, check `bash -lc 'type -a omarchy-theme-set-tmux'` before relying on a local wrapper: Omarchy's uwsm and mise setup may alter the effective order.
-A wrapper could replace the whole updater without editing Omarchy's package, but would also remove its Gum, `COLORFGBG`, pane OSC, cursor and redraw updates unless supplied elsewhere.
-Keep the updater and the hook in place until the live Foot/tmux checks in `docs/STATE.md` settle which updates matter.
+The override is reached because `~/bin/overrides` precedes `/usr/bin` on the session `PATH` and Omarchy runs its updaters through `bash -lc`; `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` is what keeps `/usr/share/omarchy/bin` from being prepended.
+Nothing else from the updater was ported: its pane-TTY OSC writes and its `SIGWINCH`/`refresh-client` signals had no consumer here, and `omarchy-theme-set-foot` already writes the same palette to the outer foot terminal.
+If a live switch in foot shows a missed colour or a stale pane, that is the first place to look.
 
 ## Plugins
 

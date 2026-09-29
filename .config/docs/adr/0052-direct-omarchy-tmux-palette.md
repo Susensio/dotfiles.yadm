@@ -1,6 +1,6 @@
 # ADR-0052: Source Omarchy's generated tmux palette directly instead of using yadm alternates or symlinks
 
-Status: Accepted
+Status: Superseded by [ADR-0075](0075-omit-omarchy-tmux-updater.md)
 Date: 2026-09-25
 
 ## Context

@@ -58,6 +58,7 @@ A newly installed plugin still needs a shell restart to appear.
 
 Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` for everything Hyprland starts, and its `autostart.lua` imports that into the user manager, so a wrapper in `~/bin/overrides` would never be reached in the session.
 `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` patches the prepend out until the upstream fix ships ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)); a relogin applies it.
+`bin/overrides/omarchy-theme-set-tmux` disables Omarchy's tmux retint; `omarchy-theme-set` runs its updaters through `bash -lc`, so the override is reached, and the theme-set hook owns that work instead ([ADR-0075](adr/0075-omit-omarchy-tmux-updater.md)).
 
 ## Patching Omarchy bugs
 
