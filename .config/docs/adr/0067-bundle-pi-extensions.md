@@ -30,14 +30,15 @@ More seriously, inlining relocates a module, so any code that locates a sibling 
 
 A tracked library lives beside the patch library at `agent/bundler/`: `lib.mjs`, `screen.mjs`, `bundle.mjs`, `verdicts.json`, `run.sh`, and `benchmark.mjs`.
 
-`screen.mjs` classifies every package in `settings.json` through three gates and fails closed.
+`screen.mjs` classifies every package in `settings.json` through four gates and fails closed.
 Gate P refuses any package named by a `patches/*/target`, because a bundle would shadow the patched source and the patch would land in a file nobody loads.
 Gate A refuses any package esbuild cannot resolve, which is a proof rather than a judgement.
+Gate C refuses any package whose built bundle has async module initializers that await each other, which would deadlock; it is also a proof, so it runs ahead of the verdicts and no verdict can override it.
 Gate B scans the esbuild metafile's inlined-module list — only what is actually inlined, not the whole package — for `import.meta.url`, `import.meta.dirname`/`filename`, `__dirname`/`__filename`, `createRequire`, quoted `.wasm` and `.node` assets, and `new Worker`, and requires a verdict recorded in `verdicts.json` for every hit.
 A verdict carries a `reviewedKinds` list, so a change in the detected set re-opens it and a dependency bump cannot ride on an approval granted for a different graph.
 
-Five packages carry a `bundle` verdict and four do not.
-`@gotgenes/pi-permission-system` is the patch target of [ADR-0066](0066-trust-auto-reviewer-external-directory.md) and also fails gate A; `@mzwing/pi-permission-auto-review` fails gate A; `pi-claude-bridge` was refused because its hazard is fatal when inlined and externalizing the SDK was measured at ~390 ms against ~590 ms for source, which does not buy the upkeep; `@juicesharp/rpiv-ask-user-question` was bundled at first and then refused because its bundle deadlocks, as described under Consequences.
+Six packages carry a `bundle` verdict and three do not, and gate C refuses one of the six, `@juicesharp/rpiv-ask-user-question`, as described under Consequences.
+`@gotgenes/pi-permission-system` is the patch target of [ADR-0066](0066-trust-auto-reviewer-external-directory.md) and also fails gate A; `@mzwing/pi-permission-auto-review` fails gate A; `pi-claude-bridge` was refused because its hazard is fatal when inlined and externalizing the SDK was measured at ~390 ms against ~590 ms for source, which does not buy the upkeep.
 The one patched package is also unbundleable, so gate P costs nothing today.
 
 `bundle.mjs` runs esbuild once per verdict with the packages pi supplies as virtual modules external — `@earendil-works/*` and the pre-rename `@mariozechner/*` alias — and then rewrites that package's own `pi.extensions` field to point at `./.pi-bundler/bundle.mjs`.
@@ -57,10 +58,11 @@ An earlier revision had `run.sh` screen and then call the bundler, which left th
 
 What the gate decides is what gets bundled.
 `bundle.mjs` builds every package the screen reports as `bundle` rather than every package with a hand-written verdict, so a newly installed extension with no hazard is screened, approved, and bundled without anyone editing a file.
+It also restores any bundled package the screen no longer approves, so a bundle built under an earlier screen does not outlive a later refusal.
 
 `verdicts.json` is the decision record rather than a cache, and it carries more than a yes/no.
 `reviewedKinds` lists each hazard as `file:kind×count`, so a new hit of a known kind in a known file re-opens the verdict rather than passing as one of the old ones.
-`reopenIf.installed` names packages whose absence is what makes a hazard inert — the `rpiv-todo` verdict depends on `@juicesharp/rpiv-i18n` not being installed — so that condition is checked mechanically instead of being a sentence in a reason field nobody re-reads.
+`reopenIf.installed` names packages whose absence is what makes a hazard inert — the two `rpiv` verdicts depend on `@juicesharp/rpiv-i18n` not being installed — so that condition is checked mechanically instead of being a sentence in a reason field nobody re-reads.
 
 A package reaches the screen's own sources, not its artifact: once a bundle is applied the installed manifest names the bundle, so `packageEntries` prefers the kept pristine manifest when one exists.
 Without that, a re-run would screen the bundle (one module, no source hazards) and every recorded verdict would look stale.
@@ -87,12 +89,13 @@ A second found that the decision record and the screen's header claimed hazard-f
 A third found that the bootstrap step guarded the hook it writes but not the two halves it then ran, so a checkout with only one half aborted the whole bootstrap on a missing file, and that this record's gate-A rationale for `@latentminds/pi-quotas` was false.
 All three confirmed that no code path could delete a file the tool did not create, and that the six `bundle` verdicts were justified by evidence on disk.
 
-One of those six was not safe, and none of the gates could have caught it.
+One of those six was not safe, and none of the original three gates could have caught it.
 `@juicesharp/rpiv-ask-user-question` lazily imports its questionnaire graph, and that graph contains top-level `await`, so esbuild wraps each module in an async initializer.
 `view/dialog-builder.ts` and `view/tab-content-strategy.ts` import each other, so each one awaits the other's pending initializer.
 The first `ask_user_question` call in every bundled session then never resolved: no questionnaire appeared, the session showed "Working...", and Esc could not cancel because the tool ignores the abort signal.
-The package now carries a `skip` verdict and loads from source.
-No other bundle has an awaited initializer cycle, but the screen does not check for them, so a dependency bump could introduce one unnoticed.
+Gate C was added for this case, and the bundler's restore step followed because the gate alone would have left the existing broken bundle in place.
+The package keeps its `bundle` verdict, so it bundles again automatically once an upstream release breaks the cycle.
+The detector parses esbuild's `var init_x = __esm(...)` output shape, so an esbuild release that renames those wrappers would make it see nothing and pass everything; a known-cycle probe would catch that, and none is run.
 
 Accepted limitations:
 

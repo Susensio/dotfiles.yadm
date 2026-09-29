@@ -225,6 +225,15 @@ for (const name of names) {
   if (!quiet || changed) console.log(line);
 }
 
+// A bundle built under an earlier screen must not outlive the screen refusing it.
+if (!revert) {
+  for (const name of statefulPackages()) {
+    if (names.includes(name) || (only && name !== only)) continue;
+    const [line, changed] = restore(name);
+    if (!quiet || changed) console.log(line);
+  }
+}
+
 if (only && !revert && !names.includes(only)) {
   console.error(`bundle: ${only} is not bundleable per the screen; see screen-report.json`);
   process.exit(1);

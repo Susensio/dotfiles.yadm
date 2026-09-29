@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Gate screen: decides which pi extensions may be replaced by a prebuilt bundle.
 //
-// Three gates, in order:
+// Four gates, in order:
 //   P  a package named in patches/*/target is refused outright
 //   A  the package must bundle at all (proof: esbuild resolves the graph or it does not)
+//   C  the built bundle must not deadlock (proof: no async inits that await each other)
 //   B  every asset-locating construct in the inlined graph is listed for judgement
 //
 // The screen never decides a hazard for you. It fails closed instead: a package
@@ -89,6 +90,12 @@ function main() {
     const a = analyze(esbuild, entry, verdict?.externals ?? []);
     if (!a.ok) {
       report[name] = { gate: "A", decision: "skip", detail: a.error };
+      continue;
+    }
+    // Ahead of the verdict check: a recorded verdict cannot approve a deadlock.
+    if (a.cycles.length > 0) {
+      const detail = `awaited init cycle: ${a.cycles.map((c) => c.join(" <-> ")).join("; ")}`;
+      report[name] = { gate: "C", decision: "skip", modules: a.inputs.length, detail };
       continue;
     }
 

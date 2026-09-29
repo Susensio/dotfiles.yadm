@@ -170,6 +170,78 @@ export function scanSource(src) {
   return hits;
 }
 
+// esbuild wraps a lazily imported module in `var init_x = __esm({ async "path"() {...} })`
+// when its graph has top-level await. Calling an init that is still running returns
+// its pending promise, so two inits that await each other never settle. Returns
+// each such cycle as a list of module paths, found as strongly connected components
+// of the awaited-init graph.
+export function awaitedInitCycles(code) {
+  const paths = new Map();
+  const deps = new Map();
+  let cur = null;
+  for (const line of code.split("\n")) {
+    const start = line.match(/^var (init_\w+) = __esm\(\{/);
+    if (start) {
+      cur = start[1];
+      deps.set(cur, new Set());
+      continue;
+    }
+    if (!cur) continue;
+    // The init's own path is the first line after its opening brace.
+    if (!paths.has(cur)) paths.set(cur, line.match(/^\s+(?:async )?"([^"]+)"\(\)/)?.[1] ?? cur);
+    for (const [, dep] of line.matchAll(/\bawait (init_\w+)\(\)/g)) if (dep !== cur) deps.get(cur).add(dep);
+    if (line.startsWith("});")) cur = null;
+  }
+
+  // Iterative Tarjan: bundles inline hundreds of modules.
+  const index = new Map();
+  const low = new Map();
+  const stack = [];
+  const onStack = new Set();
+  const cycles = [];
+  let next = 0;
+  for (const root of deps.keys()) {
+    if (index.has(root)) continue;
+    const work = [[root, [...deps.get(root)]]];
+    index.set(root, next);
+    low.set(root, next++);
+    stack.push(root);
+    onStack.add(root);
+    while (work.length > 0) {
+      const [v, pending] = work[work.length - 1];
+      const w = pending.pop();
+      if (w !== undefined) {
+        if (!deps.has(w)) continue;
+        if (!index.has(w)) {
+          index.set(w, next);
+          low.set(w, next++);
+          stack.push(w);
+          onStack.add(w);
+          work.push([w, [...deps.get(w)]]);
+        } else if (onStack.has(w)) {
+          low.set(v, Math.min(low.get(v), index.get(w)));
+        }
+        continue;
+      }
+      work.pop();
+      if (work.length > 0) {
+        const parent = work[work.length - 1][0];
+        low.set(parent, Math.min(low.get(parent), low.get(v)));
+      }
+      if (low.get(v) !== index.get(v)) continue;
+      const component = [];
+      let w2;
+      do {
+        w2 = stack.pop();
+        onStack.delete(w2);
+        component.push(paths.get(w2) ?? w2);
+      } while (w2 !== v);
+      if (component.length > 1) cycles.push(component.sort());
+    }
+  }
+  return cycles;
+}
+
 // Build the graph once, for both the screen and the bundle.
 export function analyze(esbuild, entry, externals = []) {
   // Probe output goes to a temp dir: it is ours, but node_modules is not the
@@ -189,8 +261,10 @@ export function analyze(esbuild, entry, externals = []) {
   const inputs = Object.keys(readJson(meta).inputs).map((p) =>
     isAbsolute(p) ? p : join(MODULES_DIR, p),
   );
+  // The probe is built with the bundle's own arguments, so its code is the artifact.
+  const cycles = awaitedInitCycles(readFileSync(out, "utf8"));
   rmSync(dir, { recursive: true, force: true });
-  return { ok: true, inputs, probe: out, meta };
+  return { ok: true, inputs, cycles };
 }
 
 export { execFileSync };
