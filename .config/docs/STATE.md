@@ -114,7 +114,7 @@ Setup and the standing oddities are in `docs/omarchy.md`.
 Cloned and bootstrapped; foot now starts login shells, and the Goodix reader works through `omarchy/fingerprint.sh`.
 
 - Checked after a reboot (2026-09-26): terminals run `fish --login` with `~/bin/overrides:~/bin` right behind the mise shims, fprintd runs at boot and sudo takes a fingerprint, the bootstrap is silent, the manager holds `EDITOR=omarchy-launch-editor --inline` and `SUDO_EDITOR=env helix`, and the Hyprland `PATH` patch and capture folders are in place.
-- `yadm push`: `master` is 40-odd commits ahead of GitHub.
+- `yadm push`: `master` stood 152 commits ahead of GitHub on 2026-09-29.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
 
 Delete this file and its `CLAUDE.md` line once the laptop runs clean.
@@ -127,3 +127,15 @@ Committed 2026-09-28 (`pi: name sessions from the first prompt`, ADR-0062): sess
 - No pi report: the residual gap is [earendil-works/pi#9290](https://github.com/earendil-works/pi/issues/9290) (closed no-action) and [#10053](https://github.com/earendil-works/pi/issues/10053) (closed not planned), and pi-ai 0.87.1 already derives `x-opencode-session` from `options.sessionId` ([#9326](https://github.com/earendil-works/pi/issues/9326), fixed and shipped).
 - Naming runs on the pinned `opencode-go/gpt-6-luna`, falling back to the session model when scoped out.
 - A first turn that ends in an unanswered `ask_user_question` defers the name to the next `agent_end` (observed; `agent_end` does not fire while a tool blocks on input).
+
+## pi permission reviewer
+
+Committed 2026-09-29 (`pi: fall back from codex in the permission reviewer`, and the alias map's tier commit): the permission system's auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias`, so an exhausted Codex quota fails over instead of turning every ask into a prompt.
+
+- Chain: `openai-codex/codex-auto-review` → `opencode-go/deepseek-v4.1-flash` → `opencode-go/glm-5.3-flash` → `claude-bridge/claude-haiku-4-5`, with a 15s first-event budget: a stalled reviewer holds up a permission prompt, where a session turn can afford the 30s default. Only provider failures advance the chain — a reviewer `defer` verdict still reaches the human.
+- `models.json` registers `openai-codex/codex-auto-review`, which the authorizer otherwise synthesizes outside the registry where the alias cannot reach it.
+- The haiku target is inert: `pi-claude-bridge` refuses system prompts it has not captured from a real session, and the reviewer sends the Guardian policy. Harmless, and it starts working if the bridge relaxes that.
+- The `pi-auto-review-session-id` patch was deleted when [mzwing/pi-packages#22](https://github.com/mzwing/pi-packages/pull/22) shipped in 0.5.2. `pi-model-alias-shared-registry` stays until [unrelentingfox/pi-model-fallback-alias#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) ships: pi loads a copy of the extension per subagent session, and the last copy re-registers the process-wide `alias` provider while holding no registry, which failed every alias call in the process.
+- Tiers `alias/top` (`claude-opus-5-5` → `gpt-6-sol` → `mimo-v2.6-pro`), `alias/mid` and `alias/fast` live in the same file; `alias/top` is verified end to end, and nothing points at them yet (see BACKLOG).
+- Sessions started before 2026-09-29 need `/reload` to pick up auto-review 0.5.2 and the patched alias.
+- Untested: whether `deepseek-v4.1-flash` and `glm-5.3-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.

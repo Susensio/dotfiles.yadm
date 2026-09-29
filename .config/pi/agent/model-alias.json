@@ -1,10 +1,26 @@
 {
-  "$comment": "reviewer: permission auto-review chain; claude-bridge is excluded because it refuses system prompts it has not captured from a pi session.",
+  "$comment": "Model aliases by tier, plus the permission reviewer's chain. Aliases cannot target other aliases, so every entry is a concrete model. claude-bridge refuses system prompts it has not captured from a real pi session, which is why it is dead weight in `reviewer` and safe in the session tiers. `reviewer` allows a model 15s to first event, not the 30s default: a stalled reviewer holds up a permission prompt, while a session turn can afford the wait.",
+  "top": [
+    "claude-bridge/claude-opus-5-5",
+    "openai-codex/gpt-6-sol",
+    "opencode-go/mimo-v2.6-pro"
+  ],
+  "mid": [
+    "claude-bridge/claude-sonnet-5",
+    "openai-codex/gpt-6-luna",
+    "opencode-go/glm-5.3"
+  ],
+  "fast": [
+    "claude-bridge/claude-haiku-4-5",
+    "opencode-go/glm-5.3-flash",
+    "opencode-go/deepseek-v4.1-flash"
+  ],
   "reviewer": {
     "targets": [
       "openai-codex/codex-auto-review",
       "opencode-go/deepseek-v4.1-flash",
-      "opencode-go/glm-5.3-flash"
+      "opencode-go/glm-5.3-flash",
+      "claude-bridge/claude-haiku-4-5"
     ],
     "timeouts": { "firstEventMs": 15000 }
   }
