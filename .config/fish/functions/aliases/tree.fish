@@ -4,7 +4,7 @@ function tree --wraps=eza --description 'Tree contents in directory'
         return
     end
 
-    set -l roots (path filter $argv)
+    set -l roots (path filter -- $argv)
 
     if test -z "$roots"
         set roots .
