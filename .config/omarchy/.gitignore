@@ -3,3 +3,7 @@
 *.sample
 # Omarchy's logo art for its about screen and screensaver
 branding/
+# Downloaded clones, maintained by plugin lifecycle hooks (ADR-0072).
+plugins/akitaonrails.ai-usagebar/
+plugins/io.github.poctek.hyprland-submap/
+plugins/rohaquinlop.agent-collectors/

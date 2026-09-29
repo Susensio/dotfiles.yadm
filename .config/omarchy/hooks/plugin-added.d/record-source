@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# shellcheck disable=SC1091
+source "$(dirname -- "${BASH_SOURCE[0]}")/../plugin-sources.sh"
+plugin_with_lock record_plugin_source "${1:-}" "${2:-}"

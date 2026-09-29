@@ -1,0 +1,15 @@
+diff --git a/bin/omarchy-plugin-remove b/bin/omarchy-plugin-remove
+index 2e8591f7..a2855616 100755
+--- a/bin/omarchy-plugin-remove
++++ b/bin/omarchy-plugin-remove
+@@ -114,7 +114,9 @@ else
+   echo "Removed $id. Backup at: $backup"
+ fi
+ 
+-omarchy-shell shell rescanPlugins >/dev/null
++omarchy-hook plugin-removed "$id"
++
++omarchy-shell -q shell rescanPlugins >/dev/null
+ 
+ if [[ -n $cloned_from && $was_enabled == "true" ]]; then
+   echo "Restored $cloned_from."
