@@ -8,6 +8,9 @@
  *    as an anchor too, so its answer is pinned like a typed prompt (formatted
  *    from the component's result.details), including hide-on-visible and
  *    click-to-jump.
+ *  - paint the bar with userMessageBg instead of selectedBg: selectedBg is the
+ *    list-selection tint (accent-mixed), which made the pinned prompt look
+ *    unlike the user messages it echoes.
  *
  * sticky-last-prompt — Pin the user message your viewport is currently in to
  * the top of pi's fullscreen TUI; click the pinned bar to jump to it.
@@ -282,7 +285,7 @@ class PinBar implements Component {
 		// Local fork: no leading icon (U+F007 is nf-fa-user, not a thumbtack).
 		const line = ` ${theme.fg("text", label)}`;
 		this.renderedRows = 1;
-		return [theme.bg("selectedBg", padToWidth(line, width))];
+		return [theme.bg("userMessageBg", padToWidth(line, width))];
 	}
 
 	invalidate(): void {}
