@@ -42,6 +42,7 @@ Worktrees created from committed `HEAD` do not include uncommitted main-session 
 Integrate returned changes before building further work on them.
 
 The main session does not repeat delegated research. It checks the returned evidence and inspects file changes before accepting them.
+Keep the main session available while background agents run: continue other work or end the turn; check or steer them when needed.
 
 ## Review once
 
