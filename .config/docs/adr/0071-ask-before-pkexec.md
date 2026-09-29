@@ -35,5 +35,5 @@ The Pi extension route stays the deterministic fallback if the review log ever s
 ## Corrections
 
 2026-09-29: the Decision said `sandbox.excludedCommands` listed `pkexec` to lift the sandbox, and Consequences said redirections kept a pkexec line from matching it.
-Claude Code 2.1.283 ignores `excludedCommands` outside trusted settings tiers, and the user settings file was not one, so pkexec failed with `must be setuid root` even bare; it runs unsandboxed per call instead, as `claude/CLAUDE.md` instructs.
+Claude Code 2.1.283 never lets `excludedCommands` cover a command led by a privilege wrapper (`sudo`, `su`, `doas`, `pkexec`, `runuser`, `chroot`), whatever the pattern, so pkexec failed with `must be setuid root` even as `"pkexec *"`; it runs unsandboxed per call instead, as `claude/CLAUDE.md` instructs.
 The Pi policy first said pkexec is "never allowed", and the reviewer answered with `deny`, which is final; it now demands `defer`.
