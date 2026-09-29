@@ -6,12 +6,15 @@ The live agent definitions, skills, extensions, and settings are authoritative f
 
 ## Provider and permissions
 
-Everything runs on the OpenCode Go subscription, without a second provider or model-fallback layer.
 An extension may make its own model call outside the main turn; `extensions/session-name.ts` does so for the first-prompt title and `/rename`.
 It passes the session ID explicitly because opencode-go rejects headerless side calls, and places its instruction in the user turn because that gateway drops a bare system prompt.
 See [ADR-0062](../../docs/adr/0062-session-naming-in-own-extension.md) for the decision to own the extension instead of patching a package.
 
 The permission system asks by default and sends eligible requests to its auto-review authorizer; deferred requests still reach the human.
+The authorizer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `model-alias.json`), so an exhausted Codex quota fails over to fast opencode-go models instead of deferring every ask to the human.
+The `pi-model-alias-shared-registry` patch keeps the alias working after a subagent loads its own copy of the extension in the same process; delete it once [unrelentingfox/pi-model-fallback-alias#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) ships.
+Only provider failures advance the chain; a reviewer's `defer` verdict is final.
+`models.json` registers `openai-codex/codex-auto-review`, which the authorizer otherwise synthesizes outside the registry where the alias cannot reach it.
 Its hand-maintained rule and authorizer configs live beside their extensions.
 For privileged commands use `pkexec`, not `sudo`: polkit opens a visible authentication dialog, while sudo's fingerprint prompt can wait invisibly in Pi's pipes and time out.
 Use `pkexec /usr/bin/id -u` for a harmless root check, with a shell timeout of at least 60 seconds.

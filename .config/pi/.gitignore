@@ -8,6 +8,8 @@
 !agent/settings.json
 !agent/keybindings.json
 !agent/subagents.json
+!agent/models.json
+!agent/model-alias.json
 !agent/agents/
 !agent/agents/**
 !agent/skills/

@@ -11,7 +11,8 @@
     "npm:pi-footer",
     "npm:@gotgenes/pi-permission-system",
     "npm:@narumitw/pi-usage",
-    "npm:@mzwing/pi-permission-auto-review"
+    "npm:@mzwing/pi-permission-auto-review",
+    "npm:pi-model-fallback-alias"
   ],
   "hideThinkingBlock": true,
   "enabledModels": [
