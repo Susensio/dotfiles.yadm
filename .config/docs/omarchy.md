@@ -125,6 +125,7 @@ The proxy remains in the browser's Wayland connection for its lifetime, and a pr
 Its protocol library hides unsupported compositor protocols, and browser updates can change the classification hints, so test a newer proxy or Chromium version with a disposable profile before changing this workaround.
 A roughly five-second page-loading pause was reported after enabling the proxy, but disposable-profile comparisons did not reproduce a consistent proxy-only delay and encountered network failures with both launch paths.
 The cause remains unconfirmed.
+A 1080p60 frame-pacing A/B through the proxy and direct — CDP `getVideoPlaybackQuality` on disposable profiles, 2026-09 — rendered 904 frames in each run, with 1 dropped frame through the proxy and 17 direct; this did not measure audio-video sync or establish the proxy's latency cost.
 
 [Chromium's Linux window setup](https://github.com/chromium/chromium/blob/main/chrome/browser/ui/views/frame/browser_native_widget_aura_linux.cc) exposes `browser`/`pop-up` roles for X11 but assigns ordinary browser and login popup windows the same Wayland app ID.
 No Chromium issue tracking this exact fix was found; the [related upstream browser bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1864115) belongs to Firefox.
