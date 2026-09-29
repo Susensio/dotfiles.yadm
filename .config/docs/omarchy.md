@@ -53,6 +53,8 @@ They record only portable HTTPS or Git-over-SSH sources without embedded credent
 A plugin removed without `omarchy plugin remove` is restored on the next bootstrap; use the lifecycle command for intentional removal.
 Locally authored plain-file plugins remain trackable beside the ignored clones: add their files to yadm explicitly, including copies created by `omarchy plugin clone`.
 A newly installed plugin still needs a shell restart to appear.
+Editing a plugin's code does not reach the widget the bar is already showing: the shell logs `Local plugin changed, reloading: <id>` and recompiles the plugin, but the mounted bar instance survives, and `omarchy-shell shell rescanPlugins` does not replace it — only `omarchy restart shell` does.
+Verified 2026-09-30 with a `Component.onCompleted` marker in a plugin's bar widget: the reload line appeared and the marker never fired.
 
 ## Overriding Omarchy commands
 
