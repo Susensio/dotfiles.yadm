@@ -32,7 +32,8 @@ Hooks and statuslines in `settings.json` use `$CLAUDE_CONFIG_DIR` and survive a 
 The write paths under `sandbox.filesystem.allowWrite` are literal; update them when moving the directory so the new location stays writable.
 A stale path can silently deny writes.
 
-`Bash(pkexec *)` is allowed and `pkexec` is excluded from the sandbox, so Claude can run root commands; polkit's fingerprint prompt is the approval gate for each call.
+Root commands go through `pkexec`, behind an ask in the agent's pane: `Bash(pkexec *)` is a `permissions.ask` rule, so Claude asks even in auto mode, and polkit's fingerprint dialog opens only after you answer ([ADR-0071](adr/0071-ask-before-pkexec.md)).
+`pkexec` is in `sandbox.excludedCommands`, which matches a bare command only: keep redirections off the line (`pkexec install`, `pkexec tee`, `pkexec sh -c`).
 
 ## Two entry points
 

@@ -17,9 +17,9 @@
       "Bash(command -v *)",
       "Bash(git check-ignore *)",
       "Bash(yadm ls-files *)",
-      "Bash(claude --version)",
-      "Bash(pkexec *)"
+      "Bash(claude --version)"
     ],
+    "ask": ["Bash(pkexec *)"],
     "deny": [
       "Agent(leader)",
       "Artifact",
