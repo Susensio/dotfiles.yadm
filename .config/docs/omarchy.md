@@ -43,6 +43,17 @@ Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` require
 `themed/pi.json.tpl` renders the stock Pi template's roles from other colors: tool titles and syntax variables from the foreground, links from the theme's blue, tool output from a foreground/bright-blue mix, and the running and finished tool boxes from the theme's green and cyan, leaving the accent to Pi's prompt and spinner rather than to every panel and border.
 The step renders files only: running apps retint through Omarchy's theme-set hook, and the rest of what a theme ships — backgrounds, icons — still arrives only with a theme set, so editing one of those wants an explicit `omarchy-theme-refresh`.
 
+## Third-party shell plugins
+
+`omarchy/plugins.conf` declares the source of each marketplace plugin, one `id<TAB>git-url` line; the clones themselves stay untracked under `omarchy/plugins/`, and placement and enablement stay in `omarchy/shell.json` ([ADR-0072](adr/0072-omarchy-plugin-source-declaration.md)).
+`omarchy/hooks/plugin-added.d/record-source` and `plugin-removed.d/forget-source` update the source list and the matching ignore rule when Omarchy successfully adds or removes a plugin.
+The hooks need `bugfix/plugin-lifecycle-hooks.sh` to apply [Omarchy PR #13743](https://github.com/omacom/omarchy/pull/13743) until Omarchy emits those events natively.
+They record only portable HTTPS or Git-over-SSH sources without embedded credentials; an Omarchy add from a local path still installs, but prints `Hook failed` and is not declared.
+`bootstrap.d/omarchy/plugins.sh` only reads the list: it installs a missing clone and never removes a declaration or touches an existing clone.
+A plugin removed without `omarchy plugin remove` is restored on the next bootstrap; use the lifecycle command for intentional removal.
+Locally authored plain-file plugins remain trackable beside the ignored clones: add their files to yadm explicitly, including copies created by `omarchy plugin clone`.
+A newly installed plugin still needs a shell restart to appear.
+
 ## Overriding Omarchy commands
 
 Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` for everything Hyprland starts, and its `autostart.lua` imports that into the user manager, so a wrapper in `~/bin/overrides` would never be reached in the session.
