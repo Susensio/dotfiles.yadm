@@ -9,7 +9,7 @@ Only the hand-maintained harness is tracked here by yadm; runtime state is ignor
 - `pi/.gitignore` — whitelists exactly these paths, with one-line comments only; this README is the documentation
 - `pi/README.md` — this file
 - `pi/agent/AGENTS.md` — universal behaviour and pre-routing triggers
-- `pi/agent/README.md` — harness overview, model tiers, delegation policy
+- `pi/agent/README.md` — Pi-specific operating notes and validation boundaries
 - `pi/agent/settings.json` — theme, default provider/model, package list
 - `pi/agent/keybindings.json` — disables the stock thinking-level shortcut in favor of Shift+Up/Down from `thinking-direction.ts`
 - `pi/agent/subagents.json` — hand-edited global subagent feature flags
@@ -40,6 +40,6 @@ The gitignore has two layers: the `!` whitelist, and the regenerable knockouts a
 
 ## Further reading
 
-- `agent/README.md` — harness design, model tiers, extension list
-- `~/.config/docs/harness.md` — how the two agent harnesses (pi and claude) fit together
+- `agent/README.md` — Pi-specific operating notes
+- `~/.config/docs/harness.md` — shared harness approach and Pi/Claude/Codex boundaries
 - `~/.config/docs/environment-architecture.md` — shell/env relay and `environment.d` precedence
