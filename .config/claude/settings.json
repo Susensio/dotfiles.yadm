@@ -19,6 +19,7 @@
       "Bash(yadm ls-files *)",
       "Bash(claude --version)"
     ],
+    "ask": ["Bash(pkexec *)"],
     "deny": [
       "Agent(leader)",
       "Artifact",

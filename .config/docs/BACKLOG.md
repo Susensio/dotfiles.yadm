@@ -33,6 +33,12 @@
   The installed package has no config knob beyond `collapseKey` (`~/.config/rpiv-ask-user-question/config.json`); the v2.11.0 `Ctrl+]` collapse is the shipped stopgap.
   Trade-offs to re-check before applying the patch: non-overlay input routing in fullscreen mode is only community-verified on pi-tui, not here (see #253's reproduction); any applied patch gets wiped on package updates, so it would need an npm `postinstall` hook or a repo-tracked script with an anchor-match that fails loudly when upstream restructures the file; retirement signal is #221/#205 closing or a v2.12+ release-note overlay change.
   Also unfiled upstream: Enter on the multi-question Submit tab is a silent no-op when a tab's custom draft was never confirmed on its own tab, so the dialog waits until Esc; partial answers are never returned by design (`orderedAnswers`).
+- pi | ADR-0071's Pi half does not work: the auto-reviewer denied `pkexec /usr/bin/id -u` (review log, 2026-09-29) instead of handing it to the operator.
+  The `additionalPolicy` demand to defer cannot be met: the reviewer model's reply schema is `outcome: allow | deny` (ported from Codex Guardian), and `defer` is only the extension's own failure path.
+  That path already reaches the permission dialog, because `auto-review` is the last link, so the fix is a deterministic pre-model check in `@mzwing/pi-permission-auto-review`, e.g. `"deferCommands": ["pkexec *"]`, matched against the command, not the rule that decided: this ask came from the `external_directory` gate (`/usr/bin/id`), not `pkexec *`.
+  Plan: request it upstream on mzwing/pi-packages, carry a local patch in `pi/agent/patches/` meanwhile (ADR-0066 shape), drop the dead pkexec clause from `additionalPolicy`, and record the mechanism change against ADR-0071.
+  Alternative: an `operatorOnly` rule flag in pi-permission-system (35.0.2 has none; no upstream issue) that skips every link.
+  `yoloMode: true` rewrites asks to allows before the chain runs, so with it on pkexec runs unannounced whatever the reviewer does; either fix needs yolo off or an exception to it.
 
 ## Omarchy migration
 
