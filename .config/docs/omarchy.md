@@ -56,6 +56,9 @@ Each step sources `lib.sh` and passes its patch filename; the helper resolves it
 `bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
 This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
 
+`bugfix/keyboard-backlight-hibernate.sh` applies [Omarchy PR #13729](https://github.com/omacom/omarchy/pull/13729) to the `system-sleep/keyboard-backlight` hook that `omarchy-hibernation-setup` installs: it zeroed the backlight before hibernation (an ASUS S4 workaround) and never restored it, so a suspend-then-hibernate woke with the light off.
+The hook now calls `omarchy-brightness-keyboard off` before hibernating and `restore` after resume, sharing the command's save/restore; plain suspend is untouched.
+
 `bugfix/nightlight-schedule-refresh.sh` fixes [issue #8286](https://github.com/omacom/omarchy/issues/8286): the bar's night light indicator missed hyprsunset's scheduled switches, so it re-probes a second past every minute, when hyprsunset lands them.
 A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's toggle still updates it at once.
 
