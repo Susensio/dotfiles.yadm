@@ -38,7 +38,13 @@ function once() {
       `no startup timings in pi's output (exit ${r.status}); tail of stderr:\n${err.split("\n").slice(-6).join("\n")}`,
     );
   }
-  return { wall, main, extensions };
+  // Keyed by package name, so a package's source and bundled entries compare.
+  const perPackage = {};
+  for (const [, path, ms] of err.matchAll(/^\s*(\S+) module import: (\d+)ms$/gm)) {
+    const key = path.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)\//)?.[1] ?? path.replace(/^.*\/agent\//, "");
+    perPackage[key] = (perPackage[key] ?? 0) + Number(ms);
+  }
+  return { wall, main, extensions, perPackage };
 }
 
 function median(xs) {
@@ -61,3 +67,8 @@ for (let i = 0; i < RUNS; i++) {
 const med = (k) => median(samples.map((s) => s[k]));
 console.log(`\nmedian over ${RUNS} runs: ${med("main")}ms main, ${med("extensions")}ms extensions, ${med("wall")}ms wall`);
 console.log(`per-extension detail from the last run is in ${TMP}`);
+
+console.log(`\nmedian module import per package:`);
+const names = [...new Set(samples.flatMap((s) => Object.keys(s.perPackage)))];
+const rows = names.map((n) => [n, median(samples.map((s) => s.perPackage[n] ?? 0))]).sort((a, b) => b[1] - a[1]);
+for (const [n, ms] of rows) console.log(`  ${String(ms).padStart(5)}ms  ${n}`);
