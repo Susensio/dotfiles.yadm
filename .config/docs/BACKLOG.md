@@ -11,6 +11,9 @@
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."
   Get the pattern narrow enough to not false-positive on legitimate `-L`/`-S` usage.
   See `tmux-testing` skill's SKILL.md section 0 for the incident writeup.
+- herdr | Simplify the herdr scratchpad (ADR-0059): its tmux shim sources `50_scratchpad.conf`, leans on the `_scratchpad` socket suffix, rebinds `S`, and leaves tmux's own keys live in a herdr popup.
+  Leading shape (2026-09-29): tmux as a bare persistence layer on a `herdr-scratch` socket — shim of `status off`, `prefix None`, `unbind -a` on prefix and root, `bind -n M-\` detach-client`, fish, escape-time, history, mouse — so the popup is just a persistent shell; the theme hook then drops its `TMUX` derivation and `TMUX_CONFIG_DIR` guard and reloads only `default` and `default_scratchpad`. Loses the tmux keys and keyboard copy-mode inside the popup.
+  Weighed and set aside: herdr-in-herdr (`[experimental] allow_nested`, needs its own config for the close key anyway, shows its sidebar), abduco (no screen restore), the full `tmux.conf` (tmux keys in a herdr popup), Hyprland's `special:scratchpad` (desktop-wide, not per workspace); a herdr scratch tab toggled from Alt+` fits if an overlay is not required.
 - ci | Explore [Boeing/config-file-validator](https://github.com/Boeing/config-file-validator) to replace `json-syntax` and `toml-syntax`; held back for its small following (about 500 stars).
   v2.3.0 passed all 28 tracked config files, naming each, and covered what the one-liners do not: YAML, the `.jsonc`, `.editorconfig`, and the `##` alternates through `-type-map='**/*.toml##*:toml'`.
   Skip its `validate-configs-action` wrapper: it has no `type-map` input and only scans directories.
