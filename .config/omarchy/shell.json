@@ -45,12 +45,22 @@
       ],
       "right": [
         {
-          "id": "omarchy.tray",
-          "pinned": [],
-          "hidden": ["chrome_status_icon_1"]
+          "id": "akitaonrails.ai-usagebar",
+          "lastSelectedEntryId": "anthropic",
+          "showAll": true,
+          "showProvider": false,
+          "showValue": true
         },
         {
-          "id": "omarchy.agents"
+          "id": "omarchy.spacer",
+          "size": 6
+        },
+        {
+          "id": "omarchy.tray",
+          "pinned": [],
+          "hidden": [
+            "chrome_status_icon_1"
+          ]
         },
         {
           "id": "omarchy.bluetooth"
@@ -70,5 +80,9 @@
       ]
     }
   },
-  "plugins": []
+  "plugins": [
+    {
+      "id": "rohaquinlop.agent-collectors"
+    }
+  ]
 }
