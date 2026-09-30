@@ -1,0 +1,8 @@
+{
+  "$comment": "Models the fast cycle (Shift+Left/Shift+Right) steps through, in order; edited by /cycled-models. Each entry is provider/modelId.",
+  "models": [
+    "alias/top",
+    "alias/mid",
+    "alias/cheap"
+  ]
+}

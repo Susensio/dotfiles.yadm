@@ -10,6 +10,7 @@
 !agent/subagents.json
 !agent/models.json
 !agent/model-alias.json
+!agent/cycled-models.json
 !agent/agents/
 !agent/agents/**
 !agent/skills/
