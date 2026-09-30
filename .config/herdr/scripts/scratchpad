@@ -31,9 +31,10 @@ if [[ -f "$HERDR_SCRATCHPAD_DEBUG" ]]; then
   } >"$HERDR_SCRATCHPAD_DEBUG"
 fi
 
-# The nested session's workspace should start where the outer workspace's focused
-# pane is. Save that before clearing the outer caller context.
-START_CWD="${HERDR_ACTIVE_PANE_CWD:-}"
+# Herdr launches popup commands from the workspace root directory. Use that as
+# the scratch start directory, with fallbacks in case it ever changes.
+START_CWD="$PWD"
+[[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="${HERDR_ACTIVE_PANE_CWD:-}"
 if [[ -z "$START_CWD" ]]; then
   active_pane="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
   if [[ -n "$active_pane" ]]; then
@@ -43,7 +44,6 @@ fi
 [[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="$HOME"
 if [[ -f "$HERDR_SCRATCHPAD_DEBUG" ]]; then
   {
-    echo "active_pane=${HERDR_ACTIVE_PANE_ID:-<none>}"
     echo "START_CWD=$START_CWD"
   } >>"$HERDR_SCRATCHPAD_DEBUG"
 fi

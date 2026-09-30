@@ -7,6 +7,9 @@ name = "terminal"
 
 [terminal]
 default_shell = "/home/susensio/.config/herdr/scripts/scratchpad-shell"
+# "follow" falls back to $HOME when there is no source workspace; "current" uses
+# the process directory set by the scratchpad launcher.
+new_cwd = "current"
 
 [ui]
 sidebar_start_collapsed = true
