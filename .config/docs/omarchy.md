@@ -85,6 +85,8 @@ A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's
 
 `bugfix/power-discharging.sh` applies [Omarchy PR #13016](https://github.com/omacom/omarchy/pull/13016): the power panel treats a battery still discharging after a plug-change settle window as draining, even when a stale USB-C source keeps UPower's global `onBattery` false.
 
+`bugfix/battery-warning-discharging.sh` applies [Omarchy PR #11161](https://github.com/omacom/omarchy/pull/11161): a draining battery still triggers the low-battery warning when UPower reports AC power, whether from a stale USB-C source or an underpowered charger.
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
