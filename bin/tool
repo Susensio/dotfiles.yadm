@@ -28,7 +28,7 @@ install() {
     fi
 
     if [[ "${argc_mise:-}" != 1 ]] && is_pacman_package "$tool"; then
-      sudo pacman -S --needed --noconfirm "$tool"
+      pacman -Q "$tool" &>/dev/null || sudo pacman -S --noconfirm "$tool"
       local key=$tool
       [[ $tool =~ ^[A-Za-z0-9_-]+$ ]] || key="\"$tool\""
       set_latest "$PACKAGES_MISE" "tools.$tool" "$key"
