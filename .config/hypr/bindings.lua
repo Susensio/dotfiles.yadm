@@ -75,7 +75,15 @@ o.bind("XF86PowerOff", "Suspend", "systemctl suspend-then-hibernate", { locked =
 o.bind("CTRL + XF86PowerOff", "Lock system", "omarchy-system-lock", { locked = true })
 o.bind("SUPER + XF86PowerOff", "System menu", "omarchy-menu toggle system", { locked = true })
 o.bind("ALT + XF86PowerOff", "Screensaver", "omarchy-launch-screensaver force", { locked = true })
-o.bind("SUPER + ESCAPE", "Activity", { tui = "btop", focus = true })
+-- btop hardcodes Esc to its menu, so the launcher closes it again.
+o.bind("SUPER + ESCAPE", "Activity", function()
+  local window = hl.get_active_window()
+  if window and window.class == "org.omarchy.btop" then
+    hl.dispatch(hl.dsp.window.close())
+  else
+    hl.exec_cmd("omarchy-launch-or-focus-tui btop")
+  end
+end)
 o.bind("switch:on:Lid Switch", nil, "omarchy-system-lid-close", { locked = true })
 o.bind("switch:off:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { locked = true })
 o.bind("SUPER + comma", "Dismiss last notification", "omarchy-shell notifications dismissOne")
