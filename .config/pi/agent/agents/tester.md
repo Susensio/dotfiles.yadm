@@ -1,7 +1,7 @@
 ---
 name: tester
 description: Runs one isolated verification and returns a pass/fail verdict. Use when runtime behavior, slow or bulky checks, parallel verification, or independent observation merits a separate context; routine checks stay with the implementer.
-model: opencode-go/mimo-v2.6-flash
+model: alias/cheap
 thinking: low
 tools: read, grep, find, ls, ext:bash-readonly/bash_readonly
 extensions: ["~/.config/pi/agent/extensions/bash-readonly/bash-readonly.ts"]
