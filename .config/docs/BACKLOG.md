@@ -66,12 +66,12 @@
 - omarchy | Track the Omarchy-seeded config on the laptop: `omarchy`, `hypr` and `foot` are already allowed in `yadm/exclude`; the other desktop dirs join the allowlist as they are adopted.
   Every one of them is a target of `omarchy update` migrations, so each widens the `yadm diff` review above.
 - upstream | Omarchy: its AGENTS.md wrongly says `omarchy-pkg-add` handles the AUR.
+- upstream | Omarchy: no toggle-wifi command exists (the `omarchy-toggle-*` family has touchpad, touchscreen, nightlight, idle, suspend, screensaver, bar, notifications, crash-capture, hybrid-gpu, animations, theme-sync, input-device, fullscreen-desktop — no wifi); a `omarchy-toggle-wifi` wrapping NetworkManager's `wifi.enabled` would give the panel family its Alt letter a first-class command instead of the local nmcli one-liner in `bindings.lua`.
 - omarchy | Bold, larger bar clock. `shell.json` holds only its formats: the size comes from the bar, and the label, private to `Ui/WidgetButton.qml`, is never bold.
   It takes `omarchy plugin clone omarchy.clock`, tracked under `omarchy/plugins/`: `fontSize` on its button, plus a bold label of its own in place of the button's; the clone then stops receiving upstream clock fixes.
-- hypr | Nothing shows that a submap is active.
-  The menu half is fixed locally (`yadm/bootstrap.d/omarchy/bugfix/keybindings-menu-submaps.sh`) and upstream ([omacom/omarchy#13461](https://github.com/omacom/omarchy/pull/13461)); the remaining candidate is a bar indicator fed by Hyprland's `submap` event.
-- hypr | File the catchall finding upstream (Hyprland takes reports as discussions now, not issues): on 0.56.2 a `catchall` in a submap fires on a bare Shift or Ctrl press even when that modifier prefixes a chord in the same mode, so a mode cannot exit on an unknown key and tmux's one-shot table exit stays unreachable.
-  Verified 2026-09-27 with a throwaway submap and logged binds; the cause is the catchall collection in `src/keybinds/Manager.cpp` sitting out chord matching. `docs/keybinds.md` records the consequence.
+- hypr | File the catchall finding upstream (Hyprland takes reports as discussions now, not issues): on 0.56.2 a `catchall` in a submap fires on a bare Shift or Ctrl press even when that modifier prefixes a chord in the same mode, so a mode cannot exit on an unknown key.
+  Verified 2026-09-27 with a throwaway submap and logged binds; the cause is the catchall collection in `src/keybinds/Manager.cpp` sitting out chord matching.
+  ADR-0076 dropped every submap, so nothing here depends on it any more; file it or drop it on the next sweep of upstream findings.
 - hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
   Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
 - omarchy | Right-clicking the Omarchy icon in the bar opens a window that closes at once.
@@ -95,7 +95,6 @@
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
-- hypr | Capture bindings beyond PrtSc: region, window and screen screenshots, screen recording, OCR and QR scanning, and Omarchy's dictation (voxtype); pick keys for the ones worth a binding.
 - foot | In Claude Code under Foot, Ctrl + J for a newline in the prompt also adds a stray line at the bottom of the screen.
 - upstream | Omarchy: [#13351](https://github.com/omacom/omarchy/pull/13351) drops the `PATH` prepend from `default/hypr/envs.lua`; once it ships, delete `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh`.
 - hypr | Super + W's slim Chromium window (app mode) sends new-tab links to the full browser. Installed web apps with Chromium's tab strip (`#enable-desktop-pwas-tab-strip` and `-settings`) would keep them in the slim window, but Chromium 152 on Linux offered no "Tabbed window" opening mode for an app installed from its menu; revisit if it does.

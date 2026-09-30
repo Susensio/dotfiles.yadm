@@ -1,6 +1,6 @@
 # ADR-0055: Bind the Hyprland desktop on Super with tmux's letters, loading only Omarchy's media and clipboard bindings, instead of Omarchy's default set or a desktop prefix
 
-Status: Accepted
+Status: Superseded in part by [ADR-0076](0076-hyprland-chords.md) — the submap and the system keys; the Super-mirrors-tmux letters stand
 Date: 2026-09-26
 
 ## Context

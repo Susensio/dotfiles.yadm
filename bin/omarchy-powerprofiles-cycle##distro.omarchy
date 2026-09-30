@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# omarchy:summary=Cycle the power profile toward power-saver
+
+# Runs against omarchy-powerprofiles-set so the per-power-source memory and the
+# bar's power panel keep the same state. The cycle wraps backwards through the
+# list order -- performance, power-saver, balanced -- so one press from
+# balanced lands on the profile that saves power, not the one that burns it.
+set -euo pipefail
+
+case $(powerprofilesctl get) in
+  performance) next=power-saver ;;
+  power-saver) next=balanced ;;
+  balanced)    next=performance ;;
+  *)           next=balanced ;;
+esac
+
+omarchy-powerprofiles-set autodetect "$next"
+
+declare -A icons=([performance]=󰓅 [balanced]=󰗚 [power-saver]=󰤁)
+omarchy-notification-send -g "${icons[$next]}" "Power profile: $next"
