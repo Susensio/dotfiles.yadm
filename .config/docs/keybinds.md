@@ -78,6 +78,7 @@ Hyprland's window mode is the direct mirror of tmux's pane table, including the 
 - tmux confirms destructive closes with `confirm-before`; Hyprland's Super + q and herdr's close have no confirmation.
 - herdr's close tab sits on Shift + q because q alone closes a pane; tmux keeps close inside its pane and tab tables.
 - Alt + ` popups float over the terminal; Hyprland's scratchpad is a special workspace, and Shift + ` moves the focused window into it without following.
+- Inside the Herdr scratchpad, F12 + v scrolls and Alt + ` detaches; layout-creation keys are disabled because the popup is one shell, not another workspace.
 - Helix navigates its splits with Control + hjkl because Alt + hjkl is owned by the multiplexer wrapping it; its buffer stepping (gn / gp) is layer-local and stays out of the tables.
 - Hyprland's digits are keycodes (`code:10` and up), not symbols, so workspace keys survive keyboard-layout changes; tmux and herdr use plain Alt digits.
 - Alt + n / Alt + p mean "next / previous sibling" in each tool's own dimension: tmux sessions, herdr agents. Hyprland has no session dimension; it cycles windows with Super + Tab instead.

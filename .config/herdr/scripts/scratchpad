@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-[[ "${DEBUG:-}" == "1" ]] && { exec 2>>/tmp/herdr-scratchpad.env.log; env | grep '^HERDR' >>/tmp/herdr-scratchpad.env.log; }
-unset TMUX TMUX_PANE
-
-# One shared persistence server, one session per herdr workspace.
-# The mapping key is the workspace ID, which herdr guarantees
-# never to reuse - so a session name permanently identifies its workspace,
-# dead or alive, and orphaned sessions stay unambiguous.
-#
+# Herdr never reuses workspace IDs, so each scratch session has a stable owner.
 # Caller context: popup commands receive the HERDR_ACTIVE_* set and no
 # HERDR_PANE_ID; pane children receive HERDR_WORKSPACE_ID. Keys are never
 # re-resolvable later (popup env is fixed at launch), so only inherited
@@ -26,28 +19,12 @@ if [[ -z "$WK_ID" ]]; then
   exit 1
 fi
 
-# The shim lives next to this script and loads no main tmux config.
-SCRATCH_CONF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scratchpad.tmux.conf"
-[[ -r "$SCRATCH_CONF" ]] || { echo "scratchpad: missing helper config $SCRATCH_CONF" >&2; exit 1; }
+SCRATCH_CONF="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scratchpad.toml"
+[[ -r "$SCRATCH_CONF" ]] || { echo "scratchpad: missing config $SCRATCH_CONF" >&2; exit 1; }
 
-SOCK="herdr_scratchpad"
-
-# Session per workspace, addressed ONLY by exact match: tmux target
-# resolution falls back to prefix and glob matching, and herdr IDs like
-# "w5" would otherwise reach a session named "w50". The "=" prefix
-# disables those fallbacks, mirroring the tmux-native script's own guards.
-SESSION_TARGET="=$WK_ID"
-BASE=(tmux -L "$SOCK" -f "$SCRATCH_CONF")
-
-# Create-once, attach-always: one session per workspace holds window
-# "main". Without an argument the session runs the login shell (fish, per
-# the shim); with one, the first window runs that command. Either way the
-# session - not the window - is the durable thing the popup re-attaches to.
-if ! "${BASE[@]}" has -t "$SESSION_TARGET" 2>/dev/null; then
-  if [[ $# -gt 0 ]]; then
-    "${BASE[@]}" new-session -d -s "$WK_ID" -n main "$@"
-  else
-    "${BASE[@]}" new-session -d -s "$WK_ID" -n main
-  fi
-fi
-exec "${BASE[@]}" attach -t "$SESSION_TARGET"
+# Do not route the nested client back to the outer server's socket or session.
+# stderr only carries the shutdown notice from scratchpad-shell; the popup closes before anything there is readable.
+exec env -u HERDR_SOCKET_PATH -u HERDR_SESSION \
+  -u HERDR_ACTIVE_WORKSPACE_ID -u HERDR_ACTIVE_TAB_ID -u HERDR_ACTIVE_PANE_ID -u HERDR_ACTIVE_PANE_CWD \
+  -u HERDR_WORKSPACE_ID -u HERDR_TAB_ID -u HERDR_PANE_ID \
+  HERDR_CONFIG_PATH="$SCRATCH_CONF" herdr --session "scratchpad-$WK_ID" 2>/dev/null
