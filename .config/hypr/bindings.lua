@@ -83,7 +83,7 @@ o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
 
 -- System
-o.bind("SUPER + ESCAPE", "Lock system", "omarchy-system-lock")
+o.bind("SUPER + ESCAPE", "Activity", { tui = "btop", focus = true })
 o.bind("XF86PowerOff", "System menu", "omarchy-menu toggle system", { locked = true })
 o.bind("switch:on:Lid Switch", nil, "omarchy-system-lid-close", { locked = true })
 o.bind("switch:off:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { locked = true })
