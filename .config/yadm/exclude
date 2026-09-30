@@ -1,5 +1,6 @@
 /*
 !/.gitignore
+!/.ignore
 !/.config
 /.config/*
 !/.config/justfile
