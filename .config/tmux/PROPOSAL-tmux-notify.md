@@ -1,6 +1,10 @@
 # Proposal: tmux-notify — floating-pane notifications for agents and bells
 
+Status: deferred — blocked on tmux ≥ 3.8 (this box is `tmux 3.7_c-1`).
 Not implemented. A design write-up, not a decision — see `docs/BACKLOG.md`.
+The shape below is frozen for when the gate opens; herdr's own `[ui.toast]`
+and agent tracking (added after this write-up, now at 0.8.2) are worth a
+quick overlap check at that point, but do not change the decision.
 
 ## Problem
 
@@ -54,10 +58,12 @@ pattern but generalizes it: bells are one more source feeding the same store.
 ## Decisions
 
 **A first-party plugin, not config.** `~/Projects/tmux-notify` with a
-`notify.tmux` entrypoint, sourced via `run-shell` in `90_plugins.conf` exactly
-like `~/Projects/tmux-uzi` (`99_tpm.conf` names this as the pattern for
-loading a plugin). The engine is generic and reusable; this repo keeps only
-glue.
+`notify.tmux` entrypoint. Plugins here are managed by tpack, declared as
+`set -g @plugin` in `90_plugins.conf` ([ADR-0061](../docs/adr/0061-adopt-tpack-for-plugins.md));
+a local, not-yet-published checkout doesn't qualify for that path, so it is
+sourced instead by an explicit `run-shell` line in `90_plugins.conf`, guarded
+on the checkout existing. The engine is generic and reusable; this repo keeps
+only glue.
 
 **One store.** `$XDG_CACHE_HOME/tmux-notify/<ts>-<key>`, one file per pending
 notification, `0x1f`-TSV: `label<1f>action<1f>kind<1f>window_id<1f>pane_id`
@@ -80,7 +86,9 @@ mouse-movable only. (This box is on 3.7c — upgrade first.)
 **Tray reads the store.** `#(notify tray)` in `status-right` renders
 `[range=control|7]   n` or nothing, keeping the existing click region →
 `notify menu` (each entry jumps via its stored action and clears; a *Clear
-all* entry is last). `Prefix n` opens the same menu.
+all* entry is last). `Prefix n` (`20_keybinds.conf`) and `MouseUp1Control7`
+(`22_mouse.conf`) already point at `scripts/bell-menu` today — this retargets
+them to `notify menu` rather than adding new bindings.
 
 **Clear semantics: focusing the pane clears.** The `pane-focus-in` hook
 (focus-events already on, `32_visual.conf`) runs `notify clear --pane`. Items
@@ -131,8 +139,8 @@ tmux ≥ 3.8 installed (this box currently runs 3.7c).
 
 ## If this gets built
 
-1. Confirm the box is on tmux 3.8 and probe the geometry flags on a throwaway
-   server (`tmux-testing` skill).
+1. Confirm `tmux -V` reports ≥ 3.8 (the gate) and probe the geometry flags
+   and `-T`/`-B` on a throwaway server (`tmux-testing` skill).
 2. Scaffold `~/Projects/tmux-notify` (`notify.tmux`, `scripts/notify`), then
    exercise the store and CLI standalone with `TMUX_NOTIFY_DIR` pointed at a
    tmpdir.
@@ -145,4 +153,6 @@ tmux ≥ 3.8 installed (this box currently runs 3.7c).
    claude hooks; run `/hooks` once if they don't fire on the next real event —
    the settings-file watcher only tracks directories that had a settings file
    when the session started.
-5. Promote to `docs/adr/0044` once it's no longer a proposal.
+5. Promote to `docs/adr/0081` (next free number as of this deferral) once
+   it's no longer a proposal, and delete this file and its `docs/BACKLOG.md`
+   entry.
