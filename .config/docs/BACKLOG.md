@@ -44,6 +44,10 @@
   Alternative: an `operatorOnly` rule flag in pi-permission-system (35.0.2 has none; no upstream issue) that skips every link.
   `yoloMode: true` rewrites asks to allows before the chain runs, so with it on pkexec runs unannounced whatever the reviewer does; either fix needs yolo off or an exception to it.
 
+- pi | Remove the `opencode-go/kimi-k2.7-code` override in `pi/agent/models.json` once [earendil-works/pi#10237](https://github.com/earendil-works/pi/issues/10237) lands.
+  The OpenCode Go/Zen catalog entry is missing the thinking compat `moonshotai` has (`thinkingFormat: "deepseek"`, `supportsReasoningEffort: false`, `thinkingLevelMap: { off: null }`), so pi sent `reasoning_effort` — unsupported by K2.7 Code (only K3 takes it) — and its chain-of-thought could arrive in `content` as normal text.
+  Retirement signal: the issue closes and a pi release regenerates the catalog with those fields.
+
 ## Omarchy migration
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
