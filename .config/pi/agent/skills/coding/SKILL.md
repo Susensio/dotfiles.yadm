@@ -12,7 +12,7 @@ Search before writing. Prefer deleting, reusing an existing solution, or using a
 - Keep data flow explicit and control flow flat.
 - Let unexpected errors surface; catch only errors that can be handled.
 - Preserve the project's interfaces and conventions unless changing them is part of the request.
-- Comment only constraints or workarounds the code cannot express.
+- Let names speak. Comment only what the adjacent line cannot say about itself; history and rejected alternatives go in the commit or ADR.
 
 ## Diagnose failures
 
