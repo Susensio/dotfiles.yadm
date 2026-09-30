@@ -62,8 +62,9 @@ Do not treat scratch `gruvbox-vivid` or a swap of the classic palette tiers as a
    The local theme presently has `backgrounds/`, `colors.toml`, `icons.theme`, and `neovim.lua`; a representative stock theme also ships `hyprland.lua`, `vscode.json`, `preview.png`, `preview-unlock.png`, and `unlock.png`.
    Verify which assets Omarchy actually requires before creating them, produce legitimate previews/background permissions, run upstream `./test/all` in a proper checkout, and provide before/after images for visual changes.
    Current stock `gruvbox` uses gruvbox-material colors but classic `ellisonleao/gruvbox.nvim`, so check Neovim integration for both themes.
-   The possibility of renaming stock `gruvbox` to `gruvbox-material` (and perhaps giving classic the short name) deserves an Omarchy **Suggestions Discussion first**: it changes persisted theme names, would need a migration, and requires a material-appropriate Neovim mapping.
-   Adding `gruvbox-classic` alongside unchanged `gruvbox` is independently viable; do not bundle the rename without a maintainer decision.
+   Posted [Suggestions Discussion #13864](https://github.com/omacom/omarchy/discussions/13864) (2026-09-30): option 1 adds `gruvbox-classic` beside unchanged `gruvbox`; option 2 renames stock to `gruvbox-material` with a `theme.name` migration and gives classic the short name (our lean).
+   The editor-config mismatch (material palette, classic `neovim.lua`/`vscode.json`) was kept out of the discussion on purpose, as an implementation detail for the PR.
+   Wait for a maintainer answer before implementing; do not bundle the rename without one.
 2. **Better generic Helix fallback:** first follow [#6696](https://github.com/omacom/omarchy/pull/6696) and the review comment, and compare its result against the stock template and the local override across dark and light stock themes.
    The stock template largely uses only plain hues and collapses some syntax distinctions; #6696 names the palette semantically, adds bare `markup.heading`, moves constants to orange, and refines parameters/special roles.
    Do not open a competing change to the same file while that PR is live.
