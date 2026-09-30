@@ -1,0 +1,43 @@
+--- index.ts
++++ index.ts
+@@ -1971,6 +1971,40 @@
+       if (params.resume) {
+         const existing = manager.getRecord(params.resume);
+         if (!existing || !isTopLevelAgent(existing)) {
++          // Local patch: resume evicted subagents. The record is evicted 10 minutes
++          // after it settles, but its tombstone still names the session file, so
++          // reopen it the way the `@handle` mention path does. Always detached:
++          // the reopened record notifies on completion like any background spawn.
++          const evicted = manager.resolveMention(params.resume);
++          if (evicted?.kind === "tombstone") {
++            const entry = evicted.entry;
++            if (!existsSync(entry.sessionFile)) {
++              manager.dropTombstone(entry.handle);
++              return textResult(`Agent "${params.resume}" was cleaned up and its session file is gone; it cannot be resumed.`);
++            }
++            reloadCustomAgents();
++            const dispatch = resolveSpawnType(entry.type);
++            if (!dispatch.ok || dispatch.fellBackFrom !== undefined) {
++              return textResult(`Agent "${params.resume}" cannot be resumed: the ${entry.type} agent is no longer available.`);
++            }
++            const id = spawnResolved(pi, ctx, dispatch.type, params.prompt, {
++              description: entry.description,
++              maxTurns: effectiveMaxTurns,
++              reclaim: { handle: entry.handle, alias: entry.alias },
++              resumeSessionFile: entry.sessionFile,
++              isBackground: true,
++            });
++            await manager.awaitStartup(id);
++            const record = manager.getRecord(id);
++            const isQueued = record?.status === "queued";
++            return textResult(
++              `Agent ${isQueued ? "queued" : "resumed"} in background from its saved session.\n` +
++              `Agent ID: ${id} (new; was ${entry.id})\n` +
++              `Type: ${entry.type}\n` +
++              `\nYou will be notified when this agent completes.\n` +
++              `Use get_subagent_result to retrieve full results, or steer_subagent to send it messages.`,
++            );
++          }
+           return textResult(`Agent not found: "${params.resume}". It may have been cleaned up.`);
+         }
+         if (!existing.session) {
