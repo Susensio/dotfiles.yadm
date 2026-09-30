@@ -152,4 +152,4 @@ declare argc_installed
 declare argc_name
 declare argc_tool
 declare -a argc_tools
-eval "$(argc --argc-eval "$0" "$@")"
+eval "$(argc --argc-eval "${BASH_SOURCE[0]}" "$@")"
