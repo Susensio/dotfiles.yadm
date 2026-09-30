@@ -7,7 +7,7 @@ source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
 # The omarchy package owns default/, so the patch is -p1 relative to it.
 target=/usr/share/omarchy/default/hypr/envs.lua
-patch_file=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets/hypr-envs-path.patch
+patch_file=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/patches/hypr-envs-path.patch
 needs_patch=false
 if patch -p1 -N -f -s -F0 --dry-run "$target" < "$patch_file" &>/dev/null; then
   needs_patch=true
