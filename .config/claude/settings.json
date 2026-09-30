@@ -1,6 +1,5 @@
 {
   "env": {
-    "CLAUDE_CODE_DISABLE_MOUSE_CLICKS": "1",
     "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1",
     "CLAUDE_CODE_TMUX_TRUECOLOR": "1"
   },
@@ -174,7 +173,7 @@
   },
   "syntaxHighlightingDisabled": false,
   "effortLevel": "high",
-  "theme": "custom:gruvbox-dark-ansi-fixed",
+  "theme": "custom:omarchy",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell"
 }
