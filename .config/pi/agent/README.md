@@ -27,6 +27,14 @@ The auto-reviewer's policy defers every pkexec to you, so it waits in the pane's
 It is fragile: bundling changes module loading, not just file layout, and its gates catch only failure modes already seen — an approved bundle once deadlocked `ask_user_question`.
 When an extension hangs or misbehaves, run `node bundler/bundle.mjs --revert` and retest before debugging the extension; `node bundler/screen.mjs` shows each package's gate and hazards.
 `/bundle-review` measures each bundle's saving against source, reviews its hazards and verdicts, and proposes `verdicts.json` changes; run it after installing or updating a package.
+A patched package is never bundled: the `pi-subagents-resume-evicted-*` patches therefore keep `@tintinweb/pi-subagents` on source, costing ~190 ms of startup.
+
+## Subagent resume
+
+A finished subagent's record is evicted 10 minutes after it settles, and at every session boundary.
+The `pi-subagents-resume-evicted-*` patches carry [tintinweb/pi-subagents#286](https://github.com/tintinweb/pi-subagents/pull/286): the `Agent` tool's `resume` reopens an evicted agent from its saved session under its original ID, and the parent session records it so this survives `/reload` and restarts.
+It relies on `rememberAgents: true` in `subagents.json`, which writes that session.
+Drop the patches when #286 ships.
 
 ## Validation boundaries
 
