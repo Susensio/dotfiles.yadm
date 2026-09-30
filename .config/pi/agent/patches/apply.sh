@@ -5,8 +5,11 @@
 # Layout per patch dir (<name>/):
 #   target    absolute path of the file the patch applies to
 #   marker    a string present only in the patched form (applied-detection)
-#   *.orig    pristine upstream copy
+#   *.orig    pristine upstream copy, exactly one
 #   *.patch   unified diff against the pristine file, bare "store.ts" headers
+#
+# Patches only a byte-identical pristine target, unlike the Omarchy bugfix steps'
+# fuzz-free patch check: npm updates land silently and some patches touch permission code.
 #
 # Exit 0: applied (or already applied). Exit 1: drifted/missing - patch needs
 # a manual rebase against the .orig in this directory.
@@ -20,9 +23,10 @@ for f in target marker; do
     [ -f "$dir/$f" ] || { echo "apply.sh: $dir/$f missing" >&2; exit 1; }
 done
 target=$(cat "$dir/target")
-orig=$(cat "$dir/orig" 2>/dev/null || echo store.ts.orig)
-orig_path="$dir/$orig"
 marker=$(cat "$dir/marker")
+set -- "$dir"/*.orig
+orig_path=$1
+orig=$(basename "$orig_path")
 # POSIX sh never globs a redirection word, so expand into $patch_file first.
 set -- "$dir"/*.patch
 patch_file=$1
