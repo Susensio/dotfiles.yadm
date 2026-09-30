@@ -22,7 +22,8 @@ Pressing both Shift keys toggles Caps Lock.
 | Modal tables | prefix, mode, or submap | resize, swap, close | see below |
 
 Held-modifier keys do navigation only.
-Anything with an argument — resize distances, swap targets, close confirmations — lives in a modal table, entered with one key and left with Escape or Return.
+Anything with an argument — close confirmations, resize distances — lives in a modal table, entered with one key and left with Escape or Return.
+Hyprland is the exception since [ADR-0076](adr/0076-hyprland-chords.md): its window actions are chords, one modifier per action with a fixed distance or direction, so no mode can be left stuck.
 
 nvim exists as a fallback editor with its own leader and none of these letters; it does not participate in the scheme.
 
@@ -31,6 +32,9 @@ nvim exists as a fallback editor with its own leader and none of these letters; 
 | Key | tmux (Alt) | herdr (Alt) | Hyprland (Super) |
 |---|---|---|---|
 | h j k l | focus pane | focus pane | focus window |
+| Ctrl + hjkl | – | – | resize window (repeatable) |
+| Shift + hjkl | – | – | swap window |
+| Alt + hjkl | – | – | move window to monitor |
 | i / o | previous / next window | previous / next tab | previous / next workspace |
 | 1–9 | select window | select tab | select workspace |
 | Shift + 1–9 | – | – | move window to workspace |
@@ -69,9 +73,8 @@ tmux's pane table (Prefix p) holds close (q), zoom (z), resize (hjkl, repeatable
 | tmux key tables ([ADR-0012](adr/0012-modal-tmux-key-tables.md)) | Prefix, then P / T / S / C | pane, tab, session, config operations | action exits; which-key menu arms the table |
 | herdr resize mode | Prefix p | pane resize | a mode bar replaces the tab bar while active |
 | helix select mode | v | selection operations | Escape |
-| Hyprland window mode | Super p | resize (hjkl), swap (Shift + hjkl), workspace to monitor (Ctrl + hjkl) | Escape or Return |
 
-Hyprland's window mode is the direct mirror of tmux's pane table, including the Shift + hjkl swap letters.
+tmux's pane table is the only modal table left; Hyprland's actions moved to chords ([ADR-0076](adr/0076-hyprland-chords.md)).
 
 ## Where it bends
 
@@ -82,6 +85,7 @@ Hyprland's window mode is the direct mirror of tmux's pane table, including the 
 - Helix navigates its splits with Control + hjkl because Alt + hjkl is owned by the multiplexer wrapping it; its buffer stepping (gn / gp) is layer-local and stays out of the tables.
 - Hyprland's digits are keycodes (`code:10` and up), not symbols, so workspace keys survive keyboard-layout changes; tmux and herdr use plain Alt digits.
 - Alt + n / Alt + p mean "next / previous sibling" in each tool's own dimension: tmux sessions, herdr agents. Hyprland has no session dimension; it cycles windows with Super + Tab instead.
+- Hyprland's window actions are chords, not a modal table: Ctrl + hjkl resizes, Shift + hjkl swaps, Alt + hjkl sends the window to a monitor. tmux keeps its pane table, so the hjkl letters mirror across layers while the mechanism no longer does.
 - The prefix is F12, not an Alt chord, so it works identically inside and outside tmux, and herdr's prefix never collides with the shell's Alt usage.
 - Hyprland's mode leaves on an explicit key (Escape, Return) because it cannot leave on an unknown one: a catchall fires on a bare modifier press before Shift + hjkl or Ctrl + hjkl can complete (upstream #5073, unfixed on 0.56.2), so tmux's one-shot table exit has no equivalent here.
 - herdr's stock resize mode lives on prefix+r; `config.toml` moves it to p so the pane-table letter matches tmux.
