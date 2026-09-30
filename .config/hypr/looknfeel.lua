@@ -14,12 +14,21 @@ hl.config({
     dim_strength = 0.15,
     -- Hyprland's 0.2 dims too little for the covered workspace to read as behind.
     dim_special = 0.5,
+    dim_around = 0.3
   },
 })
 
 -- SUPER + Z is otherwise invisible.
 o.window(
   { fullscreen_state_internal = 1 },
+  { border_color = palette.maximize_border, dim_around = true }
+)
+
+-- SUPER + CTRL + BACKSPACE: the tagged window dims everything behind it in the
+-- same colour maximize uses, so one window can be singled out without leaving
+-- the workspace. Tags are per window, so several can be in this mode at once.
+o.window(
+  { tag = "focus" },
   { border_color = palette.maximize_border, dim_around = true }
 )
 
