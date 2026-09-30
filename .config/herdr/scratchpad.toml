@@ -1,0 +1,37 @@
+# The scratchpad is a separate Herdr session rendered inside the outer popup.
+onboarding = false
+
+# Herdr has no config include; follow the terminal palette instead of copying the outer theme.
+[theme]
+name = "terminal"
+
+[terminal]
+default_shell = "/home/susensio/.config/herdr/scripts/scratchpad-shell"
+# "follow" falls back to $HOME when there is no source workspace; "current" uses
+# the process directory set by the scratchpad launcher.
+new_cwd = "current"
+
+[ui]
+sidebar_start_collapsed = true
+sidebar_collapsed_mode = "hidden"
+hide_tab_bar_when_single_tab = true
+
+[ui.toast]
+delivery = "herdr"
+
+[keys]
+prefix = "F12"
+copy_mode = "prefix+v"
+# Empty bindings suppress Herdr defaults; the scratchpad is one shell, not a layout.
+new_workspace = ""
+new_worktree = ""
+new_tab = ""
+split_vertical = ""
+split_horizontal = ""
+close_tab = ""
+close_pane = ""
+# The outer popup owns input until this client exits.
+detach = "alt+`"
+
+[experimental]
+allow_nested = true

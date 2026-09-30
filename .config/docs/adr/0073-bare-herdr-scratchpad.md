@@ -1,6 +1,6 @@
 # ADR-0073: Keep herdr scratchpad as a bare tmux persistence layer instead of sharing native scratchpad config
 
-Status: Accepted
+Status: Superseded by [ADR-0077](0077-nested-herdr-scratchpad.md)
 Date: 2026-09-29
 Supersedes: [ADR-0059](0059-herdr-scratchpad-workspace-id-sessions.md)
 
