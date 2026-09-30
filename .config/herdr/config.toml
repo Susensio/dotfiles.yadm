@@ -3,7 +3,7 @@ onboarding = false
 name = "gruvbox"
 auto_switch = false
 [theme.custom]
-overlay0 = "#665c54"  # inactive pane border darker
+overlay0 = "#665c54" # inactive pane border darker
 
 [ui]
 tab_bar_position = "top"
@@ -16,7 +16,7 @@ window_title = "[{workspace}] {tab} - {terminal_title}"
 sidebar_collapsed_mode = "hidden"
 tab_bar_right = [
   { type = "command", command = "\"$HERDR_BIN_PATH\" workspace list | jq -r --arg id \"$HERDR_ACTIVE_WORKSPACE_ID\" '.result.workspaces[] | select(.workspace_id == $id) | .label'", interval_seconds = 1, timeout_seconds = 2 },
-  ]
+]
 
 [ui.toast]
 delivery = "herdr"
@@ -44,6 +44,7 @@ close_tab = "prefix+shift+q"
 
 settings = "prefix+C"
 reload_config = "prefix+R"
+open_notification_target = "prefix+o"
 toggle_sidebar = "prefix+s"
 copy_mode = "prefix+v"
 
