@@ -70,6 +70,10 @@ Each step sources `lib.sh` and passes its patch filename; the helper resolves it
 
 `bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
 This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
+On 2026-09-30 a suspend-then-hibernate session resumed with the keyboard light off, but the journal showed only suspend cycles, not hibernation; the hibernate-only hook did not act.
+The session snapshot `/run/user/1000/omarchy-keyboard-backlight-dell::kbd_backlight` held only a newline (mtime 2026-09-29 09:15), so `restore` passed an empty value to `brightnessctl`, which rejects it and leaves the snapshot in place; `omarchy-system-wake` masks that failure with its final successful command.
+The writer was a test, not the session: at 09:15:06 upstream's `system-sleep-ownership-migration-test.sh`, run from the PR #13729 worktree, stubbed only `brightnessctl` (empty stdout, exit 0), so the new hook's real `omarchy-brightness-keyboard off` saved that empty read into the host's `XDG_RUNTIME_DIR`; the failing assertion in the same run and the stub's replacement 26 s later (PR commit `996da554`) confirm it.
+The malformed snapshot was removed; a test that runs Omarchy commands must stub them or set its own `XDG_RUNTIME_DIR`.
 
 `bugfix/keyboard-backlight-hibernate.sh` applies [Omarchy PR #13729](https://github.com/omacom/omarchy/pull/13729) to the `system-sleep/keyboard-backlight` hook that `omarchy-hibernation-setup` installs: it zeroed the backlight before hibernation (an ASUS S4 workaround) and never restored it, so a suspend-then-hibernate woke with the light off.
 The hook now calls `omarchy-brightness-keyboard off` before hibernating and `restore` after resume, sharing the command's save/restore; plain suspend is untouched.
