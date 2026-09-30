@@ -25,4 +25,10 @@ How the layers stack is described in §8 of `environment-architecture.md`.
 Mint, SSH and TTY sessions no longer carry Omarchy-only variables.
 A `uwsm/env.d` change needs a relogin; `env_reload` never reads it.
 Two files now hold environment, in two syntaxes, and the choice between them has to be made per variable.
-The mise shims that `10-omarchy` prepends stay ahead of `~/bin/overrides`, against [ADR-0007](0007-link-mise-tools-into-xdg.md), until that is decided separately.
+The mise shims that `10-omarchy` prepended stayed ahead of `~/bin/overrides`, against [ADR-0007](0007-link-mise-tools-into-xdg.md), until that was decided separately.
+
+## Corrections
+
+2026-09-30: the last Consequence described mise's shims as staying ahead of `~/bin/overrides`.
+[ADR-0057](0057-omarchy-bugfix-patch-steps.md)'s `uwsm-mise-shims.sh` step removed `10-omarchy`'s prepend ([omacom/omarchy#13364](https://github.com/omacom/omarchy/pull/13364), still open), and `env-bootstrap` appends the shims last, so the live session `PATH` puts `~/bin/overrides` before them, as ADR-0007 wants.
+The line was moved to past tense; the decision above is unchanged.
