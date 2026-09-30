@@ -13,14 +13,15 @@ set -g __fish_git_prompt_char_stashstate (set_color --bold)'$'(printf '\e[22m')
 
 function __prompt_last_command_info --on-event fish_postexec
     set -l last_pipestatus $pipestatus
+    # Comment-only input runs nothing; without this the previous footer would print again.
+    test -n "$(commandline --input=$argv[1] -x)"; or return
     set -l last_command_info
     set -a last_command_info (__prompt_status $last_pipestatus)
     set -a last_command_info (__prompt_timer)
 
     if test -n "$last_command_info"
         # Printed from postexec so it lands between Fish's OSC 133 D and the next A,
-        # outside the prompt region. tmux acts on only two of the four OSC 133
-        # markers, so this placement cannot be handed to tmux instead.
+        # outside the prompt region.
         set -p last_command_info '└───'
         string join --no-empty ' ' $last_command_info
     end
