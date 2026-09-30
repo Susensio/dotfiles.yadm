@@ -145,4 +145,4 @@ Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`):
 
 - Drop both patches when #286 ships; upstream had been idle since 2026-09-03, with 55 open PRs.
 - Keeps `@tintinweb/pi-subagents` on source (~190 ms of startup, ADR-0067).
-- Not yet exercised live in pi.
+- Verified live 2026-09-30: after `/reload` wiped the in-memory record, resuming a probe agent by its old ID reopened the saved conversation (it answered a token only that conversation held) and kept the same ID.
