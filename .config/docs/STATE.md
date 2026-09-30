@@ -138,3 +138,11 @@ Committed 2026-09-29 (`pi: fall back from codex in the permission reviewer`, and
 - Tiers `alias/top` (`claude-opus-5-5` → `gpt-6-sol` → `mimo-v2.6-pro` → `kimi-k2.7-code`), `alias/mid` (`mimo-v2.6-pro` → `deepseek-v4.1-flash` → `kimi-k2.7-code` → `gpt-5.6-terra` → `claude-sonnet-5`) and `alias/cheap` (`mimo-v2.6-flash` → `gpt-6-luna` → `claude-haiku-4-5`) live in the same file; `alias/top` is verified end to end, and nothing points at them yet (see BACKLOG).
 - Sessions started before 2026-09-29 need `/reload` to pick up auto-review 0.5.2 and the patched alias.
 - Untested: whether `deepseek-v4.1-flash` and `mimo-v2.6-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.
+
+## pi subagent resume
+
+Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`): the `pi-subagents-resume-evicted-*` patches carry [tintinweb/pi-subagents#286](https://github.com/tintinweb/pi-subagents/pull/286), so the `Agent` tool resumes an evicted subagent from its saved session, across `/reload` and restarts.
+
+- Drop both patches when #286 ships; upstream had been idle since 2026-09-03, with 55 open PRs.
+- Keeps `@tintinweb/pi-subagents` on source (~190 ms of startup, ADR-0067).
+- Not yet exercised live in pi.
