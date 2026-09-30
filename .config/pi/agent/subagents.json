@@ -9,7 +9,7 @@
   "maxSubagentDepth": 1,
   "agentMentions": "off",
   "fleetView": true,
-  "widgetMode": "background",
+  "widgetMode": "off",
   "rememberAgents": false,
   "outputTranscript": false,
   "toolDescriptionMode": "compact",
