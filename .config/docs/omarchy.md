@@ -83,6 +83,8 @@ A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's
 
 `bugfix/pi-theme-agent-dir.sh` applies [Omarchy PR #13693](https://github.com/omacom/omarchy/pull/13693): `omarchy-theme-set-pi` hardcoded `~/.pi/agent`, so a machine that sets `PI_CODING_AGENT_DIR` had the theme file and the activated setting written where pi never reads them, as reported in [issue #13691](https://github.com/omacom/omarchy/issues/13691).
 
+`bugfix/power-discharging.sh` applies [Omarchy PR #13016](https://github.com/omacom/omarchy/pull/13016): the power panel treats a battery still discharging after a plug-change settle window as draining, even when a stale USB-C source keeps UPower's global `onBattery` false.
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
