@@ -32,6 +32,9 @@
       "~/.kube/config": "deny",
       "~/.docker/config.json": "deny"
     },
+    "path_write": {
+      "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
+    },
     "external_directory": {
       "*": "ask",
       "~/.config/*": "allow",
@@ -105,19 +108,16 @@
       "true": "allow",
       "node --version*": "allow"
     },
+    "skill": "allow",
     "read": "allow",
     "grep": "allow",
     "find": "allow",
     "ls": "allow",
     "write": "allow",
     "edit": "allow",
-    "path_write": {
-      "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
-    },
     "todo": "allow",
     "ask_user_question": "allow",
     "web_fetch": "allow",
-    "web_search": "allow",
-    "skill": "allow"
+    "web_search": "allow"
   }
 }
