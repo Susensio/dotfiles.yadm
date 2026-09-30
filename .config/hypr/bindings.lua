@@ -123,7 +123,7 @@ hl.on("layer.opened", function(layer)
       selection_binds = {
         hl.bind("RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-window"),
           { description = "Capture highlighted window" }),
-        hl.bind("CTRL + RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-fullscreen"),
+        hl.bind("SHIFT + RETURN", hl.dsp.exec_cmd("omarchy-capture-region --take-fullscreen"),
           { description = "Capture entire screen" }),
         hl.bind("TAB", hl.dsp.exec_cmd("omarchy-capture-region --select-window next"),
           { description = "Select next window to capture" }),
