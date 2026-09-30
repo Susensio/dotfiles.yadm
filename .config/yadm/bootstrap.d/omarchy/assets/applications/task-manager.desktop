@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Task Manager
+GenericName=System Monitor
+Comment=btop resource monitor
+Icon=btop
+Exec=omarchy-launch-or-focus-tui btop
+Terminal=false
+Categories=System;Monitor;
+Keywords=btop;task;manager;system;monitor;process;activity;
