@@ -22,31 +22,11 @@ fi
 SCRATCH_CONF="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scratchpad.toml"
 [[ -r "$SCRATCH_CONF" ]] || { echo "scratchpad: missing config $SCRATCH_CONF" >&2; exit 1; }
 
-: "${HERDR_SCRATCHPAD_DEBUG:=/tmp/herdr-scratchpad-debug.log}"
-if [[ -f "$HERDR_SCRATCHPAD_DEBUG" ]]; then
-  {
-    echo "=== $(date -Iseconds) ==="
-    env | grep '^HERDR' | sort
-    echo "PWD=$PWD"
-  } >"$HERDR_SCRATCHPAD_DEBUG"
-fi
-
 # Herdr launches popup commands from the workspace root directory. Use that as
 # the scratch start directory, with fallbacks in case it ever changes.
 START_CWD="$PWD"
 [[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="${HERDR_ACTIVE_PANE_CWD:-}"
-if [[ -z "$START_CWD" ]]; then
-  active_pane="${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:-}}"
-  if [[ -n "$active_pane" ]]; then
-    START_CWD=$(herdr pane get "$active_pane" 2>/dev/null | jq -r '.result.pane.cwd // empty')
-  fi
-fi
 [[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="$HOME"
-if [[ -f "$HERDR_SCRATCHPAD_DEBUG" ]]; then
-  {
-    echo "START_CWD=$START_CWD"
-  } >>"$HERDR_SCRATCHPAD_DEBUG"
-fi
 
 # cd before exec so the inner herdr creates its startup workspace here.
 # Do not route the nested client back to the outer server's socket or session.

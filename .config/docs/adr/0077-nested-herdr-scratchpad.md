@@ -24,6 +24,7 @@ Keep the launch-context refusal and no workspace cleanup.
 
 Scratchpads scroll with the mouse wheel and Herdr copy mode (`F12`, `v`), start in the outer workspace's own directory, and share the outer Herdr key grammar without depending on tmux.
 Each workspace now owns a Herdr server rather than a session on one tmux server; closing a workspace still leaves an orphan until manually stopped or deleted.
+Herdr restores a named session's saved workspace cwd, so a scratchpad created before the workspace-directory rule keeps its old directory until its session is deleted, not just stopped.
 Scratchpad chrome follows the host terminal's palette, which Omarchy switches with its theme, so it can differ slightly from the outer Herdr's pinned built-in theme.
 The inner client briefly paints Herdr's machine picker on every attach: its pre-snapshot frame ignores the collapsed sidebar settings, which no config reaches.
 That flash stays until Herdr fixes it upstream (herdrdev/herdr#4790).
