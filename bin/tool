@@ -63,9 +63,7 @@ remove() {
   for tool in "${argc_tools[@]}"; do
     if is_pacman_tool "$tool"; then
       package=$(pacman_package "$tool")
-      if command -v pacman &>/dev/null; then
-        sudo pacman -R --noconfirm "$package"
-      fi
+      pacman -Q "$package" &>/dev/null && sudo pacman -R --noconfirm "$package"
       # mise has no command to drop a [bootstrap.packages] entry.
       sed -i "\|^\"pacman:$package\" = |d" "$PACKAGES_ARCH"
     fi
