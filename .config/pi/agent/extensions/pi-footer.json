@@ -135,13 +135,28 @@
           "costFormatStyle": "default",
           "showSubscription": true
         }
+      },
+      {
+        "id": "cache-hit-rate-muo4uz7y-a8nmoc",
+        "type": "cache-hit-rate",
+        "enabled": true,
+        "options": {
+          "raw": false,
+          "hideWhenZero": false,
+          "icon": "",
+          "fg": "cyan",
+          "bg": "default",
+          "bold": false,
+          "cacheHitSource": "session",
+          "style": "default"
+        }
       }
     ],
     [
       {
         "id": "external-status-mujek16c-w1iavk",
         "type": "external-status",
-        "enabled": false,
+        "enabled": true,
         "options": {
           "raw": false,
           "hideWhenEmpty": true,
@@ -150,7 +165,24 @@
           "fg": "default",
           "bg": "default",
           "bold": false,
-          "externalStatusKey": "pi-quotas-token-status",
+          "externalStatusKey": "pi-permission-system",
+          "trimValue": 0,
+          "preserveTrimStyles": true
+        }
+      },
+      {
+        "id": "external-status-mumj65i3-yc1a71",
+        "type": "external-status",
+        "enabled": true,
+        "options": {
+          "raw": false,
+          "hideWhenEmpty": true,
+          "icon": "",
+          "text": "-",
+          "fg": "default",
+          "bg": "default",
+          "bold": false,
+          "externalStatusKey": "",
           "trimValue": 0,
           "preserveTrimStyles": true
         }
@@ -164,6 +196,23 @@
           "bg": "default",
           "bold": false,
           "hideWhenEmpty": true
+        }
+      },
+      {
+        "id": "external-status-mumjq48e-dr8934",
+        "type": "external-status",
+        "enabled": true,
+        "options": {
+          "raw": false,
+          "hideWhenEmpty": true,
+          "icon": "",
+          "text": "-",
+          "fg": "default",
+          "bg": "default",
+          "bold": false,
+          "externalStatusKey": "model-alias",
+          "trimValue": 0,
+          "preserveTrimStyles": true
         }
       },
       {
@@ -196,14 +245,18 @@
   },
   "extensionStatusRow": {
     "hiddenKeys": [
+      "model-alias",
       "pi-automode",
+      "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
       "usage",
       "zz-quota"
     ],
     "knownKeys": [
+      "model-alias",
       "pi-automode",
+      "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
       "usage",
