@@ -1,17 +1,22 @@
 --- index.ts
 +++ index.ts
-@@ -45,8 +45,20 @@
+@@ -45,10 +45,31 @@
  	DEBUG_LOG.log("extension-load", { mapPath: MAP_PATH, aliases: [...aliases.keys()] });
  	if (aliases.size === 0) return;
  
 -	const session: AliasSession = {
-+	// Local patch: share the model registry across copies. Every copy in the
-+	// process (a subagent loads its own) re-registers the process-wide alias
-+	// provider, but only a copy that receives session_start learns the registry,
-+	// so the last-loaded copy would otherwise fail every alias call.
++	// Local patch: share the model registry and UI flag across copies. Every copy
++	// in the process (a subagent loads its own) re-registers the process-wide
++	// alias provider, but only a copy that receives session_start learns the
++	// registry or the UI, so the last-loaded copy would otherwise fail every
++	// alias call and report failovers on stderr, drawing over the TUI. hasUI only
++	// silences that report; the copy still has no ui, so footer status keeps
++	// coming from the bound copy.
 +	const shared = ((globalThis as Record<symbol, unknown>)[Symbol.for("pi-model-fallback-alias.registry")] ??= {
  		registry: undefined,
-+	}) as { registry: Registry | undefined };
+-		ui: undefined,
+ 		hasUI: false,
++	}) as { registry: Registry | undefined; hasUI: boolean };
 +	const session: AliasSession = {
 +		get registry() {
 +			return shared.registry;
@@ -19,6 +24,13 @@
 +		set registry(value) {
 +			shared.registry = value;
 +		},
- 		ui: undefined,
- 		hasUI: false,
++		ui: undefined,
++		get hasUI() {
++			return shared.hasUI;
++		},
++		set hasUI(value) {
++			shared.hasUI = value;
++		},
  		model: undefined,
+ 		activeTargets: new Map(),
+ 	};
