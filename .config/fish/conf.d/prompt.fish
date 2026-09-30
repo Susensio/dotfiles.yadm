@@ -19,8 +19,7 @@ function __prompt_last_command_info --on-event fish_postexec
 
     if test -n "$last_command_info"
         # Printed from postexec so it lands between Fish's OSC 133 D and the next A,
-        # outside the prompt region. tmux acts on only two of the four OSC 133
-        # markers, so this placement cannot be handed to tmux instead.
+        # outside the prompt region.
         set -p last_command_info '└───'
         string join --no-empty ' ' $last_command_info
     end
