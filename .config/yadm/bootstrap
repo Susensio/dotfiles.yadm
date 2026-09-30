@@ -4,9 +4,11 @@ set -euo pipefail
 # Ensure ~/bin (log, pkg-install) is on PATH, missing on a fresh clone
 [[ :$PATH: == *":$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
 
-# Execute all executable files (excluding templates and editor backups) in the
+# Execute all executable files (excluding yadm alternates) in the
 # ~/.config/yadm/bootstrap.d directory when run. Files a step installs live
 # under its assets/ directory, non-executable so they never run as steps.
+# A ## path is an alternate (ADR-0080): the tracked entry must never run as a
+# step, and its directory is reached only through the link where its class holds.
 # https://github.com/TheLocehiliosan/yadm/blob/master/contrib/bootstrap/bootstrap-in-dir
 
 # Directory to look for bootstrap executables in
@@ -20,7 +22,7 @@ if [[ ! -d "$BOOTSTRAP_DIR" ]]; then
 fi
 
 scripts=()
-readarray -t scripts < <(find -L "$BOOTSTRAP_DIR" -type f -executable ! -name '*##*' | sort)
+readarray -t scripts < <(find -L "$BOOTSTRAP_DIR" -type f -executable ! -path '*##*' | sort)
 
 # Steps print only what they change
 for script in "${scripts[@]}"; do
