@@ -20,6 +20,7 @@ Its hand-maintained rule and authorizer configs live beside their extensions.
 For privileged commands use `pkexec`, not `sudo`: polkit opens a visible authentication dialog, while sudo's fingerprint prompt can wait invisibly in Pi's pipes and time out.
 Use `pkexec /usr/bin/id -u` for a harmless root check, with a shell timeout of at least 60 seconds.
 The auto-reviewer's policy defers every pkexec to you, so it waits in the pane's permission dialog and the fingerprint prompt follows your answer ([ADR-0071](../../docs/adr/0071-ask-before-pkexec.md)).
+`/permission-audit` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
 
 ## Extension bundling
 

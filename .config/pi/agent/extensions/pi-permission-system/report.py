@@ -4,10 +4,15 @@
 Standalone, stdlib-only: the deterministic parsing lives here so the agent
 (or a terminal) only reads the output. The heavy lifting — correlation,
 grouping, rule evaluation — is not something a model should redo each time.
+Rule resolution mirrors the package's evaluator — load-time sugar expansion,
+last-match-wins, the universal `*` fallback — so which entry actually decides a
+given path is computed rather than guessed from the file.
 
-By default the report covers only decisions made under the CURRENT config
-(window starts at config.json's mtime), so evidence never mixes config
-generations. --all lifts the window to the whole log history.
+By default the report covers only decisions made under the CURRENT config, so
+evidence never mixes config generations. The window starts at config.json's
+mtime, which any rewrite of that file moves — including one that changes
+nothing, since the extension rewrites it on a UI save. `--all` lifts the window
+to the whole log history.
 
 Usage: report.py [denied|review] [--all]
   (no arg)  full optimization report over the current-config window
@@ -22,6 +27,7 @@ import re
 import sys
 from collections import Counter
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -76,9 +82,11 @@ def load(window_epoch=None):
                 r["agent"] = j.get("agentName")
                 raw = j.get("command") or j.get("path") or j.get("toolInputPreview") or j.get("target") or ""
                 r["snippet"] = " ".join(str(raw).split())
-                k = (j.get("decidedBy") or {}).get("kind")
+                d = j.get("decidedBy") or {}
+                k = d.get("kind")
                 r["who"] = WHO.get(k, k or "")
-                r["denial"] = j.get("denialReason") or (j.get("decidedBy") or {}).get("reason")
+                r["surface"] = j.get("surface") or d.get("surface")
+                r["denial"] = j.get("denialReason") or d.get("reason")
                 r["externalPaths"] = j.get("externalPaths") or []
     allr = list(recs.values())
     done = [r for r in allr if r.get("event") not in (None, "waiting", "open")]
@@ -86,22 +94,95 @@ def load(window_epoch=None):
     return done, opens, since
 
 
-def pattern_regex(pat):
-    """Approximate the package's wildcard semantics: `~` expands, `*` is greedy."""
-    p = os.path.expanduser(pat)
-    return re.compile("^" + ".*".join(re.escape(part) for part in p.split("*")) + "$")
+# The bare keys that are sugar for a read/write pair, in the package's
+# normative member order (ADR 0013 §4).
+FAMILIES = {
+    "path": ("path_read", "path_write"),
+    "external_directory": ("external_directory_read", "external_directory_write"),
+}
 
 
-def evaluate_config_rules(config):
-    """Which configured non-ask patterns would allow a given absolute path
-    (external_directory + read/write members)? Mirrors the package's
-    last-match-wins per surface; good enough to flag inert allows."""
-    compiled = []
-    for surface in ("external_directory", "external_directory_read", "external_directory_write"):
-        for pat, action in (config.get(surface) or {}).items():
-            act = action if isinstance(action, str) else action.get("action")
-            compiled.append((surface, pat, act, pattern_regex(pat)))
-    return compiled
+def expand_home(pat):
+    """`~`/`$HOME`/`${HOME}` prefix expansion, as the package's rule does."""
+    home = os.path.expanduser("~")
+    for token in ("~", "$HOME", "${HOME}"):
+        if pat == token:
+            return home
+        if pat.startswith(token + "/"):
+            return home + pat[len(token):]
+    return pat
+
+
+@lru_cache(maxsize=None)
+def compile_pattern(pat):
+    """The package's wildcard semantics: `*` is greedy across separators, `?`
+    is exactly one character, and a trailing ` *` is optional (`"git *"`
+    matches `git`)."""
+    expanded = expand_home(pat)
+    optional_tail = expanded.endswith(" *")
+    if optional_tail:
+        expanded = expanded[:-2]
+    rx = ".*".join(
+        re.escape(part).replace("\\?", ".") for part in expanded.split("*")
+    )
+    if optional_tail:
+        rx += "( .*)?"
+    return re.compile("^" + rx + "$", re.S)
+
+
+def to_pattern_map(value):
+    """A surface's value as {pattern: action}; a bare string means `{"*": v}`."""
+    if isinstance(value, str):
+        return {"*": value}
+    if not isinstance(value, dict):
+        return {}
+    out = {}
+    for pat, action in value.items():
+        act = action if isinstance(action, str) else (action or {}).get("action")
+        if act:
+            out[pat] = act
+    return out
+
+
+def expanded_rule_lists(permission):
+    """Surface -> ordered [(pattern, action)] as the package composes it.
+
+    Mirrors `expandDirectionalSugar` (src/policy/normalize.ts): a bare family
+    key's entries come FIRST, then the explicit directional entries, with a
+    pattern the explicit key redefines emitted once at the explicit position —
+    so last-match-wins always gives the explicit entry the final say.
+    """
+    surfaces = {}
+    for family, members in FAMILIES.items():
+        sugar = to_pattern_map(permission.get(family))
+        for member in members:
+            explicit = to_pattern_map(permission.get(member))
+            merged = {p: a for p, a in sugar.items() if p not in explicit}
+            merged.update(explicit)
+            surfaces[member] = list(merged.items())
+    for surface, value in permission.items():
+        if surface not in surfaces:
+            surfaces[surface] = list(to_pattern_map(value).items())
+    return surfaces
+
+
+def resolve_state(cfg, surfaces, surface, path):
+    """(action, pattern) the package's evaluator returns for `path` on `surface`.
+
+    `evaluate()` scans last-match-wins over the composed ruleset, whose first
+    entry is the universal fallback — the root `"*"` key, or the built-in
+    "ask" default when it is absent — and whose later entries are the queried
+    surface's own rules in load order.
+    """
+    rules = list(surfaces.get(surface, ()))
+    universal = cfg.get("*")
+    if isinstance(universal, str):
+        rules.insert(0, ("*", universal))
+    path = expand_home(path)
+    for pattern, action in reversed(rules):
+        if compile_pattern(pattern).match(path):
+            return action, pattern
+    return "ask", None
 
 
 def section_volume(done, opens, since, lines):
@@ -137,6 +218,36 @@ def section_dead_rules(cfg, done, lines):
         )
 
 
+def section_shadowed(cfg, lines):
+    """Bare-family entries a directional rule shadows into inertness.
+
+    A bare `path`/`external_directory` key is sugar: its entries are placed
+    first at load, so an explicit directional catch-all (`"*": "ask"`) is
+    evaluated after them and wins wherever its own pattern matches. The entry
+    then decides nothing on that direction — the usual reason an allow that
+    reads correctly in the file still prompts.
+    """
+    surfaces = expanded_rule_lists(cfg)
+    inert = []
+    for family, members in FAMILIES.items():
+        for pattern, action in to_pattern_map(cfg.get(family)).items():
+            if pattern == "*":
+                continue
+            witness = expand_home(pattern.replace("*", "x").replace("?", "x"))
+            for member in members:
+                decided, decider = resolve_state(cfg, surfaces, member, witness)
+                if decider != pattern and decided != action:
+                    inert.append((family, pattern, action, member, decider, decided))
+    lines.append(f"\nShadowed entries (bare-family rule never decides — {len(inert)}):")
+    lines += [
+        f"  - {family}: {pat} ({act}) — {member} decides {decided}"
+        f" via {decider or '(built-in default)'}"
+        for family, pat, act, member, decider, decided in inert[:10]
+    ]
+    if not inert:
+        lines.append("  (none)")
+
+
 def section_hot(done, lines):
     hot = Counter(r["pattern"] for r in done if r.get("pattern") and r["pattern"] != "*")
     lines.append("\nHottest patterns:")
@@ -145,52 +256,51 @@ def section_hot(done, lines):
 
 
 def section_asks(done, cfg, lines):
-    asks = [r for r in done if (r["event"] == "approved" and r["who"] == "you") or r["event"] == "session_approved"]
-    path_grants = [r for r in asks if not r.get("pattern")]
-    bash_asks = [r for r in asks if r.get("pattern")]
-
-    # Where do the external-directory grants point? Bucket by first 3 components.
+    # Session-grant records: the runtime already covered the command, so the
+    # record lists every external path the command touched and means a standing
+    # grant applied — not that a dialog appeared. Live dialogs are the
+    # `approved` records below; those name the deciding surface, but the
+    # boundary gate logs no path for them, so "the config allows this yet the
+    # gate asked" is not decidable from this log.
+    grants = [r for r in done if r["event"] == "session_approved"]
     buckets = Counter()
-    for r in path_grants:
+    for r in grants:
         for p in r.get("externalPaths") or []:
             buckets["/".join(p.split("/")[:4]) or p] += 1
-    lines.append(f"\nExternal-directory grants (session-approved): {len(path_grants)}")
+    lines.append(f"\nExternal-directory grants applied (session-covered): {len(grants)}")
     lines += [f"  {n:4d}  {k}" for k, n in buckets.most_common(8)]
 
-    # Flag config allows that the runtime ignored: a path covered by an
-    # external_directory allow that still went through a dialog.
-    compiled = evaluate_config_rules(cfg)
-    prevented = Counter()
-    for r in path_grants:
-        for p in r.get("externalPaths") or []:
-            hit = any(
-                rx.match(os.path.expanduser(p)) and act == "allow"
-                for _, pat, act, rx in compiled
-            )
-            if hit:
-                parts = os.path.expanduser(p).split("/")[1:3]
-                prevented["/".join(parts)] += 1
-    if prevented:
-        lines.append("  ! config allows MATCHED these paths but the gate asked anyway (upstream bug candidate):")
-        lines += [f"    {n:4d}  {k}/*" for k, n in prevented.most_common(6)]
+    dialogs = [r for r in done if r["event"] == "approved" and r["who"] in ("you", "review")]
+    if dialogs:
+        by_surface = Counter(r.get("surface") or "(unrecorded)" for r in dialogs)
+        lines.append(f"\nLive asks by deciding surface ({len(dialogs)}):")
+        lines += [f"  {n:4d}  {s}" for s, n in by_surface.most_common()]
 
+    # Only the deciding rule knows why the ask happened: a pattern that is not
+    # the catch-all means a rule asked, which no allow of ours could have
+    # covered. Anything the catch-all decided is a candidate for one.
     allow_prefixes = [
         p.rstrip("*")
-        for p, a in (cfg.get("bash") or {}).items()
-        if (a if isinstance(a, str) else a.get("action")) == "allow"
+        for p, a in to_pattern_map(cfg.get("bash")).items()
+        if a == "allow"
     ]
     groups = Counter()
     examples = {}
-    for r in [r for r in asks if r.get("pattern")]:
+    for r in dialogs:
+        if not r.get("pattern"):
+            continue
         s = r.get("snippet") or ""
         if not s or any(p and s.startswith(p) for p in allow_prefixes):
             continue
         key = " ".join(s.split()[:2])
         groups[key] += 1
         examples.setdefault(key, s)
-    lines.append("\nRepeated asks worth an allow rule (bash, human-resolved):")
+    lines.append("\nRepeated asks worth an allow rule (bash):")
     rows = [(n, k) for k, n in groups.items() if n >= 2]
-    lines += [f'  {n:4d}  "{k}*"  e.g. {examples[k][:70]}' for n, k in sorted(rows, reverse=True)[:10]] or ["  (none)"]
+    lines += [
+        f'  {n:4d}  "{k}*"  e.g. {examples[k][:70]}'
+        for n, k in sorted(rows, reverse=True)[:10]
+    ] or ["  (none)"]
 
 
 def section_denials(done, lines):
@@ -225,9 +335,10 @@ def main():
     args = [a for a in args if a != "--all"]
     mode = (args[0] if args else "all").lstrip("-")
 
-    # Default window: decisions made under the CURRENT config. The config is
-    # hand-edited only, so its mtime is the config-generation marker — without
-    # it a report after a change mixes evidence from older configs.
+    # Default window: decisions made under the CURRENT config. Its mtime is
+    # the generation marker — any rewrite moves it, including a rewrite that
+    # changes nothing, so the failure mode is fewer decisions reported, never
+    # evidence from two configs mixed.
     window = None
     if not show_all:
         window = CONFIG.stat().st_mtime
@@ -243,11 +354,14 @@ def main():
         return
     if mode == "denied":
         section_denials(done, lines)
+        lines = lines or ["No denials in this window."]
     elif mode == "review":
         section_reviewer(done, lines)
+        lines = lines or ["No reviewer decisions in this window."]
     else:
         section_volume(done, opens, since, lines)
         section_dead_rules(cfg, done, lines)
+        section_shadowed(cfg, lines)
         section_hot(done, lines)
         section_asks(done, cfg, lines)
         section_denials(done, lines)
