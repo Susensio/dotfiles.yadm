@@ -70,6 +70,10 @@ Each step sources `lib.sh` and passes its patch filename; the helper resolves it
 
 `bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
 This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
+On 2026-09-30 a suspend-then-hibernate session resumed with the keyboard light off, but the journal showed only suspend cycles, not hibernation; the hibernate-only hook did not act.
+The session snapshot `/run/user/1000/omarchy-keyboard-backlight-dell::kbd_backlight` held only a newline (mtime 2026-09-29 09:15), so `restore` passed an empty value to `brightnessctl`, which rejects it and leaves the snapshot in place; `omarchy-system-wake` masks that failure with its final successful command.
+The only identified writer is `omarchy-brightness-keyboard off`: its `brightnessctl get` would have to exit successfully with empty output to produce that file, unless something else wrote it; a stub that can do so exists under `/tmp/claude-1000/kb/stub/`, but its log was last written at 08:36, not 09:15, so the origin remains unconfirmed.
+The malformed snapshot was removed; if it recurs, preserve it before clearing and capture its `stat`/`od -c`, `brightnessctl -d dell::kbd_backlight get` output and exit status, the resolved `brightnessctl` path in the writer's environment, and user journal lock/blank/wake events around its mtime.
 
 `bugfix/keyboard-backlight-hibernate.sh` applies [Omarchy PR #13729](https://github.com/omacom/omarchy/pull/13729) to the `system-sleep/keyboard-backlight` hook that `omarchy-hibernation-setup` installs: it zeroed the backlight before hibernation (an ASUS S4 workaround) and never restored it, so a suspend-then-hibernate woke with the light off.
 The hook now calls `omarchy-brightness-keyboard off` before hibernating and `restore` after resume, sharing the command's save/restore; plain suspend is untouched.
