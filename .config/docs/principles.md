@@ -54,7 +54,7 @@ Corollary: cross-running the bootstrap against a machine you still have -- Mint 
 
 ## Consistent
 
-Hand-built tooling shares grammar across tools: the Hyprland Super chord mirrors tmux's Alt chord for the same actions [0055]; the herdr scratchpad copies the tmux scratchpad's design rather than reinventing it [0059]; helix replaces nvim not because it is better at vim but because it is the only one that knows itself as the single implementation of the editor niche [0008].
+Hand-built tooling shares grammar across tools: the Hyprland Super chord mirrors tmux's Alt chord for the same actions [0055]; the herdr scratchpad nests a herdr session rather than tmux, so the popup keeps herdr's own keys [0077]; helix replaces nvim not because it is better at vim but because it is the only one that knows itself as the single implementation of the editor niche [0008].
 
 Cost: coupled.
 Changing the tmux tab grammar ripples into Hyprland, herdr, Helix and keyd; the same name being cheap to adopt once is not the same discipline as keeping four interconnected grammars aligned afterwards.
