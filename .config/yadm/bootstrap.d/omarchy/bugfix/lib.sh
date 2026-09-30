@@ -8,9 +8,9 @@ log() { echo "[$1] $2" >&2; }
 #   already-patched or fixed upstream  -> silent
 #   forward applies                    -> sudo patch
 #   neither                            -> stale warning, so the PR gets checked
-# Usage: apply_omarchy_patch <patch filename in assets/> <target> <patch level, 0 or 1>
+# Usage: apply_omarchy_patch <patch filename in patches/> <target> <patch level, 0 or 1>
 apply_omarchy_patch() {
-  local patch="${BASH_SOURCE[0]%/*}/assets/$1" target=$2 p=$3 stripargs=()
+  local patch="${BASH_SOURCE[0]%/*}/patches/$1" target=$2 p=$3 stripargs=()
 
   [[ $p == 0 ]] || stripargs=(-p"$p")
   if patch "${stripargs[@]}" -R -f -s -F0 --dry-run "$target" <"$patch" &>/dev/null; then

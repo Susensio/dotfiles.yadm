@@ -63,7 +63,7 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Patching Omarchy bugs
 
 A bug in an Omarchy system file that has a PR upstream gets a step in `bootstrap.d/omarchy/bugfix/`, one per PR, linking it ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)).
-Each step sources `lib.sh` and passes its patch filename; the helper resolves it from its own `assets/` directory.
+Each step sources `lib.sh` and passes its patch filename; the helper resolves it from its own `patches/` directory.
 `omarchy update` restores the unpatched files, and its `post-update.d/yadm-bootstrap.hook` reruns the bootstrap to patch them again.
 
 `bugfix/codex-usage-rpc.sh` applies [Omarchy PR #12979](https://github.com/omacom/omarchy/pull/12979): Codex usage checks read replies and notifications from a shared byte buffer, so a reply arriving alongside a notification does not cause a false timeout.
