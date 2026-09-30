@@ -8,9 +8,6 @@ hl.config({
   -- Window-level damage leaves the dim overlay over the gaps after unzoom.
   debug = { damage_tracking = 1 },
 
-  -- Fullscreen video scans out directly, cutting ~1-2 frames of compositor latency.
-  render = { direct_scanout = true },
-
   decoration = {
     rounding = 5,
     dim_inactive = true,
