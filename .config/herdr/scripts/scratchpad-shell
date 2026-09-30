@@ -2,4 +2,4 @@
 # Herdr replaces a closed last workspace instead of exiting, so a scratch shell
 # that exits stops its own session; the attached client then closes the popup.
 /usr/bin/fish "$@" || :
-exec herdr server stop
+exec herdr server stop >/dev/null 2>&1

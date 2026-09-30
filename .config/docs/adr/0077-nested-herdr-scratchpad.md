@@ -16,12 +16,12 @@ Run one named Herdr session per originating workspace ID from the popup, using a
 Herdr has no config include, so the scratchpad uses the `terminal` theme rather than copying the outer config's built-in theme.
 Detach the inner client on `` Alt+` `` to close the popup without stopping the session.
 Herdr replaces a closed last workspace rather than exiting, so the scratch shell is a wrapper that stops its own session when fish exits, mirroring tmux's `detach-on-destroy`.
-Clear the outer socket and caller identifiers before launch so inner CLI commands and panes use their own session.
+Clear the outer socket and caller identifiers before launch so inner CLI commands and panes use their own session, but preserve the focused outer pane's cwd so each workspace's scratch starts in that workspace.
 Keep the launch-context refusal and no workspace cleanup.
 
 ## Consequences
 
-Scratchpads scroll with the mouse wheel and Herdr copy mode (`F12`, `v`), and their keys share the outer Herdr grammar without depending on tmux.
+Scratchpads scroll with the mouse wheel and Herdr copy mode (`F12`, `v`), start in the outer workspace's focused pane directory, and share the outer Herdr key grammar without depending on tmux.
 Each workspace now owns a Herdr server rather than a session on one tmux server; closing a workspace still leaves an orphan until manually stopped or deleted.
 Scratchpad chrome follows the host terminal's palette, which Omarchy switches with its theme, so it can differ slightly from the outer Herdr's pinned built-in theme.
 The inner client briefly paints Herdr's machine picker on every attach: its pre-snapshot frame ignores the collapsed sidebar settings, which no config reaches.

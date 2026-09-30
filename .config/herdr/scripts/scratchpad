@@ -22,9 +22,17 @@ fi
 SCRATCH_CONF="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scratchpad.toml"
 [[ -r "$SCRATCH_CONF" ]] || { echo "scratchpad: missing config $SCRATCH_CONF" >&2; exit 1; }
 
+# The nested session's workspace should start where the outer workspace's focused
+# pane is. Save that before clearing the outer caller context.
+START_CWD="${HERDR_ACTIVE_PANE_CWD:-$HOME}"
+
+# cd before exec so the inner herdr creates its startup workspace here.
 # Do not route the nested client back to the outer server's socket or session.
-# stderr only carries the shutdown notice from scratchpad-shell; the popup closes before anything there is readable.
+# stderr only carries the shutdown notice from scratchpad-shell, which the popup
+# closes too fast to read; silence it so the close looks clean.
+cd "$START_CWD" 2>/dev/null || cd "$HOME" || true
 exec env -u HERDR_SOCKET_PATH -u HERDR_SESSION \
   -u HERDR_ACTIVE_WORKSPACE_ID -u HERDR_ACTIVE_TAB_ID -u HERDR_ACTIVE_PANE_ID -u HERDR_ACTIVE_PANE_CWD \
   -u HERDR_WORKSPACE_ID -u HERDR_TAB_ID -u HERDR_PANE_ID \
-  HERDR_CONFIG_PATH="$SCRATCH_CONF" herdr --session "scratchpad-$WK_ID" 2>/dev/null
+  HERDR_CONFIG_PATH="$SCRATCH_CONF" \
+  herdr --session "scratchpad-$WK_ID" 2>/dev/null
