@@ -11,6 +11,18 @@
           "input": ["text"]
         }
       ]
+    },
+    "opencode-go": {
+      "$comment": "Kimi K2.7 Code always thinks and does not support reasoning_effort (only K3 does); mirror Moonshot AI's own catalog entry so pi sends the thinking object, never reasoning_effort or thinking:disabled.",
+      "modelOverrides": {
+        "kimi-k2.7-code": {
+          "thinkingLevelMap": { "off": null },
+          "compat": {
+            "thinkingFormat": "deepseek",
+            "supportsReasoningEffort": false
+          }
+        }
+      }
     }
   }
 }
