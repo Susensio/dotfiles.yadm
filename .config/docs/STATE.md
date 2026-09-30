@@ -1,5 +1,61 @@
 # State
 
+## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
+
+Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
+These are separate contributions; the naming of stock `gruvbox` (currently gruvbox-material) is a related, potentially breaking decision, not an approved rename.
+Do not treat scratch `gruvbox-vivid` or a swap of the classic palette tiers as accepted.
+
+### Completed upstream work
+
+- Commented on [Helix template PR #6696](https://github.com/omacom/omarchy/pull/6696#issuecomment-5905412528): supported its semantic palette and contrast-safe transparent/inverted UI, asked whether removing `color0`–`color8` aliases should retain compatibility for custom themes inheriting `omarchy` or be called out as a migration, and noted that generic `bright_*` syntax defaults vary in contrast and meaning across themes.
+  PR #6696 was open at the time of the comment; check its current status and responses before proposing template edits.
+- Opened [Omarchy PR #13843](https://github.com/omacom/omarchy/pull/13843) (`Susensio:fix/helix-theme-link`, commit `1cc49b20`) for the Helix provisioning bug.
+  It adds a one-time migration for already-installed Helix and provisions the link on future theme switches for Helix installed outside Omarchy's installer; both paths only create a missing `~/.config/helix/themes/omarchy.toml` if the rendered target exists, preserving existing files and even dangling custom symlinks.
+  No dotfiles patch is required: it does not change the selected Helix theme or overwrite user config.
+  Focused regression (7 checks), staging suite, `bash -n`, and `git diff --check` pass in an isolated upstream checkout at `/tmp/helix-provision-pr.nHsC8l`.
+  `./test/all` was attempted there but failed in 15 unrelated shell suites and `test/cli` (missing companion `omarchy-pkgs` checkout and `omasnap`, other baseline/environment failures); the Helix regression passed in that full run.
+  Follow the PR to merge and test on update; if the rendered target is absent during its one-time migration, the next theme change will provision it.
+  Do not apply the migration to the live machine just to exercise it.
+
+### Current local experiment (not the intended upstream implementation)
+
+- `omarchy/themes/gruvbox-classic/colors.toml` maps morhetz gruvbox's neutral hues to plain `red`…`cyan` and its actual bright hues to `bright_*`; background `#282828`, darker surfaces `#1d2021`/`#161616`, foreground `#ebdbb2`, accent `#fe8019`.
+  **Do not swap tiers without a new decision**: that would change terminal ANSI 1–6 and throw away the faithful 0/1 gruvbox mapping.
+  Omarchy's resolver forces `color7 = foreground`, so fully canonical ANSI white is not representable here; this is an accepted constraint to describe when proposing the theme, not a reason to reverse hue tiers.
+  Decide explicitly whether the non-ANSI `orange` role should remain neutral `#d65d0e` or become vivid `#fe8019` for generated clients; avoid silently changing it.
+- `omarchy/themes/gruvbox-vivid/` and `helix/themes/omarchy-gruvbox-{classic,vivid}.toml` are **scratch** comparisons, not PR material.
+  The two Helix previews use Omarchy's **stock** rules, which read plain slots and therefore favor vivid; they do not show the installed local override's rendering.
+  Vivid omits `bright_*`, which the resolver fills with 20%-white mixes, and does not preserve classic terminal ANSI.
+  Retain the scratch files until the comparison is finished; clean them up by explicit decision, not as part of the provisioning PR.
+- `omarchy/themed/helix.toml.tpl` is a local, untracked override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
+  It was rendered and parsed without unresolved placeholders or Helix warnings, but it can wash out other themes whose bright roles are lighter tints and should **not** be submitted wholesale as a generic fallback.
+  `helix/config.toml` still selects `gruvbox_transparent` (a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
+  The observed vendor theme preference and transparent Helix background should be preserved in later comparisons.
+
+### Remaining contributions and decisions
+
+1. **Classic gruvbox theme PR:** audit all current `gruvbox-classic` assets and compare the palette against morhetz gruvbox, terminal/Omarchy rendering, and vendor Helix before touching tiers; retain neutral→plain and bright→`bright_*` unless a specific counterexample justifies a change.
+   The local theme presently has `backgrounds/`, `colors.toml`, `icons.theme`, and `neovim.lua`; a representative stock theme also ships `hyprland.lua`, `vscode.json`, `preview.png`, `preview-unlock.png`, and `unlock.png`.
+   Verify which assets Omarchy actually requires before creating them, produce legitimate previews/background permissions, run upstream `./test/all` in a proper checkout, and provide before/after images for visual changes.
+   Current stock `gruvbox` uses gruvbox-material colors but classic `ellisonleao/gruvbox.nvim`, so check Neovim integration for both themes.
+   The possibility of renaming stock `gruvbox` to `gruvbox-material` (and perhaps giving classic the short name) deserves an Omarchy **Suggestions Discussion first**: it changes persisted theme names, would need a migration, and requires a material-appropriate Neovim mapping.
+   Adding `gruvbox-classic` alongside unchanged `gruvbox` is independently viable; do not bundle the rename without a maintainer decision.
+2. **Better generic Helix fallback:** first follow [#6696](https://github.com/omacom/omarchy/pull/6696) and the review comment, and compare its result against the stock template and the local override across dark and light stock themes.
+   The stock template largely uses only plain hues and collapses some syntax distinctions; #6696 names the palette semantically, adds bare `markup.heading`, moves constants to orange, and refines parameters/special roles.
+   Do not open a competing change to the same file while that PR is live.
+   Establish concrete remaining regressions with contrast and screenshots before a follow-up PR; bright roles are **not** universally safe as generic drawing roles (especially on light themes), and transparency plus legible statusline/menu must survive.
+   The local override should eventually be revised or removed by explicit choice after testing the merged fallback; no local config rewrite was approved in this session.
+3. **Vendor-Helix `inherits` mapping:** the existing theme-staging/rendering path already honors a theme-shipped `helix.toml` ahead of `default/themed/helix.toml.tpl`.
+   Propose a **Suggestions Discussion**, then a small PR with verified vendor-name overlays rather than copied full theme implementations; [closed PR #945](https://github.com/omacom/omarchy/pull/945) was rejected for maintaining full per-editor schemes, so explain how vendor inheritance reduces that burden, without assuming a maintainer will accept it.
+   Candidate pairs to verify against the actual stock colors/backgrounds and installed Helix runtime: `gruvbox` (material)→`gruvbox-material`, `gruvbox-classic`→`gruvbox`, `catppuccin`→`catppuccin_mocha`, `catppuccin-latte`→`catppuccin_latte`, `everforest`→`everforest_dark`, `flexoki-light`→`flexoki_light`, `kanagawa`→`kanagawa`, `nord`→`nord`, `rose-pine`→`rose_pine_dawn`, `tokyo-night`→`tokyonight`; `ristretto`→`monokai_pro_ristretto` needs closer visual checking.
+   Exclude generic lookalikes such as `white`→`emacs` or `vantablack`→`modus_vivendi` without a real brand match.
+   Each overlay must include `"ui.background" = { }` beside `inherits = "…"`; shipping it suppresses fallback-template generation, and a bare inherit would lose Omarchy's transparency.
+   Confirm Helix syntax and palette compatibility for each pair, test switching and cloning/staging, and re-evaluate if classic/stock gruvbox names change.
+
+Upstream procedure: work in an Omarchy fork checkout, follow upstream `AGENTS.md` and `agents/skills/{migrations,install-scripts}.md` as applicable, run focused tests and `./test/all`, and keep upstream source edits out of `/usr/share/omarchy` and this dotfiles tree.
+The local contribution guide still says `basecamp/omarchy`, while the live GitHub repository used for these PRs is `omacom/omarchy`; verify the live destination before filing.
+
 ## Omarchy migration
 
 Source checkout for the migration: `~/Projects/omarchy` (upstream, read-only; ported items land under `~/.config`). Ported 2026-09-26: `fish/completions/omarchy.fish` — a full port of Omarchy's `default/bash/completions` (prefix-tree walk over the omarchy-* executables plus the `# omarchy:args=` spec parser, `commands` and its flags included; the only hardcoded strings are those and the flag descriptions). Verified via `complete -C` against the live tree (27 cases, side-by-side with the upstream bash script; candidate words identical, the 3 diffs being fish's fuzzy matcher and bash's invisible readline file fallback): first/second/deeper levels, hyphen-split routes (`audio output volume`), literal/choice gating (`audio output-volume raise` vs a bogus token), `bar position` choices, flag skipping, explicit file completion only at dynamic `<name>` placeholder positions (file completions are otherwise disabled for the command, so `omarchy <TAB>` lists only subcommands). Descriptions beyond the bash port: level-1 groups from the dispatcher's GROUP_DESCRIPTIONS table, deeper levels from each first child's `# omarchy:summary=` line, `commands` and its flags from the dispatcher's usage text. Costs ~78 ms at the first level, ~30–60 ms deeper. Omarchy accepts both the hyphen-split (`omarchy bar text color`) and hyphenated (`omarchy bar text-color`) forms; completions suggest the split form, as upstream bash does. Known deviation, accepted: the bash line hiding `omarchy-*` binaries from first-word completion has no fish equivalent (`complete -c X -e` does not remove a PATH command from command-name completion; verified). Out of scope here: menu-keybinds and pi harness (other agents).
