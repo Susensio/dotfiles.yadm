@@ -11,7 +11,8 @@ Only the hand-maintained harness is tracked here by yadm; runtime state is ignor
 - `pi/agent/AGENTS.md` — universal behaviour and pre-routing triggers
 - `pi/agent/README.md` — Pi-specific operating notes and validation boundaries
 - `pi/agent/settings.json` — theme, default provider/model, package list
-- `pi/agent/keybindings.json` — disables the stock thinking-level shortcut in favor of Shift+Up/Down from `thinking-direction.ts`
+- `pi/agent/keybindings.json` — disables the stock thinking-level and model-cycle shortcuts in favor of Shift+Up/Down from `thinking-direction.ts` and Shift+Left/Right from `cycled-models.ts`
+- `pi/agent/cycled-models.json` — the ordered models Shift+Left/Right step through, edited by `/cycled-models`
 - `pi/agent/subagents.json` — hand-edited global subagent feature flags
 - `pi/agent/agents/*` — subagent definitions
 - `pi/agent/prompts/*` — prompt templates; each file becomes a `/`-command (`/permission-audit` briefs the session to analyze the permission log and propose rule changes)
