@@ -23,7 +23,7 @@ install() {
   local tool
   for tool in "${argc_tools[@]}"; do
     if declared "$TOOLS_CONFIG" "$tool" || declared "$PACKAGES_MISE" "$tool"; then
-      echo "tool: $tool is already tracked" >&2
+      log warn "$tool is already tracked"
       continue
     fi
 
@@ -66,6 +66,7 @@ remove() {
       pacman -Q "$package" &>/dev/null && sudo pacman -R --noconfirm "$package"
       # mise has no command to drop a [bootstrap.packages] entry.
       sed -i "\|^\"pacman:$package\" = |d" "$PACKAGES_ARCH"
+      log success "removed \"pacman:$package\" from ${PACKAGES_ARCH#"$CONFIG_DIR"/}"
     fi
     if declared "$TOOLS_CONFIG" "$tool"; then
       mise unuse --path "$TOOLS_CONFIG" "$tool"
@@ -75,8 +76,9 @@ remove() {
         fallback_obsolete
       elif grep -qxF "$tool = \"latest\"" "$PACKAGES_MISE"; then
         sed -i "/^$tool = \"latest\"\$/d" "$PACKAGES_MISE"
+        log success "removed $tool from ${PACKAGES_MISE#"$CONFIG_DIR"/}"
       else
-        echo "tool: remove $tool from $PACKAGES_MISE by hand" >&2
+        log error "remove $tool from $PACKAGES_MISE by hand"
       fi
     fi
   done
@@ -116,10 +118,11 @@ set_latest() {
   else
     printf '%s = "latest"\n' "$3" >>"$1"
   fi
+  log success "added $3 to ${1#"$CONFIG_DIR"/}"
 }
 
 fallback_obsolete() {
-  echo "tool: mise now edits ## files; drop the fallback in ~/bin/tool" >&2
+  log warn "mise now edits ## files; drop the fallback in ~/bin/tool"
 }
 
 declared() {
