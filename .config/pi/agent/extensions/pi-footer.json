@@ -5,6 +5,20 @@
   "lines": [
     [
       {
+        "id": "session-name-mul1u82l-do637d",
+        "type": "session-name",
+        "enabled": false,
+        "options": {
+          "raw": false,
+          "hideWhenEmpty": true,
+          "icon": "",
+          "text": "-",
+          "fg": "cyan",
+          "bg": "default",
+          "bold": false
+        }
+      },
+      {
         "id": "cwd-basename-muje9srw-n774ie",
         "type": "cwd-basename",
         "enabled": true,
