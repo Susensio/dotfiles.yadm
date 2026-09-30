@@ -6,6 +6,8 @@
   Needs a human shell: `pi-permission-system` denies `~/.gnupg/*` as key material (rule `~/.gnupg/*`), so the agent cannot move it. The alternative is dropping `GNUPGHOME` from `environment.d/10_xdg.conf` and keeping the keyring where it is, which gives up the XDG goal for one directory.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `tmux/PROPOSAL-tmux-notify.md`.
+  Blocked on tmux ≥ 3.8: this box is `tmux 3.7_c-1` and `new-pane` has no geometry flags (`-x/-y/-X/-Y`), so the floating toast cannot be built.
+  Revisit when `tmux -V` reports ≥ 3.8 after an Arch update, or on an explicit decision to build tmux from source.
 - tmux | `PreToolUse` hook on `Bash` that blocks `tmux kill-server`/`kill-session`/`kill-window` when the command has no explicit `-L`/`-S`, message pointing at the `tmux-testing` skill's `scripts/tmux-test`.
   Prevents a bare destructive `tmux` command from silently falling through to the live default socket when hand-rolled `TMUX_TMPDIR` isolation resolves empty (happened in practice during tmux-uzi benchmarking: a cleanup command read an isolated socket path back from a file via `$(cat ...)`, the read failed silently, and `kill-server` hit the user's live session instead).
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."
