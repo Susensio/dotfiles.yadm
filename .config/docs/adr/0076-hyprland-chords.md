@@ -16,7 +16,7 @@ Two collisions shaped the letters. Audio's first letter V is taken on the same S
 
 Window actions are chords on the same hjkl letters, one modifier per action: Super + Ctrl resizes (repeatable, 40 px), Super + Shift swaps, Super + Alt sends the window to a monitor. The Super + P window mode is deleted, and Super + P is freed.
 
-The power key climbs modifiers, all working on the lock screen: power suspends (`systemctl suspend-then-hibernate`, inheriting ADR-0069's policy and the pre-suspend lock from `omarchy-sleep-lock.service`), Ctrl + power locks, Super + power opens the system menu, Alt + power forces the screensaver. Super + Escape keeps locking.
+The power key climbs modifiers, all working on the lock screen: power suspends (`systemctl suspend-then-hibernate`, inheriting ADR-0069's policy and the pre-suspend lock from `omarchy-sleep-lock.service`), Ctrl + power locks, Super + power opens the system menu, Alt + power forces the screensaver.
 
 The Print key climbs the capture family: plain prints the screenshot, Super opens the capture menu, Shift runs OCR, Ctrl scans a QR code, Alt picks a color.
 
@@ -45,3 +45,8 @@ A stuck mode can no longer strand the keyboard; Escape and Return do nothing spe
 The suspend binding has not yet been exercised (a real press suspends the machine); the lid, the menu and the key share the same command and ADR-0069's entry-point rule, and `hyprctl binds` verified the registrations.
 
 Not adopted, still reachable from the Omarchy menu and revisitable: calculator, keybindings menus, dictation, bar-panel digits, reminders, transparency and gaps toggles, cursor zoom, width save/restore, monitor scaling.
+
+## Corrections
+
+2026-09-30: the Decision said Super + Escape kept locking. It was bound that way when this record was written and moved to Omarchy's btop on the same day, so the sentence is gone and Ctrl + power is left as the only lock key; the power cluster's other three keys are unchanged.
+An earlier sentence claiming a `o.bind_toggle` defect upstream was wrong — Omarchy calls the standalone command with `o.bind` — and was removed along with the backlog entry it produced.

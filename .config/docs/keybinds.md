@@ -87,7 +87,6 @@ tmux's pane table is the only modal table left; Hyprland's actions moved to chor
 - Alt + n / Alt + p mean "next / previous sibling" in each tool's own dimension: tmux sessions, herdr agents. Hyprland has no session dimension; it cycles windows with Super + Tab instead.
 - Hyprland's window actions are chords, not a modal table: Ctrl + hjkl resizes, Shift + hjkl swaps, Alt + hjkl sends the window to a monitor. tmux keeps its pane table, so the hjkl letters mirror across layers while the mechanism no longer does.
 - The prefix is F12, not an Alt chord, so it works identically inside and outside tmux, and herdr's prefix never collides with the shell's Alt usage.
-- Hyprland's mode leaves on an explicit key (Escape, Return) because it cannot leave on an unknown one: a catchall fires on a bare modifier press before Shift + hjkl or Ctrl + hjkl can complete (upstream #5073, unfixed on 0.56.2), so tmux's one-shot table exit has no equivalent here.
 - herdr's stock resize mode lives on prefix+r; `config.toml` moves it to p so the pane-table letter matches tmux.
 
 ## Upkeep
