@@ -10,7 +10,7 @@
   "agentMentions": "off",
   "fleetView": true,
   "widgetMode": "off",
-  "rememberAgents": false,
+  "rememberAgents": true,
   "outputTranscript": false,
   "toolDescriptionMode": "compact",
   "reportUsage": true,
