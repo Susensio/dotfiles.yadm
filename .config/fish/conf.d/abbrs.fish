@@ -10,8 +10,7 @@ function _last_history_item
 end
 abbr --add !! --position anywhere --function _last_history_item
 
-abbr --add h helix
-abbr --add hx helix
+abbr --add h hx
 abbr --add l ll
 abbr --add g git
 abbr --add cb clipboard
