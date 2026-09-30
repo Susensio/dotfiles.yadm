@@ -75,6 +75,13 @@
 - omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
   An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line).
   Reachable from the slider once `bugfix/hypr-envs-path.sh` has run and the session restarted.
+- omarchy | Plugin edits under `~/.config/omarchy/plugins/` do not reach a bar widget that is already mounted.
+  On 2026-09-30 twelve `Local plugin changed, reloading: akitaonrails.ai-usagebar` lines were logged between 12:00 and 12:20 for edits to `omarchy/BarWidget.qml` and `Model.js`, yet the widget in the bar kept serving the old code; a temporary `Component.onCompleted` marker added later to `BarWidget.qml` did not fire after the reload line appeared at 13:00:16, which is the direct evidence that the plugin is recompiled while the slot's instance survives.
+  `omarchy-shell shell rescanPlugins` did not change that, while `omarchy restart shell` did — plugin edits reload normally in the fresh shell (12:57 and 13:00).
+  So the documented "saving a file anywhere under `plugins/` reloads plugin code automatically" holds for the plugin's code but not for the instance the bar is showing; treat a restart as required after editing a plugin, and report upstream if it recurs, since the only signal is a DEBUG-level log line and the miss is otherwise silent.
+- omarchy | `omarchy-shell` emits roughly 46 `QQmlVMEMetaObject: Internal error - attempted to evaluate a function in an invalid context` warnings per minute, continuously since at least 09:21 on 2026-09-30 and across full shell restarts, with no file, line or call site in the message.
+  Unrelated to the ai-usagebar patch under test at the time: the rate was identical before, during and after it, and a restart did not clear it.
+  Needs a bisect — disable bar widgets and plugins one at a time while watching the rate — and the likely shape is a QML function called through a stored `var`/closure after its context was destroyed.
 - upstream | herdr: consume `rpiv:ask-user:blocked` — the stable channel `@juicesharp/rpiv-ask-user-question` emits while its questionnaire waits for input — in herdr's pi integration for the pane's blocked state (today it listens for a `herdr:blocked` event nothing emits), and consider a `herdr integration sync` that installs outdated integrations for present harnesses natively.
   Either would retire our bridge extension (`.config/pi/agent/extensions/herdr-ask-user-bridge.ts`) and shrink `mise/tasks/herdr-integrations` to one line.
   See ADR-0060.

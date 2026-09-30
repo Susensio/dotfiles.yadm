@@ -1,5 +1,28 @@
 # State
 
+## ai-usagebar upstream sync (2026-09-30)
+
+Four PRs of mine merged into `akitaonrails/ai-usagebar`: #277 (speed up panel scrolling) and #278 (stop alerting the bar on cached or failed refreshes) on 2026-09-29, #289 (read the Omarchy palette where Omarchy applies it) and #290 (open the panel on the provider a bar chip stands for) on 2026-09-30 02:58Z.
+All four are on `main`; #277 and #278 are in v1.28.0 (tagged 2026-09-29, after their 15:41Z/15:43Z merges), while #289 and #290 merged after it — `git tag --contains 6eb275a` and `--contains 9857769` are both empty, and #289's entry sits under `CHANGELOG [Unreleased]`.
+
+- Opened [PR #293](https://github.com/akitaonrails/ai-usagebar/pull/293) (`fix/omarchy-chip-hit-area`, commit `cd488af`) for the bar chips' click area: the bar press-tests a slot's widget by geometry, and a chip registered only the glyph-height row, so a click above or below a chip — and in the gap beside it — reached the button and toggled whichever entry was already selected.
+  Each chip now registers its whole column of the slot (the bar's full height, half of every neighbouring gap split at the midpoint) through `Model.chipHitGaps`, which leaves the row's width and every chip's place in it unchanged; `omarchy/BarWidget.qml`, `Model.js`, `model.test.mjs`, `CHANGELOG.md` and `omarchy/README.md` carry it.
+  The geometry was verified out of tree with `qmltestrunner -input` (offscreen) before committing, which is also how the `Row`-skips-zero-height-children rule surfaced; that probe is deleted, not kept.
+  Verified live on 2026-09-30 (Omarchy 4.0.4): with the fix actually loaded, a click on the bar padding above a chip and on the gap between two chips selects that chip's entry, confirmed by the owner.
+  The first live test failed misleadingly, because editing files under `plugins/` recompiles the plugin without re-creating the mounted bar widget; see the BACKLOG entries for the reload gap and the shell's `invalid context` warning rate, and prefer `omarchy restart shell` over `omarchy-shell shell rescanPlugins` when an edit seems not to apply.
+  This clone only had `origin`, so pushing added a `fork` remote (`https://github.com/Susensio/ai-usagebar.git`); the fork's stale merged branches `feat/omarchy-chip-click` and `fix/omarchy-theme-path` were deleted on 2026-09-30, leaving `main` and this branch behind.
+  Follow the PR to merge, then `git checkout main && git merge --ff-only origin/main && git branch -d fix/omarchy-chip-hit-area`, and drop the `fork` remote if it is not wanted.
+- Clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar`: now `main` at `39f429e` == `origin/main`, with the merged `feat/omarchy-chip-click` and `fix/omarchy-theme-path` branches deleted.
+  The omarchy PRs are QML/JS only and `omarchy/` already equalled `main`, so the running bar widget needed no local change; the clone is a plain upstream checkout, not tracked by yadm.
+- Binary: `/usr/bin/ai-usagebar` is `ai-usagebar-bin 1.27.0` from pacman; the AUR carries 1.28.0 for both `ai-usagebar` and `ai-usagebar-bin`.
+  `ai-usagebar-bin 1.28.0-1` is built and staged at `~/.cache/yay/ai-usagebar-bin/ai-usagebar-bin-1.28.0-1-x86_64.pkg.tar.zst` but **not installed**: `sudo` is denied to agents here and `pkexec` is never auto-approved, so installing it is a manual terminal command.
+- Waiting on the next release for #289, verified absent from the 1.28.0 package: `strings` finds only `.config/omarchy/current/theme` there, while `main` probes `~/.local/state/omarchy/current/theme` first — where Omarchy 4 writes and where this machine's active theme is.
+  Until then the binary's TUI and widget-render surfaces stay on the One Dark fallback; the bar and panel are unaffected, since their colours come from Omarchy's QML theme.
+- Check 2026-10-01: whether a post-1.28.0 tag exists (`git ls-remote --tags origin` in the clone, or the AUR version), then `yay -S ai-usagebar-bin` and confirm `ai-usagebar --version` plus the TUI following the Omarchy theme.
+  Releases have been roughly daily: v1.25 9/25, v1.26 9/27, v1.27 9/28, v1.28 9/29, with 29 commits past the tag on 9/30.
+- Only if #289 is wanted sooner: `cargo build --release && make install PREFIX=$HOME/.local` in the clone (`~/.local/bin` precedes `/usr/bin` on PATH), then remove those two binaries once the release lands, because the shadow also hides later pacman updates.
+  Installing the staged 1.28.0 package instead is optional and does not carry #289; it only brings `/usr/bin` in line with the plugin manifest's 1.28.0.
+
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
