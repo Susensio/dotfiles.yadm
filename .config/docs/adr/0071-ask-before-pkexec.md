@@ -37,3 +37,7 @@ The Pi extension route stays the deterministic fallback if the review log ever s
 2026-09-29: the Decision said `sandbox.excludedCommands` listed `pkexec` to lift the sandbox, and Consequences said redirections kept a pkexec line from matching it.
 Claude Code 2.1.283 never lets `excludedCommands` cover a command led by a privilege wrapper (`sudo`, `su`, `doas`, `pkexec`, `runuser`, `chroot`), whatever the pattern, so pkexec failed with `must be setuid root` even as `"pkexec *"`; it runs unsandboxed per call instead, as `claude/CLAUDE.md` instructs.
 The Pi policy first said pkexec is "never allowed", and the reviewer answered with `deny`, which is final; it now demands `defer`.
+
+2026-10-01: the reviewer's reply schema is `allow | deny`, so the `defer` it was told to return was unreachable; the policy now says deny, with a rationale that the user must approve, which fails closed instead of reaching the pane.
+The Pi rule became `*pkexec*`, kept last, because `pkexec *` matched only a command starting with pkexec and missed `yay --sudo pkexec`.
+With `yoloMode: true` in the local config every ask had become an allow before the reviewer ran, and that `yay` call opened polkit unannounced; yolo is now off.

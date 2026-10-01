@@ -83,7 +83,6 @@
         "action": "deny",
         "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
       },
-      "pkexec *": "ask",
       "cat *": "allow",
       "head *": "allow",
       "tail *": "allow",
@@ -106,7 +105,18 @@
       "printf *": "allow",
       "echo *": "allow",
       "true": "allow",
-      "node --version*": "allow"
+      "node --version*": "allow",
+      "git reset *": "ask",
+      "yadm reset *": "ask",
+      "git checkout *": "ask",
+      "yadm checkout *": "ask",
+      "git restore *": "ask",
+      "yadm restore *": "ask",
+      "git clean *": "ask",
+      "yadm clean *": "ask",
+      "git stash *": "ask",
+      "yadm stash *": "ask",
+      "*pkexec*": "ask"
     },
     "skill": "allow",
     "read": "allow",
