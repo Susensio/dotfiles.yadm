@@ -39,5 +39,5 @@ Claude Code 2.1.283 never lets `excludedCommands` cover a command led by a privi
 The Pi policy first said pkexec is "never allowed", and the reviewer answered with `deny`, which is final; it now demands `defer`.
 
 2026-10-01: the reviewer's reply schema is `allow | deny`, so the `defer` it was told to return was unreachable; the policy now says deny, with a rationale that the user must approve, which fails closed instead of reaching the pane.
-The Pi rule became `*pkexec*`, kept last, because `pkexec *` matched only a command starting with pkexec and missed `yay --sudo pkexec`.
+The Pi rules `pkexec *` and `* pkexec *`, kept last, catch pkexec as the command or as a separate argument (`yay --sudo pkexec`); the matcher has no word boundaries, a bare `*pkexec*` also stopped reads of files named after pkexec, and rarer spellings fall to the catch-all ask and the reviewer's policy.
 With `yoloMode: true` in the local config every ask had become an allow before the reviewer ran, and that `yay` call opened polkit unannounced; yolo is now off.
