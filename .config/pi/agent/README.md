@@ -37,6 +37,13 @@ The `pi-subagents-resume-evicted-*` patches carry [tintinweb/pi-subagents#286](h
 It relies on `rememberAgents: true` in `subagents.json`, which writes that session.
 Drop the patches when #286 ships.
 
+## Stray terminal output
+
+Extensions share pi's process, so their `console.*` and `process.stderr.write` reach the terminal around the renderer and land in the editor ([earendil-works/pi#10002](https://github.com/earendil-works/pi/issues/10002)).
+While a TUI session runs, `extensions/tui-output-guard.ts` diverts both to `tui-captured-output.log` and a warning notification; `process.stdout`, where the renderer draws, is left alone.
+It covers every extension, so a stray write no longer needs a per-package patch; `pi-model-alias-shared-registry` stays because it also fixes the alias's failing calls.
+Drop the extension when [earendil-works/pi#10050](https://github.com/earendil-works/pi/pull/10050) ships.
+
 ## Validation boundaries
 
 Run `/web-tools` once to configure search before using `web_search` or `web_fetch`.
