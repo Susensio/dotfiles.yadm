@@ -8,7 +8,7 @@
  	collectPromptSkills,
  	projectPromptCapture,
  	sharedPromptCaptures,
-@@ -494,6 +495,25 @@
+@@ -496,6 +497,25 @@
  	};
  }
  
@@ -34,7 +34,7 @@
  function extractIsolatedSummaryPrompt(messages: Context["messages"]): string {
  	if (messages.length !== 1 || messages[0].role !== "user") {
  		throw new Error(
-@@ -888,6 +908,8 @@
+@@ -890,6 +910,8 @@
  	setPiUI(ui: ExtensionUIContext | null) {
  		piUI = ui;
  	},
@@ -43,7 +43,7 @@
  	toBridgeContext,
  	syncSharedSession,
  	extractUserPromptBlocks,
-@@ -1728,6 +1750,19 @@
+@@ -1722,6 +1744,19 @@
  		return isolatedStreamFn(model, context, options);
  	}
  

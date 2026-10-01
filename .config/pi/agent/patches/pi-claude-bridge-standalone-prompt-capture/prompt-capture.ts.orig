@@ -1,5 +1,6 @@
 import type { Skill } from "@earendil-works/pi-coding-agent";
 import { formatProjectContext } from "./agents-md.js";
+import { DEBUG_LOG_PATH } from "./log-paths.js";
 import { renderSkillsBlock, type SkillReadTool } from "./skills.js";
 
 // What pi assembled for one agent, kept so the bridge can append only the
@@ -167,6 +168,22 @@ export class PromptCaptures {
 		if (embedded.length === 0) {
 			const matches = this.closestKnown(systemPrompt);
 			this.onDiagnose({ systemPrompt, matches });
+			// The query is a recorded key minus its tail. That shape is the signature of
+			// pi#5581: an extension-triggered idle turn (sendMessage with triggerTurn) skips
+			// before_agent_start, so the prompt renders without that turn's extension
+			// additions. The capture cannot serve this turn either way, so name the bug.
+			const truncated = matches.find(
+				(m) => m.firstDivergent === systemPrompt.length && m.key.length > systemPrompt.length,
+			);
+			if (truncated) {
+				throw new Error(
+					`prompt-capture: this ${systemPrompt.length}-char prompt is the ${truncated.key.length}-char capture recorded at `
+					+ `${truncated.source ?? "an unknown boundary"} with its final ${truncated.key.length - systemPrompt.length} chars missing. `
+					+ `That shape matches pi#5581: an extension-triggered idle turn (sendMessage with triggerTurn) skips before_agent_start, `
+					+ `so the prompt lacks that turn's extension additions. The turn fails; the next user-typed turn resolves normally. `
+					+ `Workaround: when idle, send a user message instead of triggerTurn.`,
+				);
+			}
 			throw new Error(
 				`prompt-capture: no capture for this ${systemPrompt.length}-char system prompt, and it embeds none of the ${this.captures.size} known. `
 				+ `Closest known match diverges at offset ${matches[0]?.firstDivergent ?? "?"} `
@@ -357,7 +374,7 @@ function assertSendablePrompt(parts: readonly PromptPart[], capture: PromptCaptu
 		`  Capture: ${capture.source ?? "unknown"}, ${capture.inherited.length} inherited capture(s) substituted.`,
 		"  If this came from an inherited pi prompt, see README \"Compatibility with other extensions\".",
 		"  If it is your own text, reword or remove it. CLAUDE_BRIDGE_DEBUG=1 writes the full prompt to",
-		"  ~/.pi/agent/claude-bridge.log.",
+		`  ${DEBUG_LOG_PATH}.`,
 	].join("\n"));
 }
 
