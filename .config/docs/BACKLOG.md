@@ -1,5 +1,8 @@
 # Backlog
 
+- omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care. Omarchy snapshots only `/` (config `root`), only before updates, and disables `snapper-timeline.timer`; nothing covers `/home`, so the 2026-09-30 `yadm reset --hard` that wiped every uncommitted tracked change took hours of session forensics to undo (most recovered, `codex/config.toml` lost).
+  Shape: a `home` config (hourly, keep ~24 hourly / 7 daily / 4 weekly) as an idempotent bootstrap step plus a short ADR, one `pkexec`, and `btrfs-assistant` (Arch `extra`) as the GUI to browse and restore.
+  Care points: Omarchy's `install/config/snapper.sh` rewrites `SNAPPER_CONFIGS="root"` in `/etc/conf.d/snapper`, which silently drops a `home` timeline from the stock timers, so run `home` from its own systemd timer; `omarchy-snapshot create` loops over every config, so update snapshots will include `/home` too; make `~/.cache` (and other churny dirs) separate subvolumes so snapshots stay small; snapshots are not backups (same disk).
 - yadm | gpg: **urgent** — `GNUPGHOME` points at `~/.local/share/gnupg`, which holds no keyring: `gpg --list-keys` reports 0 keys and creates an empty `pubring.kbx` there (seen 2026-09-29), while the real keyring — `pubring.kbx` at 80K, `pubring.kbx~`, `trustdb.gpg` — is still in `~/.gnupg`.
   Nothing secret is at risk: `~/.local/share/gnupg/private-keys-v1.d` is empty, so these are imported public keys, and today nothing can reach them.
   Fix: `install -d -m 700 ~/.local/share/gnupg`, `mv ~/.gnupg/{pubring.kbx,pubring.kbx~,trustdb.gpg} ~/.local/share/gnupg/`, `rmdir ~/.gnupg`, then `gpgconf --kill all` so no agent keeps the old home, and check `gpg --list-keys`.
