@@ -1,15 +1,5 @@
 # State
 
-## ai-usagebar upstream sync
-
-Merged into `akitaonrails/ai-usagebar`: #277, #278, #289, #290, [#293](https://github.com/akitaonrails/ai-usagebar/pull/293) and [#295](https://github.com/akitaonrails/ai-usagebar/pull/295); [#296](https://github.com/akitaonrails/ai-usagebar/pull/296) (the bar dims the chips the open panel is not showing) is open.
-
-- The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `feat/omarchy-chip-dim`, one commit ahead of upstream `main`, so the bar keeps the dimming until #296 merges.
-  Once it merges, fast-forward `main` and delete that branch, which leaves the clone with no local patches; drop the `fork` remote if it is not wanted.
-  If #296 is rejected, point its declaration in `omarchy/plugins.conf` at the fork (ADR-0072) rather than vendoring the clone (ADR-0065).
-- `/usr/bin/ai-usagebar` is `ai-usagebar-bin 1.27.0`; upstream tagged v1.29.0 with #289 (the TUI reads the palette from `~/.local/state/omarchy/current/theme`, where Omarchy 4 writes), while the AUR still carries 1.28.0, which lacks it.
-  Once the AUR has 1.29.0, run `yay -S ai-usagebar-bin` in a terminal (agents cannot sudo), then confirm `ai-usagebar --version` and the TUI following the Omarchy theme; until then the TUI stays on its One Dark fallback, while the bar and panel already follow the theme.
-
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
