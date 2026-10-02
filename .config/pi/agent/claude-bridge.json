@@ -1,0 +1,9 @@
+{
+  "askClaude": {
+    "enabled": true
+  },
+  "provider": {
+    "allowExtensionSystemPrompts": true
+  },
+  "startupNoticeShown": "2026-10-01"
+}
