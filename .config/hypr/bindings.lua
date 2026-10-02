@@ -110,9 +110,6 @@ o.bind("SUPER + ALT + P", "Cycle power profile", "omarchy-powerprofiles-cycle")
 o.bind("SUPER + ALT + W", "Toggle wifi", "bash -lc '[[ $(nmcli -t -f WIFI radio) == enabled ]] && nmcli radio wifi off || nmcli radio wifi on'")
 o.bind("SUPER + ALT + B", "Toggle bluetooth", "omarchy-bluetooth-power toggle")
 
--- Focus mode
-require("hypr.focus")
-
 -- Capture
 o.bind("PRINT", "Screenshot", "omarchy-capture-screenshot")
 o.bind("SUPER + PRINT", "Capture menu", "omarchy-menu toggle capture")

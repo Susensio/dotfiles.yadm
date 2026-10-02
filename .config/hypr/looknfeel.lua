@@ -24,13 +24,16 @@ o.window(
   { border_color = palette.maximize_border, dim_around = true }
 )
 
--- SUPER + CTRL + BACKSPACE: the tagged window dims everything behind it in the
--- same colour maximize uses, so one window can be singled out without leaving
--- the workspace. Tags are per window, so several can be in this mode at once.
-o.window(
-  { tag = "focus" },
-  { border_color = palette.maximize_border, dim_around = true }
-)
+-- f[1] matches a workspace with a maximized window: wider side gaps give it the zen ratio.
+local zen_ratio = 4 / 3
+local gap = hl.get_config("general.gaps_out")
+local monitor = hl.get_active_monitor()
+local side = gap.left
+if monitor then
+  local height = monitor.height / monitor.scale - monitor.reserved.top - monitor.reserved.bottom - gap.top - gap.bottom
+  side = math.max(gap.left, math.floor((monitor.width / monitor.scale - height * zen_ratio) / 2))
+end
+hl.workspace_rule({ workspace = "f[1]", gaps_out = { top = gap.top, right = side, bottom = gap.bottom, left = side } })
 
 -- The bar's workspace strip keeps showing the workspace under a special as
 -- focused, and Hyprland reports it as active too, so the overlay has to say so
