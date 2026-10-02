@@ -13,6 +13,8 @@ set -g __fish_git_prompt_char_stashstate (set_color --bold)'$'(printf '\e[22m')
 
 function __prompt_last_command_info --on-event fish_postexec
     set -l last_pipestatus $pipestatus
+    # Comment-only input runs nothing; without this the previous footer would print again.
+    test -n "$(commandline --input=$argv[1] -x)"; or return
     set -l last_command_info
     set -a last_command_info (__prompt_status $last_pipestatus)
     set -a last_command_info (__prompt_timer)
