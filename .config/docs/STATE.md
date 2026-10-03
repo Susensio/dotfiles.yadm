@@ -1,5 +1,10 @@
 # State
 
+## ai-usagebar chip icon gap
+
+[#313](https://github.com/akitaonrails/ai-usagebar/pull/313) drops the 6 px spacer 1.30.0 put between a bar chip's icon and its value (the gap was 14 px, wider than between chips) and is open.
+The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `fix/omarchy-chip-icon-gap`, one commit ahead of upstream `main`, so the bar keeps the fix until it merges; then fast-forward `main`, delete the branch locally and on the fork, and drop this section.
+
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
