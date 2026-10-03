@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# omarchy-default-editor records the pick for Omarchy's launchers only, so file
-# managers keep opening text files in whatever mimeapps.list names (docs/adr/0057).
-# https://github.com/omacom/omarchy/pull/7446; delete this step once it ships
+# Omarchy's system mimeapps.list sends text files to nvim.desktop, so file managers
+# open them in Neovim whatever omarchy-default-editor picked (docs/adr/0057). The
+# patch sends them to the editor handler, which launches the menu's pick, and
+# keeps nvim.desktop as the fallback until the handler is installed.
+# https://github.com/omacom/omarchy/pull/7446 (reworked as a suggestion:
+# https://github.com/Susensio/omarchy/commits/default-editor-handler-review);
+# delete this step once it ships
 set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
-apply_omarchy_patch default-editor-mime.patch /usr/bin/omarchy-default-editor 1
+apply_omarchy_patch editor-mimeapps.patch /usr/share/applications/mimeapps.list 1
 
 # Where omarchy-refresh-applications copies the packaged entries
 install_omarchy_file omarchy-launch-editor.desktop \
