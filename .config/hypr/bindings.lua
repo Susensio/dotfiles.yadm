@@ -68,6 +68,7 @@ o.bind("SUPER + SHIFT + W", "Browser", { omarchy = "browser" })
 o.bind("SUPER + E", "File manager", { omarchy = "nautilus" })
 o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
+o.bind("SUPER + SHIFT + slash", "Keybindings", "omarchy-menu-keybindings")
 
 -- System
 -- omarchy-sleep-lock.service secures the session before suspend (ADR-0069).
@@ -90,6 +91,7 @@ o.bind("SUPER + comma", "Dismiss last notification", "omarchy-shell notification
 o.bind("SUPER + SHIFT + comma", "Dismiss all notifications", "omarchy-shell notifications dismissAll")
 o.bind("SUPER + CTRL + comma", "Notification history", "omarchy-shell notifications showHistory")
 o.bind_toggle("SUPER + ALT + comma", "Toggle silencing notifications", "notification-silencing")
+o.bind("SUPER + CTRL + ALT + comma", "Invoke last notification", "omarchy-shell notifications invokeLast")
 
 -- Bar panels
 o.bind("SUPER + CTRL + W", "Wi-Fi panel", "omarchy-shell shell toggle omarchy.network")
@@ -109,6 +111,16 @@ o.bind("SUPER + ALT + P", "Cycle power profile", "omarchy-powerprofiles-cycle")
 -- Radio toggles
 o.bind("SUPER + ALT + W", "Toggle wifi", "bash -lc '[[ $(nmcli -t -f WIFI radio) == enabled ]] && nmcli radio wifi off || nmcli radio wifi on'")
 o.bind("SUPER + ALT + B", "Toggle bluetooth", "omarchy-bluetooth-power toggle")
+o.bind_toggle("SUPER + ALT + N", "Toggle nightlight", "nightlight")
+o.bind_toggle("SUPER + ALT + I", "Toggle locking on idle", "idle")
+
+-- Cursor zoom
+o.bind("SUPER + ALT + Z", "Zoom in", function()
+  hl.config({ cursor = { zoom_factor = (hl.get_config("cursor.zoom_factor") or 1) + 1 } })
+end)
+o.bind("SUPER + ALT + SHIFT + Z", "Reset zoom", function()
+  hl.config({ cursor = { zoom_factor = 1 } })
+end)
 
 -- Capture
 o.bind("PRINT", "Screenshot", "omarchy-capture-screenshot")

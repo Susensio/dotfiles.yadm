@@ -44,7 +44,7 @@ A stuck mode can no longer strand the keyboard; Escape and Return do nothing spe
 
 The suspend binding has not yet been exercised (a real press suspends the machine); the lid, the menu and the key share the same command and ADR-0069's entry-point rule, and `hyprctl binds` verified the registrations.
 
-Not adopted, still reachable from the Omarchy menu and revisitable: calculator, keybindings menus, dictation, bar-panel digits, reminders, transparency and gaps toggles, cursor zoom, width save/restore, monitor scaling.
+Not adopted, still reachable from the Omarchy menu and revisitable: calculator, bar-panel digits, reminders, transparency and gaps toggles, width save/restore, monitor scaling. The keybindings menu (Super + Shift + /), the nightlight and idle toggles (Super + Alt + N and I, the flip-it family), the last-notification action (Super + Ctrl + Alt + comma) and cursor zoom (Super + Alt + Z, reset on Shift) were adopted afterwards; Super + K stayed focus-up, so the menu took the key that types `?`.
 
 ## Corrections
 
