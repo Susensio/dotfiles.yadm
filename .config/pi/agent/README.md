@@ -19,7 +19,9 @@ Only provider failures advance the chain; a reviewer's `defer` verdict is final.
 Its hand-maintained rule and authorizer configs live beside their extensions.
 For privileged commands use `pkexec`, not `sudo`: polkit opens a visible authentication dialog, while sudo's fingerprint prompt can wait invisibly in Pi's pipes and time out.
 Use `pkexec /usr/bin/id -u` for a harmless root check, with a shell timeout of at least 60 seconds.
-The auto-reviewer's policy defers every pkexec to you, so it waits in the pane's permission dialog and the fingerprint prompt follows your answer ([ADR-0071](../../docs/adr/0071-ask-before-pkexec.md)).
+`extensions/always-ask.ts` asks you before any command matching `always-ask.json` (`*pkexec*`), and the fingerprint prompt follows your answer ([ADR-0071](../../docs/adr/0071-ask-before-pkexec.md), [ADR-0081](../../docs/adr/0081-pi-session-yolo-always-ask.md)).
+`/yolo` or `pi --yolo` approves every ask for the current session only, through `extensions/session-yolo.ts`; the first link in `authorizerChain` that decides wins, so put `always-ask` first to keep pkexec prompting under yolo.
+Leave `yoloMode` in `config.json` off: it applies to every running session and runs before the chain.
 `/permission-audit` runs `extensions/pi-permission-system/report.py` (the deterministic log parser) and briefs this session to turn its findings into `config.json` edits; the script is also runnable directly from a shell.
 
 ## Extension bundling
