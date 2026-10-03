@@ -9,7 +9,7 @@ The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `fix/omar
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
 These are separate contributions; the naming of stock `gruvbox` (currently gruvbox-material) is a related, potentially breaking decision, not an approved rename.
-Do not treat scratch `gruvbox-vivid` or a swap of the classic palette tiers as accepted.
+Do not treat a swap of the classic palette tiers as accepted; the vivid variants were tried and rejected.
 
 ### Completed upstream work
 
@@ -27,10 +27,9 @@ Do not treat scratch `gruvbox-vivid` or a swap of the classic palette tiers as a
   **Do not swap tiers without a new decision**: that would change terminal ANSI 1–6 and throw away the faithful 0/1 gruvbox mapping.
   Omarchy's resolver forces `color7 = foreground`, so fully canonical ANSI white is not representable here; this is an accepted constraint to describe when proposing the theme, not a reason to reverse hue tiers.
   Decide explicitly whether the non-ANSI `orange` role should remain neutral `#d65d0e` or become vivid `#fe8019` for generated clients; avoid silently changing it.
-- `omarchy/themes/gruvbox-vivid/` and `helix/themes/omarchy-gruvbox-{classic,vivid}.toml` are **scratch** comparisons, not PR material.
-  The two Helix previews use Omarchy's **stock** rules, which read plain slots and therefore favor vivid; they do not show the installed local override's rendering.
-  Vivid omits `bright_*`, which the resolver fills with 20%-white mixes, and does not preserve classic terminal ANSI.
-  Retain the scratch files until the comparison is finished; clean them up by explicit decision, not as part of the provisioning PR.
+- The scratch `gruvbox-vivid` and `gruvbox-vivid-flat` themes (bright tones in the plain slots) were tried and deleted on 2026-10-03.
+  Against `terminal_color_0..15` in morhetz `colors/gruvbox.vim`, classic matches 14/16 slots (only 7 and 15, forced by the resolver to `foreground`/`bright_foreground`), vivid-flat 8/16, vivid 2/16.
+  Swapping to vivid changed nothing visible in Herdr's `terminal` theme, whose greys come from slots 7 and 8, identical in all variants.
 - `omarchy/themed/helix.toml.tpl` is a local, untracked override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
   It was rendered and parsed without unresolved placeholders or Helix warnings, but it can wash out other themes whose bright roles are lighter tints and should **not** be submitted wholesale as a generic fallback.
   `helix/config.toml` still selects `gruvbox_transparent` (a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
@@ -55,6 +54,7 @@ Do not treat scratch `gruvbox-vivid` or a swap of the classic palette tiers as a
    Candidate pairs to verify against the actual stock colors/backgrounds and installed Helix runtime: `gruvbox` (material)→`gruvbox-material`, `gruvbox-classic`→`gruvbox`, `catppuccin`→`catppuccin_mocha`, `catppuccin-latte`→`catppuccin_latte`, `everforest`→`everforest_dark`, `flexoki-light`→`flexoki_light`, `kanagawa`→`kanagawa`, `nord`→`nord`, `rose-pine`→`rose_pine_dawn`, `tokyo-night`→`tokyonight`; `ristretto`→`monokai_pro_ristretto` needs closer visual checking.
    Exclude generic lookalikes such as `white`→`emacs` or `vantablack`→`modus_vivendi` without a real brand match.
    Each overlay must include `"ui.background" = { }` beside `inherits = "…"`; shipping it suppresses fallback-template generation, and a bare inherit would lose Omarchy's transparency.
+   Local proof (2026-10-03): `omarchy/themes/gruvbox-classic/helix.toml` ships `inherits = "gruvbox"` plus `"ui.background" = { }`; `omarchy-theme-set` copied it to the current theme verbatim, bypassing the local `helix.toml.tpl`. `helix/config.toml` still selects `gruvbox_transparent`, so switch it to `omarchy` to see it live.
    Confirm Helix syntax and palette compatibility for each pair, test switching and cloning/staging, and re-evaluate if classic/stock gruvbox names change.
 
 Upstream procedure: work in an Omarchy fork checkout, follow upstream `AGENTS.md` and `agents/skills/{migrations,install-scripts}.md` as applicable, run focused tests and `./test/all`, and keep upstream source edits out of `/usr/share/omarchy` and this dotfiles tree.
