@@ -22,3 +22,22 @@ apply_omarchy_patch() {
     sudo patch "${stripargs[@]}" -N -f -F0 --no-backup-if-mismatch "$target" <"$patch"
   fi
 }
+
+# Install a file the PR adds into the user's own tree, never the package's:
+# a pacman-unowned file at a path the package later ships fails the update (docs/adr/0082).
+#   package ships it -> remove our untouched copy, which would shadow or outdate it;
+#                       a locally edited copy stays
+#   otherwise        -> install when it differs
+# Usage: install_omarchy_file <file in files/> <destination> <mode> <path the package would ship>
+install_omarchy_file() {
+  local file="${BASH_SOURCE[0]%/*}/files/$1" dest=$2 mode=$3 shipped=$4
+
+  if [[ -e $shipped ]]; then
+    if cmp -s "$file" "$dest"; then
+      rm -- "$dest"
+      log warn "Omarchy ships $(basename "$shipped"): removed the local copy, drop this step"
+    fi
+  elif ! cmp -s "$file" "$dest"; then
+    install -Dv --mode="$mode" "$file" "$dest"
+  fi
+}
