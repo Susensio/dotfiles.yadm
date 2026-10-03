@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Omarchy hardcodes Nautilus as the file manager, with no Defaults entry to
 # change it like the browser, terminal and editor have (docs/adr/0057).
-# https://github.com/omacom/omarchy/pull/10542; delete this step once it ships
+# https://github.com/omacom/omarchy/pull/10542 (reworked as a suggestion, with Flea on
+# the list: https://github.com/Susensio/omarchy/commits/default-filemanager-review);
+# delete this step once it ships
 # The PR also rebinds Omarchy's default SUPER + SHIFT + F, which hypr/hyprland.lua
 # does not load; hypr/bindings.lua calls the launcher itself.
 set -euo pipefail
