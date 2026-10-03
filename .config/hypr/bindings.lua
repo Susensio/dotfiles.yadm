@@ -12,7 +12,8 @@ o.bind("SUPER + L", "Focus right", hl.dsp.focus({ direction = "r" }))
 o.bind("SUPER + I", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
 o.bind("SUPER + O", "Next workspace", hl.dsp.focus({ workspace = "e+1" }))
 o.bind("SUPER + CTRL + TAB", "Former workspace", hl.dsp.focus({ workspace = "previous" }))
-for workspace = 1, 9 do
+-- Digit 0 (code:19) is workspace 10, pinned to the side monitor by the hyprmoncfg profile.
+for workspace = 1, 10 do
   local key = "code:" .. tostring(workspace + 9)
   o.bind("SUPER + " .. key, "Workspace " .. workspace, hl.dsp.focus({ workspace = tostring(workspace) }))
   o.bind("SUPER + SHIFT + " .. key, "Move window to workspace " .. workspace,
@@ -57,6 +58,10 @@ o.bind("SUPER + ALT + H", "Window to left monitor", hl.dsp.window.move({ monitor
 o.bind("SUPER + ALT + J", "Window to lower monitor", hl.dsp.window.move({ monitor = "d" }))
 o.bind("SUPER + ALT + K", "Window to upper monitor", hl.dsp.window.move({ monitor = "u" }))
 o.bind("SUPER + ALT + L", "Window to right monitor", hl.dsp.window.move({ monitor = "r" }))
+o.bind("SUPER + SHIFT + ALT + H", "Workspace to left monitor", hl.dsp.workspace.move({ monitor = "l" }))
+o.bind("SUPER + SHIFT + ALT + J", "Workspace to lower monitor", hl.dsp.workspace.move({ monitor = "d" }))
+o.bind("SUPER + SHIFT + ALT + K", "Workspace to upper monitor", hl.dsp.workspace.move({ monitor = "u" }))
+o.bind("SUPER + SHIFT + ALT + L", "Workspace to right monitor", hl.dsp.workspace.move({ monitor = "r" }))
 
 -- Apps
 o.bind("SUPER + RETURN", "Terminal", { omarchy = "terminal" })
