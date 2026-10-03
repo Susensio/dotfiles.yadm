@@ -24,13 +24,14 @@ o.window(
   { border_color = palette.maximize_border, dim_around = true }
 )
 
--- f[1] matches a workspace with a maximized window: wider side gaps make it 4:3.
+-- f[1] matches a workspace with a maximized window: wider side gaps give it the zen ratio.
+local zen_ratio = 4 / 3
 local gap = hl.get_config("general.gaps_out")
 local monitor = hl.get_active_monitor()
 local side = gap.left
 if monitor then
   local height = monitor.height / monitor.scale - monitor.reserved.top - monitor.reserved.bottom - gap.top - gap.bottom
-  side = math.max(gap.left, math.floor((monitor.width / monitor.scale - height * 4 / 3) / 2))
+  side = math.max(gap.left, math.floor((monitor.width / monitor.scale - height * zen_ratio) / 2))
 end
 hl.workspace_rule({ workspace = "f[1]", gaps_out = { top = gap.top, right = side, bottom = gap.bottom, left = side } })
 
