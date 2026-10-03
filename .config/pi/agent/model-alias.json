@@ -1,5 +1,5 @@
 {
-  "$comment": "Model aliases by intelligence tier, plus the permission reviewer's chain. Aliases cannot target other aliases, so every entry is a concrete model. Each tier spans claude-bridge and opencode-go so one exhausted subscription never empties it. Inside opencode-go a $15-limit model falls back to a $60-limit one, never the reverse: once a $60 model is exhausted the Go budget likely is too. claude-bridge serves `reviewer` only through the pi-claude-bridge-standalone-* patches and `provider.allowExtensionSystemPrompts: true` in claude-bridge.json; without them it refuses prompts no pi session recorded. `reviewer` is ordered for latency and allows a model 15s to first event, not the 30s default: a stalled reviewer holds up a permission prompt, while a session turn can afford the wait.",
+  "$comment": "Model aliases by intelligence tier, plus the permission reviewer's chain. Aliases cannot target other aliases, so every entry is a concrete model. Each tier spans claude-bridge and opencode-go so one exhausted subscription never empties it. Inside opencode-go a $15-limit model falls back to a $60-limit one, never the reverse: once a $60 model is exhausted the Go budget likely is too. claude-bridge serves `reviewer` only through the pi-claude-bridge-standalone-* patches and `provider.allowExtensionSystemPrompts: true` in claude-bridge.json; without them it refuses prompts no pi session recorded. `reviewer` is ordered for latency; its 30s first-event allowance covers claude-bridge Haiku, whose session startup averages ~10s with a tail past 15s.",
   "top": [
     "claude-bridge/claude-opus-5-5",
     "opencode-go/kimi-k2.7-code",
@@ -19,6 +19,6 @@
       "opencode-go/mimo-v2.6-flash",
       "claude-bridge/claude-haiku-4-5"
     ],
-    "timeouts": { "firstEventMs": 15000 }
+    "timeouts": { "firstEventMs": 30000 }
   }
 }
