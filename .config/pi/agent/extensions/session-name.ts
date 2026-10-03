@@ -15,9 +15,9 @@ import net from "node:net";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import type { Model } from "@earendil-works/pi-ai";
 
-// Fast and cheap for a one-shot title; falls back to the session model when the
-// session's model scope excludes it.
-const TITLE_MODEL = { provider: "opencode-go", model: "gpt-6-luna" };
+// The cheap tier's fallback chain, so one exhausted subscription never leaves a
+// session unnamed; falls back to the session model when the scope excludes it.
+const TITLE_MODEL = { provider: "alias", model: "cheap" };
 
 // Line 2 exists because the herdr tab bar has room for one word, and a second
 // side call for it is not worth the latency; a model that answers with one line
