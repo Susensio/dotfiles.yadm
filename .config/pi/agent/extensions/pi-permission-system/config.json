@@ -5,6 +5,8 @@
   "doublePressToConfirm": false,
   "piInfrastructureReadPaths": [],
   "authorizerChain": [
+    "session-yolo",
+    "always-ask",
     "auto-review"
   ],
   "permission": {

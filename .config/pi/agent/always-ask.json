@@ -1,0 +1,4 @@
+{
+  "$comment": "Bash command globs that always reach you, never an automated approval: always-ask.ts prompts for them, unless a link before it in authorizerChain decides first. Matched against the whole command; * is any text.",
+  "commands": ["*pkexec*"]
+}

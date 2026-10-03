@@ -11,6 +11,7 @@
 !agent/models.json
 !agent/model-alias.json
 !agent/cycled-models.json
+!agent/always-ask.json
 !agent/claude-bridge.json
 !agent/agents/
 !agent/agents/**
