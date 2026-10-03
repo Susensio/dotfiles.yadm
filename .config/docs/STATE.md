@@ -95,6 +95,9 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 - `pi-theme-agent-dir.sh`: applies [#13693](https://github.com/omacom/omarchy/pull/13693), so `omarchy-theme-set-pi` honours `PI_CODING_AGENT_DIR` ([issue #13691](https://github.com/omacom/omarchy/issues/13691)).
 - `default-editor-mime.sh`: applies [#7446](https://github.com/omacom/omarchy/pull/7446), so text files opened from a file manager follow the menu's editor; `mime.sh` points at its handler and keeps doing so after the step goes.
   A review proposing the handler in the shipped `mimeapps.list` instead is on the PR, branch `default-editor-handler-review` on the fork; refresh the patch if the PR adopts it.
+- `default-filemanager.sh`: applies [#10542](https://github.com/omacom/omarchy/pull/10542), a Defaults entry for the file manager; Super + E calls its `omarchy-launch-filemanager`, so revert that binding if the PR is rejected.
+  A review with three follow-up commits (launch through the desktop entry, shims for `omarchy-launch-nautilus`, leave foreign FileManager1 registrations alone) is on the PR, branch `default-filemanager-review` on the fork; refresh the step if the PR adopts them.
+  Pending a terminal `yadm bootstrap` for the sudo patches (menu rows and `omarchy-default-editor`); the user-level files are installed.
 - `wheel-scroll.sh`: applies [#8959](https://github.com/omacom/omarchy/pull/8959), so touchpad scrolling moves the menus and the emoji picker by an eighth of the list per notch (the slowness is [issue #7361](https://github.com/omacom/omarchy/issues/7361); Hyprland's `touchpad.scroll_factor = 0.4` applies to layer surfaces and has no layer-rule override).
   Dry-run applies to the installed 4.0.4 files; pending a terminal `yadm bootstrap` for the sudo patch and `omarchy-restart-shell`, then a real touchpad check that rows still hover and click.
 

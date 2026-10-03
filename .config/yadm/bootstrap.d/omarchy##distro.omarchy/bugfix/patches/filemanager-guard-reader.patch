@@ -1,0 +1,12 @@
+diff --git a/shell/plugins/menu/MenuModel.js b/shell/plugins/menu/MenuModel.js
+index 53c49768e1f..3ae79e4ac97 100644
+--- a/shell/plugins/menu/MenuModel.js
++++ b/shell/plugins/menu/MenuModel.js
+@@ -397,6 +397,7 @@ var GUARD_READERS = [
+   "omarchy-default-agent",
+   "omarchy-default-browser",
+   "omarchy-default-editor",
++  "omarchy-default-filemanager",
+   "omarchy-default-terminal",
+   "omarchy-dns"
+ ]

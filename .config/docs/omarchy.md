@@ -92,6 +92,10 @@ A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's
 `bugfix/default-editor-mime.sh` applies [Omarchy PR #7446](https://github.com/omacom/omarchy/pull/7446): `omarchy-default-editor` also points the text MIME types at `omarchy-launch-editor.desktop`, so file managers open text files in the menu's editor.
 `mime.sh` sets the same handler, so the pick takes effect without re-selecting it.
 
+`bugfix/default-filemanager.sh` applies [Omarchy PR #10542](https://github.com/omacom/omarchy/pull/10542): **Setup → Defaults → File Manager** sets the `inode/directory` handler, and `omarchy-launch-filemanager`, which Super + E calls, opens it.
+The PR's commands live in `~/.local/bin`, and its menu hunk is rebased onto 4.0.4.
+Its picker offers only Nautilus, Dolphin, Thunar, Nemo and PCManFM, while the launcher opens any `inode/directory` handler set through `xdg-mime`.
+
 `bugfix/battery-warning-discharging.sh` applies [Omarchy PR #11161](https://github.com/omacom/omarchy/pull/11161): a draining battery still triggers the low-battery warning when UPower reports AC power, whether from a stale USB-C source or an underpowered charger.
 
 `bugfix/wheel-scroll.sh` applies [Omarchy PR #8959](https://github.com/omacom/omarchy/pull/8959): the menus and the emoji picker are Qt Flickables with a fixed wheel step, so a touchpad crawls through long lists such as the keybindings menu ([issue #7361](https://github.com/omacom/omarchy/issues/7361)); each list scrolls an eighth of its height per wheel notch instead.
