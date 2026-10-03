@@ -93,6 +93,8 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
   Observe the next scheduled switches, including one crossed while suspended.
   If [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) ships, `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` replaces the polling.
 - `pi-theme-agent-dir.sh`: applies [#13693](https://github.com/omacom/omarchy/pull/13693), so `omarchy-theme-set-pi` honours `PI_CODING_AGENT_DIR` ([issue #13691](https://github.com/omacom/omarchy/issues/13691)).
+- `default-editor-mime.sh`: applies [#7446](https://github.com/omacom/omarchy/pull/7446), so text files opened from a file manager follow the menu's editor; `mime.sh` points at its handler and keeps doing so after the step goes.
+  A review proposing the handler in the shipped `mimeapps.list` instead is on the PR, branch `default-editor-handler-review` on the fork; refresh the patch if the PR adopts it.
 - `wheel-scroll.sh`: applies [#8959](https://github.com/omacom/omarchy/pull/8959), so touchpad scrolling moves the menus and the emoji picker by an eighth of the list per notch (the slowness is [issue #7361](https://github.com/omacom/omarchy/issues/7361); Hyprland's `touchpad.scroll_factor = 0.4` applies to layer surfaces and has no layer-rule override).
   Dry-run applies to the installed 4.0.4 files; pending a terminal `yadm bootstrap` for the sudo patch and `omarchy-restart-shell`, then a real touchpad check that rows still hover and click.
 

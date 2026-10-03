@@ -66,6 +66,8 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 
 A bug in an Omarchy system file that has a PR upstream gets a step in `bootstrap.d/omarchy/bugfix/`, one per PR, linking it ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)).
 Each step sources `lib.sh` and passes its patch filename; the helper resolves it from its own `patches/` directory.
+A file the PR adds goes in `files/` and is installed into the user's tree, where its packaged counterpart would land or be shadowed, never under `/usr`: pacman refuses an update that ships a path an unowned file already occupies ([ADR-0082](adr/0082-omarchy-bugfix-added-files.md)).
+Once the package ships that path, the step removes its untouched copy and warns.
 `omarchy update` restores the unpatched files, and its `post-update.d/yadm-bootstrap.hook` reruns the bootstrap to patch them again.
 
 `bugfix/codex-usage-rpc.sh` applies [Omarchy PR #12979](https://github.com/omacom/omarchy/pull/12979): Codex usage checks read replies and notifications from a shared byte buffer, so a reply arriving alongside a notification does not cause a false timeout.
@@ -87,6 +89,9 @@ A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's
 
 `bugfix/power-discharging.sh` applies [Omarchy PR #13016](https://github.com/omacom/omarchy/pull/13016): the power panel treats a battery still discharging after a plug-change settle window as draining, even when a stale USB-C source keeps UPower's global `onBattery` false.
 
+`bugfix/default-editor-mime.sh` applies [Omarchy PR #7446](https://github.com/omacom/omarchy/pull/7446): `omarchy-default-editor` also points the text MIME types at `omarchy-launch-editor.desktop`, so file managers open text files in the menu's editor.
+`mime.sh` sets the same handler, so the pick takes effect without re-selecting it.
+
 `bugfix/battery-warning-discharging.sh` applies [Omarchy PR #11161](https://github.com/omacom/omarchy/pull/11161): a draining battery still triggers the low-battery warning when UPower reports AC power, whether from a stale USB-C source or an underpowered charger.
 
 `bugfix/wheel-scroll.sh` applies [Omarchy PR #8959](https://github.com/omacom/omarchy/pull/8959): the menus and the emoji picker are Qt Flickables with a fixed wheel step, so a touchpad crawls through long lists such as the keybindings menu ([issue #7361](https://github.com/omacom/omarchy/issues/7361)); each list scrolls an eighth of its height per wheel notch instead.
@@ -96,7 +101,7 @@ The PR's shared `WheelScrollArea` component would be a new file under `/usr` tha
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
 Tools that match `EDITOR` against a list of known editors, like lazygit's edit presets, cannot recognise the launcher and need the editor named in their own config.
-The menu changes `EDITOR` only: text files keep opening in the editor set as the MIME default by the bootstrap.
+Text files opened from a file manager follow the same pick through `omarchy-launch-editor.desktop` ([PR #7446](https://github.com/omacom/omarchy/pull/7446)); a GUI pick changes that handler but not `EDITOR`.
 
 ## Distro detection
 

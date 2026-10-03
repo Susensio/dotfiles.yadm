@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Desktop defaults that replace Omarchy's: Gmail for mailto: instead of HEY, whose
-# launcher preinstalls.sh removes, and Helix instead of nvim for text files.
+# launcher preinstalls.sh removes. Text files follow the menu's editor through
+# bugfix/default-editor-mime.sh.
 # omarchy-provision-user resets mailto to HEY, so this runs on every bootstrap.
 set -euo pipefail
 
@@ -25,7 +26,3 @@ set_default() {
 }
 
 set_default Gmail.desktop x-scheme-handler/mailto
-
-# The types Omarchy's system mimeapps.list gives nvim; Arch's helix ships Helix.desktop
-readarray -t text_types < <(sed -n 's/=nvim\.desktop$//p' /usr/share/applications/mimeapps.list)
-set_default Helix.desktop "${text_types[@]}"
