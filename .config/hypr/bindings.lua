@@ -65,7 +65,7 @@ o.bind("SUPER + SHIFT + RETURN", "Tmux", { launch = "omarchy-launch-terminal tm"
 o.bind("SUPER + CTRL + RETURN", "Herdr", { omarchy = "terminal-herdr" })
 o.bind("SUPER + W", "Slim browser", { webapp = "https://www.google.com/" })
 o.bind("SUPER + SHIFT + W", "Browser", { omarchy = "browser" })
-o.bind("SUPER + E", "File manager", { omarchy = "nautilus" })
+o.bind("SUPER + E", "File manager", { omarchy = "filemanager" })
 o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
 o.bind("SUPER + SHIFT + slash", "Keybindings", "omarchy-menu-keybindings")
