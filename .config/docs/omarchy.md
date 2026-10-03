@@ -89,6 +89,9 @@ A temperature set with raw `hyprctl` shows in the bar within a minute; Omarchy's
 
 `bugfix/battery-warning-discharging.sh` applies [Omarchy PR #11161](https://github.com/omacom/omarchy/pull/11161): a draining battery still triggers the low-battery warning when UPower reports AC power, whether from a stale USB-C source or an underpowered charger.
 
+`bugfix/wheel-scroll.sh` applies [Omarchy PR #8959](https://github.com/omacom/omarchy/pull/8959): the menus and the emoji picker are Qt Flickables with a fixed wheel step, so a touchpad crawls through long lists such as the keybindings menu ([issue #7361](https://github.com/omacom/omarchy/issues/7361)); each list scrolls an eighth of its height per wheel notch instead.
+The PR's shared `WheelScrollArea` component would be a new file under `/usr` that the menus import from the package's own module, so the step patches the same `MouseArea` into `Menu.qml` and `Emojis.qml` inline. [PR #7451](https://github.com/omacom/omarchy/pull/7451) is the competing fix, a 3x `WheelHandler` on the menu only.
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
