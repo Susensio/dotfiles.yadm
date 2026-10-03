@@ -38,6 +38,9 @@
 !/.config/codex/
 !/.config/omarchy/
 !/.config/hypr/
+# Regenerated from the hyprmoncfg profiles on every apply (docs/adr/0083)
+/.config/hypr/hyprmoncfg-monitors.lua
+!/.config/hyprmoncfg/
 !/.config/foot/
 !/.config/uwsm/
 !/.local/share/yadm/archive

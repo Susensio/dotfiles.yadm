@@ -35,6 +35,7 @@ nvim exists as a fallback editor with its own leader and none of these letters; 
 | Ctrl + hjkl | – | – | resize window (repeatable) |
 | Shift + hjkl | – | – | swap window |
 | Alt + hjkl | – | – | move window to monitor |
+| Shift + Alt + hjkl | – | – | move workspace to monitor |
 | i / o | previous / next window | previous / next tab | previous / next workspace |
 | 1–9 | select window | select tab | select workspace |
 | Shift + 1–9 | – | – | move window to workspace |

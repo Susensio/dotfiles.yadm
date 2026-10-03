@@ -1,0 +1,149 @@
+{
+  "name": "dock-belchite",
+  "created_at": "2026-10-03T12:28:34.252386307Z",
+  "updated_at": "2026-10-03T13:41:37.940668623Z",
+  "outputs": [
+    {
+      "key": "lg electronics|lg hdr 4k|105ntytfb186",
+      "match_key": "lg electronics|lg hdr 4k|105ntytfb186",
+      "name": "DP-6",
+      "description": "LG Electronics LG HDR 4K 105NTYTFB186",
+      "make": "LG Electronics",
+      "model": "LG HDR 4K",
+      "serial": "105NTYTFB186",
+      "enabled": true,
+      "mode": "3840x2160@60.00Hz",
+      "width": 3840,
+      "height": 2160,
+      "refresh": 60,
+      "x": 2616,
+      "y": -284,
+      "scale": 1.5,
+      "transform": 0,
+      "bitdepth": 8,
+      "cm": "srgb",
+      "sdr_brightness": 1,
+      "sdr_saturation": 1,
+      "sdr_min_luminance": 0.2,
+      "sdr_max_luminance": 80,
+      "min_luminance": 0
+    },
+    {
+      "key": "lg electronics|lg ips qhd|106ntdv65794",
+      "match_key": "lg electronics|lg ips qhd|106ntdv65794",
+      "name": "DP-5",
+      "description": "LG Electronics LG IPS QHD 106NTDV65794",
+      "make": "LG Electronics",
+      "model": "LG IPS QHD",
+      "serial": "106NTDV65794",
+      "enabled": true,
+      "mode": "2560x1440@59.95Hz",
+      "width": 2560,
+      "height": 1440,
+      "refresh": 59.95,
+      "x": 1536,
+      "y": -384,
+      "scale": 1.33333,
+      "transform": 1,
+      "bitdepth": 8,
+      "cm": "srgb",
+      "sdr_brightness": 1,
+      "sdr_saturation": 1,
+      "sdr_min_luminance": 0.2,
+      "sdr_max_luminance": 80,
+      "min_luminance": 0
+    },
+    {
+      "key": "sharp corporation|0x14f9",
+      "match_key": "sharp corporation|0x14f9",
+      "name": "eDP-1",
+      "description": "Sharp Corporation 0x14F9",
+      "make": "Sharp Corporation",
+      "model": "0x14F9",
+      "enabled": false,
+      "mode": "1920x1200@59.95Hz",
+      "width": 1920,
+      "height": 1200,
+      "refresh": 59.95,
+      "x": 0,
+      "y": 0,
+      "scale": 1.25,
+      "transform": 0,
+      "bitdepth": 8,
+      "cm": "srgb",
+      "sdr_brightness": 1,
+      "sdr_saturation": 1,
+      "sdr_min_luminance": 0.2,
+      "sdr_max_luminance": 80,
+      "min_luminance": 0
+    }
+  ],
+  "workspaces": {
+    "enabled": true,
+    "strategy": "manual",
+    "max_workspaces": 10,
+    "group_size": 3,
+    "monitor_order": [
+      "sharp corporation|0x14f9",
+      "lg electronics|lg ips qhd|106ntdv65794",
+      "lg electronics|lg hdr 4k|105ntytfb186"
+    ],
+    "rules": [
+      {
+        "workspace": "1",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "2",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "3",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "4",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "5",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "6",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "7",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "8",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "9",
+        "output_key": "lg electronics|lg hdr 4k|105ntytfb186",
+        "output_name": "DP-6"
+      },
+      {
+        "workspace": "10",
+        "output_key": "lg electronics|lg ips qhd|106ntdv65794",
+        "output_name": "DP-5"
+      },
+      {
+        "workspace": "f[1]",
+        "output_key": ""
+      }
+    ]
+  },
+  "exec": ""
+}
