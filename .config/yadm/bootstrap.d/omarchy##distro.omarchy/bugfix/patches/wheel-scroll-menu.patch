@@ -1,0 +1,24 @@
+--- a/menu/Menu.qml	2026-10-03 10:18:38.140133261 +0200
++++ b/menu/Menu.qml	2026-10-03 10:18:38.141093989 +0200
+@@ -1415,6 +1415,21 @@
+               width: Style.space(320)
+             }
+           }
++
++          // Qt's wheel step for a Flickable is fixed; this scrolls an eighth of the
++          // view per notch, and touchpad deltas in proportion.
++          MouseArea {
++            anchors.fill: parent
++            acceptedButtons: Qt.NoButton
++            onWheel: function(wheel) {
++              if (wheel.angleDelta.y === 0 || resultList.contentHeight <= resultList.height) return
++              var step = resultList.height / 8
++              resultList.contentY = Math.max(0, Math.min(
++                resultList.contentY - wheel.angleDelta.y / 120.0 * step,
++                resultList.contentHeight - resultList.height))
++              wheel.accepted = true
++            }
++          }
+         }
+ 
+         Item {

@@ -1,0 +1,24 @@
+--- a/emojis/Emojis.qml	2026-10-03 10:18:38.141965602 +0200
++++ b/emojis/Emojis.qml	2026-10-03 10:18:38.142852762 +0200
+@@ -338,6 +338,21 @@
+               width: parent.width
+             }
+           }
++
++          // Qt's wheel step for a Flickable is fixed; this scrolls an eighth of the
++          // view per notch, and touchpad deltas in proportion.
++          MouseArea {
++            anchors.fill: parent
++            acceptedButtons: Qt.NoButton
++            onWheel: function(wheel) {
++              if (wheel.angleDelta.y === 0 || resultGrid.contentHeight <= resultGrid.height) return
++              var step = resultGrid.height / 8
++              resultGrid.contentY = Math.max(0, Math.min(
++                resultGrid.contentY - wheel.angleDelta.y / 120.0 * step,
++                resultGrid.contentHeight - resultGrid.height))
++              wheel.accepted = true
++            }
++          }
+         }
+       }
+     }
