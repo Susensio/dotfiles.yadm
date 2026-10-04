@@ -1,10 +1,10 @@
 onboarding = false
 [theme]
 name = "gruvbox"
-auto_switch = false
-[theme.custom]
-overlay0 = "#665c54" # inactive pane border darker
+# [theme.custom]
+# overlay0 = "#665c54" # inactive pane border darker
 
+auto_switch = false
 [ui]
 tab_bar_position = "top"
 accent = "green"
