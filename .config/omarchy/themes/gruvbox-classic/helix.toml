@@ -1,0 +1,3 @@
+# Helix's bundled classic gruvbox; the empty background keeps the terminal's transparency.
+inherits = "gruvbox"
+"ui.background" = { }
