@@ -1,5 +1,5 @@
 {
-  "$comment": "Model aliases by intelligence tier, plus the permission reviewer's chain. Aliases cannot target other aliases, so every entry is a concrete model. Each tier spans claude-bridge and opencode-go so one exhausted subscription never empties it. Inside opencode-go a $15-limit model falls back to a $60-limit one, never the reverse: once a $60 model is exhausted the Go budget likely is too. claude-bridge serves `reviewer` only through the pi-claude-bridge-standalone-* patches and `provider.allowExtensionSystemPrompts: true` in claude-bridge.json; without them it refuses prompts no pi session recorded. `reviewer` is ordered for latency; its 30s first-event allowance covers claude-bridge Haiku, whose session startup averages ~10s with a tail past 15s.",
+  "$comment": "Model aliases by intelligence tier, plus the permission reviewer's chain. Aliases cannot target other aliases, so every entry is a concrete model. Each tier spans claude-bridge and opencode-go so one exhausted subscription never empties it. Inside opencode-go a $15-limit model falls back to a $60-limit one, never the reverse: once a $60 model is exhausted the Go budget likely is too. claude-bridge serves `reviewer` only through the pi-claude-bridge-standalone-* patches and `provider.allowExtensionSystemPrompts: true` in claude-bridge.json; without them it refuses prompts no pi session recorded. `reviewer` is ordered for latency and availability: Gemini and Groq free tiers and the opencode-go `-free` models still answer once the Go and Codex quotas are gone (verified 2026-10-04) and answer in 1–2s against Haiku's ~6s, so they lead (Groq gpt-oss-safeguard-20b first: 20/20 on the tricky set, 1.3s median), then Haiku, then the quota-bound models and Codex last. The two Groq models share one organization-level quota, so a Groq 429 takes out both at once; gpt-oss-20b was dropped because it shared that quota, added nothing the other two do not cover, and made a safety-relevant error (allowed `yadm restore pi/agent/*`). Gemini and the opencode-go free models are the independent pools. gpt-oss-safeguard-20b is gpt-oss fine-tuned to judge text against a policy you supply, which is exactly the reviewer's shape (gemini-3.5-flash-lite also 20/20; gpt-oss-120b and gpt-oss-20b 19/20; Haiku 19/20); it leads on accuracy despite gpt-oss-120b's marginally faster median, since its tail stayed inside the 30s first-event allowance (worst of 8 runs: 13.2s). its 30s first-event allowance covers claude-bridge Haiku, whose session startup averages ~10s with a tail past 15s.",
   "top": [
     "claude-bridge/claude-opus-5-5",
     "opencode-go/kimi-k2.7-code",
@@ -14,10 +14,15 @@
   "cheap": ["opencode-go/mimo-v2.6-flash", "claude-bridge/claude-haiku-4-5"],
   "reviewer": {
     "targets": [
-      "openai-codex/codex-auto-review",
+      "groq/openai/gpt-oss-safeguard-20b",
+      "groq/openai/gpt-oss-120b",
+      "google/gemini-3.5-flash-lite",
+      "opencode-go/space-bunny-free",
+      "claude-bridge/claude-haiku-4-5",
+      "opencode-go/longcat-2.5-preview-free",
       "opencode-go/deepseek-v4.1-flash",
       "opencode-go/mimo-v2.6-flash",
-      "claude-bridge/claude-haiku-4-5"
+      "openai-codex/codex-auto-review"
     ],
     "timeouts": { "firstEventMs": 30000 }
   }
