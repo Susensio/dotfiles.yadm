@@ -11,6 +11,7 @@ keyd (`keyd/default.conf`) sets the floor every layer stands on.
 Caps is Escape on tap and Control on hold.
 Caps + Space sends F12, which is the prefix key for tmux and herdr, so the prefix is reachable without leaving home row.
 Pressing both Shift keys toggles Caps Lock.
+Super+L pressed within 35ms becomes the lock key (KEY_SCREENLOCK, keycode 160), which locks the screen; the MX Keys lock key is firmware Super+L, so it lands here instead of on Hyprland's focus-right bind.
 
 ## Layers
 

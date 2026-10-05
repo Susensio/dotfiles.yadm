@@ -72,11 +72,14 @@ o.bind("SUPER + W", "Slim browser", { webapp = "https://www.google.com/" })
 o.bind("SUPER + SHIFT + W", "Browser", { omarchy = "browser" })
 o.bind("SUPER + E", "File manager", { omarchy = "filemanager" })
 o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
+o.bind("XF86Calculator", "Calculator", { launch = "omacalc" })
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
 o.bind("SUPER + SHIFT + slash", "Keybindings", "omarchy-menu-keybindings")
 
 -- System
 -- omarchy-sleep-lock.service secures the session before suspend (ADR-0069).
+-- BUG: code:160 is XF86ScreenSaver; hl.bind resolves that name to the wrong keysym (hyprwm/Hyprland#5892, discussion 16586). Use the name once fixed.
+o.bind("code:160", "Lock system (MX Keys lock key, via keyd)", "omarchy-system-lock", { locked = true })
 o.bind("XF86PowerOff", "Suspend", "systemctl suspend-then-hibernate", { locked = true })
 o.bind("CTRL + XF86PowerOff", "Lock system", "omarchy-system-lock", { locked = true })
 o.bind("SUPER + XF86PowerOff", "System menu", "omarchy-menu toggle system", { locked = true })
