@@ -1,10 +1,5 @@
 # State
 
-## ai-usagebar chip icon gap
-
-[#313](https://github.com/akitaonrails/ai-usagebar/pull/313) drops the 6 px spacer 1.30.0 put between a bar chip's icon and its value (the gap was 14 px, wider than between chips) and is open.
-The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `fix/omarchy-chip-icon-gap`, one commit ahead of upstream `main`, so the bar keeps the fix until it merges; then fast-forward `main`, delete the branch locally and on the fork, and drop this section.
-
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
@@ -30,7 +25,7 @@ Do not treat a swap of the classic palette tiers as accepted; the vivid variants
 - The scratch `gruvbox-vivid` and `gruvbox-vivid-flat` themes (bright tones in the plain slots) were tried and deleted on 2026-10-03.
   Against `terminal_color_0..15` in morhetz `colors/gruvbox.vim`, classic matches 14/16 slots (only 7 and 15, forced by the resolver to `foreground`/`bright_foreground`), vivid-flat 8/16, vivid 2/16.
   Swapping to vivid changed nothing visible in Herdr's `terminal` theme, whose greys come from slots 7 and 8, identical in all variants.
-- `omarchy/themed/helix.toml.tpl` is a local, untracked override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
+- `omarchy/themed/helix.toml.tpl` is a tracked local override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
   It was rendered and parsed without unresolved placeholders or Helix warnings, but it can wash out other themes whose bright roles are lighter tints and should **not** be submitted wholesale as a generic fallback.
   `helix/config.toml` still selects `gruvbox_transparent` (a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
   The observed vendor theme preference and transparent Helix background should be preserved in later comparisons.
@@ -68,7 +63,6 @@ Setup and the standing oddities are in `docs/omarchy.md`; `~/Projects/omarchy` i
   If a pane's ANSI palette or a redraw turns out to matter, the dropped pane-TTY OSC writes and `SIGWINCH`/`refresh-client` are the first candidates to restore into the hook.
 - ADR-0069: observe menu Suspend on battery hibernating after 5h, the lid on AC staying suspended, and an unplug during sleep starting the countdown.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
-- `yadm push`: `master` stood 222 commits ahead of GitHub on 2026-09-30.
 - ADR-0076 applied 2026-09-29: window mode replaced by chords (Super + Ctrl + hjkl resize, repeatable; Super + Shift + hjkl swap; Super + Alt + hjkl window to monitor), the power key climbing modifiers (suspend-then-hibernate, Ctrl lock, Super system menu, Alt screensaver, all `locked`), the Print family (plain screenshot, Super capture menu, Shift OCR, Ctrl QR, Alt color picker), notification history on Super + Ctrl + comma and silencing on Super + Alt + comma, and the Super + Ctrl panel family (W network, B bluetooth, A audio, D display, P power; the clipboard manager keeps Super + Ctrl + V).
   `hyprctl reload` clean, `hyprctl configerrors` empty, binds with mods spot-checked (SHIFT 65, CTRL 68), `omarchy menu keybindings --print` lists the chords; `omarchy-restart-shell` picked up the bar without the poctek submap widget.
   Same-day additions: Super + Alt + the panel letter flips the thing (W wifi radio via nmcli, B bluetooth rfkill via omarchy-bluetooth-power, P power-profile cycle via the local `omarchy-powerprofiles-cycle` — wraps performance → power-saver → balanced and notifies with the profile's icon; the one-liner first bound inline was reversed per request and moved into `~/bin`; P first sat on Super + Alt + power and moved), dictation on Insert push-to-talk with Shift + Insert latching hands-free and bare Insert ending the latch (moved off F9, whose bare press emits no event; observe live: hold, latch, and latch-then-Insert), and zen mode as Super + Z maximize itself (a `f[1]` workspace rule widens the side gaps to 160, about 4:3 here; replaces the square-aspect toggle).
@@ -97,9 +91,8 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
   A review proposing the handler in the shipped `mimeapps.list` instead is on the PR, branch `default-editor-handler-review` on the fork; refresh the patch if the PR adopts it.
 - `default-filemanager.sh`: applies [#10542](https://github.com/omacom/omarchy/pull/10542), a Defaults entry for the file manager; Super + E calls its `omarchy-launch-filemanager`, so revert that binding if the PR is rejected.
   A review with three follow-up commits (launch through the desktop entry, shims for `omarchy-launch-nautilus`, leave foreign FileManager1 registrations alone) is on the PR, branch `default-filemanager-review` on the fork; refresh the step if the PR adopts them.
-  Pending a terminal `yadm bootstrap` for the sudo patches (menu rows and `omarchy-default-editor`); the user-level files are installed.
 - `wheel-scroll.sh`: applies [#8959](https://github.com/omacom/omarchy/pull/8959), so touchpad scrolling moves the menus and the emoji picker by an eighth of the list per notch (the slowness is [issue #7361](https://github.com/omacom/omarchy/issues/7361); Hyprland's `touchpad.scroll_factor = 0.4` applies to layer surfaces and has no layer-rule override).
-  Dry-run applies to the installed 4.0.4 files; pending a terminal `yadm bootstrap` for the sudo patch and `omarchy-restart-shell`, then a real touchpad check that rows still hover and click.
+  Applied by a terminal `yadm bootstrap` on 2026-10-05; pending `omarchy-restart-shell`, then a real touchpad check that rows still hover and click.
 
 ## pi session naming
 

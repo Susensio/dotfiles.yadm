@@ -3,10 +3,6 @@
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care. Omarchy snapshots only `/` (config `root`), only before updates, and disables `snapper-timeline.timer`; nothing covers `/home`, so the 2026-09-30 `yadm reset --hard` that wiped every uncommitted tracked change took hours of session forensics to undo (most recovered, `codex/config.toml` lost).
   Shape: a `home` config (hourly, keep ~24 hourly / 7 daily / 4 weekly) as an idempotent bootstrap step plus a short ADR, one `pkexec`, and `btrfs-assistant` (Arch `extra`) as the GUI to browse and restore.
   Care points: Omarchy's `install/config/snapper.sh` rewrites `SNAPPER_CONFIGS="root"` in `/etc/conf.d/snapper`, which silently drops a `home` timeline from the stock timers, so run `home` from its own systemd timer; `omarchy-snapshot create` loops over every config, so update snapshots will include `/home` too; make `~/.cache` (and other churny dirs) separate subvolumes so snapshots stay small; snapshots are not backups (same disk).
-- yadm | gpg: **urgent** — `GNUPGHOME` points at `~/.local/share/gnupg`, which holds no keyring: `gpg --list-keys` reports 0 keys and creates an empty `pubring.kbx` there (seen 2026-09-29), while the real keyring — `pubring.kbx` at 80K, `pubring.kbx~`, `trustdb.gpg` — is still in `~/.gnupg`.
-  Nothing secret is at risk: `~/.local/share/gnupg/private-keys-v1.d` is empty, so these are imported public keys, and today nothing can reach them.
-  Fix: `install -d -m 700 ~/.local/share/gnupg`, `mv ~/.gnupg/{pubring.kbx,pubring.kbx~,trustdb.gpg} ~/.local/share/gnupg/`, `rmdir ~/.gnupg`, then `gpgconf --kill all` so no agent keeps the old home, and check `gpg --list-keys`.
-  Needs a human shell: `pi-permission-system` denies `~/.gnupg/*` as key material (rule `~/.gnupg/*`), so the agent cannot move it. The alternative is dropping `GNUPGHOME` from `environment.d/10_xdg.conf` and keeping the keyring where it is, which gives up the XDG goal for one directory.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `tmux/PROPOSAL-tmux-notify.md`.
   Blocked on tmux ≥ 3.8: this box is `tmux 3.7_c-1` and `new-pane` has no geometry flags (`-x/-y/-X/-Y`), so the floating toast cannot be built.
@@ -45,7 +41,7 @@
 
 - pi | Remove the `opencode-go/kimi-k2.7-code` override in `pi/agent/models.json` once [earendil-works/pi#10237](https://github.com/earendil-works/pi/issues/10237) lands.
   The OpenCode Go/Zen catalog entry is missing the thinking compat `moonshotai` has (`thinkingFormat: "deepseek"`, `supportsReasoningEffort: false`, `thinkingLevelMap: { off: null }`), so pi sent `reasoning_effort` — unsupported by K2.7 Code (only K3 takes it) — and its chain-of-thought could arrive in `content` as normal text.
-  The issue was auto-closed as not planned on 2026-09-30 (new-contributor policy; maintainers may reopen it), so the override stays until a pi release ships those fields in the catalog.
+  The issue was auto-closed as not planned on 2026-09-30 (new-contributor policy; maintainers may reopen it), so the override stays until a pi release ships those fields in the catalog; pi 1.0.0's `opencode-go` entry still lacks them (checked 2026-10-05).
 - upstream | herdr: consume `rpiv:ask-user:blocked` — the stable channel `@juicesharp/rpiv-ask-user-question` emits while its questionnaire waits for input — in herdr's pi integration for the pane's blocked state (today it listens for a `herdr:blocked` event nothing emits), and consider a `herdr integration sync` that installs outdated integrations for present harnesses natively.
   Either would retire our bridge extension (`.config/pi/agent/extensions/herdr-ask-user-bridge.ts`) and shrink `mise/tasks/herdr-integrations` to one line.
   See ADR-0060.
@@ -55,9 +51,6 @@
 - upstream | mise: `config set` and `unuse` reject a `--file`/`--path` not named `*.toml` ("unknown config file type"), while `config get --file` reads the same file; so `tool install`/`tool remove` cannot write the yadm variants `packages.toml##default` and `packages.toml##distro_family.arch`.
   File an issue and a PR: with an explicit file, the writers should treat an unknown name as TOML, as `config get` does.
   Until then `tool` falls back to appending and `sed`, and warns once mise stops failing so the fallback can go.
-- harness | Point the tier aliases at something: `defaultModel` and the four agent definitions still name concrete models, so `alias/top`/`alias/mid`/`alias/cheap` (`pi/agent/model-alias.json`) are only reachable by hand.
-  `alias/top` leads with `claude-bridge/claude-opus-5-5`, so adopting it for the default moves the default off the OpenCode Go subscription; the explorer and tester agents deliberately run cheap `opencode-go` models, and `alias/cheap` is the close equivalent if those are swapped.
-  A tier swap must leave `alias/reviewer` alone: it is ordered for latency, and its claude-bridge target depends on a local patch (see STATE).
 - pi | Review [`@d3ara1n/pi-editor-shell`](https://www.npmjs.com/package/@d3ara1n/pi-editor-shell) (0.15.0, published 2026-09-29) as the editor border, replacing the hand-rolled `extensions/session-name-border.ts`: it wraps pi's `CustomEditor` in a rounded shell whose top border carries activity · model · thinking level, and pins any `setStatus()` key there through its `pinnedStatus` config.
   It has no session-name segment of its own, so the title would go in as a pinned status — publishing `ctx.ui.setStatus("session", name)` from `session-name.ts` is the one route that survives a second editor-replacing extension, where subclassing the editor cannot.
   Check before switching: `setEditorComponent` is last-writer-wins and its README calls this mutually exclusive with other editor-replacing extensions, so adopting it deletes the local extension rather than coexisting; it drops pi's native `↑ N more` / `↓ N more` indicators in favour of its own status text; it falls back to the stock editor below 20 columns; and its bottom border would duplicate what `pi-footer` already shows.
@@ -89,9 +82,6 @@
   It takes `omarchy plugin clone omarchy.clock`, tracked under `omarchy/plugins/`: `fontSize` on its button, plus a bold label of its own in place of the button's; the clone then stops receiving upstream clock fixes.
 - hypr | The touchpad pointer feels spongy next to Mint's X11. Live settings match libinput's defaults (adaptive accel, sensitivity 0), the panel runs at 60 Hz without VRR, and `cursor:no_hardware_cursors` is on auto.
   Compare Mint's `xinput list-props` accel speed and profile, then try `accel_profile`/`sensitivity`, and check whether Hyprland fell back to a software cursor.
-- omarchy | Claude Code does not follow the Omarchy theme.
-- omarchy | The monitor panel's text-size slider runs `omarchy-display-text-size`, which sets the bar's `base-size`, GTK's `text-scaling-factor` and Foot's font size in lockstep, overwriting the separately tuned monitor scale, `omarchy/shell.toml` and `foot/foot.ini`.
-  An override in `~/bin/overrides` could move only the bar (`[[ $1 =~ ^[0-9]+$ ]] || super "$@"`, then `sed` the `base-size` line).
 - omarchy | Plugin edits under `~/.config/omarchy/plugins/` do not reach a bar widget that is already mounted.
   On 2026-09-30 twelve `Local plugin changed, reloading: akitaonrails.ai-usagebar` lines were logged between 12:00 and 12:20 for edits to `omarchy/BarWidget.qml` and `Model.js`, yet the widget in the bar kept serving the old code; a temporary `Component.onCompleted` marker added later to `BarWidget.qml` did not fire after the reload line appeared at 13:00:16, which is the direct evidence that the plugin is recompiled while the slot's instance survives.
   `omarchy-shell shell rescanPlugins` did not change that, while `omarchy restart shell` did — plugin edits reload normally in the fresh shell (12:57 and 13:00).
