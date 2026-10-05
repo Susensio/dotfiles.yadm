@@ -103,7 +103,7 @@ ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/ses
 
 Committed 2026-09-29: the permission system's auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `pi/agent/model-alias.json`), so an exhausted Codex quota fails over instead of turning every ask into a prompt.
 
-- The `claude-bridge/claude-haiku-4-5` target works only through the `pi-claude-bridge-standalone-index` and `-prompt-capture` patches plus `provider.allowExtensionSystemPrompts: true` in `pi/agent/claude-bridge.json`; drop the patches once [#148](https://github.com/elidickinson/pi-claude-bridge/pull/148) ships in a release.
+- The `claude-bridge/claude-haiku-4-5` target works only through the `pi-claude-bridge-index` and `-prompt-capture` patches plus `provider.allowExtensionSystemPrompts: true` in `pi/agent/claude-bridge.json`; drop the #148 hunks once [#148](https://github.com/elidickinson/pi-claude-bridge/pull/148) ships in a release.
 - `pi-model-alias-shared-registry` stays until [unrelentingfox/pi-model-fallback-alias#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) ships: a per-subagent copy of the extension re-registered the process-wide `alias` provider with no registry, failing every alias call, and wrote failover warnings to stderr over the TUI ([earendil-works/pi#10002](https://github.com/earendil-works/pi/issues/10002)).
 - Untested: whether `deepseek-v4.1-flash` and `mimo-v2.6-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.
 
@@ -114,3 +114,11 @@ Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`):
 - Drop both patches when #286 ships; upstream had been idle since 2026-09-03, with 55 open PRs.
 - Keeps `@tintinweb/pi-subagents` on source (~190 ms of startup, ADR-0067).
 - Verified live 2026-09-30: after `/reload` wiped the in-memory record, resuming a probe agent by its old ID reopened the saved conversation (it answered a token only that conversation held) and kept the same ID.
+
+## pi model fallback
+
+Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carries [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
+
+- Drop the #162 hunk once #163 ships in a release; the directory then holds only the #148 hunks.
+- Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.
+- claude-bridge rewrote `pi/agent/claude-bridge.json` to `{ "askClaude": { "enabled": true }, }` during this work; a `yadm restore` brought back the committed file. Cause unknown; watch for a repeat before blaming the patch.
