@@ -107,6 +107,17 @@ Its picker offers only Nautilus, Dolphin, Thunar, Nemo and PCManFM, while the la
 `bugfix/wheel-scroll.sh` applies [Omarchy PR #8959](https://github.com/omacom/omarchy/pull/8959): the menus and the emoji picker are Qt Flickables with a fixed wheel step, so a touchpad crawls through long lists such as the keybindings menu ([issue #7361](https://github.com/omacom/omarchy/issues/7361)); each list scrolls an eighth of its height per wheel notch instead.
 The PR's shared `WheelScrollArea` component would be a new file under `/usr` that the menus import from the package's own module, so the step patches the same `MouseArea` into `Menu.qml` and `Emojis.qml` inline. [PR #7451](https://github.com/omacom/omarchy/pull/7451) is the competing fix, a 3x `WheelHandler` on the menu only.
 
+## No XCompose
+
+fcitx5 ran only to resolve `~/.XCompose`, and those sequences were unreachable anyway: Omarchy's `default/hypr/input.lua` sets `kb_options = compose:caps,...`, so Caps was Multi_key, while `keyd` shadows it with `overload(caps, esc)` before xkb sees it.
+`hypr/input.lua` clears `kb_options`, so Caps is Caps and keyd's both-Shifts toggle is the only Caps Lock; both xkb's `shift:both_capslock_cancel` and the compose sequences are gone.
+The emoji panel at `SUPER + CTRL + E` is a `hypr/bindings.lua` bind and unaffected.
+
+Two halves, kept together: `environment.d/10-omarchy-fcitx.conf##distro.omarchy` is a symlink to `/dev/null`, which `environment.d(5)` gives complete precedence by filename over `/usr/lib/environment.d/10-omarchy-fcitx.conf`, and `bootstrap.d/omarchy##distro.omarchy/fcitx5.sh` disables the unit.
+Neither file is Omarchy-specific on its own, so the alternate scopes both to Omarchy per [ADR-0080](adr/0080-distro-alternate-scope.md).
+The step is needed only for the unit: migration `1785167800` supervises it with `Restart=always` and re-enables it on every `omarchy update`, which the post-update bootstrap then undoes.
+`omarchy dev unlink fcitx5` and removing the packaged file were rejected: the file is owned by `omarchy-settings`, so a local deletion is a keeps-it-correct check against package state ([ADR-0049](adr/0049-omarchy-preinstalls-mise-bootstrap.md)) and comes back on every update.
+
 ## Editor
 
 uwsm keeps `EDITOR=omarchy-launch-editor --inline` for the session ([ADR-0051](adr/0051-keep-uwsm-editor-launcher.md)); `SUDO_EDITOR` follows the editor picked in Omarchy's menu.
