@@ -12,3 +12,4 @@ stylua = "latest"
 taplo = { version = "latest", symlink_bins = true, gen_completions = "completions fish" }
 tree-sitter = "latest"
 ty = { version = "latest", gen_completions = "generate-shell-completion fish" }
+"npm:esbuild" = "latest"

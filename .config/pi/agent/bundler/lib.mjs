@@ -51,13 +51,10 @@ export function isInstalled(name) {
   return statSync(join(MODULES_DIR, name), { throwIfNoEntry: false })?.isDirectory() === true;
 }
 
-// esbuild is not installed by pi, so resolution is explicit rather than assumed.
+// esbuild is not installed by pi; mise/conf.d/lsp.toml puts it on PATH.
 export function findEsbuild() {
-  const candidates = [
-    process.env.PI_BUNDLER_ESBUILD,
-    join(homedir(), "src/pi-automode/node_modules/.bin/esbuild"),
-  ].filter(Boolean);
-  for (const c of candidates) if (existsSync(c)) return c;
+  const override = process.env.PI_BUNDLER_ESBUILD;
+  if (override && existsSync(override)) return override;
   const which = spawnSync("sh", ["-c", "command -v esbuild"], { encoding: "utf8" });
   if (which.status === 0 && which.stdout.trim()) return which.stdout.trim();
   return null;

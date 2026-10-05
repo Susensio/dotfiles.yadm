@@ -106,7 +106,7 @@ Accepted limitations:
 - A bundle is a build artifact, not reviewed code. A dependency bump changes the inlined code with no diff to read, and `reviewedKinds` re-opens review only when the scanned hazard set changes, not when behaviour does.
 - `pi update` replaces a package directory wholesale, discarding both the bundle and the manifest backup. The package returns to source and stays there until the hook runs again, so a lapsed hook costs speed, not correctness. The same install discards the patch library's work, which is why the two share one hook rather than two.
 - Bundles are not source-mapped, so a stack trace from a bundled extension points into `.pi-bundler/bundle.mjs`.
-- esbuild is not installed by pi and must be resolvable when the hook runs; the library reports its absence and skips rather than building something stale.
+- esbuild is not installed by pi and must be resolvable when the hook runs; `mise/conf.d/lsp.toml` declares it, and the library reports its absence and skips rather than building something stale.
 - A freshly built bundle has no `jiti` cache entry, so the first start after a build pays it once (~5.4 s observed). That cache lives in `/tmp`, which is `tmpfs` here, so a cold cache after reboot still costs ~9.4 s regardless of bundling.
 - The screen must be re-run whenever pi or a package changes graph, which is why it runs inside the hook rather than once by hand.
 - A package that fails gate A is not permanently unbundleable: `--alias:#src=./src` would very likely make the two `#src/*` packages build, and the screen would then have to judge them like any other rather than refusing them on proof.
