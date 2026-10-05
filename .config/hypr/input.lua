@@ -8,3 +8,6 @@ hl.config({
     },
   },
 })
+
+-- One entry per mouse; the name comes from `hyprctl devices`. MX Master 3
+hl.device({ name = "logitech-mx-master-3-1", accel_profile = "flat", sensitivity = 0.8 })
