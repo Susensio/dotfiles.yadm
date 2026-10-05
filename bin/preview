@@ -1,8 +1,6 @@
 #!/bin/bash
-IFS=$'\n'
-# Five arguments are passed to the file, (1) current file name, (2) width, (3) height, (4) horizontal position, and (5) vertical position of preview pane respectively.
 ## Script arguments
-file_path=$(echo $1 | sed "s|~|$HOME|g")
+file_path="${1/#\~/$HOME}"
 line_number=${2:-}
 
 [ -n "${FZF_PREVIEW_COLUMNS}" ] &&
@@ -21,11 +19,10 @@ case "$mimetype" in
   image/*) chafa "$file_path" -s "$pv_width"x"$pv_height" ;;
   */pdf) pdftotext "$file_path" - ;;
   text/* | */xml | application/json)
-    # bat --color=always --style=plain --line-range=:500 \
-    #   --paging=never --terminal-width="$pv_width" \
-    #   "$file_path"
     if [[ -n "$line_number" ]]; then
-      bat_args=(--line-range=":$((line_number + 500))" --highlight-line="$line_number")
+      # 2 context lines above; fzf's '+{2}' offset ignores wrap (fzf#4851)
+      start=$((line_number > 2 ? line_number - 2 : 1))
+      bat_args=(--line-range="${start}:$((line_number + 50))" --highlight-line="$line_number")
     else
       bat_args=(--line-range=:500)
     fi
@@ -35,14 +32,11 @@ case "$mimetype" in
     # the underlying file type gets highlighted
     case "${file_path##*/}" in
       *'##'*) bat_args+=(--ignored-suffix="##${file_path##*##}") ;;
-    esac
-    case "${file_path##*/}" in
       *.tpl) bat_args+=(--ignored-suffix=.tpl) ;;
     esac
 
     bat --color=always --style=plain --paging=never \
-      --terminal-width="$pv_width" "${bat_args[@]}" \
-      "$file_path"
+      "${bat_args[@]}" "$file_path"
     ;;
   *)
     case "$file_extension" in
@@ -53,8 +47,6 @@ case "$mimetype" in
       *)
         echo '----- File Type Classification -----'
         file --dereference --brief -- "$file_path"
-        # file --dereference --brief -- "$file_path" |
-        #   fold --spaces --width="$pv_width"
         ;;
     esac
     ;;
