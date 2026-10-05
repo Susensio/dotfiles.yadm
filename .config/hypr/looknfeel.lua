@@ -16,7 +16,23 @@ hl.config({
     dim_special = 0.5,
     dim_around = 0.3
   },
+
+  -- On workspace change, return the pointer to where it was, not mid-window.
+  cursor = { persistent_warps = true },
 })
+
+-- New windows don't pull the pointer; re-focus so it follows (#5745).
+hl.on("window.open", function(w)
+  local active = hl.get_active_window()
+  if active == w then
+    hl.dispatch(hl.dsp.focus({ window = w }))
+    -- Focus warps without re-sending pointer motion; re-issue it in place (ADR-0086).
+    if not hl.get_config("cursor.no_warps") then
+      local pos = hl.get_cursor_pos()
+      hl.dispatch(hl.dsp.cursor.move({ x = pos.x, y = pos.y }))
+    end
+  end
+end)
 
 -- SUPER + Z is otherwise invisible.
 o.window(
