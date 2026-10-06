@@ -1,5 +1,8 @@
 set script-interpreter := ["bash", "-euo", "pipefail"]
 
+# Run every recipe from the repo root, not .config where this file lives.
+set working-directory := '..'
+
 # `git ls-files` skips the untracked JSON and fish files other tools keep in
 # .config. File lists split on whitespace, which no tracked path has.
 
@@ -9,7 +12,7 @@ check: fish-syntax shellcheck json-syntax toml-syntax
 [script]
 fish-syntax:
     files=$(git ls-files '*.fish')
-    scripts=$(grep -rl '^#!.*fish' ../bin || true)
+    scripts=$(grep -rl '^#!.*fish' bin || true)
     for file in $files $scripts; do fish --no-execute "$file"; done
 
 # shfmt --find misses sourced fragments, whose only shell marker is their
@@ -17,20 +20,24 @@ fish-syntax:
 # is the syntax check too.
 [script]
 shellcheck:
-    scripts=$(shfmt --find yadm ../bin)
-    fragments=$(grep -rl '^# shellcheck shell=' yadm ../bin || true)
+    scripts=$(shfmt --find .config/yadm bin)
+    fragments=$(grep -rl '^# shellcheck shell=' .config/yadm bin || true)
     shellcheck --severity=error $scripts $fragments
 
+# Tracked symlinks can point outside the repo (omarchy's theme files point
+# into ~/.local/state), so they dangle in CI. Their targets aren't ours to check.
 [script]
 json-syntax:
-    cd "$(git rev-parse --show-toplevel)"
     files=$(git ls-files '*.json' '*.json##*')
-    for file in $files; do jq empty "$file"; done
+    for file in $files; do
+      if [ -L "$file" ]; then continue; fi
+      jq empty "$file"
+    done
 
 [script]
 toml-syntax:
-    cd "$(git rev-parse --show-toplevel)"
     files=$(git ls-files '*.toml' '*.toml##*')
     for file in $files; do
+      if [ -L "$file" ]; then continue; fi
       python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
     done
