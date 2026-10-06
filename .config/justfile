@@ -23,11 +23,13 @@ shellcheck:
 
 [script]
 json-syntax:
+    cd "$(git rev-parse --show-toplevel)"
     files=$(git ls-files '*.json' '*.json##*')
     for file in $files; do jq empty "$file"; done
 
 [script]
 toml-syntax:
+    cd "$(git rev-parse --show-toplevel)"
     files=$(git ls-files '*.toml' '*.toml##*')
     for file in $files; do
       python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
