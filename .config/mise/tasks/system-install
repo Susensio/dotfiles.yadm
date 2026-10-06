@@ -126,8 +126,9 @@ process_extra_assets() {
     # folder, e.g. ".../docs/{configuration,keyboard}.mdx". `set -f` keeps
     # `*`/`?` in unrelated URLs from also glob-expanding against the cwd.
     local urls=()
+    # Escaped so a `>filename` suffix stays a word, not a redirection
     set -f
-    eval "urls=($expanded_asset)"
+    eval "urls=(${expanded_asset//>/\\>})"
     set +f
 
     for url in "${urls[@]}"; do
