@@ -1,24 +1,12 @@
 #!/usr/bin/env python3
-"""PostToolUse and PostToolUseFailure: resolve sandbox device-mount noise.
+"""PostToolUse and PostToolUseFailure: name the sandbox's /dev/null mounts.
 
-The sandbox bind-mounts /dev/null over paths it protects -- seen so far as
-`.bashrc`/`.gitconfig` in a directory listing, `.git/config.lock` in a git
-lock error, and a dotfile that reads back empty or swallows a write. Naming the
-known paths is a losing game; the next one is always a surprise.
-Pattern-matching the error text instead ("could not lock", "Permission
-denied") is unsafe the other way -- a real stale `.git/index.lock` produces the
-same words, and a hook that waves those away teaches the model to ignore a
-genuine blocker.
-
-The one fact that can't lie is the inode itself: stat every path the call
-named or printed -- its input, its output, its error -- and speak only for a
-confirmed /dev/null character device. Every other candidate (a URL fragment, a
-version number, a real file) fails the stat check silently and costs nothing.
-
-A failed call arrives as PostToolUseFailure, not PostToolUse: a git command
-that cannot take its lock exits non-zero, so the failure event is where the
-lock error is. This hook replaces the CLAUDE.md paragraph that asked the model
-to recognise the signature itself.
+The sandbox bind-mounts /dev/null over paths it protects, which shows up as a
+character device in a listing, a lock git cannot take, or a dotfile that reads
+empty and swallows writes. Matching error text would also wave away a real
+stale lock, so the hook stats every path the call named or printed and speaks
+only for a confirmed /dev/null device. A failed call, such as git's lock
+error, arrives as PostToolUseFailure.
 """
 
 import os
@@ -28,53 +16,34 @@ import stat
 from utils import agent_key, first_time, inform, payload
 
 PATH_TOKEN = re.compile(r"""(?:~|\.{1,2})?/[^\s'"]+|\.[\w.-]+(?:/[^\s'"]*)?""")
-
-NULL_RDEV = (1, 3)  # major, minor of /dev/null
-
-# Tool-input keys that hold a path outright, for tools whose output never echoes it.
 PATH_KEYS = ("file_path", "path", "notebook_path")
+NULL_RDEV = (1, 3)
 
 NOTE = (
-    "`{path}` is a character device (major {major} minor {minor}): the sandbox "
-    "bind-mounts /dev/null over it, so reads come back empty, writes are "
-    "discarded, and a lock on it cannot be taken. It is not a stale lock, a "
-    "stray file, a surprise diff or a repo finding, and it does not exist "
-    "outside the sandbox. Nothing to fix and nothing to tell the user: do not "
-    "mention it, and carry on without that path."
+    "`{path}` is the sandbox's /dev/null mount: reads come back empty, writes "
+    "are discarded and it cannot be locked. It is not a stale lock, a stray "
+    "file or a repo finding, and it does not exist outside the sandbox. Do not "
+    "mention it to the user; carry on without that path."
 )
 
 
-def candidates(output):
-    r"""Every path-like token in `output`, in order of first appearance.
-
-    Over-generates on purpose: a token that isn't a real path just fails the
-    stat check downstream, so casting wide here costs nothing.
+def candidates(text):
+    r"""Path-like tokens in `text`; a non-path just fails the stat later.
 
     >>> list(candidates("could not lock config file .git/config: File exists"))
     ['.git/config']
     >>> list(candidates("crw-rw-rw- 1 root root 1, 3 Jan 1 00:00 /home/u/.bashrc"))
     ['/home/u/.bashrc']
-    >>> list(candidates("plain text, no paths here"))
-    []
     """
-    seen = set()
-    for match in PATH_TOKEN.finditer(output):
-        token = match.group().rstrip("'\",.:;)")
-        if token not in seen:
-            seen.add(token)
-            yield token
+    for match in PATH_TOKEN.finditer(text):
+        yield match.group().rstrip("'\",.:;)")
 
 
 def texts(value):
-    """Every string inside a tool payload value, depth first.
+    """Every string in a tool payload value: responses are strings or objects.
 
-    Tool responses are a bare string for some tools and nested objects for
-    others (Bash's stdout/stderr, Read's file record), so walk them all.
-
-    >>> list(texts({"stdout": "a", "stderr": "", "n": 3, "more": ["b", {"c": "d"}]}))
-    ['a', '', 'b', 'd']
-    >>> list(texts("plain"))
-    ['plain']
+    >>> list(texts({"stdout": "a", "n": 3, "more": ["b", {"c": "d"}]}))
+    ['a', 'b', 'd']
     """
     if isinstance(value, str):
         yield value
@@ -87,51 +56,49 @@ def texts(value):
 
 
 def named_paths(data):
-    """Paths the call names: input path fields first, then every token printed.
-
-    >>> list(named_paths({"tool_input": {"file_path": "/x/.gitconfig"},
-    ...                   "error": "EACCES: /x/.gitconfig"}))
-    ['/x/.gitconfig', '/x/.gitconfig']
-    """
-    tool_input = data.get("tool_input") or {}
-    if isinstance(tool_input, dict):
-        for key in PATH_KEYS:
-            if isinstance(value := tool_input.get(key), str) and value:
-                yield value
-    command = tool_input.get("command") if isinstance(tool_input, dict) else None
-    for value in (data.get("tool_response"), data.get("error"), command):
+    """Paths in the call's input fields, then every token in its command, output or error."""
+    tool_input = data.get("tool_input")
+    if not isinstance(tool_input, dict):
+        tool_input = {}
+    for key in PATH_KEYS:
+        if isinstance(tool_input.get(key), str):
+            yield tool_input[key]
+    for value in (
+        tool_input.get("command"),
+        data.get("tool_response"),
+        data.get("error"),
+    ):
         for text in texts(value):
             yield from candidates(text)
 
 
-def null_device(path):
-    """(major, minor) if `path` is a character device masking a file, else None.
+def is_null_mount(path):
+    """True for a /dev/null device standing in for a file; /dev/null itself is not one.
 
-    A real device node under /dev -- the `> /dev/null` in a command -- is
-    itself, not a mount over something; a bind mount keeps its own path.
-
-    >>> null_device("/dev/null") is None
-    True
+    >>> is_null_mount("/dev/null")
+    False
     """
     if os.path.realpath(path).startswith("/dev/"):
-        return None
+        return False
     try:
         st = os.stat(path)
     except OSError:
-        return None
-    if not stat.S_ISCHR(st.st_mode):
-        return None
-    return os.major(st.st_rdev), os.minor(st.st_rdev)
+        return False
+    return (
+        stat.S_ISCHR(st.st_mode)
+        and (os.major(st.st_rdev), os.minor(st.st_rdev)) == NULL_RDEV
+    )
 
 
 def main():
     data = payload()
-    for token in named_paths(data):
-        found = null_device(os.path.expanduser(token))
-        # A stamp name cannot hold the path's slashes; first_time would fail open.
-        stamp = token.replace("/", "%2F")
-        if found == NULL_RDEV and first_time(agent_key(data), "sandbox-noise", stamp):
-            inform(NOTE.format(path=token, major=found[0], minor=found[1]), data)
+    for path in named_paths(data):
+        path = os.path.expanduser(path)
+        # Stamp names cannot hold slashes; first_time would fail open and repeat.
+        if is_null_mount(path) and first_time(
+            agent_key(data), "sandbox-noise", path.replace("/", "%2F")
+        ):
+            inform(NOTE.format(path=path), data)
 
 
 if __name__ == "__main__":
