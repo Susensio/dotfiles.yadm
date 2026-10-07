@@ -16,7 +16,7 @@ webapp() { [[ -f $APPS/$1.desktop ]] || omarchy-webapp-install "$@"; }
 webapp "ChatGPT" https://chatgpt.com/ chatgpt
 webapp "Claude" https://claude.ai/new claude
 webapp "Gemini" https://gemini.google.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/google-gemini.png
-webapp "GitHub" https://www.github.com
+webapp "GitHub" https://www.github.com https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/github.png
 webapp "Google Maps" https://maps.google.com google-maps
 webapp "Google Photos" https://photos.google.com/ google-photos
 webapp "Spotify" https://open.spotify.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify.png
