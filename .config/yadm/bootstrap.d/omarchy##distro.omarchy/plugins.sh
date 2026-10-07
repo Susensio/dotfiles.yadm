@@ -16,7 +16,8 @@ while IFS=$'\t' read -r id url; do
   }
   [[ -e $config/plugins/$id || -L $config/plugins/$id ]] && continue
   log info "Installing Omarchy plugin $id"
-  omarchy plugin add "$url" --yes
+  # Installs, then fails to rescan when no desktop session runs (SSH, TTY, CI)
+  omarchy plugin add "$url" --yes || true
   [[ -f $config/plugins/$id/manifest.json ]] || {
     log error "Installed Omarchy plugin did not provide the declared id $id"
     exit 1
