@@ -32,7 +32,8 @@ fi
 
 # Seed from tools.conf, not $EDITOR: in an Omarchy session that is uwsm's launcher
 if [[ ! -f $STATE ]]; then
-  omarchy-default-editor "$(sed -n 's/^EDITOR=//p' "$TOOLS_ENV")"
+  # Records the pick, then fails to notify when no desktop session runs (SSH, TTY, CI)
+  omarchy-default-editor "$(sed -n 's/^EDITOR=//p' "$TOOLS_ENV")" || [[ -f $STATE ]]
 fi
 # Catch up on a pick made while the watcher was off
 if [[ $(<"$STATE") != "$(sed -n 's/^EDITOR=//p' "$TOOLS_ENV")" ]]; then
