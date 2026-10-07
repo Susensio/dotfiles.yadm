@@ -62,10 +62,12 @@ herdr adopted tmux's table letters per [ADR-0012](adr/0012-modal-tmux-key-tables
 | d | detach | detach |
 | C | config table | settings |
 | R | reload config | reload config |
-| p | pane table | resize mode |
+| P / p | pane table (P) | resize mode (p) |
+| T | tab table | – |
+| S | session table | – |
 
 Each tool binds more beyond these; the config is the list.
-tmux's pane table (Prefix p) holds close (q), zoom (z), resize (hjkl, repeatable) and swap (Shift + hjkl).
+tmux's pane table (Prefix P) holds close (q), zoom (z), resize (hjkl, repeatable) and swap (Shift + hjkl); its tab and session tables hold new (n), close (q) and rename (r) for their level, and the config table holds reload, edit and toggles.
 
 ## Modal tables
 
@@ -75,7 +77,7 @@ tmux's pane table (Prefix p) holds close (q), zoom (z), resize (hjkl, repeatable
 | herdr resize mode | Prefix p | pane resize | a mode bar replaces the tab bar while active |
 | helix select mode | v | selection operations | Escape |
 
-tmux's pane table is the only modal table left; Hyprland's actions moved to chords ([ADR-0076](adr/0076-hyprland-chords.md)).
+Hyprland left the modal tables when its window actions moved to chords ([ADR-0076](adr/0076-hyprland-chords.md)); tmux's four tables and herdr's resize mode remain.
 
 ## Where it bends
 
@@ -88,7 +90,7 @@ tmux's pane table is the only modal table left; Hyprland's actions moved to chor
 - Alt + n / Alt + p mean "next / previous sibling" in each tool's own dimension: tmux sessions, herdr agents. Hyprland has no session dimension; it cycles windows with Super + Tab instead.
 - Hyprland's window actions are chords, not a modal table: Ctrl + hjkl resizes, Shift + hjkl swaps, Alt + hjkl sends the window to a monitor. tmux keeps its pane table, so the hjkl letters mirror across layers while the mechanism no longer does.
 - The prefix is F12, not an Alt chord, so it works identically inside and outside tmux, and herdr's prefix never collides with the shell's Alt usage.
-- herdr's stock resize mode lives on prefix+r; `config.toml` moves it to p so the pane-table letter matches tmux.
+- herdr's stock resize mode lives on prefix+r; `config.toml` moves it to p, the letter of tmux's pane table, which tmux reaches as capital P like its other tables.
 
 ## Upkeep
 
