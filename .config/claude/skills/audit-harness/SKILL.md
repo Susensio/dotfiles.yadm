@@ -17,6 +17,7 @@ The two files split by job, and keeping the split is what stops one drifting fro
 This file holds what to look for and the command that finds it, and cites the rule by slug instead of restating why it matters -- an explanation copied here is one that gets corrected in one file and not the other.
 
 Scope: `~/.config/claude/` (user tier, where `CLAUDE_CONFIG_DIR` points), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
+An `AGENTS.md` in a directory with no `CLAUDE.md` loads in its place and is in scope the same way; one beside a `CLAUDE.md` is never read by Claude, which is a finding.
 Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
 A rule is worth what the layer that catches it is worth (R-enforcement), so a harness cannot be judged from its prose alone.
 

@@ -21,6 +21,8 @@ Report only when it is not, since that is the answer that changes what happens n
 
 **1. What does it say about itself?** `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`.
 Take the nearest one above the files you touched; it beats the root's where they disagree.
+Below, `CLAUDE.md` means whichever context file the project keeps: `CLAUDE.md`, or `AGENTS.md` where that is the only one.
+Never create a `CLAUDE.md` beside an `AGENTS.md` — Claude reads `AGENTS.md` only where no `CLAUDE.md` exists, so the new file silently replaces it.
 
 **2. What does it visibly keep?** A `docs/` tree, `TODO.md`, `CHANGELOG.md`, an issue tracker it links to.
 Match it, even where the format is not what you would have chosen.
