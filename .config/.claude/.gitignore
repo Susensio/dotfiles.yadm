@@ -1,0 +1,4 @@
+# Hand-maintained config only.
+*
+!.gitignore
+!settings.json

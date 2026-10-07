@@ -45,15 +45,11 @@ fi
 
 # Full sync from here on: herdr's own postinstall or a manual run.
 # --- skill mirrors ----------------------------------------------------------
-# Herdr ships one agent skill (SKILL.md, install-shipped); this repo hand-
-# maintains a second entrypoint (herdr/SKILL-config.md) that routes into the
-# install-linked references/. Both are mirrored as plain symlinks into the
-# versioned mise install, so they stay untracked: each harness's .gitignore
-# and yadm/exclude knock them out, and this sync relinks them whenever herdr
-# installs or upgrades. No .gitignore is shipped beside mirrors: agents
-# disagree on what it should hide (pi honors ignore files while scanning
-# skills and would drop the mirror). Runs on full syncs only -- install-side
-# content changes only when herdr itself does.
+# Herdr ships one agent skill (SKILL.md); this repo hand-maintains a second
+# entrypoint (herdr/SKILL-config.md) routing into the install's references/.
+# Both mirror as untracked symlinks into the versioned install, relinked on
+# every full sync. No .gitignore beside a mirror: pi reads ignore files inside
+# the skills tree it scans and would drop it.
 link_skill() {
 	local src=$1 dest=$2
 	if [[ -e $dest && ! -L $dest ]]; then
