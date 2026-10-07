@@ -94,9 +94,9 @@ Require it to mark what it ran apart from what it read.
 A claim it executed comes back with the evidence that decided it and is worth what the run is worth; a claim it inferred from a doc reads identically and is worth what the doc is worth.
 Asking for the line keeps the distinction free -- the agent already knows which it did, and the caller cannot tell afterwards without doing the work again.
 
-A young project makes briefs longer, not shorter: a mature repository tells a subagent what it needs through `CLAUDE.md` and its records, a two-day-old one tells it nothing.
+A young project makes briefs longer, not shorter: a mature repository tells a subagent what it needs through `AGENTS.md` and its records, a two-day-old one tells it nothing.
 
-The second time the same fact goes into a brief, it has earned a line in `CLAUDE.md` -- or `AGENTS.md`, where that is the context file the project keeps.
+The second time the same fact goes into a brief, it has earned a line in `AGENTS.md`, or the `CLAUDE.md` a project keeps instead.
 Propose that line and wait for the user to take it -- two tasks that happened to rhyme look identical to a convention from here, and a wrong one lands in every spawn from then on.
 
 ## Nesting

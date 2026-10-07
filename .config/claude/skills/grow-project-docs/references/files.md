@@ -2,10 +2,10 @@
 
 Each entry below: what earns the file, what it holds, and the boundary that stops it absorbing its neighbours.
 
-A pointer to each file lives in the project's `CLAUDE.md`, not in the file's own first lines.
+A pointer to each file lives in the project's `AGENTS.md`, not in the file's own first lines.
 One line there per file, naming identity only — where it sits, what kind of thing it holds, who writes it — never the boundary or behaviour below, which stays here as the one copy.
 A file that explains itself is carrying that line's job in a copy nobody routes by, and it goes stale the first time the boundary moves.
-A `CLAUDE.md` line caught restating a boundary or an edit/append rule is a defect in the project: trim it back to identity, do not sync it (ADR-0041).
+An `AGENTS.md` line caught restating a boundary or an edit/append rule is a defect in the project: trim it back to identity, do not sync it (ADR-0041).
 
 ## README.md — what this project is
 
@@ -18,7 +18,7 @@ Where use and change are the same audience, one file serves both and this is not
 *Boundary:* what a reader needs in order to use it.
 Why it is built this way is an ADR, what it must do is `docs/SPEC.md`, and milestones that outgrow this file are `docs/ROADMAP.md`.
 
-## CLAUDE.md — what you would get wrong here
+## AGENTS.md — what you would get wrong here
 
 The repository's own, at its root — never the userspace one under `$CLAUDE_CONFIG_DIR`, which is this user's global preferences and carries no project's filenames.
 
@@ -114,7 +114,7 @@ This is checkable the moment the commitment happens, not an event recognised onl
 Why a choice was made stays in the ADR — this file tracks only that it is not yet done.
 Edit the file, or drop a section once it is no longer current — never append.
 An append-only file is a log, and a log is not what a fresh session needs: it needs the current truth, not its history.
-Delete it, and its `CLAUDE.md` line, once the work it tracks lands — an empty or stale one advertises a record that is no longer true.
+Delete it, and its `AGENTS.md` line, once the work it tracks lands — an empty or stale one advertises a record that is no longer true.
 
 ## .scratch/ — working material
 

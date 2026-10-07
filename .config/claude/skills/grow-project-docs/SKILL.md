@@ -15,13 +15,14 @@ A repository whose conventions belong to someone else is out of scope — there,
 ## Where things sit
 
 The root holds entry points only.
-`CLAUDE.md` below means the project's context file, `AGENTS.md` where that is the one it keeps; never add a `CLAUDE.md` beside an `AGENTS.md`, which stops Claude reading it.
+Below, `AGENTS.md` means the project's context file, or the `CLAUDE.md` it keeps instead.
+Never keep both: Claude reads `CLAUDE.md` and ignores an `AGENTS.md` beside it.
 Everything that overflowed goes under `docs/`, so location alone answers whether a thing overflowed.
 
 | What is held | Where it goes | Earned when |
 | --- | --- | --- |
 | What this project is, and how someone uses it | `README.md` | someone reads it to use the project without changing it |
-| What you would get wrong here | the repository's `CLAUDE.md` | something has surprised someone, and not before |
+| What you would get wrong here | the repository's `AGENTS.md` | something has surprised someone, and not before |
 | What the system must do | `docs/SPEC.md` | the README cannot hold the behaviour |
 | The order things happen in | `docs/ROADMAP.md` | the README's roadmap or TODO section outgrew it |
 | Open work nobody is on | `docs/BACKLOG.md` | the README's TODO section outgrew it |
@@ -43,7 +44,7 @@ Two rows are worth reading twice, because the instinct is to create them on day 
 `README.md` is earned by a reader, not by the project existing.
 Where use and change are the same audience — a dotfiles tree, a private script — one file serves both and there is no README to write.
 
-The repository's `CLAUDE.md` is earned by a surprise.
+The repository's `AGENTS.md` is earned by a surprise.
 One restating what `package.json` or the CI workflow already says costs every turn of every agent, and teaches the model to discount the lines sitting beside it.
 
 Neither carries an index line pointing at the other.
@@ -53,14 +54,14 @@ Read it when you are about to create one.
 
 ## Creating one is two things at once
 
-Creating a file and naming it in the project's `CLAUDE.md` are one step, never two.
+Creating a file and naming it in the project's `AGENTS.md` are one step, never two.
 One line per file: where it sits, what kind of thing it holds, and who writes it.
 
 That line is what a later session actually reads.
-A repository's `CLAUDE.md` loads every turn for every agent working in it, so `project-docs` resolves it at step one of its ladder, before anything has been opened.
+A repository's `AGENTS.md` loads every turn for every agent working in it, so `project-docs` resolves it at step one of its ladder, before anything has been opened.
 The file's own first lines carry no such explanation — a second copy there goes stale, and the reader who has already opened the file no longer needs routing.
 
 Formats stay out of it too.
 A file explains its own layout by having one, and a description of that layout is wrong the first time the layout changes.
 
-Done when every file created has met the condition beside it, each carries its line in the project's `CLAUDE.md`, and the rows that were not earned are left unwritten.
+Done when every file created has met the condition beside it, each carries its line in the project's `AGENTS.md`, and the rows that were not earned are left unwritten.
