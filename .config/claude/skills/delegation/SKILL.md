@@ -96,7 +96,7 @@ Asking for the line keeps the distinction free -- the agent already knows which 
 
 A young project makes briefs longer, not shorter: a mature repository tells a subagent what it needs through `CLAUDE.md` and its records, a two-day-old one tells it nothing.
 
-The second time the same fact goes into a brief, it has earned a line in `CLAUDE.md`.
+The second time the same fact goes into a brief, it has earned a line in `CLAUDE.md` -- or `AGENTS.md`, where that is the context file the project keeps.
 Propose that line and wait for the user to take it -- two tasks that happened to rhyme look identical to a convention from here, and a wrong one lands in every spawn from then on.
 
 ## Nesting

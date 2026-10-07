@@ -1,6 +1,6 @@
 # ADR-0020: Collapse the agent harness to Claude Code only
 
-Status: Accepted
+Status: Superseded in part by [ADR-0084](0084-workspace-agents-md-fallback.md) — the `.config/` workspace file is `AGENTS.md` again
 Date: 2026-08-15
 Supersedes: [ADR-0019](0019-share-agent-config-claude-antigravity.md)
 

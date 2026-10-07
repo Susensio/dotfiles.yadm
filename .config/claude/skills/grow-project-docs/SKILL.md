@@ -15,6 +15,7 @@ A repository whose conventions belong to someone else is out of scope — there,
 ## Where things sit
 
 The root holds entry points only.
+`CLAUDE.md` below means the project's context file, `AGENTS.md` where that is the one it keeps; never add a `CLAUDE.md` beside an `AGENTS.md`, which stops Claude reading it.
 Everything that overflowed goes under `docs/`, so location alone answers whether a thing overflowed.
 
 | What is held | Where it goes | Earned when |
