@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Smoke-test a bootstrapped machine, from a login shell. Configured programs must
+# start silently: they print when something their config declares is missing.
+set -u
+
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+data=${XDG_DATA_HOME:-$HOME/.local/share}
+failures=0
+
+check() {
+  local what=$1 out
+  shift
+  if out=$("$@" 2>&1); then
+    echo "ok    $what"
+    return
+  fi
+  failures=$((failures + 1))
+  echo "FAIL  $what"
+  [[ -n $out ]] && echo "$out"
+}
+
+silent() {
+  local out
+  out=$("$@" 2>&1) && [[ -z $out ]] && return
+  echo "$out"
+  return 1
+}
+
+# vim.pack writes the lockfile
+nvim_lockfile_installed() {
+  local plugins plugin missing=()
+  plugins=$(jq -re '.plugins | keys[]' "$config/nvim/nvim-pack-lock.json") || return 1
+  for plugin in $plugins; do
+    [[ -d $data/nvim/site/pack/core/opt/$plugin ]] || missing+=("$plugin")
+  done
+  ((${#missing[@]} == 0)) || {
+    echo "not installed: ${missing[*]}"
+    return 1
+  }
+}
+
+fisher_matches_fish_plugins() {
+  local wanted installed
+  wanted=$(sort "$config/fish/fish_plugins") || return 1
+  installed=$(fish -c 'fisher list' 2>&1 | sort) || return 1
+  [[ $installed == "$wanted" ]] || diff <(echo "$wanted") <(echo "$installed")
+}
+
+# As mise/tasks/herdr-integrations: installed harnesses whose config directory
+# exists, but omp, which herdr refuses while pi holds the directory they share
+herdr_integrations_current() {
+  local status line target stale=()
+  status=$(herdr integration status 2>&1) || {
+    echo "$status"
+    return 1
+  }
+  while read -r line; do
+    [[ $line == omp[:\ ]* ]] && continue
+    target=${line##*'('}
+    [[ -d ${target%/*} ]] && command -v "${line%%[: ]*}" >/dev/null &&
+      [[ $line != *": current "* ]] && stale+=("$line")
+  done <<<"$status"
+  ((${#stale[@]} == 0)) || {
+    printf '%s\n' "${stale[@]}"
+    return 1
+  }
+}
+
+echo "# tools"
+check "mise: no tool missing" silent mise ls --global --missing
+check "no dangling links in ~/.local/bin" silent find "$HOME/.local/bin" -xtype l
+check "plain git works in ~/.config" git -C "$config" rev-parse
+
+echo "# fish"
+# Without a terminal, fish skips querying one
+check "fish starts silently" silent fish -i -c exit </dev/null
+check "fisher holds fish_plugins" fisher_matches_fish_plugins
+
+echo "# tmux, on a server of its own"
+# As reload-config's dry run (docs/adr/0017); a plugin tpack can't install prints
+trap 'tmux -L bootstrap-test kill-server 2>/dev/null' EXIT
+TERM=xterm-256color tmux -L bootstrap-test -f /dev/null new-session -d
+check "tmux sources its config silently" \
+  silent tmux -L bootstrap-test source-file "$config/tmux/tmux.conf"
+
+echo "# editors"
+check "nvim starts silently" silent nvim --headless +qa
+check "nvim lockfile plugins installed" nvim_lockfile_installed
+check "helix has the grammar tmux-grammar.sh builds" \
+  test -f "$config/helix/runtime/grammars/tmux.so"
+
+echo "# agents"
+check "herdr integrations current" herdr_integrations_current
+
+echo "# services"
+check "keyd active" systemctl is-active keyd
+check "keyd-sync.path enabled" systemctl --user is-enabled keyd-sync.path
+
+((failures == 0)) || {
+  echo "$failures failed"
+  exit 1
+}
+echo "all passed"

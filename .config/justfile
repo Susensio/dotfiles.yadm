@@ -41,3 +41,6 @@ toml-syntax:
       if [ -L "$file" ]; then continue; fi
       python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
     done
+# Smoke-test a bootstrapped machine
+bootstrap-test:
+    .config/yadm/bootstrap-test

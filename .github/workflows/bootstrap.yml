@@ -1,0 +1,151 @@
+name: Bootstrap
+
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
+
+# A pull request runs on its merge ref; clone the branch itself
+env:
+  BRANCH: ${{ github.head_ref || github.ref_name }}
+  # mise looks up releases on GitHub, whose anonymous limit runners share
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  ubuntu:
+    # Linux Mint 22's base; ubuntu-latest moves on without it
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # No login in CI: lingering starts the user manager `systemctl --user` needs
+      - name: Start a user session
+        run: |
+          sudo modprobe uinput
+          sudo loginctl enable-linger "$USER"
+          uid=$(id -u)
+          for _ in $(seq 30); do [ -S "/run/user/$uid/bus" ] && break; sleep 1; done
+          echo "XDG_RUNTIME_DIR=/run/user/$uid" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus" >> "$GITHUB_ENV"
+          # Stock Ubuntu's mode, which 10_xdg_compliance/sudo.sh relies on
+          sudo chmod 755 /etc/sudoers.d
+
+      # The README's steps
+      - name: Clone and bootstrap
+        run: |
+          # shellcheck disable=SC1090
+          source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
+          yadm checkout -- ~/.config
+          yadm bootstrap
+
+      # As the bootstrap asks once environment.d changed: restart the user manager
+      - name: Log in again
+        run: |
+          sudo systemctl restart "user@$(id -u)"
+          for _ in $(seq 30); do [ -S "$XDG_RUNTIME_DIR/bus" ] && break; sleep 1; done
+
+      # A login shell, whose profile imports the user manager's environment
+      - name: Test
+        run: |
+          set -o pipefail
+          # FAIL lines become annotations on the run's summary page
+          bash --login -c 'cd && just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+
+      # Steps print only what they change
+      - name: Bootstrap again, silently
+        if: ${{ !cancelled() }}
+        run: |
+          out=$(~/.config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          [ -z "$out" ] && exit 0
+          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
+          exit 1
+
+  # Omarchy's ISO, replayed in an Arch container booted into systemd
+  omarchy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # GitHub's container: key keeps its own process as PID 1, so not through it
+      - name: Boot Arch
+        run: |
+          sudo modprobe uinput
+          docker run --detach --name omarchy --privileged --cgroupns=host \
+            --volume /sys/fs/cgroup:/sys/fs/cgroup --tmpfs /run \
+            archlinux:latest /usr/lib/systemd/systemd
+          docker exec omarchy systemctl is-system-running --wait || true
+          # A login shell as the user, with its manager's bus, as a terminal has
+          sudo tee /usr/local/bin/as-dev >/dev/null <<'EOF'
+          #!/bin/sh
+          exec docker exec -i -u dev -w /home/dev -e USER=dev -e LOGNAME=dev -e GITHUB_TOKEN \
+            -e XDG_RUNTIME_DIR=/run/user/1000 -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+            omarchy bash --login "$@"
+          EOF
+          sudo chmod +x /usr/local/bin/as-dev
+
+      - name: Install Omarchy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          docker exec -i -e GH_TOKEN omarchy bash -xeuo pipefail <<'EOF' 2>&1 | tee /tmp/ci.log
+          # The latest release is what the stable channel ships
+          tag=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/basecamp/omarchy/releases/latest |
+            sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+          raw=https://raw.githubusercontent.com/basecamp/omarchy/$tag
+          curl -fsSL -o /etc/pacman.conf "$raw/default/pacman/pacman-stable.conf"
+          curl -fsSL -o /etc/pacman.d/mirrorlist "$raw/default/pacman/mirrorlist-stable"
+          pacman-key --init
+          pacman-key --recv-keys 40DFB630FF42BCFFB047046CF0134EE680CAC571 --keyserver keys.openpgp.org
+          pacman-key --lsign-key 40DFB630FF42BCFFB047046CF0134EE680CAC571
+
+          # omarchy-settings seeds /etc/skel, so it goes in before the user exists
+          pacman -Syyuu --noconfirm omarchy-keyring omarchy-settings
+          mapfile -t packages < <(curl -fsSL "$raw/install/omarchy-base.packages" | grep -v '^#' | grep .)
+          # Boot hooks fail without a boot partition; check the packages landed instead
+          pacman -S --noconfirm --needed "${packages[@]}" omarchy sudo git || true
+          pacman -T "${packages[@]}" omarchy sudo git
+          useradd --create-home --uid 1000 --groups wheel dev
+          echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
+
+          # Omarchy's own modes for a root without btrfs and a user without a desktop session
+          OMARCHY_SNAPPER_CONFIGURE_TEST=1 omarchy-apply-system --install-user dev --first-install
+          sudo -u dev -H OMARCHY_SETUP_CONTEXT=provision-owner omarchy-provision-user --first-install
+          # yadm picks the Omarchy steps by this
+          grep -qx ID=omarchy /etc/os-release
+
+          loginctl enable-linger dev
+          for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done
+          EOF
+
+      - name: Clone and bootstrap
+        run: |
+          set -o pipefail
+          # shellcheck disable=SC2016  # $0 and $1 expand in the container
+          as-dev -euo pipefail -c '
+            source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$0" "https://github.com/$1.git"
+            yadm checkout -- ~/.config
+            yadm bootstrap
+          ' "$BRANCH" "$GITHUB_REPOSITORY" 2>&1 | tee -a /tmp/ci.log
+
+      - name: Log in again
+        run: |
+          docker exec omarchy systemctl restart user@1000
+          docker exec omarchy bash -c 'for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done'
+
+      - name: Test
+        run: as-dev -c 'just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+
+      - name: Bootstrap again, silently
+        if: ${{ !cancelled() }}
+        run: |
+          out=$(as-dev -c .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          [ -z "$out" ] && exit 0
+          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
+          exit 1
+
+      # TEMP: the agent reads annotations, not logs
+      - name: Report failure
+        if: failure()
+        run: |
+          out=$({ tail -n 6 /tmp/ci.log; docker exec omarchy tail -n 20 /var/log/omarchy-install.log; } 2>&1 | cut -c1-300)
+          echo "::error title=Last lines::${out//$'\n'/%0A}"
