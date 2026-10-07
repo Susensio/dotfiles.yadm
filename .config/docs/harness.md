@@ -2,7 +2,7 @@
 
 The global userspace harnesses live under `~/.config/claude/` and `~/.config/pi/agent/`; Codex reuses Pi's shared guidance and skills.
 This document explains the boundaries and design choices common to them, then the Claude-specific setup that needs operational explanation.
-For Pi-specific operating notes see [`pi/agent/README.md`](../pi/agent/README.md); for tracked files and runtime state see [`pi/README.md`](../pi/README.md).
+For Pi's tracked files and operating notes see [`pi/README.md`](../pi/README.md).
 These are user-global configurations, not project-local harnesses such as a repository's `.claude/` directory.
 
 ## Shared approach
@@ -37,7 +37,7 @@ The sandbox strips setuid, so `claude/CLAUDE.md` has Claude run pkexec unsandbox
 
 ## Two entry points
 
-**`claude`** — the default session, on `sonnet`.
+**`claude`** — the default session, on the account's default model; `settings.json` pins none.
 Ad-hoc, no fixed role, does whatever the prompt asks.
 This is what runs when nothing else is specified — including background jobs.
 
@@ -67,14 +67,14 @@ The `delegation` skill has the full picture of when handing off pays for itself.
 
 `claude plugin` installs third-party additions under `claude/plugins/`, outside the hand-maintained tree above and untracked — a plugin owns its own agents and skill triggers, and updates independently of this repo.
 
-The `codex` plugin (`codex@openai-codex`) adds `codex-rescue`, a sixth agent Claude reaches for on its own judgement — its description says to use it proactively when Claude is stuck or a task should go to Codex/GPT-5.x instead, the same shape of trigger the five first-party agents above carry.
+The `codex` plugin (`codex@openai-codex`) adds `codex-rescue`, an agent Claude reaches for on its own judgement — its description says to use it proactively when Claude is stuck or a task should go to Codex/GPT-5.x instead, the same shape of trigger the five first-party agents above carry.
 It runs against the user's Codex/ChatGPT quota, not Claude's.
 `/codex:review`, `/codex:adversarial-review`, `/codex:cancel`, `/codex:result`, `/codex:status` and `/codex:transfer` are `disable-model-invocation: true` — typed only, unreachable by any agent's own judgement; `/codex:setup` and `/codex:rescue` are not.
 Run `/codex:setup` once per machine to authenticate.
-The plugin also registers `SessionStart`/`SessionEnd` hooks of its own (job bookkeeping, not counted among the five first-party hooks below) and an opt-in `Stop` review gate, off until `/codex:setup --enable-review-gate` — left off deliberately, since `Stop` fires at the end of every turn, not at session end.
+The plugin also registers `SessionStart`/`SessionEnd` hooks of its own (job bookkeeping, not in the table below) and an opt-in `Stop` review gate, off until `/codex:setup --enable-review-gate` — left off deliberately, since `Stop` fires at the end of every turn, not at session end.
 
-`independent-code-review` (a skill, not a plugin command) reaches the same native reviewer automatically: `coding`'s own check-and-fix loop calls for it once per finished non-trivial change, by reading `review.md`'s current invocation and running the equivalent directly rather than through the gated command.
-That is now the harness's default for a routine review, ahead of Claude's own judgement, on the reasoning that a model that did not write the diff sees what its author cannot.
+`independent-code-review` (a skill, not a plugin command) reaches the same native reviewer without the gated command, by reading `review.md`'s current invocation and running the equivalent directly.
+It is opt-in: it runs only when a brief explicitly requests it for a completed feature that changes behaviour, once per feature, never per commit, task, doc change or chore.
 
 ## Skills
 
@@ -93,54 +93,35 @@ They also load on a matching file's **write**\*, because a file created fresh is
 
 \* This write-time load is powered by a custom hook in this harness, not a native Claude Code feature.
 
-## Hooks: fixing what the runtime doesn't
+## Hooks
 
-Hooks are the patches for gaps in how Claude Code natively delivers context.
-Each one exists because something *should* happen automatically and doesn't, in one specific case:
+Hooks cover what prose cannot enforce reliably or the runtime does not deliver on its own.
+Each script's docstring holds why it exists and what it was probed against; this table is only the map.
 
-- **`SessionStart` → `skills-on-launch.py`** — fires at startup and after `/clear`
-  An agent's `skills:` frontmatter only auto-loads when it's *spawned* as a subagent — not when it's launched directly as the main thread (`claude --agent leader`).
-  Without this, `leader` would start a session with none of the skills its own definition names.
-  This hook reads the launched agent's declared skills and injects them, so it reads as if they'd loaded normally.
-  `/clear` wipes the transcript, so it re-injects there too — probed at v2.1.238, `leader` was losing both its skills silently.
-  An unresolvable skill name exits 2 rather than being dropped, since a rename is how that happens.
+| Event | Script | Does |
+|---|---|---|
+| `SessionStart` (startup, clear) | `skills-on-launch.py` | injects the `skills:` a `--agent` launch declares, which the runtime loads only for spawned subagents |
+| `SessionStart` | `herdr-agent-state.sh` | reports the session to herdr's pane state; written and overwritten by herdr's integration installer, so its absolute path is herdr's, not `$CLAUDE_CONFIG_DIR` |
+| `PreToolUse:Bash` | `prefer-rich-cli.py` | nudges toward `rg`/`fd`/`jq` once per binary per agent; never blocks |
+| `PreToolUse:Write\|Edit` | `rules-on-write.py` | injects path-scoped rules for a file being written, which natively load only on read |
+| `PreToolUse:Write\|Edit` | `not-your-repo.py` | nudges before a new record file is created in a repository you do not own; never blocks |
+| `PostToolUse:Write\|Edit` | `autoformat.py` | formats what was just written and says when the on-disk copy changed |
+| `PostToolUse` and `PostToolUseFailure` (Bash and file tools) | `sandbox-noise.py` | names any path a call touched that is the sandbox's `/dev/null` mount, so it is neither chased nor reported |
 
-- **`PreToolUse:Write|Edit` → `rules-on-write.py`** — fires once per rule, per agent
-  Path-scoped rules (`claude/rules/*.md`) natively load when a file is *read*, not when it's freshly *written*.
-  A file created from scratch would never see the rule governing how it should be written.
-  This hook checks the rules directory against the file being written and injects any that match — too late to have shaped this write, so the message names the file and tells the model to rewrite it if the rule would have changed it.
-  `Edit` is matched too: native delivery is once per *session*, and a session is shared with its subagents, so a subagent editing a matching file after its parent consumed that rule would otherwise get nothing.
-  A file written through the shell arrives as `Bash` with no path to match, and stays uncovered.
-
-- **`PreToolUse:Write` → `not-your-repo.py`** — fires once per reason, per agent
-  `project-docs` says a finding travels in the report where the repository isn't yours, and that `docs/ROADMAP.md` is the user's to write.
-  Both are decidable from the git remote and the path, and an agent that skipped the skill never sees either.
-  This hook checks whether the repo has an `upstream` remote or an `origin` you don't own, and nudges before a *new* record file is created there.
-  Never blocks, and only matches creation — editing a file that already exists goes through untouched, so a README fix you were asked to make isn't second-guessed.
-
-- **`PreToolUse:Bash` → `prefer-rich-cli.py`** — fires once per binary, per agent
-  Nudges toward `rg`/`fd`/`jq` over `grep -r`/`find -name`/hand-parsed JSON, when the richer tool is installed.
-  Never blocks — it's a preference, not a rule, so `grep` inside a pipeline or `find -exec` still goes through untouched.
-
-- **`PostToolUse:Write|Edit` → `autoformat.py`** — fires every time, no dedup
-  Format-on-save for whatever was just touched (`ruff format`, `rustfmt`, `gofmt`, `biome`, project-pinned versions preferred over global installs).
-  If formatting changes the file, the model is told its on-disk copy no longer matches what it wrote — otherwise the next edit builds on stale text and fails to apply.
-
-`rules-on-write.py`, `not-your-repo.py` and `prefer-rich-cli.py` get their once-per-agent quiet by stamping a marker under `$TMPDIR/claude-hook-nudge` the first time each speaks, so the same lesson doesn't repeat every call within a session.
-`skills-on-launch.py` needs no marker — `SessionStart` fires on four sources and it acts on the two that begin with no skill in context: `startup` and `clear`.
-It skips `resume`, where the restored transcript still holds the injection, and `compact`, where `CLAUDE.md` is re-injected from disk and names the skill anyway.
-`autoformat.py` skips dedup entirely: formatting is idempotent, so repeating it costs nothing.
+The nudging hooks keep quiet after their first word by stamping a marker under `$TMPDIR/claude-hook-nudge`.
 
 ## Where things live
 
 ```
 claude/
 ├── CLAUDE.md       # always-loaded instructions (user-global)
-├── settings.json   # hooks, permissions, model, statusline, sandbox
+├── settings.json   # hooks, permissions, statusline, sandbox
+├── keybindings.json
+├── statusline.sh
 ├── agents/         # leader + the five subagents above
 ├── skills/         # knowledge loaded on demand
 ├── rules/          # path-scoped standards
-└── hooks/          # the five scripts above, plus utils.py
+└── hooks/          # the scripts above, plus utils.py
 ```
 
 For how a new piece of harness content should be slotted in (agent vs. skill vs. rule vs. `CLAUDE.md` vs. a doc like this one), see the `harness-design` skill — it's the doctrine this whole layout follows.
