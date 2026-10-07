@@ -34,3 +34,5 @@ agent/extensions/**/logs/
 # Omarchy-linked; no trailing slash: a symlink is a file, not a directory.
 agent/skills/omarchy
 agent/skills/diagnose-crash
+# herdr's skill, mirrored from its versioned mise install by mise/tasks/herdr-integrations.
+agent/skills/herdr/

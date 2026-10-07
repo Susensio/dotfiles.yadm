@@ -1,1 +1,0 @@
-../../../herdr/SKILL-config.md
