@@ -110,18 +110,4 @@ Each script's docstring holds why it exists and what it was probed against; this
 
 The nudging hooks keep quiet after their first word by stamping a marker under `$TMPDIR/claude-hook-nudge`.
 
-## Where things live
-
-```
-claude/
-├── CLAUDE.md       # always-loaded instructions (user-global)
-├── settings.json   # hooks, permissions, statusline, sandbox
-├── keybindings.json
-├── statusline.sh
-├── agents/         # leader + the five subagents above
-├── skills/         # knowledge loaded on demand
-├── rules/          # path-scoped standards
-└── hooks/          # the scripts above, plus utils.py
-```
-
 For how a new piece of harness content should be slotted in (agent vs. skill vs. rule vs. `CLAUDE.md` vs. a doc like this one), see the `harness-design` skill — it's the doctrine this whole layout follows.

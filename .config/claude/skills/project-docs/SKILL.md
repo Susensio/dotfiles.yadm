@@ -39,7 +39,7 @@ A line found doing more than that is a defect in the project's `AGENTS.md`: trim
 
 ## What kind of thing is it?
 
-Six go wherever the ladder lands:
+These go wherever the ladder lands:
 
 - **What this project is**, and how someone uses it — a `README`.
 - **What it must do** — a spec, a requirements doc.
