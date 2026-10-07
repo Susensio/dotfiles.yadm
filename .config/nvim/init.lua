@@ -234,7 +234,8 @@ vim.diagnostic.config({ severity_sort = true, virtual_text = false, virtual_line
 require("lazydev").setup({})
 
 -- Ensure parsers are installed; highlighting starts when a matching buffer opens.
-require("nvim-treesitter").install({
+-- Headless, as in the bootstrap, it waits for the downloads
+local parsers = require("nvim-treesitter").install({
    "bash",
    "fish",
    "javascript",
@@ -245,6 +246,9 @@ require("nvim-treesitter").install({
    "vim",
    "yaml",
 })
+if #vim.api.nvim_list_uis() == 0 then
+   parsers:wait(300000)
+end
 local config_group = vim.api.nvim_create_augroup("UserConfig", { clear = true })
 
 vim.api.nvim_create_autocmd("FileType", {
