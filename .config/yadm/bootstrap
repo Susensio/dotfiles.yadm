@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ensure ~/bin (log, pkg-install) is on PATH, missing on a fresh clone
-[[ :$PATH: == *":$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
+# environment.d applies only from the next login, so a first bootstrap ran
+# without PATH's ~/bin and ~/.local/bin and with tools' default homes (rustup
+# in ~/.rustup); its shell-safe files, as in mise/tasks/herdr-integrations
+set -a
+. "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf"
+. "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/11_path.conf"
+set +a
 
 # Execute all executable files (excluding yadm alternates) in the
 # ~/.config/yadm/bootstrap.d directory when run. Files a step installs live
