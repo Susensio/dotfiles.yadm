@@ -20,6 +20,11 @@ This layout rehomes the agents that take a config-directory variable and deletes
 `omarchy update` migrations recreate the `$HOME` links, so the post-update bootstrap removes them again.
 Antigravity has no such variable, so the agent and its skill were removed instead.
 
+## Keybindings
+
+`hypr/hyprland.lua` turns Omarchy's stock bindings off and `hypr/bindings.lua` defines this desktop's own ([ADR-0055](adr/0055-hyprland-super-mirrors-tmux.md)), so Omarchy's manual and its agent skill's examples name keys that do nothing here.
+The letters are in [`keybinds.md`](keybinds.md); `omarchy menu keybindings --print` lists the live set.
+
 ## Omarchy writes into tracked files
 
 Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is expected, not drift:

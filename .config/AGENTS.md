@@ -23,7 +23,7 @@ XDG config repo for `~/.config`, managed with yadm.
 ## References
 
 - For shell or environment questions, read `docs/environment-architecture.md` before investigating the process tree.
-- For Omarchy setup, commands that edit tracked files, or command overrides, read `docs/omarchy.md`.
+- Before answering about or changing the Omarchy desktop (Hyprland, keybinds, bar, themes, setup, commands that edit tracked files, command overrides), read `docs/omarchy.md`; it overrides the stock `omarchy` skill.
 - Before proposing tools, services or generation mechanisms, read `docs/principles.md`.
 - Before changing global Claude configuration, read `docs/harness.md` for its location and sandbox path constraints.
 - Before changing bindings shared across tools, read `docs/keybinds.md`.
