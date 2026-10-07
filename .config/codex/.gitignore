@@ -12,11 +12,9 @@
 
 # Bundled skills are managed by Codex.
 skills/.system/
-# Omarchy's skills, which omarchy/skills.sh links in. No trailing slash: to git
-# a symlink is a file, not a directory.
+# Linked in by the bootstrap; a symlink takes no trailing slash.
 skills/omarchy
 skills/diagnose-crash
-# herdr's skill, mirrored from its versioned mise install by mise/tasks/herdr-integrations.
 skills/herdr/
 __pycache__/
 *.pyc
