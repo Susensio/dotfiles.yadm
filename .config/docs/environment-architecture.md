@@ -8,7 +8,7 @@ These two worlds do not naturally share an environment, leading to "stale" varia
 This setup bridges that gap.
 
 Sections 1–6 describe Mint's X11/LightDM setup.
-Section 8 describes the planned Omarchy Wayland/uwsm setup.
+Section 8 describes the Omarchy Wayland/uwsm setup.
 
 ## 1. The Core Problem: Two Hierarchies
 On a modern Linux desktop, there isn't a single "root" process for everything.

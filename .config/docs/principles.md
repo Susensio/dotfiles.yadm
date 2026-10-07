@@ -25,7 +25,7 @@ Cost: every lazy-rendered surface has a builder, and generated state rots when t
 The bootstrap is safe to rerun any time, and rerun it does.
 Each step checks before acting, and is silent when nothing changes [0005, 0056]; bugfix steps apply a patch only when the forward one matches, so a fix that has landed upstream makes the step a silent no-op rather than a spurious error [0057].
 
-Idempotency alsoenabled a design choice: state that is checked on every run might as well be recomputed from its source every time, so caching is rarely worth it.
+Idempotency also enabled a design choice: state that is checked on every run might as well be recomputed from its source every time, so caching is rarely worth it.
 tmux re-derives its own location at relaunch [0010], tool routing is derived from the declaration [0046], the tmux palette is re-rendered from a tracked template on each theme switch [0052].
 
 Cost: every consumer of this repo interacts with it through check-and-set, which `omarchy update` migrations break -- they write into tracked files and only check that some marker exists, not that the file is in a known shape [0049].
@@ -41,7 +41,8 @@ Three boundary conditions:
 - A keeps-it-correct check the distro runs out of its own state (RPM scriptlets, `dpkg --verify`) is not declarative: the source of truth has to be a file that exists in the repo, not `/var/lib`.
 - Observed runtime is not the same as declaration -- reading a tool's live behaviour and codifying that bakes in a snapshot that rots on its next update [0045, 0051].
 - When a task needs an imperative loop, the answer is to shell out to the imperative layer, not to bend the declarative tool until it barely does it (the footballing-vs-wrapper-script trade [0048]).
-- Cost: declarative tools want odd cases expressed in their model, and what they cannot see -- fine-grained runtime state diffing against its complement -- stays invisible.
+
+Cost: declarative tools want odd cases expressed in their model, and what they cannot see -- fine-grained runtime state diffing against its complement -- stays invisible.
 
 ## Bootstrapped
 
