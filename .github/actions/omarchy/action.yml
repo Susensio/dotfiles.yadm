@@ -1,0 +1,65 @@
+name: Omarchy
+description: >-
+  Boot an Arch container named omarchy into systemd and make it Omarchy the way
+  its ISO does, for a user dev without a desktop session; as-dev runs a login
+  shell as dev
+inputs:
+  token:
+    description: Token for GitHub's API, to find Omarchy's latest release
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    # GitHub's container: key keeps its own process as PID 1, so not through it
+    - name: Boot Arch
+      shell: bash
+      run: |
+        sudo modprobe uinput
+        docker run --detach --name omarchy --privileged --cgroupns=host \
+          --volume /sys/fs/cgroup:/sys/fs/cgroup --tmpfs /run \
+          archlinux:latest /usr/lib/systemd/systemd
+        docker exec omarchy systemctl is-system-running --wait || true
+        # A login shell as the user, with its manager's bus, as a terminal has
+        sudo tee /usr/local/bin/as-dev >/dev/null <<'EOF'
+        #!/bin/sh
+        exec docker exec -i -u dev -w /home/dev -e USER=dev -e LOGNAME=dev -e GITHUB_TOKEN \
+          -e XDG_RUNTIME_DIR=/run/user/1000 -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+          omarchy bash --login "$@"
+        EOF
+        sudo chmod +x /usr/local/bin/as-dev
+
+    - name: Install Omarchy
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        docker exec -i -e GH_TOKEN omarchy bash -euo pipefail <<'EOF'
+        # The latest release is what the stable channel ships
+        tag=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+          https://api.github.com/repos/basecamp/omarchy/releases/latest |
+          sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+        raw=https://raw.githubusercontent.com/basecamp/omarchy/$tag
+        curl -fsSL -o /etc/pacman.conf "$raw/default/pacman/pacman-stable.conf"
+        curl -fsSL -o /etc/pacman.d/mirrorlist "$raw/default/pacman/mirrorlist-stable"
+        pacman-key --init
+        pacman-key --recv-keys 40DFB630FF42BCFFB047046CF0134EE680CAC571 --keyserver keys.openpgp.org
+        pacman-key --lsign-key 40DFB630FF42BCFFB047046CF0134EE680CAC571
+
+        # omarchy-settings seeds /etc/skel, so it goes in before the user exists
+        pacman -Syyuu --noconfirm omarchy-keyring omarchy-settings
+        mapfile -t packages < <(curl -fsSL "$raw/install/omarchy-base.packages" | grep -v '^#' | grep .)
+        # Boot hooks fail without a boot partition; check the packages landed instead
+        pacman -S --noconfirm --needed "${packages[@]}" omarchy sudo git || true
+        pacman -T "${packages[@]}" omarchy sudo git
+        useradd --create-home --uid 1000 --groups wheel dev
+        echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
+
+        # Omarchy's own modes for a root without btrfs and a user without a desktop session
+        OMARCHY_SNAPPER_CONFIGURE_TEST=1 omarchy-apply-system --install-user dev --first-install
+        sudo -u dev -H OMARCHY_SETUP_CONTEXT=provision-owner omarchy-provision-user --first-install
+        # yadm picks the Omarchy steps by this
+        grep -qx ID=omarchy /etc/os-release
+
+        loginctl enable-linger dev
+        for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done
+        EOF

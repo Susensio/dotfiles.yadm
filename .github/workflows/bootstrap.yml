@@ -1,0 +1,97 @@
+name: Bootstrap
+
+on:
+  - push
+  - pull_request
+  - workflow_dispatch
+
+# A pull request runs on its merge ref; clone the branch itself
+# An explicit bash adds pipefail, so a test's failure survives its sed
+defaults:
+  run:
+    shell: bash
+
+env:
+  BRANCH: ${{ github.head_ref || github.ref_name }}
+  # mise looks up releases on GitHub, whose anonymous limit runners share
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  ubuntu:
+    # Linux Mint 22's base; ubuntu-latest moves on without it
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # No login in CI: lingering starts the user manager `systemctl --user` needs
+      - name: Start a user session
+        run: |
+          sudo modprobe uinput
+          sudo loginctl enable-linger "$USER"
+          uid=$(id -u)
+          for _ in $(seq 30); do [ -S "/run/user/$uid/bus" ] && break; sleep 1; done
+          echo "XDG_RUNTIME_DIR=/run/user/$uid" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus" >> "$GITHUB_ENV"
+          # Stock Ubuntu's mode, which 10_xdg_compliance/sudo.sh relies on
+          sudo chmod 755 /etc/sudoers.d
+
+      # The README's steps
+      - name: Clone and bootstrap
+        run: |
+          # shellcheck disable=SC1090
+          source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
+          yadm checkout -- ~/.config
+          yadm bootstrap
+
+      # As the bootstrap asks once environment.d changed: restart the user manager
+      - name: Log in again
+        run: |
+          sudo systemctl restart "user@$(id -u)"
+          for _ in $(seq 30); do [ -S "$XDG_RUNTIME_DIR/bus" ] && break; sleep 1; done
+
+      # A login shell, whose profile imports the user manager's environment
+      - name: Test
+        run: |
+          # FAIL lines become annotations on the run's summary page
+          bash --login -c 'cd && just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+
+      # Steps print only what they change
+      - name: Bootstrap again, silently
+        if: ${{ !cancelled() }}
+        run: |
+          out=$(~/.config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          [ -z "$out" ] && exit 0
+          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
+          exit 1
+
+  # Omarchy's ISO, replayed in an Arch container booted into systemd (actions/omarchy)
+  omarchy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/omarchy
+
+      - name: Clone and bootstrap
+        run: |
+          # shellcheck disable=SC2016  # $0 and $1 expand in the container
+          as-dev -euo pipefail -c '
+            source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$0" "https://github.com/$1.git"
+            yadm checkout -- ~/.config
+            yadm bootstrap
+          ' "$BRANCH" "$GITHUB_REPOSITORY"
+
+      - name: Log in again
+        run: |
+          docker exec omarchy systemctl restart user@1000
+          docker exec omarchy bash -c 'for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done'
+
+      - name: Test
+        run: as-dev -c 'just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+
+      - name: Bootstrap again, silently
+        if: ${{ !cancelled() }}
+        run: |
+          out=$(as-dev -c .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          [ -z "$out" ] && exit 0
+          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
+          exit 1
