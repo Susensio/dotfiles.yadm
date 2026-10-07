@@ -1,46 +1,31 @@
-# pi agent configuration
+# Pi
 
-pi agent config lives in `$XDG_CONFIG_HOME/pi/` (`~/.config/pi`).
+Pi's user-global harness lives in `~/.config/pi/agent/`, which `PI_CODING_AGENT_DIR` points at.
+What it shares with the Claude and Codex harnesses, and where they differ, is in [`docs/harness.md`](../docs/harness.md).
+The live agents, skills, extensions and settings are authoritative for their own behaviour; this file covers what is tracked and what is easy to miss when operating it.
 
-Only the hand-maintained harness is tracked here by yadm; runtime state is ignored.
+## What yadm tracks
 
-## What is tracked
+`pi/.gitignore` is the whitelist and the only complete list: read it rather than a copy here.
+In outline, the hand-maintained harness is tracked — `agent/AGENTS.md`, the settings and model JSON files, `agents/`, `skills/`, `prompts/` (each file becomes a `/`-command), `extensions/` with their configs, the local `patches/` library and the `bundler/`.
+Skills the bootstrap links in from elsewhere, credentials, sessions, the npm checkout, caches and extension logs are not.
 
-- `pi/.gitignore` — whitelists exactly these paths, with one-line comments only; this README is the documentation
-- `pi/README.md` — this file
-- `pi/agent/AGENTS.md` — universal behaviour and pre-routing triggers
-- `pi/agent/README.md` — Pi-specific operating notes and validation boundaries
-- `pi/agent/settings.json` — theme, default provider/model, package list
-- `pi/agent/keybindings.json` — disables the stock thinking-level and model-cycle shortcuts in favor of Shift+Up/Down from `thinking-direction.ts` and Shift+Left/Right from `cycled-models.ts`
-- `pi/agent/cycled-models.json` — the ordered models Shift+Left/Right step through, edited by `/cycled-models`
-- `pi/agent/subagents.json` — hand-edited global subagent feature flags
-- `pi/agent/agents/*` — subagent definitions
-- `pi/agent/prompts/*` — prompt templates; each file becomes a `/`-command (`/permission-audit` briefs the session to analyze the permission log and propose rule changes)
-- `pi/agent/skills/*` — hand-written skills; the two Omarchy-provided symlinks (`omarchy`, `diagnose-crash`) are ignored, Omarchy's skills.sh links them in
-- `pi/agent/extensions/**` — including the hand-maintained permission-system and auto-review configs and the kept-dormant `pi-automode/config.json`
-- `pi/agent/patches/**` — local patch library for re-patching pi's `node_modules`; each patch directory carries `target`, `marker`, `orig`, a pristine `.orig` copy and the `.patch` diff, and `reapply-all.sh` runs them all
+Track a new file by adding it to the whitelist, above the knockouts at the end, since gitignore's last matching rule wins; never `git add -f`.
+`yadm status` showing nothing untracked under `pi/` is the check.
 
-See the tracked set with `git --git-dir="$HOME/.local/share/yadm/repo.git" ls-files -- .config/pi`, and confirm nothing runtime-generated shows as untracked with `yadm status`. Track a file by adding it to the whitelist (keeping it out of the knockouts), never by `git add -f`.
+## Operating notes
 
-The gitignore has two layers: the `!` whitelist, and the regenerable knockouts at the end, which must stay below the whitelist because gitignore's last matching rule wins. The knockouts are written against shapes, not names — any `logs/` under any extension, not a specific package — so swapping an extension does not touch the file.
-
-## What is not tracked
-
-- `pi/pi.bin` — the compiled binary
-- `pi/agent/auth.json` — provider credentials
-- `pi/agent/trust.json` — trusted-directory markers
-- `pi/agent/models-store.json` — provider model registry cache
-- `pi/agent/sessions/` — per-project session transcripts
-- `pi/agent/npm/` — the package checkout; `package.json` also lists two packages not wired into `settings.json`: `@latentminds/pi-quotas` and `pi-quota-monitoring`
-- `pi/.pi/` — per-project subagent feature-flag overrides written by the `/agents` Settings menu; `agent/subagents.json` is the hand-edited global defaults file, which the menu never writes
-- any `logs/` directory under `pi/agent/extensions/` — extension run logs
-
-## Environment
-
-`environment.d/20_pi.conf` sets `PI_AUTO_REVIEW_ALLOW_UNTRUSTED_DEV=1`, which lets the permission system and its auto-review authorizer treat this dotfiles tree as a dev project without deferring routine work. It is read from the process environment, not from pi config, hence it lives in environment.d rather than `agent/settings.json`.
-
-## Further reading
-
-- `agent/README.md` — Pi-specific operating notes
-- `~/.config/docs/harness.md` — shared harness approach and Pi/Claude/Codex boundaries
-- `~/.config/docs/environment-architecture.md` — shell/env relay and `environment.d` precedence
+- **Root commands** go through `pkexec`, never `sudo`, whose fingerprint prompt waits invisibly in Pi's pipes; allow a shell timeout of at least 60 seconds.
+  Commands listed in `agent/always-ask.json` always reach you ([ADR-0071](../docs/adr/0071-ask-before-pkexec.md)).
+- **`/yolo`** (or `pi --yolo`) approves every ask for the current session only ([ADR-0081](../docs/adr/0081-pi-session-yolo-always-ask.md)).
+  Keep `always-ask` first in the authorizer chain so pkexec still prompts under it, and leave `yoloMode` in the permission config off: it applies to every running session.
+- **The permission reviewer** asks `alias/reviewer`, a fallback chain defined and explained in `agent/model-alias.json`.
+  Only provider failures move down the chain; a reviewer's `defer` is final.
+  `/permission-audit` turns the permission log into proposed config edits.
+- **Extension bundling** roughly halves startup but changes how modules load ([ADR-0067](../docs/adr/0067-bundle-pi-extensions.md)).
+  When an extension hangs or misbehaves, run `node agent/bundler/bundle.mjs --revert` and retest before debugging the extension itself; run `/bundle-review` after installing or updating a package.
+- **Local patches** in `agent/patches/` carry upstream fixes not yet released, and keep their package off the bundler; `agent/patches/reapply-all.sh` reapplies them after a package update.
+- **Stray extension output** goes to `agent/tui-captured-output.log` with a warning while a TUI session runs, through `agent/extensions/tui-output-guard.ts`, instead of landing in the editor.
+- **Web tools** need `/web-tools` run once before `web_search` or `web_fetch` work.
+- **`bash-readonly`** gives the explorer and tester a disposable writable view of the project; it does not isolate the network.
+- **`environment.d/20_pi.conf`** sets `PI_AUTO_REVIEW_ALLOW_UNTRUSTED_DEV=1`, so the auto-reviewer treats this dotfiles tree as a dev project; it is read from the process environment, not from Pi's config.
