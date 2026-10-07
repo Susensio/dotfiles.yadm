@@ -22,3 +22,9 @@ The task is install-only (never uninstalls, because of the claude churn above), 
 A fresh bootstrap self-integrates every harness the checkout carries, in any tool-install order. Adding a harness means one `tools.toml` line — the postinstall — and nothing else; removing one is an uninstall away. No environment defaults are duplicated, and the task cannot outdate its own variable knowledge.
 
 Machine-local harnesses installed after herdr through plain `mise use -g` (ADR-0045) carry no hook and wait for herdr's next install or a manual run. Presence is the opt-in: a harness whose config directory exists is integrated, with no per-harness opt-out. Integration version bumps rewrite the tracked managed files and surface as ordinary yadm diffs to commit as herdr bumps. A distro-packaged herdr older than mise's must not win binary resolution, so the task prefers the hook's install path. The bridge extension for ask_user_question's blocked event stays until herdr consumes `rpiv:ask-user:blocked` natively, at which point it is deleted.
+
+## Corrections
+
+2026-10-07: the hooks run `mise run --skip-tools herdr-integrations`, not `mise run herdr-integrations`.
+Without the flag `mise run` installs every missing tool before the task, so on a fresh machine each hook started a nested install racing the outer one, three levels deep once those tools' hooks fired; the bootstrap CI saw the claude and pi hooks fail with another tool's error, and whole runs hung.
+The task also takes an exclusive `flock` for its run: under parallel installs a harness's hook and herdr's full sync fire together and both write that harness's config.

@@ -8,6 +8,11 @@
 # (normalizes its matcher), so an uninstall+install cycle churns the file.
 set -u
 
+# Parallel installs run a harness's hook and herdr's at once, and both write that
+# harness's config (claude's settings.json, pi's extension)
+exec 9>"${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/herdr-integrations.lock"
+flock 9
+
 # environment.d/10_xdg.conf is the single source of these variables
 # (docs/environment-architecture.md §3): it defines the XDG base and the agent
 # roots (CLAUDE_CONFIG_DIR, PI_CODING_AGENT_DIR, ...) herdr's installers read —
