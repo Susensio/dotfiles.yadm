@@ -26,3 +26,5 @@ skills/synced/
 # a symlink is a file, not a directory.
 skills/omarchy
 skills/diagnose-crash
+# herdr's skill, mirrored from its versioned mise install by mise/tasks/herdr-integrations.
+skills/herdr/
