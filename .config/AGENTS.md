@@ -6,7 +6,7 @@ XDG config repo for `~/.config`, managed with yadm.
   Never derive this workspace's root from `git rev-parse --show-toplevel`.
 - Before writing config syntax you have not verified in this session, check the tool's manpage or `--help`.
 - Write one-line comments for constraints the config cannot express.
-- Split delegated work by config domain (`tmux`, `fish`, `nvim`, `mise`, `keyd`).
+- Split delegated work by config domain (`tmux`, `fish`, `helix`, `mise`, `keyd`).
 - Commit messages: `domain: imperative`, lowercase after the prefix, no trailing period (`fish: add fenv`); the prefix names the config domain.
 - Commit one concern with its docs; amend an existing unpushed commit for follow-ups.
   Stage explicit paths and only your own changes.
