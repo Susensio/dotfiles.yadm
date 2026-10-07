@@ -21,8 +21,8 @@ Report only when it is not, since that is the answer that changes what happens n
 
 **1. What does it say about itself?** `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`.
 Take the nearest one above the files you touched; it beats the root's where they disagree.
-Below, `CLAUDE.md` means whichever context file the project keeps: `CLAUDE.md`, or `AGENTS.md` where that is the only one.
-Never create a `CLAUDE.md` beside an `AGENTS.md` — Claude reads `AGENTS.md` only where no `CLAUDE.md` exists, so the new file silently replaces it.
+Below, `AGENTS.md` means the project's context file, or the `CLAUDE.md` it keeps instead.
+Never keep both: Claude reads `CLAUDE.md` and ignores an `AGENTS.md` beside it.
 
 **2. What does it visibly keep?** A `docs/` tree, `TODO.md`, `CHANGELOG.md`, an issue tracker it links to.
 Match it, even where the format is not what you would have chosen.
@@ -34,8 +34,8 @@ List the root directly — a file holding live state is often gitignored, and `r
 The `grow-project-docs` skill has this user's filenames and what earns each.
 
 Read a file before writing to it.
-Someone else's may declare its own boundary in its first lines and that governs; this user's will not, because the repository's own `CLAUDE.md` carries a line per file — identity only, never the boundary or edit rule.
-A line found doing more than that is a defect in the project's `CLAUDE.md`: trim it back to identity rather than following it (ADR-0041).
+Someone else's may declare its own boundary in its first lines and that governs; this user's will not, because the repository's own `AGENTS.md` carries a line per file — identity only, never the boundary or edit rule.
+A line found doing more than that is a defect in the project's `AGENTS.md`: trim it back to identity rather than following it (ADR-0041).
 
 ## What kind of thing is it?
 
@@ -52,7 +52,7 @@ Five go wherever the ladder lands:
 Three skip the ladder.
 A settled choice between real alternatives, including a decision not to do something, goes to the `adr` skill, which decides whether it is worth recording at all.
 A standing fact about the system sits where it would otherwise be re-derived: a comment beside its code, or a path-scoped rule when it spans one path; one cheap to re-derive can simply go.
-`CLAUDE.md` is for rules every session there needs, so it makes a poor catch-all.
+`AGENTS.md` is for rules every session there needs, so it makes a poor catch-all.
 Throwaway material goes wherever the project already ignores, gone when the work commits.
 
 Roadmap or backlog, when both fit: `grow-project-docs` holds that boundary.

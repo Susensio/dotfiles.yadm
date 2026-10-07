@@ -16,8 +16,8 @@ The two files split by job, and keeping the split is what stops one drifting fro
 `harness-design` holds the reason a rule exists and the example that shows it.
 This file holds what to look for and the command that finds it, and cites the rule by slug instead of restating why it matters -- an explanation copied here is one that gets corrected in one file and not the other.
 
-Scope: `~/.config/claude/` (user tier, where `CLAUDE_CONFIG_DIR` points), the repo's own `.claude/` and `CLAUDE.md`, any nested `**/.claude/`, and any nested `**/CLAUDE.md` -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
-An `AGENTS.md` in a directory with no `CLAUDE.md` loads in its place and is in scope the same way; one beside a `CLAUDE.md` is never read by Claude, which is a finding.
+Scope: `~/.config/claude/` (user tier, where `CLAUDE_CONFIG_DIR` points), the repo's own `.claude/` and context file, any nested `**/.claude/`, and any nested context file -- Claude auto-discovers these walking up from cwd, so a stale one in a subpackage is still live.
+A context file is `AGENTS.md`, or `CLAUDE.md` where a directory keeps one; an `AGENTS.md` beside a `CLAUDE.md` is never read by Claude, which is a finding.
 Plus the layers the harness leans on to hold a rule: hooks in `settings*.json`, pre-commit config, linter and formatter configs, CI workflows.
 A rule is worth what the layer that catches it is worth (R-enforcement), so a harness cannot be judged from its prose alone.
 
@@ -136,7 +136,7 @@ A mismatch already priced as an accepted consequence is not a finding — check 
 A rule knowingly left in a file that reaches every subagent, because a narrower placement would not fire in time, is a decision, not a defect.
 
 - **An instruction reaching an agent that cannot obey it.**
-  Cross every rule in `CLAUDE.md` and its imports, which reach each subagent with no opt-out, against the roster's `tools:` lists.
+  Cross every rule in the context file and its imports, which reach each subagent with no opt-out, against the roster's `tools:` lists.
   The fix is a condition on the rule, or a grant.
 - **A handoff the grant does not support.**
   Where one file tells an agent to spawn another, the named agent exists and the spawning one holds `Agent`.
