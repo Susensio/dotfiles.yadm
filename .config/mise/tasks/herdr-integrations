@@ -28,11 +28,12 @@ set -a
 set +a
 
 # Prefer the binary this hook runs for: MISE_TOOL_INSTALL_PATH is set only in
-# the tool postinstall context and names the version that just landed, and a
-# distro copy of herdr on PATH (this machine carries a stale pacman herdr
-# 0.8.2 in /usr/bin) must never win over it. Manual runs fall back to PATH.
+# the tool postinstall context and names the version that just landed. Else
+# mise's herdr, never PATH: Omarchy ships an older herdr in /usr/bin, which
+# would install older integrations over current ones. Before mise's herdr is
+# installed this skips, and herdr's own hook integrates every harness after.
 herdr_bin="${MISE_TOOL_INSTALL_PATH:-}/herdr"
-[[ -x $herdr_bin ]] || herdr_bin="$(command -v herdr || true)"
+[[ -x $herdr_bin ]] || herdr_bin="$(mise which herdr 2>/dev/null || true)"
 if [[ -z "$herdr_bin" || ! -x "$herdr_bin" ]]; then
 	echo "herdr-integrations: herdr binary not found, skipping" >&2
 	exit 0
