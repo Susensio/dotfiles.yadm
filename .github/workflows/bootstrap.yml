@@ -35,7 +35,14 @@ jobs:
           # shellcheck disable=SC1090
           source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
           yadm checkout -- ~/.config
-          yadm bootstrap
+          set -o pipefail
+          DEBUG=1 timeout 11m ~/.config/yadm/bootstrap 2>&1 | tee /tmp/ci.log
+
+      - name: Report failure
+        if: ${{ failure() }}
+        run: |
+          out=$(tail -n 40 /tmp/ci.log)
+          echo "::error title=tail::${out//$'\n'/%0A}"
 
       # As the bootstrap asks once environment.d changed: restart the user manager
       - name: Log in again
