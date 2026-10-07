@@ -4,3 +4,5 @@ git
 jq
 wget
 gcc
+patch
+cmp diffutils
