@@ -1,7 +1,7 @@
 ---
 name: independent-code-review
 user-invocable: false
-description: Gets Codex's independent review of a completed, committed feature that changes behaviour, and returns its findings verbatim. Use only when the brief explicitly requests it, once the feature's last commit is in -- never per commit, task, documentation change or chore.
+description: Codex's independent review of a completed, committed feature that changes behaviour. Use only when a brief explicitly requests it.
 ---
 
 # Independent code review
