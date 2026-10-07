@@ -28,3 +28,5 @@ Machine-local harnesses installed after herdr through plain `mise use -g` (ADR-0
 2026-10-07: the hooks run `mise run --skip-tools herdr-integrations`, not `mise run herdr-integrations`.
 Without the flag `mise run` installs every missing tool before the task, so on a fresh machine each hook started a nested install racing the outer one, three levels deep once those tools' hooks fired; the bootstrap CI saw the claude and pi hooks fail with another tool's error, and whole runs hung.
 The task also takes an exclusive `flock` for its run: under parallel installs a harness's hook and herdr's full sync fire together and both write that harness's config.
+
+2026-10-07: preferring the hook's install path covered herdr's own hook only; claude's and pi's fell back to PATH, where a fresh Omarchy bootstrap found Omarchy's older /usr/bin/herdr and, after herdr's hook, overwrote current integrations with older ones. The task now asks mise for its herdr and skips when there is none yet, leaving that harness to herdr's own hook.
