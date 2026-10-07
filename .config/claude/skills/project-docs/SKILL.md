@@ -37,7 +37,7 @@ A line found doing more than that is a defect in the project's `CLAUDE.md`: trim
 
 ## What kind of thing is it?
 
-Five go wherever the ladder lands:
+Six go wherever the ladder lands:
 
 - **What this project is**, and how someone uses it — a `README`.
 - **What it must do** — a spec, a requirements doc.

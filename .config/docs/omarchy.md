@@ -16,7 +16,7 @@ The bootstrap trims Omarchy's preinstalls itself ([ADR-0049](adr/0049-omarchy-pr
 ## Agent skills
 
 Omarchy symlinks its skills into `$HOME`-relative agent roots: `~/.agents`, `~/.claude`, `~/.codex`, `~/.pi/agent`, `~/.hermes`, and later `~/.gemini/config`.
-This layout rehomes the agents that take a config-directory variable and deletes those `$HOME` copies, leaving the skills in `~/.config/claude`, `~/.config/codex`, `~/.config/pi/agent`, `~/.config/hermes` and the generic `~/.config/.agents` ([ADR-0068](adr/0068-xdg-agent-skill-roots.md)).
+This layout rehomes the agents that take a config-directory variable and deletes those `$HOME` copies, leaving the skills in `~/.config/claude`, `~/.config/codex`, `~/.config/pi/agent`, `~/.config/opencode`, `~/.config/hermes` and the generic `~/.config/.agents` ([ADR-0068](adr/0068-xdg-agent-skill-roots.md)).
 `omarchy update` migrations recreate the `$HOME` links, so the post-update bootstrap removes them again.
 Antigravity has no such variable, so the agent and its skill were removed instead.
 
