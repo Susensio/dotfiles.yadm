@@ -1,6 +1,6 @@
 name: Claude comment
 
-# Posts what a Claude session dispatches, under the app's bot identity when configured.
+# Posts or replies as the app's bot when configured; resolve: true also resolves the thread.
 on:
   repository_dispatch:
     types: [claude-comment]
@@ -33,3 +33,17 @@ jobs:
             path="repos/$REPO/issues/$number/comments"
           fi
           jq -e '{body: (.body | strings)}' <<<"$PAYLOAD" | gh api -X POST "$path" --input -
+          [[ -n $reply_to && $(jq -r '.resolve' <<<"$PAYLOAD") == true ]] || exit 0
+          # shellcheck disable=SC2016 # GraphQL variables
+          thread=$(gh api graphql -F owner="${REPO%/*}" -F name="${REPO#*/}" -F number="$number" -f query='
+            query($owner: String!, $name: String!, $number: Int!) {
+              repository(owner: $owner, name: $name) {
+                pullRequest(number: $number) {
+                  reviewThreads(first: 100) { nodes { id comments(first: 1) { nodes { databaseId } } } }
+                }
+              }
+            }' | jq -er --argjson root "$reply_to" \
+            '.data.repository.pullRequest.reviewThreads.nodes[] | select(.comments.nodes[0].databaseId == $root) | .id')
+          # shellcheck disable=SC2016 # GraphQL variables
+          gh api graphql -f thread="$thread" -f query='
+            mutation($thread: ID!) { resolveReviewThread(input: {threadId: $thread}) { thread { isResolved } } }'
