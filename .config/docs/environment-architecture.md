@@ -59,7 +59,7 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
 ### Phase 3: The Shell Layer (The Interactive Experience)
 1.  **Terminal Startup:** You open a terminal.
     `gnome-terminal-server` (child of systemd) spawns a shell.
-2.  **The Fish Transition:** `~/.config/bash/bashrc` detects an interactive session and `exec fish --login`.
+2.  **The Fish Transition:** `~/.config/bash/bashrc` detects a plain interactive session and `exec fish --login`.
 3.  **The Final Sync:** `01_environment.fish` detects a login shell and calls `_env_pull`.
     *   **Action:** Fetches the current environment from `systemd --user`, including session overrides.
 
@@ -90,7 +90,8 @@ On Mint that is `gnome-terminal-server`, activated once by Cinnamon; on Omarchy 
 ### The Bash-to-Fish Relay
 While Fish is our primary interactive shell, we use Bash as the entry point for compatibility:
 1.  **Entry:** Most sessions start `/bin/bash`.
-2.  **Relay (`~/.config/bash/bashrc`):** If the shell is interactive, it `exec`s into `fish`.
+2.  **Relay (`~/.config/bash/bashrc`):** If the shell is interactive and runs no command string (`bash -ilc` stays in bash), it `exec`s into `fish`.
+    `yadm/bootstrap.d/20_fish.sh` keeps the relay at the top of `bashrc`, rewriting it when it changes.
 3.  **State Preservation:** Bash checks if it is a login shell and passes the `--login` flag to Fish, ensuring the environment sync logic is triggered.
 
 ### Login Shell Support (`~/.config/profile`)
