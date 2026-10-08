@@ -1,0 +1,35 @@
+name: Claude comment
+
+# Posts what a Claude session dispatches, under the app's bot identity when configured.
+on:
+  repository_dispatch:
+    types: [claude-comment]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - id: app
+        if: ${{ vars.CLAUDE_APP_ID != '' }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.CLAUDE_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
+      - name: Post
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          REPO: ${{ github.repository }}
+        run: |
+          number=$(jq -er '.number | numbers' <<<"$PAYLOAD")
+          reply_to=$(jq -r '.reply_to // empty | numbers' <<<"$PAYLOAD")
+          if [[ -n $reply_to ]]; then
+            path="repos/$REPO/pulls/$number/comments/$reply_to/replies"
+          else
+            path="repos/$REPO/issues/$number/comments"
+          fi
+          jq -e '{body: (.body | strings)}' <<<"$PAYLOAD" | gh api -X POST "$path" --input -
