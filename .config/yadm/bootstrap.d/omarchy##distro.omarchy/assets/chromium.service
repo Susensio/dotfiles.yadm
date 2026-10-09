@@ -4,6 +4,8 @@ PartOf=graphical-session.target
 After=graphical-session.target
 
 [Service]
+# Chromium draws its own notification windows for life if no server is up at start; the Omarchy shell has no unit to order after.
+ExecStartPre=-/usr/bin/gdbus wait --session --timeout 30 org.freedesktop.Notifications
 # Chromium exits without a window unless kept alive; the switch is its test-only one
 # env resolves the user PATH so renaming ~/bin/overrides/chromium bypasses the proxy.
 ExecStart=/usr/bin/env chromium --no-startup-window --keep-alive-for-test

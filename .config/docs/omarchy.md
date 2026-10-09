@@ -135,6 +135,10 @@ An installed `lsb_release` takes precedence and would change what they match.
 Chromium exits with no window open unless started with `--keep-alive-for-test`, a switch meant for its own tests; if a release drops it, the service just exits and launches go back to cold starts.
 A change to `chromium-flags.conf` applies after `systemctl --user restart chromium`, and quitting Chromium from its menu stops the service until the next login.
 
+Chromium decides at startup whether a notification server exists; started before the Omarchy shell owns `org.freedesktop.Notifications`, it draws every notification itself as a nameless, untitled window that Hyprland tiles, until the process restarts.
+The shell runs inside Hyprland's own service, so there is no unit to order after; `ExecStartPre` waits up to 30 s for the bus name and, on timeout, starts Chromium anyway with that fallback.
+A restart that brought notifications back as Omarchy toasts confirmed the cause; `~/.local/state/omarchy/notifications/history/` gains no entry for the fallback windows.
+
 `chromium-flags.conf` is tracked directly, including `--force-device-scale-factor=0.9` and Omarchy's bundled Google OAuth flags.
 The Chromium bootstrap installs and enables the background service and refreshes a user-local desktop entry from the packaged launcher, changing all its `Exec` commands to `chromium`.
 Set **Page zoom → 125%** manually in `chrome://settings/appearance`; later zoom changes stay in Chromium's profile and are not managed by bootstrap.
