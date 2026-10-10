@@ -40,7 +40,7 @@ if [[ $wanted != "$current" ]]; then
   printf '%s\n' "$wanted" >"$BASHRC_FILE"
 fi
 
-# conf.d/20_fisher.fish installs fisher and its plugins on an interactive start
+# conf.d/20_fisher.fish installs fisher and syncs it with fish_plugins on an interactive start
 fish -i -c exit </dev/null
 
 # if [ "$SHELL" != "$(which fish)" ]; then

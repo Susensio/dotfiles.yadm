@@ -15,6 +15,11 @@ if status is-interactive
     if not functions -q fisher
         echo "Fisher not found, installing..."
         curl -sL https://git.io/fisher | source && fisher update || fisher install jorgebucaran/fisher
+    else if test -f $__fish_config_dir/fish_plugins
+        # fish_plugins changed under fisher (a pull): update installs and removes to match
+        set -l wanted (string match -rv '^\s*$' <$__fish_config_dir/fish_plugins | sort)
+        set -l installed (fisher list | sort)
+        test "$wanted" = "$installed"; or fisher update
     end
 end
 
