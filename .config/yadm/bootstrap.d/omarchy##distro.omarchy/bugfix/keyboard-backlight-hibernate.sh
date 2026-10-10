@@ -4,6 +4,9 @@
 set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
+# omarchy-hibernation-setup installs the hook only where hibernation is set up
+[[ -e /usr/lib/systemd/system-sleep/keyboard-backlight ]] || exit 0
+
 apply_omarchy_patch \
   keyboard-backlight-hibernate.patch \
   /usr/lib/systemd/system-sleep/keyboard-backlight 0

@@ -4,13 +4,15 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 DEPENDENCIES_FILE=${SCRIPT_DIR}/dependencies.txt
 
-required_pkgs=()
-readarray -t required_pkgs < <(grep --invert-match -E '^\s*#|^$' "$DEPENDENCIES_FILE")
+required=()
+readarray -t required < <(grep --invert-match -E '^\s*#|^$' "$DEPENDENCIES_FILE")
 
+# Each line is a command, then its package when the names differ
 missing_pkgs=()
-for pkg in "${required_pkgs[@]}"; do
-  if ! command -v "$pkg" &> /dev/null; then
-    missing_pkgs+=("$pkg")
+for line in "${required[@]}"; do
+  read -r cmd pkg <<<"$line"
+  if ! command -v "$cmd" &> /dev/null; then
+    missing_pkgs+=("${pkg:-$cmd}")
   fi
 done
 

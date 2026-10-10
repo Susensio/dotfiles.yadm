@@ -5,15 +5,16 @@ aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
 ] }
 argc = "latest"
-claude = { version = "latest", postinstall = "mise run herdr-integrations" }
-codex = { version = "latest", symlink_bins = true, postinstall = "mise run herdr-integrations" }
+# --skip-tools: else each hook's mise installs every missing tool, racing this install
+claude = { version = "latest", postinstall = "mise run --skip-tools herdr-integrations" }
+codex = { version = "latest", symlink_bins = true, postinstall = "mise run --skip-tools herdr-integrations" }
 "github:tmuxpack/tpack" = "latest"
-herdr = { version = "latest", gen_completions = "completion fish", postinstall = "mise run herdr-integrations", extra_assets = [
+herdr = { version = "latest", gen_completions = "completion fish", postinstall = "mise run --skip-tools herdr-integrations", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
 ] }
 opencode = "latest"
-pi = { version = "latest", postinstall = "mise run herdr-integrations" }
+pi = { version = "latest", postinstall = "mise run --skip-tools herdr-integrations" }
 usage = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = { version = "latest", gen_shell_init = "init fish --cmd cd" }
