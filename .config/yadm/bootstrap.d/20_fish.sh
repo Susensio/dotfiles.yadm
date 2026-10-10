@@ -42,18 +42,3 @@ fi
 
 # conf.d/20_fisher.fish installs fisher and syncs it with fish_plugins on an interactive start
 fish -i -c exit </dev/null
-
-# if [ "$SHELL" != "$(which fish)" ]; then
-#   log info "Setting fish as default shell for current user..."
-#   sudo chsh -s "$(which fish)" "$USER"
-# fi
-
-# # update plugins from fish_plugins if changed
-# if [[ -n $(comm -3 \
-#     <(fish -c 'fisher list' | tr '[:upper:]' '[:lower:]' | sort) \
-#     <(cat ~/.config/fish/fish_plugins |tr '[:upper:]' '[:lower:]' | sort) \
-#     &> /dev/null) ]]; then
-#   fish -c 'fisher update' &
-#   # have to wait bc fisher is async
-#   wait
-# fi
