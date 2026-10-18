@@ -57,6 +57,10 @@
   Before adopting, weigh that the key store is plaintext at `0600` and the override shadows the `auth.json` `opencode-go` credential; set `retry.maxRetries` to at least the key count and consider `retry.provider.maxRetries: 0`, since pi retries a 429 twice on the same key (`maxRetries ?? 2`) before rotation is re-read; and the 90s watchdog can abort a legitimately slow turn.
   It rotates accounts behind one provider id, which aliases cannot do (they select models, not credentials), so it replaces nothing in `model-alias.json`; keep `pi-multi-account` out, as it wants provider retries at zero for its own router and treats `opencode-go` as an unmanaged last-resort member rather than a managed family.
 
+- keyd | The MX Keys Fn row sends firmware Super chords, found with `keyd monitor`: Fn+F3 is Super+Tab, Fn+F4 is Super+A, Fn+F5 is Super+D. They were left alone deliberately, and the keyboard is not in use now.
+  What they do today: Fn+F3 "Next window" and Fn+F4 "Agent" (`hypr/bindings.lua`), Fn+F5 nothing. Reclaiming them means a keyd chord per key to a spare F-key (`f13`, `f14`, `f16`; `f15` is the lock key), which raises the same per-device scoping question as the lock chord (previous entry).
+  Their Windows meanings (Task View, Quick Settings, Show Desktop) do not exist here, so the value is whatever actions get chosen; candidates are the three-key chords with no letter of their own: Power panel, Wi-Fi panel, cycle power profile, notification history, keybindings list.
+
 - keyd | The MX Keys lock chord (`leftmeta+l = coffee` in `keyd/default.conf`) is global, so a manual Super+L faster than `chord_timeout` locks the screen on any keyboard instead of `focus right`.
   Scoping it to `k:046d:408a` needs a second config file: keyd has no `include` and matches a device to exactly one file, so that file must repeat `capslock`, `rightalt`, `[shift]` and `[caps:C]`, or those silently stop working on the MX Keys alone.
   Left global deliberately, since the misfire needs a manual press inside 35ms; revisit if it fires, and prefer generating the MX Keys file from `default.conf` at sync over duplicating the base by hand (docs/keybinds.md).
