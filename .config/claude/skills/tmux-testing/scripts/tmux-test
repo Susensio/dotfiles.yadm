@@ -28,6 +28,15 @@ EOF
 
 socket_path() { echo "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$1"; }
 
+# tmux refuses a socket directory with any group or other permission bits, and
+# one created by an earlier mkdir -p under the default umask 022 is 0755.
+ensure_socket_dir() {
+    local dir
+    dir=$(dirname "$(socket_path x)")
+    mkdir -p "$dir"
+    chmod 700 "$dir"
+}
+
 # Keyed on the socket, not the pid, so kill/sweep can find it later.
 fakebin_path() { echo "${TMPDIR:-/tmp}/tmux-test-fakebin.$1"; }
 
@@ -39,6 +48,7 @@ cmd_spawn() {
     local config=${1:?usage: spawn <config>}
     [ -f "$config" ] || { echo "no such config: $config" >&2; exit 1; }
     local sock="${PREFIX}_$$_${RANDOM}"
+    ensure_socket_dir
     tmux -L "$sock" -f "$config" new-session -d -s test
     echo "$sock"
 }

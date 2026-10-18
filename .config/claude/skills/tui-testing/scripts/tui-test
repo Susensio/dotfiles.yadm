@@ -21,6 +21,16 @@ EOF
 
 socket_path() { echo "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$1"; }
 
+# tmux refuses a socket directory with any group or other permission bits, and
+# mkdir -p under the default umask 022 leaves exactly that (0755). Install 0700
+# so a dir created here, or left behind by an earlier run, still works.
+ensure_socket_dir() {
+    local dir
+    dir=$(dirname "$(socket_path x)")
+    mkdir -p "$dir"
+    chmod 700 "$dir"
+}
+
 # Hide our own tmux from the TUI being tested
 unset TMUX
 
@@ -32,7 +42,7 @@ cmd_spawn() {
     local w=${2:-100} h=${3:-24}
     local id="${PREFIX}_$$_${RANDOM}"
     
-    mkdir -p "$(dirname "$(socket_path x)")"
+    ensure_socket_dir
     tmux -L "$id" -f /dev/null new-session -d -s term -x "$w" -y "$h" "$cmd"
     echo "$id"
 }
