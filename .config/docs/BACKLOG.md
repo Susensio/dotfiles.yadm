@@ -57,6 +57,10 @@
   Before adopting, weigh that the key store is plaintext at `0600` and the override shadows the `auth.json` `opencode-go` credential; set `retry.maxRetries` to at least the key count and consider `retry.provider.maxRetries: 0`, since pi retries a 429 twice on the same key (`maxRetries ?? 2`) before rotation is re-read; and the 90s watchdog can abort a legitimately slow turn.
   It rotates accounts behind one provider id, which aliases cannot do (they select models, not credentials), so it replaces nothing in `model-alias.json`; keep `pi-multi-account` out, as it wants provider retries at zero for its own router and treats `opencode-go` as an unmanaged last-resort member rather than a managed family.
 
+- keyd | The MX Keys lock chord (`leftmeta+l = coffee` in `keyd/default.conf`) is global, so a manual Super+L faster than `chord_timeout` locks the screen on any keyboard instead of `focus right`.
+  Scoping it to `k:046d:408a` needs a second config file: keyd has no `include` and matches a device to exactly one file, so that file must repeat `capslock`, `rightalt`, `[shift]` and `[caps:C]`, or those silently stop working on the MX Keys alone.
+  Left global deliberately, since the misfire needs a manual press inside 35ms; revisit if it fires, and prefer generating the MX Keys file from `default.conf` at sync over duplicating the base by hand (docs/keybinds.md).
+
 ## Omarchy migration
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
