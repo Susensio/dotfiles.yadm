@@ -1,6 +1,6 @@
 # ADR-0066: Trust the auto-reviewer with the external_directory family by patching the delegation envelope, instead of widening static external allows or waiting for upstream
 
-Status: Accepted
+Status: Superseded in part by [ADR-0087](0087-licensed-external-directory-allow.md) — the delegation-envelope patch is gone; the reviewer policy extension stands
 Date: 2026-09-28
 
 ## Context
