@@ -1,5 +1,10 @@
 # State
 
+## ai-usagebar critical toast timeout
+
+[#461](https://github.com/akitaonrails/ai-usagebar/pull/461) asks `notify-send` for a 30 s timeout on a critical toast (`-t 30000`), so a 100% alert can expire once Omarchy honours a requested timeout; Omarchy's notification plugin returns duration 0 for critical today, and [omacom/omarchy#12964](https://github.com/omacom/omarchy/pull/12964) is the fix there, still waiting on the maintainer.
+The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `fix/notify-critical-timeout`, one commit ahead of upstream `main`, so the bar keeps the change until it merges; then fast-forward `main`, delete the branch locally and on the fork, and drop this section.
+
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
