@@ -1,4 +1,4 @@
-# ADR-0085: Reach Mise's global tools from a login shell through ADR-0007's links, instead of login-profile shims or mise env
+# ADR-0089: Reach Mise's global tools from a login shell through ADR-0007's links, instead of login-profile shims or mise env
 
 Status: Accepted
 Date: 2026-10-08

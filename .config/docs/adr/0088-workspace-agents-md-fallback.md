@@ -1,4 +1,4 @@
-# ADR-0084: Name the dotfiles workspace instructions AGENTS.md now that Claude Code falls back to it, instead of keeping CLAUDE.md or symlinking both
+# ADR-0088: Name the dotfiles workspace instructions AGENTS.md now that Claude Code falls back to it, instead of keeping CLAUDE.md or symlinking both
 
 Status: Accepted
 Date: 2026-10-07
