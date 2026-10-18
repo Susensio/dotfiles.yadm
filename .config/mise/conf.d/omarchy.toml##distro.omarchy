@@ -9,6 +9,8 @@
 "pacman:libreoffice-fresh" = "latest"
 "pacman:omacalc" = "latest"
 "pacman:pinta" = "latest"
+"pacman:voxtype-bin" = "latest"
+"pacman:wtype" = "latest"
 "pacman:cliamp" = { state = "absent" }
 "pacman:kdenlive" = { state = "absent" }
 "pacman:lazydocker" = { state = "absent" }

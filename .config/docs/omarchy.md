@@ -67,13 +67,32 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` patches the prepend out until the upstream fix ships ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)); a relogin applies it.
 `bin/overrides/omarchy-theme-set-tmux` disables Omarchy's tmux retint; `omarchy-theme-set` runs its updaters through `bash -lc`, so the override is reached, and the theme-set hook owns that work instead ([ADR-0075](adr/0075-omit-omarchy-tmux-updater.md)).
 
+## Dictation (voxtype)
+
+`voxtype-bin` comes from the `omarchy` repo, and `omarchy-voxtype-install` copies `$OMARCHY_PATH/default/voxtype/config.toml` over `voxtype/config.toml`, so that tracked file is one of the configs an Omarchy command overwrites.
+The upstream model list is the interesting part of the drift: `language = "auto"` transcribes in one pass at ~0.6s, while a language list such as `["en", "es"]` makes voxtype run a separate `Language detection:` pass over the whole model first, and a 2.3s recording measured 22.9s against 0.6s.
+The list also guessed badly: of the five logged detections before the switch, two landed outside the list (`it` at 3.9%, `ko` at 7.1–7.4%) and the fallback then chose `es` once and `en` the other, so the same input language gave different results.
+No `Language detection:` line appears after the switch, so `auto` keeps it to one pass.
+
+Dictation is provisioned without `omarchy-voxtype-install`: `mise/conf.d/omarchy.toml##distro.omarchy` declares `voxtype-bin` and `wtype`, `voxtype/config.toml` is tracked, and `bootstrap.d/omarchy##distro.omarchy/voxtype.sh` does what a declaration cannot: it downloads the model the tracked config names, enables the Vulkan backend, enables the packaged `voxtype.service`, and marks `voxtype-install-invitation` done.
+The installer is skipped because it prompts, overwrites the tracked config with its template, and runs `voxtype setup gpu --enable` without `sudo` behind `|| true`, which fails with `Failed to remove existing /usr/bin/voxtype (need sudo?)` and leaves the CPU build: ~20s a transcription instead of ~0.6s.
+Reported upstream as [issue #11110](https://github.com/omacom/omarchy/issues/11110), with [issue #7099](https://github.com/omacom/omarchy/issues/7099) the same bug and open fixes in [PR #12901](https://github.com/omacom/omarchy/pull/12901) and [PR #13508](https://github.com/omacom/omarchy/pull/13508); those fix the installer, so they do not change this step.
+The package's own upgrade scriptlet keeps the backend: `pre_upgrade`/`post_upgrade` hand the active binary through `/tmp/.voxtype-backend-upgrade` and restore it, with `tests/voxtype-bin-install.sh` covering the GPU case.
+
+The model is a download the step must make: `voxtype transcribe` with a config naming a missing model lists the paths it searched and says to run `voxtype setup`, and only the `voxtype configure` TUI is documented to fetch one.
+`omarchy-done mark voxtype-install-invitation` matters because Omarchy's first-run provisioning installs `install-voxtype.hook` into `post-update.d`, which offers the installer once per machine whether or not voxtype is installed; accepting it would overwrite the config.
+`omarchy-hook` runs `post-update.d` in glob order, so the bootstrap hook is named `00_yadm-bootstrap.hook` to mark the invitation before that hook can offer it; a tracked no-op `install-voxtype.hook` would not hold, since `omarchy-hook-install` overwrites with `cp`.
+What stays Omarchy's keeps working off the command: the bar's `omarchy-voxtype-status`, and the menu's `omarchy-voxtype-config` and `omarchy-voxtype-model`, which open voxtype's own TUIs.
+`omarchy-voxtype-remove` deletes `~/.config/voxtype`, the tracked config, and the next bootstrap reinstalls the package.
+In 4.0.4 the installer did nothing else beyond `hyprctl reload` and a shell restart; a step Omarchy adds to it later would go unnoticed here.
+
 ## Patching Omarchy bugs
 
 A bug in an Omarchy system file that has a PR upstream gets a step in `bootstrap.d/omarchy/bugfix/`, one per PR, linking it ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)).
 Each step sources `lib.sh` and passes its patch filename; the helper resolves it from its own `patches/` directory.
 A file the PR adds goes in `files/` and is installed into the user's tree, where its packaged counterpart would land or be shadowed, never under `/usr`: pacman refuses an update that ships a path an unowned file already occupies ([ADR-0082](adr/0082-omarchy-bugfix-added-files.md)).
 Once the package ships that path, the step removes its untouched copy and warns.
-`omarchy update` restores the unpatched files, and its `post-update.d/yadm-bootstrap.hook` reruns the bootstrap to patch them again.
+`omarchy update` restores the unpatched files, and its `post-update.d/00_yadm-bootstrap.hook` reruns the bootstrap to patch them again.
 
 `bugfix/codex-usage-rpc.sh` applies [Omarchy PR #12979](https://github.com/omacom/omarchy/pull/12979): Codex usage checks read replies and notifications from a shared byte buffer, so a reply arriving alongside a notification does not cause a false timeout.
 

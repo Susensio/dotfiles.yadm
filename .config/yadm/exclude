@@ -43,6 +43,7 @@
 !/.config/hyprmoncfg/
 !/.config/foot/
 !/.config/uwsm/
+!/.config/voxtype/
 !/.local/share/yadm/archive
 !/.github
 !/bin
@@ -52,3 +53,5 @@
 # their re-includes; yadm reads this file instead of ~/.config/git/ignore.
 __pycache__/
 .cc-writes/
+# voxtype rewrites config.toml in place and leaves its previous contents beside it
+/.config/voxtype/config.toml.bak
