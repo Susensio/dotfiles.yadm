@@ -42,3 +42,5 @@ Accepted limitations:
 - Pi's check is manifest-shaped, so a future release that also inspects resolved modules would surface the copies this record leaves in place.
 
 Drop the patches when upstream ships the `peerDependencies` fix (rpiv-mono #267/#269/#271, pi-subagents #358/#362/#366); `apply.sh` reports drift against the kept pristine manifest rather than patching a newer release silently.
+
+Dropped 2026-10-18: `rpiv-ask-user-question`, `rpiv-todo` and `rpiv-web-tools` 2.13.9 and `pi-subagents` 0.22.0 all declare `typebox` as a peer, so the four patch directories are deleted and startup stays warning-free without them.

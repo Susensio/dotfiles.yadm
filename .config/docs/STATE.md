@@ -85,7 +85,7 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
   Observe the next suspend-then-hibernate resume.
 - `nightlight-schedule-refresh.sh`: [#13684](https://github.com/omacom/omarchy/pull/13684) (worktree `~/Projects/omarchy-nightlight`) re-probes hyprsunset a second past every minute, so the 07:00/20:00 switches reach the bar ([issue #8286](https://github.com/omacom/omarchy/issues/8286)); `nightlight-probe-guard.patch` drops a probe that lands while a toggle is applying.
   Observe the next scheduled switches, including one crossed while suspended.
-  If [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) ships, `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` replaces the polling.
+  [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) merged 2026-10-09, but the newest release is still v0.4.0 (2026-07-13) and the installed binary has no `on-switch` flag, so the polling stays until a release ships (checked 2026-10-18); `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` then replaces it.
 - `pi-theme-agent-dir.sh`: applies [#13693](https://github.com/omacom/omarchy/pull/13693), so `omarchy-theme-set-pi` honours `PI_CODING_AGENT_DIR` ([issue #13691](https://github.com/omacom/omarchy/issues/13691)).
 - `default-editor-mime.sh`: applies [#7446](https://github.com/omacom/omarchy/pull/7446), so text files opened from a file manager follow the menu's editor; `mime.sh` points at its handler and keeps doing so after the step goes.
   A review proposing the handler in the shipped `mimeapps.list` instead is on the PR, branch `default-editor-handler-review` on the fork; refresh the patch if the PR adopts it.
@@ -97,7 +97,8 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 ## pi session naming
 
 ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/session-name.ts`.
-[TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19) merged 2026-09-28 but is unreleased (npm `pi-agent-extensions` is still 0.5.4, from 2026-08-22); once a newer version ships, point `settings.json` back at the package and delete the extension.
+The session-id fix for opencode gateways ([TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19), merged 2026-09-28) ships in `pi-session-name` 0.1.7 (2026-10-08), a package of its own, not in `pi-agent-extensions`.
+That package names with the session's own model and knows nothing about herdr tabs, while ours runs on the cheap alias tier and renames the tab over the socket, so the extension stays (checked 2026-10-18).
 
 ## pi permission reviewer
 
