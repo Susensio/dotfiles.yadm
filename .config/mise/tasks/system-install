@@ -16,6 +16,11 @@ declare -A TARGET_DIRS=(
   [NODE_MODULES]=${XDG_LIB_HOME:-$HOME/.local/lib}/node_modules
 )
 
+# Bin names linked by this run, for prune_stale_links
+LINKED_BINS=()
+# Tools this run managed, as their install-directory names
+PROCESSED_TOOLS=()
+
 # ------------------------------------------------------------------------------
 # PRE-FLIGHT & INFRASTRUCTURE
 # ------------------------------------------------------------------------------
@@ -37,6 +42,24 @@ prune_broken_links() {
     -lname "*/$(basename "$MISE_HOME")/*" \
     -printf "removed '%p'\n" \
     -delete 2>/dev/null || true
+}
+
+# A link into the mise home that the current toolset no longer exposes: an upgrade
+# that drops a binary, or an aqua `symlink_bins` filter, leaves the old link live
+# because its target still exists, which prune_broken_links cannot see.
+# Only tools this run managed: an installed tool the config no longer declares keeps
+# its links, since removing those is a config decision, not a sync side effect.
+# Unfiltered runs only: a filtered sync knows a subset of the expected names.
+prune_stale_links() {
+  local link name owner
+  while IFS= read -r link; do
+    name=$(basename "$link")
+    owner=$(readlink "$link" | sed -n 's|.*/installs/\([^/]*\)/.*|\1|p')
+    printf '%s\n' "${PROCESSED_TOOLS[@]}" | grep --quiet --fixed-strings --line-regexp -- "$owner" || continue
+    printf '%s\n' "${LINKED_BINS[@]}" | grep --quiet --fixed-strings --line-regexp -- "$name" && continue
+    rm --verbose "$link"
+  done < <(find "${TARGET_DIRS[BIN]}" -maxdepth 1 -type l \
+    -lname "*/$(basename "$MISE_HOME")/*")
 }
 
 # ------------------------------------------------------------------------------
@@ -220,6 +243,7 @@ link_tool_assets() {
   for bin in "${tool_binaries[@]}"; do
     local bin_name
     bin_name=$(basename "$bin")
+    LINKED_BINS+=("$bin_name")
     symlink "$bin" "${TARGET_DIRS[BIN]}/"
 
     local fish_completion
@@ -310,6 +334,7 @@ main() {
   readarray -t tools < <(get_installed_tools "${filter_tools[@]}")
   for tool_json in "${tools[@]}"; do
     init_tool_context "$tool_json"
+    PROCESSED_TOOLS+=("${tool[name]}" "${tool[name]//:/-}")
 
     process_extra_assets
     generate_completions
@@ -317,6 +342,10 @@ main() {
     link_tool_assets
     link_node_modules
   done
+
+  if ((${#filter_tools[@]} == 0)); then
+    prune_stale_links
+  fi
 
   mandb --user-db --quiet
 }
