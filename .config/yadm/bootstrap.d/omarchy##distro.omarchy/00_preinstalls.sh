@@ -32,3 +32,11 @@ if [[ ! -e $MARKER ]]; then
   touch "$MARKER"
   hyprctl reload &>/dev/null || true
 fi
+
+# The same marker opts this user out of Omarchy's lazy mise tool declarations
+# (omarchy#9596): its migration writes this, but only on an update, so a fresh
+# machine needs it here. Not `disable_tools`, which matches by tool name and
+# would also block our own conf.d entries for claude, codex, pi and opencode.
+if command -v omarchy-mise-default-tools &>/dev/null; then
+  omarchy-mise-default-tools disable
+fi

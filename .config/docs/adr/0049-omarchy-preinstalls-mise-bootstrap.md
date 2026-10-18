@@ -29,3 +29,7 @@ The lists are ours: a preinstall a later Omarchy adds stays until it is listed, 
 `mise bootstrap packages apply` removes with `pacman -R`, not `-Rns`, leaving orphaned dependencies.
 The scripts were checked against Omarchy 4.0.4 and its development branch, `quattro`, not run on a machine.
 Running `omarchy-remove-preinstalls` or `omarchy-install-preinstalls` by hand undoes this; the menu no longer offers them.
+
+2026-10-18: the marker now also opts this user out of Omarchy's lazy mise tool declarations (omarchy#9596), which its migration applies only on an update, so `00_preinstalls.sh` calls `omarchy-mise-default-tools disable` itself when that helper exists.
+That writes `ignored_config_paths` for `/etc/mise/conf.d/omarchy-tools.toml` in `~/.config/mise/miserc.toml`, so Omarchy's twenty-one defaults and their `locked_scopes` never load here and ADR-0007's links stay the only route to those tools.
+`disable_tools` is deliberately not used: it matches by tool name, so it would block our own `conf.d/tools.toml` entries for claude, codex, pi and opencode as well.

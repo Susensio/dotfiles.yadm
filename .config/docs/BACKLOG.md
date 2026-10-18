@@ -69,7 +69,6 @@
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
   Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
-- mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
   A `post-update.d` hook could notify when that happens, but Omarchy has no pre-update hook, so it cannot tell a migration's edits from uncommitted ones.
