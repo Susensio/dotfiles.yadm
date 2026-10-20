@@ -122,6 +122,14 @@ Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`):
 - Keeps `@tintinweb/pi-subagents` on source (~190 ms of startup, ADR-0067).
 - Verified live 2026-09-30: after `/reload` wiped the in-memory record, resuming a probe agent by its old ID reopened the saved conversation (it answered a token only that conversation held) and kept the same ID.
 
+## pi model catalog
+
+Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `yadm/bootstrap.d/pi/models.sh` refreshes `pi/agent/models-store.json` once a day, because pi only refreshes when the TUI model selector opens and a headless machine therefore keeps the catalog bundled with its installed version.
+
+- The step never fails the bootstrap: a refresh that times out exits non-zero upstream, so the step converts it to a warning. pi leaves an existing store untouched when a refresh fails, so the retry is free.
+- A store written before any provider is authenticated is `{}`; the next run with credentials overwrites it, and the daily gate stops that from repeating on every attempt.
+- Untested on a machine that has never run pi: the step's fresh-store path was exercised against scratch agent directories, not a real first bootstrap.
+
 ## pi model fallback
 
 Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carries [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
