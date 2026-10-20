@@ -52,6 +52,9 @@ model = "small"
 # See: https://github.com/openai/whisper#available-models-and-languages
 language = "auto"
 
+# Spellings whisper should prefer for words it mishears
+initial_prompt = "Omarchy, Hyprland."
+
 # Translate non-English speech to English
 translate = false
 mode = "local"
