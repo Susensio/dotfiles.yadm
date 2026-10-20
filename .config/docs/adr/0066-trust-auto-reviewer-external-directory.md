@@ -46,3 +46,7 @@ The symptom is only the return of operator prompts, not a widened policy.
 It now expands the glob into a variable first.
 
 The patch is deleted once [#983](https://github.com/gotgenes/pi-packages/pull/983) or [#620](https://github.com/gotgenes/pi-packages/issues/620) ships an equivalent, operator-controlled capability upstream.
+
+## Corrections
+
+2026-10-20: the hook does not cover `pi install` or `pi update`. Pi installs with `npm install <spec> --prefix <dir>`, and npm 12.2.1 runs the project's root `postinstall` only on a bare `npm install`, so the hook fires on a bootstrap's first-start install and never on an update. An update reverts patched files until the next bootstrap, and `patch-drift.ts` is the only signal. The `pi-model-alias-shared-registry` patch has since been dropped: `pi-model-fallback-alias` 0.2.1 ships it.

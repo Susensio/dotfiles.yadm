@@ -4,8 +4,11 @@
 # line is injected here rather than versioned.
 # The project is created when pi has not run yet, so pi's first-start
 # auto-install of the packages in settings.json already carries the hook and
-# applies it in that same start. After that the npm postinstall covers
-# `pi install`/`pi update --extensions`. ADR-0066, ADR-0067.
+# applies it in that same start. After that the hook does NOT fire for
+# `pi install`/`pi update`: pi runs `npm install <spec>`, and npm only runs the
+# root postinstall on a bare `npm install` (checked on npm 12.2.1). An update
+# therefore reverts patched files until the next bootstrap; patch-drift.ts
+# warns at startup. ADR-0066, ADR-0067.
 #
 # Order matters: patches re-apply first so a bundle built afterwards carries
 # whatever they changed.
