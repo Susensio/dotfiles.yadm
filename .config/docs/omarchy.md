@@ -192,3 +192,13 @@ A 1080p60 frame-pacing A/B through the proxy and direct — CDP `getVideoPlaybac
 [Chromium's Linux window setup](https://github.com/chromium/chromium/blob/main/chrome/browser/ui/views/frame/browser_native_widget_aura_linux.cc) exposes `browser`/`pop-up` roles for X11 but assigns ordinary browser and login popup windows the same Wayland app ID.
 No Chromium issue tracking this exact fix was found; the [related upstream browser bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1864115) belongs to Firefox.
 Remove the workaround when Chromium exposes popup identity before mapping, for example through [the Wayland toplevel-tag protocol](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/xdg-toplevel-tag/xdg-toplevel-tag-v1.xml), which would let a compositor rule distinguish these windows directly.
+
+## Automatic brightness (wluma)
+
+`bootstrap.d/omarchy##distro.omarchy/wluma.sh` installs `wluma` from the AUR with `yay` and enables its packaged user unit, but only on a machine with an ambient light sensor (`/sys/bus/iio/devices/*/in_illuminance_raw`).
+mise's `pacman:` backend cannot install AUR packages, which is why it is a bootstrap step ([ADR-0048](adr/0048-direct-arch-tool-install.md)).
+
+There is no tracked config: wluma discovers the sensor, the `eDP-1` backlight and the keyboard backlight itself.
+It starts from a guess and learns from manual brightness changes, stored under `~/.local/share/wluma/`.
+It writes the backlight directly and does not touch hyprsunset's colour temperature or the shell's idle timers, so the three coexist.
+Follow its decisions with `journalctl --user -fu wluma`; for per-decision output stop the unit and run `RUST_LOG=debug wluma`.
