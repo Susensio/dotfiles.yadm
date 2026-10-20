@@ -12,5 +12,6 @@ command -v omarchy-tui-install &>/dev/null || exit 0
 APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
 tui() { [[ -f $APPS/$1.desktop ]] || omarchy-tui-install "${@:2}"; }
 tui "Disk Usage" "Disk Usage" 'bash -c "dua i /"' float disk-usage
+tui "Claude Code" "Claude Code" claude tile https://cdn.jsdelivr.net/gh/selfhst/icons/png/claude.png
 tui "Tmux" "Tmux" tm tile utilities-terminal
 tui "Herdr" "Herdr" herdr tile utilities-terminal
