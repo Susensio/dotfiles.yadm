@@ -24,7 +24,10 @@ post-packages = "rustup default >/dev/null 2>&1 || rustup default stable"
 "pacman:nodejs" = "latest"
 "pacman:npm" = "latest"
 "pacman:pandoc-cli" = "latest"
+# pip must match `python3`, which is pacman's here; mise's python exists for the
+# pipx: backend only and must not own the user's pip.
 "pacman:python" = "latest"
+"pacman:python-pip" = "latest"
 "pacman:ripgrep" = "latest"
 "pacman:rustup" = "latest"
 "pacman:tealdeer" = "latest"
