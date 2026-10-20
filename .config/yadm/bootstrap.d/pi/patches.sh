@@ -7,8 +7,9 @@
 # applies it in that same start. After that the hook does NOT fire for
 # `pi install`/`pi update`: pi runs `npm install <spec>`, and npm only runs the
 # root postinstall on a bare `npm install` (checked on npm 12.2.1). An update
-# therefore reverts patched files until the next bootstrap; patch-drift.ts
-# warns at startup. ADR-0066, ADR-0067.
+# therefore reverts patched files; patch-drift.ts reapplies them and rebuilds
+# the bundles at the next interactive start, and /reload loads them.
+# ADR-0066, ADR-0067.
 #
 # Order matters: patches re-apply first so a bundle built afterwards carries
 # whatever they changed.
