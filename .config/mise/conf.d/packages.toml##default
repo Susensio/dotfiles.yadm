@@ -37,3 +37,4 @@ tmux = { version = "latest", extra_assets = [
 uv = "latest"
 yadm = { version = "latest", extra_assets = ["raw://@completion/fish/yadm.fish", "raw://@yadm.1"] }
 btop = "latest"
+chafa = "latest"

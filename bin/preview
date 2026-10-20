@@ -10,13 +10,25 @@ line_number=${2:-}
   pv_height="$((FZF_PREVIEW_LINES - 2))" ||
   pv_height=$(tput lines)
 
+# chafa cannot probe the terminal from inside fzf's preview. Outside tmux it
+# reads TERM (foot gets sixel). Inside, TERM is tmux-256color, which makes it
+# fall back to ASCII glyphs, so ask the client and otherwise name the format.
+chafa_format=()
+if [[ -n ${TMUX:-} ]]; then
+  if [[ $(tmux display -p '#{client_termfeatures}' 2>/dev/null) == *sixel* ]]; then
+    chafa_format=(-f sixel)
+  else
+    chafa_format=(-f symbols --symbols block+border)
+  fi
+fi
+
 file_extension=$(echo "${file_path##*.}" | tr '[:upper:]' '[:lower:]')
 
 mimetype=$(file --dereference --brief --mime-type -- "$file_path")
 
 case "$mimetype" in
   */directory) eza --tree --group-directories-first --level=2 --git-ignore --color=always --icons -- "$file_path" ;;
-  image/*) chafa "$file_path" -s "$pv_width"x"$pv_height" ;;
+  image/*) { chafa "${chafa_format[@]}" "$file_path" -s "$pv_width"x"$pv_height" && echo; } ;;
   */pdf) pdftotext "$file_path" - ;;
   text/* | */xml | application/json)
     if [[ -n "$line_number" ]]; then
