@@ -38,4 +38,9 @@ And it was not the machine: a direct symlink dispatched in 0 ms on the same box 
 Two things follow for whoever reads this next.
 The decision holds until upstream lands a resolution cache for the shim path keyed by config mtimes and cwd, or an opt-in binary-only shim mode that skips whole-toolset environment construction — either changes the cost model this rests on, and either is worth re-measuring against the numbers above before the farm is touched.
 And the shim directory held 86 shims that nothing resolved to, because the shim farm was not on `PATH`; they were left in place as free and `mise reshim`-regenerated, which means a reader asking "are shims in use here" has to check `PATH` rather than the presence of that directory.
-
+2026-10-18 check, mise 2026.10.12, 50 configured tools: neither revisit trigger has landed.
+The resolution cache exists only as [#12291](https://github.com/jdx/mise/pull/12291), closed unmerged on 2026-09-04, and no binary-only shim mode appears in the source or the settings.
+Measured as above: `zoxide --version` takes 1.3 ms as the real binary, 1.5 ms through the link, and 57 ms through the shim.
+`mise --version` alone is 15 ms and the same shim under a one-tool config is 27 ms, so about 30 ms of it is whole-toolset resolution over those 50 tools; `MISE_TIMINGS=1` splits config load, toolset build, resolve and env construction roughly 10+7+4+9 ms, while `env_cache` and `MISE_OFFLINE` change nothing.
+Upstream's own position: [#3773](https://github.com/jdx/mise/issues/3773), "scaling mise with heavyweight configs", was closed not-planned on 2026-09-23 with a simple config at ~25 ms and "<20 ms" as the stated goal, and [#13698](https://github.com/jdx/mise/issues/13698) measured a `go` shim at 11.9 ms rising to 31.3 ms once `rust` was also configured — the same per-invocation scaling with tool count.
+Nothing is pending upstream about shims; the cost is a function of how many tools the config declares.
