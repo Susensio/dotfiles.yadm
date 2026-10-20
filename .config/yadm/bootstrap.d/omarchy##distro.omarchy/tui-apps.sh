@@ -5,6 +5,7 @@
 # wrap; the TUI.tile app id keeps them tiled like any other window.
 # tm is single-word, so the desktop entry needs no bash quoting wrapper;
 # ~/bin is on the manager PATH via environment.d/11_path.conf.
+# Icons: pick one with `icon`; a name or URL goes in the last argument.
 set -euo pipefail
 
 command -v omarchy-tui-install &>/dev/null || exit 0
