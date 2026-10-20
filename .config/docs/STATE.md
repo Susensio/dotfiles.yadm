@@ -108,6 +108,7 @@ That package names with the session's own model and knows nothing about herdr ta
 ## pi permission reviewer
 
 Committed 2026-09-29: the permission system's auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `pi/agent/model-alias.json`), so an exhausted Codex quota fails over instead of turning every ask into a prompt.
+The chain was reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md)): `opencode-go/beam-free` is now its first Go rung and `opencode-go/claude-haiku-5-5` the first quota-bound one, because free capacity outlasts metered capacity once the plan drains.
 
 - The `claude-bridge/claude-haiku-4-5` target works only through the `pi-claude-bridge-index` and `-prompt-capture` patches plus `provider.allowExtensionSystemPrompts: true` in `pi/agent/claude-bridge.json`; drop the #148 hunks once [#148](https://github.com/elidickinson/pi-claude-bridge/pull/148) ships in a release.
 - `pi-model-alias-shared-registry` stays until [unrelentingfox/pi-model-fallback-alias#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) ships: a per-subagent copy of the extension re-registered the process-wide `alias` provider with no registry, failing every alias call, and wrote failover warnings to stderr over the TUI ([earendil-works/pi#10002](https://github.com/earendil-works/pi/issues/10002)).
@@ -124,6 +125,7 @@ Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`):
 ## pi model fallback
 
 Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carries [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
+The tier chains themselves were reordered on 2026-10-18 against Artificial Analysis Intelligence Index v4.3.2, first by [ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md) and then by [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md), which put `claude-sonnet-5-5` in front of `deepseek-v4.1-flash` so each tier leads with its strongest option; `alias/top` gained `glm-5.3` fourth.
 
 - Drop the #162 hunk once #163 ships in a release; the directory then holds only the #148 hunks.
 - Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.

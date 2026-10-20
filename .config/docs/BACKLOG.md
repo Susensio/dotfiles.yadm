@@ -35,7 +35,7 @@
 
 - pi | Remove the `opencode-go/kimi-k2.7-code` override in `pi/agent/models.json` once [earendil-works/pi#10237](https://github.com/earendil-works/pi/issues/10237) lands.
   The OpenCode Go/Zen catalog entry is missing the thinking compat `moonshotai` has (`thinkingFormat: "deepseek"`, `supportsReasoningEffort: false`, `thinkingLevelMap: { off: null }`), so pi sent `reasoning_effort` — unsupported by K2.7 Code (only K3 takes it) — and its chain-of-thought could arrive in `content` as normal text.
-  The issue was auto-closed as not planned on 2026-09-30 (new-contributor policy; maintainers may reopen it), so the override stays until a pi release ships those fields in the catalog; pi 1.0.0's `opencode-go` entry still lacks them (checked 2026-10-05).
+  The issue was auto-closed as not planned on 2026-09-30 (new-contributor policy; maintainers may reopen it), so the override stays until a pi release ships those fields in the catalog; pi 1.3.0's `opencode-go` entry still lacks them (checked 2026-10-18).
 - upstream | herdr: consume `rpiv:ask-user:blocked` — the stable channel `@juicesharp/rpiv-ask-user-question` emits while its questionnaire waits for input — in herdr's pi integration for the pane's blocked state (today it listens for a `herdr:blocked` event nothing emits), and consider a `herdr integration sync` that installs outdated integrations for present harnesses natively.
   Either would retire our bridge extension (`.config/pi/agent/extensions/herdr-ask-user-bridge.ts`) and shrink `mise/tasks/herdr-integrations` to one line.
   See ADR-0060.
