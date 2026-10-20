@@ -5,13 +5,17 @@ set working-directory := '..'
 
 # `git ls-files` skips the untracked JSON and fish files other tools keep in
 # .config. File lists split on whitespace, which no tracked path has.
+# Each recipe falls back to `yadm ls-files`: the worktree is $HOME and only
+# .config/.git points at the repo, so plain git finds nothing when run from `..`
+# on a machine that cloned with yadm. CI has a real .git at the root and never
+# reaches the fallback.
 
 check: fish-syntax shellcheck json-syntax toml-syntax
 
 # `fish --no-execute` checks only its first argument, hence the loop.
 [script]
 fish-syntax:
-    files=$(git ls-files '*.fish')
+    files=$(git ls-files '*.fish' 2>/dev/null || yadm ls-files '*.fish')
     scripts=$(grep -rl '^#!.*fish' bin || true)
     for file in $files $scripts; do fish --no-execute "$file"; done
 
@@ -28,7 +32,7 @@ shellcheck:
 # into ~/.local/state), so they dangle in CI. Their targets aren't ours to check.
 [script]
 json-syntax:
-    files=$(git ls-files '*.json' '*.json##*')
+    files=$(git ls-files '*.json' '*.json##*' 2>/dev/null || yadm ls-files '*.json' '*.json##*')
     for file in $files; do
       if [ -L "$file" ]; then continue; fi
       jq empty "$file"
@@ -36,7 +40,7 @@ json-syntax:
 
 [script]
 toml-syntax:
-    files=$(git ls-files '*.toml' '*.toml##*')
+    files=$(git ls-files '*.toml' '*.toml##*' 2>/dev/null || yadm ls-files '*.toml' '*.toml##*')
     for file in $files; do
       if [ -L "$file" ]; then continue; fi
       python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$file"
