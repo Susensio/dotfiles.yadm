@@ -10,3 +10,9 @@ use_git_credentials = true
 # The registry baked into mise lacks some packages (yadm-dev/yadm); fetch the live one
 [settings.aqua]
 baked_registry = false
+
+# mise's own service, which upgrades tools whose `auto_update` interval is due once an
+# hour in the background (tools.toml), so agents stay current without mise in every
+# invocation. Install it with `mise bootstrap services apply`.
+[bootstrap.services.mise-tool-update]
+builtin = "tool-update"

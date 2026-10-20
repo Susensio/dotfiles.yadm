@@ -19,5 +19,6 @@ FISH_COMPLETIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completio
 mkdir --parents "$FISH_COMPLETIONS_DIR"
 mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 
-# Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files
-mise bootstrap --only packages,tools --yes --quiet
+# Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files.
+# services carries the tool-update unit that `auto_update` relies on (ADR-0007).
+mise bootstrap --only packages,tools,services --yes --quiet

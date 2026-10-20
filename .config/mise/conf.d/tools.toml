@@ -1,18 +1,21 @@
 # Tracked tools installed through mise on every machine; distro-sourced ones live in
 # packages.toml (docs/adr/0046). The global config.toml is machine-local (docs/adr/0045).
+# `auto_update` is served by mise's tool-update service (settings.toml), never by the
+# invocation: ADR-0007's links bypass mise's shims. pi is left out because its extension
+# API moves between releases and our patches and bundler ride on it.
 [tools]
 aichat = { version = "latest", extra_assets = [
   "raw://v@scripts/completions/aichat.fish",
 ] }
 argc = "latest"
-claude = { version = "latest", postinstall = "mise run herdr-integrations" }
-codex = { version = "latest", symlink_bins = true, postinstall = "mise run herdr-integrations" }
+claude = { version = "latest", postinstall = "mise run herdr-integrations", auto_update = "4h" }
+codex = { version = "latest", symlink_bins = true, postinstall = "mise run herdr-integrations", auto_update = "4h" }
 "github:tmuxpack/tpack" = "latest"
 herdr = { version = "latest", gen_completions = "completion fish", postinstall = "mise run herdr-integrations", extra_assets = [
   "raw://v@skills/herdr/SKILL.md",
   "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
 ] }
-opencode = "latest"
+opencode = { version = "latest", auto_update = "4h" }
 pi = { version = "latest", postinstall = "mise run herdr-integrations" }
 usage = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
