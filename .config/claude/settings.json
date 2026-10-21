@@ -18,7 +18,6 @@
       "Bash(yadm ls-files *)",
       "Bash(claude --version)"
     ],
-    "ask": ["Bash(pkexec *)"],
     "deny": [
       "Agent(leader)",
       "Artifact",
@@ -30,6 +29,9 @@
       "PushNotification",
       "RemoteTrigger",
       "ScheduleWakeup"
+    ],
+    "ask": [
+      "Bash(pkexec *)"
     ],
     "defaultMode": "auto"
   },
@@ -171,7 +173,9 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "network": {
-      "allowedDomains": ["*"]
+      "allowedDomains": [
+        "*"
+      ]
     },
     "filesystem": {
       "allowWrite": [
@@ -187,5 +191,6 @@
   "effortLevel": "high",
   "theme": "custom:omarchy",
   "verbose": false,
-  "preferredNotifChannel": "terminal_bell"
+  "preferredNotifChannel": "terminal_bell",
+  "switchModelsOnFlag": false
 }
