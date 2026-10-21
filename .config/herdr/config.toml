@@ -95,4 +95,7 @@ height = "85%"
 directory = "~/.local/share/herdr/worktrees"
 
 [experimental]
+# BUG: no inline images under foot; Herdr passes through Kitty graphics only, foot speaks Sixel only
+# (herdrdev/herdr#4330 closed as duplicate, ask upstream in discussion #2520; foot declines Kitty, dnkl/foot#2342).
+# Workaround: `chafa -f symbols`, or run Herdr in a Kitty-graphics terminal with `chafa -f kitty`.
 pane_history = true
