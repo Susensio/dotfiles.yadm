@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# Report what may need action: GitHub links in tracked files whose issue, PR or
+# discussion has since closed, unread GitHub activity, open PRs of ours that
+# need work, and local drift. Reports only; the /maintenance pi prompt judges
+# the findings (docs/adr/0096).
+# Usage: maintenance [--new]
+#   --new  print only items no earlier --new run printed, and remember them
+# Exit 0 when there is nothing to report, 1 when there is.
+set -euo pipefail
+
+state=${XDG_STATE_HOME:-$HOME/.local/state}
+seen=$state/maintenance/seen
+bootstrap_log=$state/yadm/bootstrap.log
+
+new_only=false
+case ${1:-} in
+  --new) new_only=true ;;
+  '') ;;
+  *)
+    echo "Usage: maintenance [--new]" >&2
+    exit 2
+    ;;
+esac
+
+# Item lines are indented two spaces; four-space lines under one are its context.
+# ADRs and filed-issue examples are history; the .orig files are vendored upstream copies.
+locations() {
+  (cd "$HOME" && yadm grep -nIoE 'github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(pull|issues|discussions)/[0-9]+' \
+    -- ':!.config/docs/adr' ':!*/past_issues/*' ':!*.orig') |
+    jq -R 'capture("^(?<path>[^:]+):(?<line>[0-9]+):github\\.com/(?<ref>.+)$")' | jq -s . || true
+}
+
+# One request for every referenced item and our open PRs; partial errors
+# (a deleted repository) still return the rest of the data.
+github_query() {
+  jq -r '
+    [map(.ref) | unique | to_entries[] | .value as $ref | ($ref | split("/")) as [$owner, $name, $kind, $n] |
+      "r\(.key): repository(owner: \($owner | tojson), name: \($name | tojson)) { " +
+      (if $kind == "discussions"
+       then "discussion(number: \($n)) { closed closedAt stateReason }"
+       else "issueOrPullRequest(number: \($n)) { ... on Issue { state stateReason closedAt } ... on PullRequest { state mergedAt closedAt } }"
+       end) + " }"] |
+    "query { viewer { pullRequests(states: OPEN, first: 100) { nodes { number title reviewDecision mergeable repository { nameWithOwner } commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } " + join(" ") + " }"'
+}
+
+resolved_upstream() { # <locations json> <response json>
+  jq -r --argjson locs "$1" '
+    ($locs | map(.ref) | unique) as $refs | .data as $data |
+    $refs | to_entries[] | .value as $ref | $data["r\(.key)"] as $repo |
+    ($repo.issueOrPullRequest // $repo.discussion) as $item |
+    (if $repo == null or $item == null then "not found"
+     elif $item.state == "MERGED" then "merged \($item.mergedAt[:10])"
+     elif $item.state == "CLOSED" or $item.closed == true
+     then "closed \($item.closedAt[:10])" + (if $item.stateReason then " (\($item.stateReason | ascii_downcase | gsub("_"; " ")))" else "" end)
+     else empty end) as $status |
+    ($ref | split("/")) as [$owner, $name, $kind, $n] |
+    "  \($owner)/\($name)#\($n) \($status)",
+    ($locs[] | select(.ref == $ref) | "    ~/\(.path):\(.line)")' <<<"$2"
+}
+
+open_prs() {
+  jq -r '.data.viewer.pullRequests.nodes[] |
+    [(if .reviewDecision == "CHANGES_REQUESTED" then "changes requested" else empty end),
+     (if .mergeable == "CONFLICTING" then "conflicts" else empty end),
+     (if (.commits.nodes[0].commit.statusCheckRollup.state // "") | test("FAILURE|ERROR") then "checks failing" else empty end)] as $why |
+    select($why | length > 0) |
+    "  \(.repository.nameWithOwner)#\(.number) \($why | join(", ")): \(.title)"'
+}
+
+# CI runs are noise here: failing checks on our own PRs come from open_prs.
+notifications() {
+  timeout 30 gh api --paginate 'notifications?per_page=100' --jq '.[] | select(.reason != "ci_activity") |
+    (((.subject.url // "") | capture("/(?<n>[0-9]+)$").n) // "") as $n |
+    "  \(.repository.full_name)\(if $n == "" then "" else "#\($n)" end) \(.reason | gsub("_"; " ")): \(.subject.title) (\(.updated_at[:10]))"'
+}
+
+local_drift() {
+  yadm status --porcelain --untracked-files=no | cut -c4- | sed 's|^|  uncommitted: ~/|'
+  if (($(yadm rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0) > 0)); then
+    echo "  unpushed commits on $(yadm branch --show-current)"
+    echo "    yadm log @{upstream}..HEAD"
+  fi
+  if [[ -f $bootstrap_log ]]; then
+    sed 's/\x1b\[[0-9;]*m//g' "$bootstrap_log" | grep -E '^\[(WARN|ERROR)\]|WARNING' | sed 's/^/  bootstrap: /' || true
+  fi
+  if command -v systemctl &>/dev/null; then
+    { systemctl --failed --plain --no-legend; systemctl --user --failed --plain --no-legend; } 2>/dev/null |
+      awk '{ print "  failed unit: " $1 }'
+  fi
+  if command -v pacman &>/dev/null; then
+    find /etc \( -name '*.pacnew' -o -name '*.pacsave' \) 2>/dev/null | sed 's/^/  config to merge: /' || true
+  fi
+}
+
+section() { # <title> <lines>
+  [[ -z $2 ]] || printf '%s\n%s\n' "$1" "$2"
+}
+
+skipped=()
+resolved="" prs="" activity=""
+locs=$(locations)
+if ! command -v gh &>/dev/null; then
+  skipped+=("GitHub: gh is not installed")
+else
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  notifications >"$tmp/activity" 2>/dev/null &
+  notifications_pid=$!
+  response=$(github_query <<<"$locs" | timeout 30 gh api graphql -F query=@- 2>/dev/null || true)
+  if jq -e '.data.viewer' <<<"${response:-null}" &>/dev/null; then
+    resolved=$(resolved_upstream "$locs" "$response")
+    prs=$(open_prs <<<"$response")
+  else
+    skipped+=("GitHub: unreachable or not authenticated (gh auth status)")
+  fi
+  if wait "$notifications_pid"; then
+    activity=$(<"$tmp/activity")
+  else
+    skipped+=("GitHub notifications: request failed")
+  fi
+fi
+
+report=$(
+  section "Resolved upstream" "$resolved"
+  section "Needs you" "$(printf '%s\n' "$prs" "$activity" | sed '/^$/d')"
+  section "Local" "$(local_drift)"
+)
+
+if $new_only; then
+  mkdir -p "${seen%/*}"
+  touch "$seen"
+  new=$(grep '^  [^ ]' <<<"$report" | grep -vxFf "$seen" || true)
+  [[ -n $new ]] || exit 0
+  printf '%s\n' "$new"
+  # Bounded, newest last; an item that disappears and returns unchanged stays seen.
+  { cat "$seen"; printf '%s\n' "$new"; } | tail -n 2000 >"$seen.tmp" && mv "$seen.tmp" "$seen"
+  exit 1
+fi
+
+[[ -n $report ]] && printf '%s\n' "$report"
+if ((${#skipped[@]})); then
+  echo "Skipped"
+  printf '    %s\n' "${skipped[@]}"
+fi
+[[ -z $report ]]

@@ -32,6 +32,7 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
 - `omarchy update` runs migrations that edit the tmux and herdr configs, among others.
   Omarchy has a `post-update` hook but no pre-update one; review the diff by hand.
   The post-update hook reruns `yadm bootstrap`, which reapplies what the update undid.
+  A second post-update hook runs `maintenance --new` and, when it finds something it has not reported before, sends a notification that opens `pi /maintenance` ([ADR-0096](adr/0096-maintenance-report-from-tracked-links.md)); `maintenance` alone prints the full report.
 - The editor menu writes `EDITOR` into `environment.d/tools.conf` ([ADR-0047](adr/0047-helix-canonical-editor-name.md)).
 - The text-size slider (`omarchy display text size`) sets three things at once: `[font] base-size` in `omarchy/shell.toml`, the font size in `foot/foot.ini`, and GTK's `text-scaling-factor` in dconf, which is not tracked.
 

@@ -4,6 +4,11 @@ set -euo pipefail
 # Ensure ~/bin (log, pkg-install) is on PATH, missing on a fresh clone
 [[ :$PATH: == *":$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
 
+# Keep this run's warnings for `maintenance`, after they scroll away (docs/adr/0096)
+log_file=${XDG_STATE_HOME:-$HOME/.local/state}/yadm/bootstrap.log
+mkdir -p "${log_file%/*}"
+exec 2> >(tee -- "$log_file" >&2)
+
 # Execute all executable files (excluding yadm alternates) in the
 # ~/.config/yadm/bootstrap.d directory when run. Files a step installs live
 # under its assets/ directory, non-executable so they never run as steps.

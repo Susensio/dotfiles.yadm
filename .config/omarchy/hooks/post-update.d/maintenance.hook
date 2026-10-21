@@ -1,0 +1,13 @@
+#!/bin/bash
+# Report only: the agent starts when the notification is clicked (docs/adr/0096).
+# Sorts after 00_yadm-bootstrap.hook, so the bootstrap's warnings are in its log.
+
+set -e
+
+status=0
+new=$("$HOME/bin/maintenance" --new) || status=$?
+((status == 1)) || exit "$status"
+
+omarchy-notification-send -u normal -g 󰦕 "Maintenance: $(wc -l <<<"$new") new" \
+  "$(head -n 3 <<<"$new" | sed 's/^ *//')" \
+  --exec omarchy-launch-floating-terminal-with-presentation "cd ~/.config && pi /maintenance"
