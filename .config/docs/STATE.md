@@ -27,7 +27,7 @@ Do not treat a swap of the classic palette tiers as accepted; the vivid variants
   Swapping to vivid changed nothing visible in Herdr's `terminal` theme, whose greys come from slots 7 and 8, identical in all variants.
 - `omarchy/themed/helix.toml.tpl` is a tracked local override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
   It was rendered and parsed without unresolved placeholders or Helix warnings, but it can wash out other themes whose bright roles are lighter tints and should **not** be submitted wholesale as a generic fallback.
-  `helix/config.toml` still selects `gruvbox_transparent` (a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
+  `helix/config.toml` selects `omarchy` (since 2026-10-21; before that `gruvbox_transparent`, a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
   The observed vendor theme preference and transparent Helix background should be preserved in later comparisons.
 
 ### Remaining contributions and decisions
@@ -49,7 +49,7 @@ Do not treat a swap of the classic palette tiers as accepted; the vivid variants
    Candidate pairs to verify against the actual stock colors/backgrounds and installed Helix runtime: `gruvbox` (material)→`gruvbox-material`, `gruvbox-classic`→`gruvbox`, `catppuccin`→`catppuccin_mocha`, `catppuccin-latte`→`catppuccin_latte`, `everforest`→`everforest_dark`, `flexoki-light`→`flexoki_light`, `kanagawa`→`kanagawa`, `nord`→`nord`, `rose-pine`→`rose_pine_dawn`, `tokyo-night`→`tokyonight`; `ristretto`→`monokai_pro_ristretto` needs closer visual checking.
    Exclude generic lookalikes such as `white`→`emacs` or `vantablack`→`modus_vivendi` without a real brand match.
    Each overlay must include `"ui.background" = { }` beside `inherits = "…"`; shipping it suppresses fallback-template generation, and a bare inherit would lose Omarchy's transparency.
-   Local proof (2026-10-03): `omarchy/themes/gruvbox-classic/helix.toml` ships `inherits = "gruvbox"` plus `"ui.background" = { }`; `omarchy-theme-set` copied it to the current theme verbatim, bypassing the local `helix.toml.tpl`. `helix/config.toml` still selects `gruvbox_transparent`, so switch it to `omarchy` to see it live.
+   Local proof (2026-10-03): `omarchy/themes/gruvbox-classic/helix.toml` ships `inherits = "gruvbox"` plus `"ui.background" = { }`; `omarchy-theme-set` copied it to the current theme verbatim, bypassing the local `helix.toml.tpl`. `helix/config.toml` now selects `omarchy`, so it shows live.
    Confirm Helix syntax and palette compatibility for each pair, test switching and cloning/staging, and re-evaluate if classic/stock gruvbox names change.
 
 Upstream procedure: work in an Omarchy fork checkout, follow upstream `AGENTS.md` and `agents/skills/{migrations,install-scripts}.md` as applicable, run focused tests and `./test/all`, and keep upstream source edits out of `/usr/share/omarchy` and this dotfiles tree.

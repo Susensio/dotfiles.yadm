@@ -1,4 +1,4 @@
-theme = "gruvbox_transparent"
+theme = "omarchy"
 
 [editor]
 line-number = "relative"
@@ -10,6 +10,9 @@ end-of-line-diagnostics = "info"
 inline-diagnostics = { cursor-line = "warning" }
 
 trim-trailing-whitespace = true
+
+[editor.soft-wrap]
+enable = true
 
 [editor.whitespace]
 render = "all"
