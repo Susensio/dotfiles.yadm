@@ -3,6 +3,8 @@
   // preinstalls instead: both upstream scripts overwrite the tools mise links into ~/.local/bin
   "remove.preinstalls": { "when": "false" },
   "install.preinstalls": { "when": "false" },
-  // Sleep like the lid does, per ADR-0069
-  "system.suspend": { "action": "systemctl suspend-then-hibernate" }
+  // Sleep like the lid does, per ADR-0069; suspend-then-hibernate fails without a hibernation target
+  "system.suspend": {
+    "action": "if omarchy-hibernation-available; then systemctl suspend-then-hibernate; else systemctl suspend; fi"
+  }
 }
