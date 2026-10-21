@@ -13,7 +13,9 @@ Linking `Work` to `Projects` would have had the same effect and kept two names f
 ## Decision
 
 Keep repositories and home-launched Omarchy agents in `~/Projects`.
-Override `omarchy-agent` through the existing first-on-PATH override directory, forwarding all arguments to the real launcher after changing from `$HOME` to `~/Projects`.
+Override `omarchy-agent` through the existing first-on-PATH override directory, forwarding all arguments to the real launcher after changing from `$HOME` to the focused terminal's shell directory (`omarchy-cmd-terminal-cwd`), or to `~/Projects` when that is `$HOME`.
+The lookup does not inspect tmux or herdr panes: their clients report `$HOME`, and an agent wanted there is opened inside them.
+`omarchy-agent --claude` applies the same directory rule and launches Claude directly, whatever the default agent is.
 Match Omarchy's exact `~/Work` fallback line; if it changes, warn and let the upstream launcher choose the directory.
 During Omarchy bootstrap, remove `~/Work` only when it is empty or contains exactly the installer's unchanged `.mise.toml` and empty `tries` directory.
 Do not move that `.mise.toml` to `~/Projects`.

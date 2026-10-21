@@ -7,9 +7,19 @@ upstream=${OMARCHY_PATH:-/usr/share/omarchy}/bin/omarchy-agent
 fallback='[[ $PWD == "$HOME" && -d $HOME/Work ]] && cd "$HOME/Work"'
 
 if grep -Fxq -- "$fallback" "$upstream"; then
-  [[ $PWD == "$HOME" ]] && cd -- "$HOME/Projects"
+  if [[ $PWD == "$HOME" ]]; then
+    # Focused plain terminal's shell cwd; tmux/herdr clients report $HOME, so they fall through.
+    cwd=$(omarchy-cmd-terminal-cwd 2>/dev/null || true)
+    [[ -d $cwd && $cwd != "$HOME" ]] || cwd=$HOME/Projects
+    cd -- "$cwd"
+  fi
 else
   printf 'omarchy-agent: upstream workdir logic changed; review this override\n' >&2
+fi
+
+# Claude outside the default-agent setting, with the flags upstream gives it.
+if [[ ${1:-} == --claude ]]; then
+  exec omarchy-launch-tui --app-id=org.omarchy.agent claude --permission-mode auto
 fi
 
 exec "$upstream" "$@"
