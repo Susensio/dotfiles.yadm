@@ -17,10 +17,11 @@ sidebar_collapsed_mode = "hidden"
 tab_bar_right = [
   { type = "command", command = "\"$HERDR_BIN_PATH\" workspace list | jq -r --arg id \"$HERDR_ACTIVE_WORKSPACE_ID\" '.result.workspaces[] | select(.workspace_id == $id) | .label'", interval_seconds = 1, timeout_seconds = 2 },
 ]
+agent_panel_sort = "priority"
 
 [ui.toast]
-delivery = "herdr"
 # BUG: "terminal" writes no OSC sequence under foot (herdrdev/herdr#5238); "system" is not clickable
+delivery = "herdr"
 
 [keys]
 prefix = "F12"
@@ -94,8 +95,8 @@ height = "85%"
 [worktrees]
 directory = "~/.local/share/herdr/worktrees"
 
-[experimental]
 # BUG: no inline images under foot; Herdr passes through Kitty graphics only, foot speaks Sixel only
 # (herdrdev/herdr#4330 closed as duplicate, ask upstream in discussion #2520; foot declines Kitty, dnkl/foot#2342).
 # Workaround: `chafa -f symbols`, or run Herdr in a Kitty-graphics terminal with `chafa -f kitty`.
+[experimental]
 pane_history = true
