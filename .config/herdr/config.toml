@@ -20,6 +20,7 @@ tab_bar_right = [
 
 [ui.toast]
 delivery = "herdr"
+# BUG: "terminal" writes no OSC sequence under foot (herdrdev/herdr#5238); "system" is not clickable
 
 [keys]
 prefix = "F12"
