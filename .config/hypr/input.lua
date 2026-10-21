@@ -3,6 +3,10 @@ hl.config({
   input = {
     -- Caps Lock is keyd's both-Shifts toggle; xkb must not also make Caps Multi_key.
     kb_options = "",
+    -- Spanish on AltGr (á é í ó ú ñ ü ¿ ¡). AltGr is keyd's rightalt = oneshot(altgr);
+    -- us(altgr-intl) relies on Right Alt as level3, so removing that binding breaks this.
+    kb_layout = "us",
+    kb_variant = "altgr-intl",
     touchpad = {
       natural_scroll = true,
       -- Right-click in the lower-right corner, besides with two fingers
