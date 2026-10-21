@@ -10,6 +10,7 @@ command -v omarchy-webapp-install &>/dev/null || exit 0
 APPS=${XDG_DATA_HOME:-$HOME/.local/share}/applications
 webapp() { [[ -f $APPS/$1.desktop ]] || omarchy-webapp-install "$@"; }
 webapp "ChatGPT" https://chatgpt.com/ chatgpt
+webapp "Claude" https://claude.ai/new claude
 webapp "Gemini" https://gemini.google.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/google-gemini.png
 webapp "GitHub" https://www.github.com
 webapp "Google Maps" https://maps.google.com google-maps
