@@ -157,6 +157,23 @@
         }
       },
       {
+        "id": "external-status-mvgpb99x-10vpm0",
+        "type": "external-status",
+        "enabled": true,
+        "options": {
+          "raw": false,
+          "hideWhenEmpty": true,
+          "icon": "",
+          "text": "-",
+          "fg": "default",
+          "bg": "default",
+          "bold": false,
+          "externalStatusKey": "pi-permission-auto-review",
+          "trimValue": 0,
+          "preserveTrimStyles": true
+        }
+      },
+      {
         "id": "flex-separator-mujpc7jd-b7xte2",
         "type": "flex-separator",
         "enabled": true,
@@ -216,6 +233,7 @@
     "hiddenKeys": [
       "model-alias",
       "pi-automode",
+      "pi-permission-auto-review",
       "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
@@ -225,6 +243,7 @@
     "knownKeys": [
       "model-alias",
       "pi-automode",
+      "pi-permission-auto-review",
       "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
