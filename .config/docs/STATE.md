@@ -1,10 +1,5 @@
 # State
 
-## ai-usagebar critical toast timeout
-
-[#461](https://github.com/akitaonrails/ai-usagebar/pull/461) asks `notify-send` for a 30 s timeout on a critical toast (`-t 30000`), so a 100% alert can expire once Omarchy honours a requested timeout; Omarchy's notification plugin returns duration 0 for critical today, and [omacom/omarchy#12964](https://github.com/omacom/omarchy/pull/12964) is the fix there, still waiting on the maintainer.
-The clone `~/.config/omarchy/plugins/akitaonrails.ai-usagebar` sits on `fix/notify-critical-timeout`, one commit ahead of upstream `main`, so the bar keeps the change until it merges; then fast-forward `main`, delete the branch locally and on the fork, and drop this section.
-
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
@@ -135,6 +130,6 @@ Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `y
 Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carries [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
 The tier chains themselves were reordered on 2026-10-18 against Artificial Analysis Intelligence Index v4.3.2, first by [ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md) and then by [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md), which put `claude-sonnet-5-5` in front of `deepseek-v4.1-flash` so each tier leads with its strongest option; `alias/top` gained `glm-5.3` fourth.
 
-- Drop the #162 hunk once #163 ships in a release; the directory then holds only the #148 hunks.
+- The #162 hunk is gone: #163 shipped in pi-claude-bridge 0.9.2, so the `pi-claude-bridge-index` directory holds only the #148 hunks (checked 2026-10-21).
 - Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.
 - claude-bridge rewrote `pi/agent/claude-bridge.json` to `{ "askClaude": { "enabled": true }, }` during this work; a `yadm restore` brought back the committed file. Cause unknown; watch for a repeat before blaming the patch.
