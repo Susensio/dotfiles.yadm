@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Buffered readline hides batched Codex replies from select(), causing usage timeouts (docs/adr/0057).
-# https://github.com/omacom/omarchy/pull/12979; delete this step once it ships
+# https://github.com/omacom/omarchy/pull/14049 (merged, ships in 4.5.0; #12979 was closed in its favour); delete this step once it ships
 set -euo pipefail
 source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/lib.sh"
 
