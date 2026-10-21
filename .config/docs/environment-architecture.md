@@ -157,12 +157,18 @@ The first bootstrap writes `environment.d` inside a session that started without
 foot, Omarchy's terminal, starts a non-login shell by default, so `bashrc` would relay into a non-login `fish` and `_env_pull` would never run.
 `foot/foot.ini` sets `shell=/usr/bin/bash --login` for §4 to hold; its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
 
+## 8.1 Locale
+`12_locale.conf` sets `LC_TIME=en_GB.UTF-8` and leaves `LANG` at `en_US.UTF-8`, so messages stay English while dates, day and month names, and the week start — including the Omarchy clock's calendar — are Monday-first ([ADR-0091](adr/0091-monday-first-lc-time.md)).
+It is an ordinary `environment.d` variable, so it obeys §8's rules: the user manager owns it, `hl.env` would shadow it, and uwsm does not override it because nothing else exports `LC_TIME`.
+The locale itself is root-owned data in `/usr/lib/locale/locale-archive`; `bootstrap.d/12_locale.sh` enables the `en_GB.UTF-8` line in `/etc/locale.gen` and runs `locale-gen` while `locale -a` still lacks it.
+
 ## 9. Cheat Sheet & Verification (For the Future)
 
 ### Key Commands
 *   `env_reload`: Reload `environment.d` into the user manager and current shell.
     Use this after editing `~/.config/environment.d/*.conf`.
 *   `systemctl --user show-environment`: See the systemd user manager's current environment.
+*   `locale -a` and `locale -k LC_TIME`: Confirm the locale exists and reports `first_weekday=2` (1 is Sunday); `date +%x` shows whether it is really in effect.
 *   `env`: See what your current Shell process believes.
 
 ### How to Verify the Sync is Working
