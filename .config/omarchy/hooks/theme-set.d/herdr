@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Herdr re-reads the host terminal's palette only on SIGWINCH, and Omarchy
+# recolours foot through OSC without sending one. Clients are `herdr` with no
+# subcommand; the server (`herdr server`) is left alone.
+pkill -WINCH -f '^([^ ]*/)?herdr( --session [^ ]+)?$' || true
