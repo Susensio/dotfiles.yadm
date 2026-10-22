@@ -71,9 +71,10 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Dictation (voxtype)
 
 `voxtype-bin` comes from the `omarchy` repo, and `omarchy-voxtype-install` copies `$OMARCHY_PATH/default/voxtype/config.toml` over `voxtype/config.toml`, so that tracked file is one of the configs an Omarchy command overwrites.
-The upstream model list is the interesting part of the drift: `language = "auto"` transcribes in one pass at ~0.6s, while a language list such as `["en", "es"]` makes voxtype run a separate `Language detection:` pass over the whole model first, and a 2.3s recording measured 22.9s against 0.6s.
-The list also guessed badly: of the five logged detections before the switch, two landed outside the list (`it` at 3.9%, `ko` at 7.1–7.4%) and the fallback then chose `es` once and `en` the other, so the same input language gave different results.
-No `Language detection:` line appears after the switch, so `auto` keeps it to one pass.
+Language choice: `language = "auto"` strays into `pt`, `gl`, `it` and `fr` on short clips (logged detections at p≈0.24–0.37), so the config pins `["en", "es"]`.
+Both `auto` and the list run a ~1.2s detection pass on the Vulkan build (a 4.9s clip: 3.0s either way, 1.85s with `language = "es"`); the 22.9s the list once measured came from the CPU build.
+`small` stays: on a 15s Spanish clip with technical terms, `base` (1.9s) garbled names, and `large-v3-turbo` q5_0 (16.8s) still missed `Omarchy`; `flash_attention = true` is slower on this Intel GPU (measured 2026-10-21).
+`initial_prompt` carries the words Whisper mishears: adding `yadm, systemd, Telegram` fixed `Jan status`.
 
 Dictation is provisioned without `omarchy-voxtype-install`: `mise/conf.d/omarchy.toml##distro.omarchy` declares `voxtype-bin` and `wtype`, `voxtype/config.toml` is tracked, and `bootstrap.d/omarchy##distro.omarchy/voxtype.sh` does what a declaration cannot: it downloads the model the tracked config names, enables the Vulkan backend, enables the packaged `voxtype.service`, and marks `voxtype-install-invitation` done.
 The installer is skipped because it prompts, overwrites the tracked config with its template, and runs `voxtype setup gpu --enable` without `sudo` behind `|| true`, which fails with `Failed to remove existing /usr/bin/voxtype (need sudo?)` and leaves the CPU build: ~20s a transcription instead of ~0.6s.
