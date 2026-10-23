@@ -75,9 +75,14 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Dictation (voxtype)
 
 `voxtype-bin` comes from the `omarchy` repo, and `omarchy-voxtype-install` copies `$OMARCHY_PATH/default/voxtype/config.toml` over `voxtype/config.toml`, so that tracked file is one of the configs an Omarchy command overwrites.
-Language choice: `language = "auto"` strays into `pt`, `gl`, `it` and `fr` on short clips (logged detections at p≈0.24–0.37), so the config pins `["en", "es"]`.
-Both `auto` and the list run a ~1.2s detection pass on the Vulkan build (a 4.9s clip: 3.0s either way, 1.85s with `language = "es"`); the 22.9s the list once measured came from the CPU build.
-`small` stays: on a 15s Spanish clip with technical terms, `base` (1.9s) garbled names, and `large-v3-turbo` q5_0 (16.8s) still missed `Omarchy`; `flash_attention = true` is slower on this Intel GPU (measured 2026-10-21).
+Dictation is English only, with `base.en`, voxtype's and Omarchy's default, and `language = "en"`: Spanish was given up for reliable English.
+Whisper picks one language token per clip and writes everything in it, so a wrong `es` comes out as a Spanish translation of English speech.
+On 4 English and 3 Spanish clips in this accent (`voxtype transcribe`, 2026-10-23), `small` with `["en", "es"]` wrote 3 of the 4 English clips in Spanish: detection ranked `gl` or `es` first and the list only narrowed `gl` to `es`; `auto` also wrote a Spanish clip in Greek.
+`medium` q5_0 got 5 of 7 at ~3× the time of `small`, and `large-v3-turbo` q5_0 got all 7 at ~5×, too slow here.
+Parakeet TDT 0.6B v3 (ONNX build), which has no language token, got all 7 at about the speed of `small`; its int8 variant was 2–3× faster with two small slips.
+It ignores `initial_prompt`, so names would need `[text.replacements]`; both it and turbo wrote `Omachi`.
+On the English clips `base.en` took ~0.9s with one slip (`wave` for `way`), against ~2.2s for an error-free `small.en` and ~5.5s for `small` with detection; the speed won.
+`flash_attention = true` is slower on this Intel GPU (measured 2026-10-21).
 `initial_prompt` carries the words Whisper mishears: adding `yadm, systemd, Telegram` fixed `Jan status`.
 
 Dictation is provisioned without `omarchy-voxtype-install`: `mise/conf.d/omarchy.toml##distro.omarchy` declares `voxtype-bin` and `wtype`, `voxtype/config.toml` is tracked, and `bootstrap.d/omarchy##distro.omarchy/voxtype.sh` does what a declaration cannot: it downloads the model the tracked config names, enables the Vulkan backend, enables the packaged `voxtype.service`, and marks `voxtype-install-invitation` done.
