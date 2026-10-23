@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# adb ignores ANDROID_USER_HOME and keeps its keys in $HOME/.android, so give it
+# $ANDROID_USER_HOME as HOME; paths on the command line are expanded before this.
+set -euo pipefail
+home=${ANDROID_USER_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/android}
+adb=$(type -ap adb | grep -vxF "$HOME/bin/adb" | head -n1)
+mkdir -p "$home"
+HOME=$home exec "$adb" "$@"

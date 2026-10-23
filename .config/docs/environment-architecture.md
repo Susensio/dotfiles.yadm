@@ -114,6 +114,7 @@ These scripts perform the initial "surgical" moves and configuration:
 
 ### Tools that ignore XDG
 *   **wget:** `WGETRC` points at `wget/wgetrc`, whose `hsts-file` moves `~/.wget-hsts` to `~/.local/share/wget-hsts`.
+*   **adb:** reads only `$HOME/.android`, whatever `ANDROID_USER_HOME` says, so `~/bin/adb` runs it with `HOME=$ANDROID_USER_HOME`.
 
 ### Known Exception: `~/.xsession-errors`
 Unfixable in userspace: LightDM writes it internally, compiled into the daemon (`strings /usr/sbin/lightdm` shows the literal path), before our `session-wrapper` (`/usr/sbin/lightdm-session`, not `/etc/X11/Xsession`) even runs.
