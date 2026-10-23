@@ -33,6 +33,7 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
   Omarchy has a `post-update` hook but no pre-update one; review the diff by hand.
   The post-update hook reruns `yadm bootstrap`, which reapplies what the update undid.
   A second post-update hook runs `maintenance --new` and, when it finds something it has not reported before, sends a notification that opens `pi /maintenance` ([ADR-0096](adr/0096-maintenance-report-from-tracked-links.md)); `maintenance` alone prints the full report.
+- A theme switch writes `omarchy/theme.name` and the Herdr theme name in `herdr/config.toml` and `herdr/scratchpad.toml` (§Theme templates).
 - The editor menu writes `EDITOR` into `environment.d/tools.conf` ([ADR-0047](adr/0047-helix-canonical-editor-name.md)).
 - The text-size slider (`omarchy display text size`) sets three things at once: `[font] base-size` in `omarchy/shell.toml`, the font size in `foot/foot.ini`, and GTK's `text-scaling-factor` in dconf, which is not tracked.
 
@@ -47,6 +48,7 @@ Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` require
 `bootstrap.d/omarchy/theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.
 `themed/shell.toml.tpl` pins only the bar surface to the theme's `darker_background`, shadowing the stock shell template that renders every other surface; a machine-level `omarchy/shell.toml` key would win over the rendered file.
 `themed/pi.json.tpl` renders the stock Pi template's roles from other colors: tool titles and syntax variables from the foreground, links from the theme's blue, tool output from a foreground/bright-blue mix, and the running and finished tool boxes from the theme's green and cyan, leaving the accent to Pi's prompt and spinner rather than to every panel and border.
+Herdr has no theme file, so the `theme-set.d/herdr` hook writes `[theme] name` into the tracked `herdr/config.toml` and `herdr/scratchpad.toml`: the built-in a user theme names in its `herdr.theme`, a mapped built-in for a stock theme, otherwise `terminal` ([ADR-0099](adr/0099-herdr-builtin-theme-per-omarchy-theme.md)).
 The step renders files only: running apps retint through Omarchy's theme-set hook, and the rest of what a theme ships — backgrounds, icons — still arrives only with a theme set, so editing one of those wants an explicit `omarchy-theme-refresh`.
 
 ## Third-party shell plugins

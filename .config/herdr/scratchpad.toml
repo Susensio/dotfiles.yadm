@@ -1,9 +1,9 @@
 # The scratchpad is a separate Herdr session rendered inside the outer popup.
 onboarding = false
 
-# Herdr has no config include; follow the terminal palette instead of copying the outer theme.
+# The Omarchy theme-set hook writes the name, as in config.toml.
 [theme]
-name = "terminal"
+name = "gruvbox"
 
 [terminal]
 default_shell = "/home/susensio/.config/herdr/scripts/scratchpad-shell"

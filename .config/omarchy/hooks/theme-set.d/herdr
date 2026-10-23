@@ -1,5 +1,53 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+theme_dir=$HOME/.local/state/omarchy/current/theme
+configs=("$HOME/.config/herdr/config.toml" "$HOME/.config/herdr/scratchpad.toml")
+
+# A theme names its Herdr built-in in herdr.theme, as it ships helix.toml.
+# Stock themes live under /usr, so their mapping is kept here.
+if [[ -f $theme_dir/herdr.theme ]]; then
+  read -r name < "$theme_dir/herdr.theme"
+else
+  case $1 in
+    catppuccin | catppuccin-latte | gruvbox | kanagawa | nord | tokyo-night) name=$1 ;;
+    # Omarchy's rose-pine is the light variant.
+    rose-pine) name=rose-pine-dawn ;;
+    *) name=terminal ;;
+  esac
+fi
+
+# An unknown name would make Herdr fall back to catppuccin with a warning.
+check=$(mktemp)
+printf '[theme]\nname = "%s"\n' "$name" > "$check"
+HERDR_CONFIG_PATH=$check herdr config check &>/dev/null || name=terminal
+rm -f "$check"
+
+# Herdr has no config include, so the name is written in place, as its own
+# Settings screen does; the change follows the tracked omarchy/theme.name.
+changed=0
+for config in "${configs[@]}"; do
+  [[ -f $config ]] || continue
+  updated=$(awk -v name="$name" '
+    /^[[:space:]]*\[/ { in_theme = ($0 ~ /^[[:space:]]*\[theme\][[:space:]]*(#.*)?$/) }
+    in_theme && !done && /^[[:space:]]*name[[:space:]]*=/ { print "name = \"" name "\""; done = 1; next }
+    { print }
+  ' "$config")
+  [[ $updated == "$(< "$config")" ]] && continue
+  printf '%s\n' "$updated" > "$config"
+  changed=1
+done
+
+# Reloading a server makes every attached client re-read its own config.
+if (( changed )); then
+  herdr session list --json 2>/dev/null \
+    | jq -r '.sessions[] | select(.running) | .name' \
+    | while read -r session; do
+      HERDR_SESSION=$session herdr server reload-config &>/dev/null || true
+    done
+fi
+
 # Herdr re-reads the host terminal's palette only on SIGWINCH, and Omarchy
-# recolours foot through OSC without sending one. Clients are `herdr` with no
-# subcommand; the server (`herdr server`) is left alone.
+# recolours foot through OSC without sending one; the `terminal` theme needs it.
+# Clients are `herdr` with no subcommand; the server (`herdr server`) is left alone.
 pkill -WINCH -f '^([^ ]*/)?herdr( --session [^ ]+)?$' || true
