@@ -133,3 +133,10 @@ The tier chains themselves were reordered on 2026-10-18 against Artificial Analy
 - The #162 hunk is gone: #163 shipped in pi-claude-bridge 0.9.2, so the `pi-claude-bridge-index` directory holds only the #148 hunks (checked 2026-10-21).
 - Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.
 - claude-bridge rewrote `pi/agent/claude-bridge.json` to `{ "askClaude": { "enabled": true }, }` during this work; a `yadm restore` brought back the committed file. Cause unknown; watch for a repeat before blaming the patch.
+
+## SSD trim
+
+[ADR-0098](adr/0098-luks-discards-header-flag.md): TRIM reaches the SSD through the LUKS2 header's persistent `allow-discards` flag and btrfs's default async discard.
+
+- Not yet applied: `sudo cryptsetup refresh --allow-discards --persistent root` needs the passphrase in a terminal; until then `bootstrap.d/luks-discards.sh` warns.
+- Unverified: after the next boot, `findmnt -no OPTIONS /` should list `discard=async`; if not, enable `fstrim.timer` instead.
