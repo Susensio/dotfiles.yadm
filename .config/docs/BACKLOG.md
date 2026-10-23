@@ -78,6 +78,8 @@
 
 - mise | `tool upgrade`, `tool list --installed` and `tool show` still delegate only to mise, so they do not cover tools installed through pacman on Arch.
   Decide whether these commands should become source-aware, say explicitly that they are mise-only, or leave the wrapper in favor of native commands for those operations.
+- mise | Old tool versions pile up: the hourly tool-update service upgrades claude, codex and opencode, and Omarchy sets `upgrade.auto_prune = false` (migration 1787215483) so an upgrade cannot delete the install a running session executes from. On 2026-10-23, 31 stale versions held ~5 GB until a manual `mise prune --yes`.
+  Prune when nothing can be running from them, such as a user oneshot at login before any agent starts, rather than turning auto-prune back on.
 - mise | Once Omarchy PR #9596 (defaults as lazy shims in `/etc/mise/config.toml`) lands, revisit ADR-0007's symlinks versus mise shims, and `disable_tools` the unwanted Omarchy defaults.
 - omarchy | `omarchy update` runs new `migrations/`, which edit tracked files in place: several append to or awk-filter `~/.config/tmux/tmux.conf`, one reseeds `herdr/config.toml`.
   Nothing blocks them; each update needs a `yadm diff` to revert or adopt what changed.
