@@ -44,6 +44,7 @@
 !/.config/foot/
 !/.config/uwsm/
 !/.config/voxtype/
+!/.config/wget/
 !/.local/share/yadm/archive
 !/.github
 !/bin
