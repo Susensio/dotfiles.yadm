@@ -11,3 +11,5 @@ systemctl --user disable --now omarchy-fcitx5.service >/dev/null 2>&1 || true
 # A service with Restart=always is replaced by a stray autostart process on the
 # next graphical login, and a second fcitx5 exits 0 on the bus name it owns.
 pkill -x fcitx5 >/dev/null 2>&1 || true
+# The installer writes ~/.XCompose; with no Multi_key nothing can type it.
+rm -f "$HOME/.XCompose"

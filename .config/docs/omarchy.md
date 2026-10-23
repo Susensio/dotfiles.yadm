@@ -137,6 +137,7 @@ The emoji panel at `SUPER + CTRL + E` is a `hypr/bindings.lua` bind and unaffect
 Two halves, kept together: `environment.d/10-omarchy-fcitx.conf##distro.omarchy` is a symlink to `/dev/null`, which `environment.d(5)` gives complete precedence by filename over `/usr/lib/environment.d/10-omarchy-fcitx.conf`, and `bootstrap.d/omarchy##distro.omarchy/fcitx5.sh` disables the unit.
 Neither file is Omarchy-specific on its own, so the alternate scopes both to Omarchy per [ADR-0080](adr/0080-distro-alternate-scope.md).
 The step is needed only for the unit: migration `1785167800` supervises it with `Restart=always` and re-enables it on every `omarchy update`, which the post-update bootstrap then undoes.
+It also deletes the `~/.XCompose` the installer writes, which nothing can type.
 `omarchy dev unlink fcitx5` and removing the packaged file were rejected: the file is owned by `omarchy-settings`, so a local deletion is a keeps-it-correct check against package state ([ADR-0049](adr/0049-omarchy-preinstalls-mise-bootstrap.md)) and comes back on every update.
 
 ## Editor
