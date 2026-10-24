@@ -28,7 +28,8 @@ import {
   STATE_DIR,
   VERDICTS_PATH,
   packageEntries,
-  patchedPackages,
+  patchState,
+  patchStamp,
   screenAll,
 } from "./lib.mjs";
 
@@ -47,7 +48,6 @@ if (!esbuild && !revert) {
   process.exit(2);
 }
 const verdicts = JSON.parse(readFileSync(VERDICTS_PATH, "utf8"));
-const patched = patchedPackages();
 
 // A postinstall run can race a manual one. Only tool-owned state is at stake,
 // but a half-applied pair of writes is confusing to unwind by hand.
@@ -127,7 +127,6 @@ function restore(name) {
 }
 
 function build(name, verdict) {
-  if (patched.has(name)) return [`${name.padEnd(40)} REFUSED (patch target)`, true];
   const found = packageEntries(name);
   if (!found || found.entries.length === 0) return [`${name.padEnd(40)} skipped (no entry)`, false];
 
@@ -144,7 +143,12 @@ function build(name, verdict) {
   // Idempotent like apply.sh: a re-run must not bundle the bundle. The artifact
   // is checked too, so a manifest pointing at a bundle that was deleted does not
   // read as done while pi fails to load it.
-  if (found.bundled && existsSync(join(found.dir, OUT))) {
+  // The stamp names the patched sources the bundle was built from; a patch that
+  // landed since makes it stale, so it is rebuilt.
+  const stampPath = join(stateDir, "patch-stamp");
+  const stamp = patchStamp(name);
+  const fresh = existsSync(stampPath) ? readFileSync(stampPath, "utf8") === stamp : patchState(name).files.length === 0;
+  if (found.bundled && existsSync(join(found.dir, OUT)) && fresh) {
     writeFileSync(join(stateDir, MARKER), "pi-bundler\n");
     return [`${name.padEnd(40)} already bundled`, false];
   }
@@ -158,7 +162,7 @@ function build(name, verdict) {
   const externals = (verdict.externals ?? []).map((e) => `--external:${e}`);
   const r = spawnSync(
     esbuild,
-    [...esbuildArgs(entry, outfile, join(stateDir, "metafile.json"), verdict.externals ?? [])],
+    esbuildArgs(entry, outfile, join(stateDir, "metafile.json"), verdict.externals ?? [], verdict.alias ?? {}, found.dir),
     { encoding: "utf8", cwd: found.dir },
   );
   if (r.status !== 0) {
@@ -166,6 +170,7 @@ function build(name, verdict) {
     return [`${name.padEnd(40)} FAILED: ${(r.stderr || "").trim().split("\n")[0]}`, true];
   }
 
+  writeFileSync(stampPath, stamp);
   const manifest = JSON.parse(readFileSync(backup, "utf8"));
   manifest.pi.extensions = [`./${OUT}`];
   writeFileSync(pj, JSON.stringify(manifest, null, 2) + "\n");

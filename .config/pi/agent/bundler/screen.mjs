@@ -2,7 +2,7 @@
 // Gate screen: shows which pi extensions may be replaced by a prebuilt bundle.
 //
 // Four gates, in order:
-//   P  a package named in patches/*/target is refused outright
+//   P  a package whose patches are not all applied is refused (bundles are built from patched source)
 //   A  the package must bundle at all (proof: esbuild resolves the graph or it does not)
 //   C  the built bundle must not deadlock (proof: no async inits that await each other)
 //   B  every asset-locating construct in the inlined graph is listed for judgement

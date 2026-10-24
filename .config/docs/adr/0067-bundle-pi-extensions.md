@@ -118,3 +118,10 @@ Every other bundle saved under ~100 ms, the bar below which the relocation risk 
 `@juicesharp/rpiv-ask-user-question` no longer keeps its `bundle` verdict, contrary to the Consequences above: its source import is ~55 ms, so it would not earn a bundle even once upstream breaks the gate C cycle, which 2.11.0 still carries.
 `pi-model-fallback-alias` has also become a patch target since this record, so gate P refuses it regardless of its verdict.
 2026-09-30: `@tintinweb/pi-subagents` became a patch target too (`pi-subagents-resume-evicted-*`, carrying [tintinweb/pi-subagents#286](https://github.com/tintinweb/pi-subagents/pull/286) so the `Agent` tool can resume an evicted subagent), so gate P returned it to source and gave back its ~190 ms until that PR ships.
+2026-10-24: gate P no longer refuses patch targets outright; it refuses a package only while one of its patches is unapplied.
+The original reasoning ignored the ordering this record already relies on: patches run before bundling, so the bundle is built from patched source and carries the patch.
+What a bundle can still do is go stale, so `bundle.mjs` writes a `patch-stamp` (a hash of the patched files) beside the bundle and rebuilds when it changes, and treats a bundle with no stamp as stale for a patched package.
+Verdicts gained `alias` (a specifier prefix mapped to a path inside the package), which makes `@gotgenes/pi-permission-system` resolve: its `#src/*` imports map to extensionless targets esbuild will not follow, so `#src` is aliased to `./src`.
+`web-tree-sitter` and `@anthropic-ai/claude-agent-sdk` stay external there and in `pi-claude-bridge`, which locate wasm and a native CLI relative to their own install.
+`pi-claude-bridge`, `@gotgenes/pi-permission-system` and `@tintinweb/pi-subagents` are bundled again; startup under a loaded machine went from 4–7 s to about 2.1–2.5 s.
+`@mzwing/pi-permission-auto-review` stays on source (it imports the permission system's `service.ts`, whose state lives in `Symbol.for` slots on `globalThis`, so a source copy and a bundled copy agree).

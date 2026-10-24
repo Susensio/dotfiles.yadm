@@ -7,6 +7,7 @@
 // a hazard reached through an alias (`new (await import("worker_threads")).Worker`,
 // a pooled worker library) is outside what this scan can see.
 
+import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
@@ -28,7 +29,9 @@ export const VERDICTS_PATH = new URL("./verdicts.json", import.meta.url).pathnam
 // Pi supplies these to extensions as virtual modules; they must never be inlined.
 export const ESBUILD_EXTERNALS = ["--external:@earendil-works/*", "--external:@mariozechner/*"];
 
-export function esbuildArgs(entry, outfile, metafile, externals = []) {
+// `alias` maps a specifier prefix to a path relative to the package, for
+// `package.json` "imports" targets esbuild will not resolve (extensionless).
+export function esbuildArgs(entry, outfile, metafile, externals = [], alias = {}, pkgDir = MODULES_DIR) {
   return [
     entry,
     "--bundle",
@@ -40,6 +43,7 @@ export function esbuildArgs(entry, outfile, metafile, externals = []) {
     "--log-level=error",
     ...ESBUILD_EXTERNALS,
     ...externals.map((e) => `--external:${e}`),
+    ...Object.entries(alias).map(([from, to]) => `--alias:${from}=${join(pkgDir, to)}`),
   ];
 }
 
@@ -103,21 +107,35 @@ export function packageEntries(name) {
   };
 }
 
-// Any package named by a patch target is off limits: a bundle would shadow the
-// patched source and the patch would land in a file nobody loads.
-export function patchedPackages() {
-  const names = new Set();
-  if (!existsSync(PATCH_DIR)) return names;
+// Patches a package carries, with whether each is applied. A bundle is built from
+// the patched source (patches run first), so a patched package may be bundled only
+// while every patch is in; a missing one would be baked out of the bundle.
+export function patchState(name) {
+  const files = [];
+  const unapplied = [];
+  if (!existsSync(PATCH_DIR)) return { files, unapplied };
   for (const dir of readdirSync(PATCH_DIR)) {
     const target = join(PATCH_DIR, dir, "target");
+    const marker = join(PATCH_DIR, dir, "marker");
     if (!existsSync(target)) continue;
-    const files = readFileSync(target, "utf8").trim().split("\n");
-    for (const file of files) {
+    for (const file of readFileSync(target, "utf8").trim().split("\n")) {
       const m = file.match(/node_modules\/(@[^/]+\/[^/]+|[^@/][^/]*)\//);
-      if (m) names.add(m[1]);
+      if (m?.[1] !== name) continue;
+      files.push(file);
+      const applied =
+        existsSync(file) && existsSync(marker) && readFileSync(file, "utf8").includes(readFileSync(marker, "utf8").trim());
+      if (!applied) unapplied.push(dir);
     }
   }
-  return names;
+  return { files: files.sort(), unapplied };
+}
+
+// Identifies the patched sources a bundle was built from, so a patch applied or
+// refreshed after the build makes the bundle stale instead of silently shadowing it.
+export function patchStamp(name) {
+  const h = createHash("sha256");
+  for (const f of patchState(name).files) h.update(f).update(existsSync(f) ? readFileSync(f) : "");
+  return h.digest("hex");
 }
 
 export const HAZARDS = [
@@ -238,14 +256,14 @@ export function awaitedInitCycles(code) {
 }
 
 // Build the graph once, for both the screen and the bundle.
-export function analyze(esbuild, entry, externals = []) {
+export function analyze(esbuild, entry, externals = [], alias = {}, pkgDir = MODULES_DIR) {
   // Probe output goes to a temp dir: it is ours, but node_modules is not the
   // place to leave it.
   const dir = mkdtempSync(join(tmpdir(), "pi-bundler-"));
   const out = join(dir, "probe.mjs");
   const meta = join(dir, "probe.json");
   // Fixed cwd so metafile input paths resolve deterministically.
-  const r = spawnSync(esbuild, esbuildArgs(entry, out, meta, externals), {
+  const r = spawnSync(esbuild, esbuildArgs(entry, out, meta, externals, alias, pkgDir), {
     encoding: "utf8",
     cwd: MODULES_DIR,
   });
@@ -290,7 +308,6 @@ export function hitKinds(hits) {
 // Fails closed: a package with a hazard and no matching verdict is a problem.
 export function screenAll(esbuild) {
   const verdicts = existsSync(VERDICTS_PATH) ? readJson(VERDICTS_PATH) : {};
-  const patched = patchedPackages();
   const report = {};
   const problems = [];
 
@@ -300,8 +317,9 @@ export function screenAll(esbuild) {
       report[name] = { gate: "absent", detail: "not installed" };
       continue;
     }
-    if (patched.has(name)) {
-      report[name] = { gate: "P", decision: "skip", detail: "patch target (patches/*/target)" };
+    const { unapplied } = patchState(name);
+    if (unapplied.length > 0) {
+      report[name] = { gate: "P", decision: "skip", detail: `patch not applied: ${unapplied.join(", ")}` };
       continue;
     }
     if (found.entries.length === 0) {
@@ -312,7 +330,7 @@ export function screenAll(esbuild) {
     const verdict = verdicts[name];
     // The same externals the bundle would use, so the screen measures the graph
     // that actually ships.
-    const a = analyze(esbuild, found.entries[0], verdict?.externals ?? []);
+    const a = analyze(esbuild, found.entries[0], verdict?.externals ?? [], verdict?.alias ?? {}, found.dir);
     if (!a.ok) {
       report[name] = { gate: "A", decision: "skip", detail: a.error };
       continue;

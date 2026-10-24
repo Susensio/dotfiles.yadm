@@ -19,7 +19,9 @@
   "@tintinweb/pi-subagents": {
     "decision": "bundle",
     "reason": "new Worker takes WORKER_SOURCE with eval:true; worker-source.ts states the source is an inlined template literal precisely so it survives bundling, so no path is relocated.",
-    "reviewedKinds": ["@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"],
+    "reviewedKinds": [
+      "@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"
+    ],
     "measured": "import 245ms -> 52ms (paired PI_TIMING pass, 2026-09-29)"
   },
   "@narumitw/pi-usage": {
@@ -31,12 +33,28 @@
     "reason": "gate P: patches/pi-model-alias-shared-registry targets index.ts; before that patch it screened clean and saved only ~2ms (7 -> 5ms paired, 2026-09-29), so it would not earn a bundle either"
   },
   "pi-claude-bridge": {
-    "decision": "skip",
-    "reason": "inlined @anthropic-ai/claude-agent-sdk locates its native CLI via import.meta.url and would throw \"Native CLI binary for <platform>-<arch> not found\" once relocated; no pathToClaudeCodeExecutable is configured, so the SDK relies on that URL. Source now imports in ~167ms (paired, 2026-09-29), so externalizing the SDK could save under 100ms. Not worth the upkeep."
+    "decision": "bundle",
+    "reason": "@anthropic-ai/claude-agent-sdk stays external: it locates its native CLI through import.meta.url and would throw once inlined. Patched; the bundle is rebuilt when the patch stamp changes.",
+    "externals": [
+      "@anthropic-ai/claude-agent-sdk"
+    ]
   },
   "@gotgenes/pi-permission-system": {
-    "decision": "skip",
-    "reason": "gate P: patching a bundle would land the patch in a file nobody loads. Also fails gate A (#src/* subpath imports)."
+    "decision": "bundle",
+    "reason": "#src/* imports map to extensionless targets esbuild will not resolve; aliased to ./src. Other extensions reach its service through Symbol.for slots on globalThis, so a bundled copy and a source copy coexist. web-tree-sitter stays external so its wasm is located where it was installed. parser.ts resolves the wasm with createRequire(import.meta.url), which still walks up from <pkg>/.pi-bundler/ to the same hoisted node_modules.",
+    "alias": {
+      "#src": "./src"
+    },
+    "externals": [
+      "web-tree-sitter"
+    ],
+    "reviewedKinds": [
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:import.meta.url×1",
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:createRequire×1",
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:asset: .wasm×2",
+      "@gotgenes/pi-permission-system/src/config/extension-config.ts:import.meta.url×1",
+      "@gotgenes/pi-permission-system/src/path/node-modules-discovery.ts:import.meta.url×1"
+    ]
   },
   "@mzwing/pi-permission-auto-review": {
     "decision": "skip",
