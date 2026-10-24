@@ -45,6 +45,7 @@
 !/.config/uwsm/
 !/.config/voxtype/
 !/.config/wget/
+!/.config/wluma/
 !/.local/share/yadm/archive
 !/.github
 !/bin

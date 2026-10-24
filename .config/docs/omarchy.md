@@ -210,7 +210,9 @@ Remove the workaround when Chromium exposes popup identity before mapping, for e
 `bootstrap.d/omarchy##distro.omarchy/wluma.sh` installs `wluma` from the AUR with `yay` and enables its packaged user unit, but only on a machine with an ambient light sensor (`/sys/bus/iio/devices/*/in_illuminance_raw`).
 mise's `pacman:` backend cannot install AUR packages, which is why it is a bootstrap step ([ADR-0048](adr/0048-direct-arch-tool-install.md)).
 
-There is no tracked config: wluma discovers the sensor, the `eDP-1` backlight and the keyboard backlight itself.
+The tracked `wluma/config.toml` does one thing: it excludes the laptop keyboard backlight (`[[keyboard]]` with `enabled = false`), which leaves `omarchy-brightness-keyboard` the only writer of that LED ([ADR-0085](adr/0085-mx-keys-backlight-out-of-scope.md)) and keeps wluma's own idle stage from switching it off.
+That stage exists: 5.x runs idle detection over `ext-idle-notify-v1` and dims displays after two minutes, independently of the shell's timers (`BACKLOG.md`, idle dimming during video).
+Everything else is discovered: the ambient light sensor and the `eDP-1` backlight.
 It starts from a guess and learns from manual brightness changes, stored under `~/.local/share/wluma/`.
-It writes the backlight directly and does not touch hyprsunset's colour temperature or the shell's idle timers, so the three coexist.
+It writes the backlight directly and leaves hyprsunset to Hyprland's own API, so those two coexist.
 Follow its decisions with `journalctl --user -fu wluma`; for per-decision output stop the unit and run `RUST_LOG=debug wluma`.

@@ -1,0 +1,5 @@
+# Omarchy's omarchy-brightness-keyboard owns this LED (blank/restore); wluma drives displays only.
+[[keyboard]]
+name = "dell::kbd_backlight"
+path = "/sys/class/leds/dell::kbd_backlight"
+enabled = false
