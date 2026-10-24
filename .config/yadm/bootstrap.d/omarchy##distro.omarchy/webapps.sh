@@ -2,6 +2,7 @@
 # Web-app launcher entries we keep from Omarchy's preinstalls. They install
 # through omarchy-webapp-install and run after preinstalls.sh, whose
 # omarchy-webapp-remove-all would otherwise sweep them.
+# Spotify stands in while spotifast cannot play: https://github.com/crmne/spotifast/issues/283
 # Gmail, the mailto: handler, is installed by mime.sh instead; WhatsApp is
 # zapfast, a declared package with upstream's own desktop entry (ADR-0102).
 set -euo pipefail
@@ -16,4 +17,5 @@ webapp "Gemini" https://gemini.google.com/ https://cdn.jsdelivr.net/gh/homarr-la
 webapp "GitHub" https://www.github.com
 webapp "Google Maps" https://maps.google.com google-maps
 webapp "Google Photos" https://photos.google.com/ google-photos
+webapp "Spotify" https://open.spotify.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify.png
 webapp "YouTube" https://youtube.com/ youtube
