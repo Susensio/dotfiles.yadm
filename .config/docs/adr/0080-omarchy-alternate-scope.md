@@ -33,3 +33,8 @@ Membership is maintained by review at that boundary: a portable item placed in t
 The runner's step finder excludes `##` paths, which also closes a latent double-run for any `##` directory, since the link and the real directory would both be walked.
 A `~/bin` command's alternate sits beside its link, so its `##` name is a completion candidate in that directory; the yadm `alt` directory is the alternative if that becomes irksome.
 This refines ADR-0044 rather than reversing it: that record keeps governing steps within the set.
+
+## Corrections
+
+2026-10-24: yadm's `develop` branch changed how a directory alternate is materialised (commit 4214de8): instead of one symlink at the plain name pointing at `omarchy##distro.omarchy`, it creates a real directory holding a per-file symlink for each tracked file inside. The decision above still holds — the `##distro.omarchy` suffix is still what scopes the step set to Omarchy — but the Consequence saying the set "is reached only through its materialised link" describes a link that will not exist once this reaches a release, and the plain-named path will be a directory rather than a symlink.
+Nothing needs to change until then: the bootstrap's `find -L` step discovery walks either shape.

@@ -140,3 +140,12 @@ The tier chains themselves were reordered on 2026-10-18 against Artificial Analy
 
 - Not yet applied: `sudo cryptsetup refresh --allow-discards --persistent root` needs the passphrase in a terminal; until then `bootstrap.d/luks-discards.sh` warns.
 - Unverified: after the next boot, `findmnt -no OPTIONS /` should list `discard=async`; if not, enable `fstrim.timer` instead.
+
+## yadm alt race and commit signing (2026-10-24)
+
+`~/.ssh/id_ed25519` now exists without a passphrase and `commit.gpgsign` is on, so every commit signs unattended ([ADR-0100](adr/0100-passphraseless-signing-key.md)).
+`git/allowed_signers` carries the same public key, which is what turns the local `U` (signed, unknown signer) into `G`.
+
+- Opened [yadm PR #550](https://github.com/yadm-dev/yadm/pull/550), which restores `ln -nfs` in `ln_relative()` so two concurrent `auto-alt` runs replace the link instead of one failing; reported `verified: true` on `develop` `bbb58e6`, with [issue #549](https://github.com/yadm-dev/yadm/issues/549) as the report and a comment on [#538](https://github.com/yadm-dev/yadm/pull/538) recording that #538 fixes only the steady-state case.
+- Until a 3.5.0 release carries the change, `bootstrap.d/omarchy##distro.omarchy/omarchy##distro.omarchy` regenerates whenever two yadm commands overlap. Delete the self-link; it is the known release-side defect, not a new fault, and it stays untracked.
+- The PR's `test_alt_concurrent` is the only new failure-free test: the 20 other failures in `test/test_alt.py` need template processors (`envtpl`, `j2cli`, `j2`, `esh`) this machine does not have, and predate the change.
