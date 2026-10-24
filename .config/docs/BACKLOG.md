@@ -76,6 +76,10 @@
 - omarchy | Spanish dictation: voxtype is English only (`base.en`) because Whisper `small` misdetects this accent's English as Spanish; findings in `docs/omarchy.md` under Dictation.
   Candidate: Parakeet TDT 0.6B v3 int8 on the ONNX build (`voxtype setup onnx --enable`, `engine = "parakeet"`), which handled both languages in testing; it needs `[text.replacements]` built from its actual spellings of Omarchy, Hyprland, yadm and the like, since it ignores `initial_prompt`.
   voxtype 1.1.1 has no per-recording language flag, so a second key for Spanish could only swap models (`record start --model small` with `language = "es"`), which was rejected as indirect.
+- omarchy | Idle dimming during video: wluma 5.0.4 grew an idle stage of its own (120s, displays to 30%, keyboard backlights off; `wluma status --json` reports it), so a video you are only watching dims after two minutes even though the shell's `IdleMonitor` would have respected an inhibitor.
+  It hits browsers because Chromium asks `org.freedesktop.ScreenSaver` over D-Bus, which nothing on Hyprland owns, and wluma's `ext-idle-notify-v1` has no inhibitor semantics; `omarchy.media` does report `playing` from Chromium's MPRIS player, so the desktop is the only layer that can see the video.
+  Chosen shape, not built: an `idle.dim` stage in `omarchy.idle` that skips while `omarchy.media` plays, actuating through wluma (`wluma set dim`) since wluma owns the backlight and gamma and would overwrite a `brightnessctl` write within seconds during video; `[idle] enabled = false` in the tracked `wluma/config.toml` either way. Package file, so the local version needs a `bugfix/` step (ADR-0057) or a user plugin under `omarchy/plugins/`.
+  Blocked on upstream only for the AC/battery half: [PR #8595](https://github.com/omacom/omarchy/pull/8595) adds `idle.ac`/`idle.battery` off UPower's `onBattery` and is open but `CONFLICTING` since 2026-09-27; 4.0.6 and v4.5.0-rc1 both still carry one global `screensaver`/`lock` pair and an idle service with no power-source awareness.
 
 ## Omarchy migration
 
