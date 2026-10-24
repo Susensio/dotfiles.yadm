@@ -18,6 +18,12 @@ if [[ ! -f $model_file ]]; then
   changed=true
 fi
 
+# The Alt + Insert key (hypr/bindings.lua) records with multilingual small for Spanish.
+if [[ ! -f ${model_file%/*}/ggml-small.bin ]]; then
+  voxtype setup --download --model small --no-post-install
+  changed=true
+fi
+
 # Only where the hardware offers it; elsewhere the CPU build is the right one.
 if omarchy-hw-vulkan 2>/dev/null && [[ $(readlink -f /usr/bin/voxtype) != */voxtype-vulkan ]]; then
   sudo voxtype setup gpu --enable

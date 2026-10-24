@@ -47,11 +47,15 @@ pause_media = true
 # Or provide absolute path to a custom .bin model file
 model = "base.en"
 
+# `record start --model` is honored only for the models named here; others fall back to model (docs/omarchy.md)
+secondary_model = "small"
+
 # Language for transcription
 # Use "en" for English, "auto" for auto-detection
 # See: https://github.com/openai/whisper#available-models-and-languages
-# English only: small hears this accent's English as gl/es, even limited to ["en", "es"] (docs/omarchy.md)
-language = "en"
+# base.en ignores the list; the Alt + Insert key records with multilingual small (docs/omarchy.md)
+# A list must be a TOML array: the string "en,es" reaches whisper as one unknown language name.
+language = ["en", "es"]
 
 # Spellings whisper should prefer for words it mishears
 initial_prompt = "Omarchy, Hyprland, yadm, systemd, Telegram."

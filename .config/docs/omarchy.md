@@ -75,7 +75,13 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 ## Dictation (voxtype)
 
 `voxtype-bin` comes from the `omarchy` repo, and `omarchy-voxtype-install` copies `$OMARCHY_PATH/default/voxtype/config.toml` over `voxtype/config.toml`, so that tracked file is one of the configs an Omarchy command overwrites.
-Dictation is English only, with `base.en`, voxtype's and Omarchy's default, and `language = "en"`: Spanish was given up for reliable English.
+Dictation defaults to English, with `base.en`, voxtype's and Omarchy's default, and `language = ["en", "es"]`, which `base.en` ignores (identical output with `en` on a Spanish clip).
+It must be a TOML array: the string `"en,es"` works only as the `--language` flag, and in the config whisper logs `unknown language 'en,es'` and `small` writes phonetic or English garbage.
+Alt + Insert records with multilingual `small` through `record start --model small`, the only per-recording override that changes the language behaviour: voxtype 1.1.1 has no per-recording language option.
+The daemon honors `--model` only for `model` and `whisper.secondary_model`; any other name logs `Cannot prepare unavailable model` and records with `base.en`, so `secondary_model = "small"` is required (before it was set, every Alt + Insert recording of 2026-10-24 ran `base.en`, which is why Spanish came out as gibberish).
+On 3 Spanish clips (2026-10-24) `small` and `base` both detected Spanish in 1.1–4.8s with small slips (`ven o de comprar`); `small` was slower and not clearly better, but was re-chosen after `base` typed Spanish live as phonetic gibberish (`Hola, aestosnapreva`).
+English spoken on that key is expected to be misdetected, as below.
+Streaming (`whisper.streaming`) is off: voxtype disowns the typing session on stop, so the tail of every dictation is dropped ([issue #804](https://github.com/peteonrails/voxtype/issues/804)), and with it on, push-to-talk needs a `transparent = true` release bind because Hyprland shadows a release while another key is held.
 Whisper picks one language token per clip and writes everything in it, so a wrong `es` comes out as a Spanish translation of English speech.
 On 4 English and 3 Spanish clips in this accent (`voxtype transcribe`, 2026-10-23), `small` with `["en", "es"]` wrote 3 of the 4 English clips in Spanish: detection ranked `gl` or `es` first and the list only narrowed `gl` to `es`; `auto` also wrote a Spanish clip in Greek.
 `medium` q5_0 got 5 of 7 at ~3× the time of `small`, and `large-v3-turbo` q5_0 got all 7 at ~5×, too slow here.
