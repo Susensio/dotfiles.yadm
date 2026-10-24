@@ -2,9 +2,13 @@
 # Pin the browser's Wayland proxy until a newer version is tested (docs/omarchy.md).
 "cargo:wl-relabel" = "0.1.1"
 
-# Omarchy's preinstalls, kept or removed, applied by `mise bootstrap` through pacman.
+# Omarchy's preinstalls, kept or removed, applied by `mise bootstrap` through pacman,
+# plus the AUR packages this desktop adds. `aur:` means what `pacman:` cannot see:
+# no pins, no `absent`, and `--noconfirm` leaves the PKGBUILD review to us (ADR-0102).
 # Their launchers and wrappers are yadm/bootstrap.d/omarchy/preinstalls.sh's.
 [bootstrap.packages]
+"aur:wluma" = "latest"
+"aur:zapfast-bin" = "latest"
 "pacman:aether" = "latest"
 "pacman:libreoffice-fresh" = "latest"
 "pacman:omacalc" = "latest"

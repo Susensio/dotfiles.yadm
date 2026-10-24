@@ -2,7 +2,8 @@
 # Web-app launcher entries we keep from Omarchy's preinstalls. They install
 # through omarchy-webapp-install and run after preinstalls.sh, whose
 # omarchy-webapp-remove-all would otherwise sweep them.
-# Gmail, the mailto: handler, is installed by mime.sh instead.
+# Gmail, the mailto: handler, is installed by mime.sh instead; WhatsApp is
+# zapfast, a declared package with upstream's own desktop entry (ADR-0102).
 set -euo pipefail
 
 command -v omarchy-webapp-install &>/dev/null || exit 0
@@ -15,5 +16,4 @@ webapp "Gemini" https://gemini.google.com/ https://cdn.jsdelivr.net/gh/homarr-la
 webapp "GitHub" https://www.github.com
 webapp "Google Maps" https://maps.google.com google-maps
 webapp "Google Photos" https://photos.google.com/ google-photos
-webapp "WhatsApp" https://web.whatsapp.com/ whatsapp
 webapp "YouTube" https://youtube.com/ youtube

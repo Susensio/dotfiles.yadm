@@ -211,10 +211,18 @@ A 1080p60 frame-pacing A/B through the proxy and direct — CDP `getVideoPlaybac
 No Chromium issue tracking this exact fix was found; the [related upstream browser bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1864115) belongs to Firefox.
 Remove the workaround when Chromium exposes popup identity before mapping, for example through [the Wayland toplevel-tag protocol](https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/staging/xdg-toplevel-tag/xdg-toplevel-tag-v1.xml), which would let a compositor rule distinguish these windows directly.
 
+## AUR packages
+
+`[bootstrap.packages]` has two Arch prefixes, and neither stands in for the other: `pacman:<pkg>` is a sync-repo package, checked with `pacman -Q`, and `aur:<pkg>` is an AUR one, checked with `pacman -Qm` and built by `yay -S --aur --noconfirm` (`paru` when yay is absent).
+`zapfast-bin` and `wluma` are `aur:` entries in `mise/conf.d/omarchy.toml##distro.omarchy`, shipped like any other package ([ADR-0102](adr/0102-aur-packages-mise-backend.md)).
+The backend supports no pins and no `state = "absent"`, and mise never removes an AUR package, so a removal is `pacman -R` by hand; `--noconfirm` means the PKGBUILD is never shown, so review a new or upgraded AUR package yourself.
+`yay` and `base-devel` are the operator's: mise installs neither, and `bootstrap.d/00_dependencies.sh` fails the run when a config declares `aur:` and one is missing.
+When a sync repo ships the same name, the `aur:` entry reports it missing and `apply` replaces the repo build with the AUR one.
+
 ## Automatic brightness (wluma)
 
-`bootstrap.d/omarchy##distro.omarchy/wluma.sh` installs `wluma` from the AUR with `yay` and enables its packaged user unit, but only on a machine with an ambient light sensor (`/sys/bus/iio/devices/*/in_illuminance_raw`).
-mise's `pacman:` backend cannot install AUR packages, which is why it is a bootstrap step ([ADR-0048](adr/0048-direct-arch-tool-install.md)).
+`bootstrap.d/omarchy##distro.omarchy/wluma.sh` enables wluma's packaged user unit, but only where the package is installed (a machine with an ambient light sensor, `/sys/bus/iio/devices/*/in_illuminance_raw`) and `wluma` is on `PATH`.
+The package itself is a `pacman:`/`aur:` declaration, not a `yay` call in this step ([ADR-0102](adr/0102-aur-packages-mise-backend.md)).
 
 The tracked `wluma/config.toml` does one thing: it excludes the laptop keyboard backlight (`[[keyboard]]` with `enabled = false`), which leaves `omarchy-brightness-keyboard` the only writer of that LED ([ADR-0085](adr/0085-mx-keys-backlight-out-of-scope.md)) and keeps wluma's own idle stage from switching it off.
 That stage exists: 5.x runs idle detection over `ext-idle-notify-v1` and dims displays after two minutes, independently of the shell's timers (`BACKLOG.md`, idle dimming during video).
