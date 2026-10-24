@@ -1,5 +1,12 @@
 # State
 
+## pi-permission-system cd home-prefix patch (2026-10-24)
+
+The patch library carries `pi-permission-cd-home-prefix`, the `~` / `~/…` cd-target fold, because 41.0.0 resolves a relative token after such a `cd` against the session cwd and asks about a path that does not exist.
+[ADR-0101](adr/0101-cd-home-prefix-patch.md) holds the reasoning and the drop condition; [gotgenes/pi-packages#1083](https://github.com/gotgenes/pi-packages/issues/1083) and [PR #1084](https://github.com/gotgenes/pi-packages/pull/1084) carry the upstream change.
+Finish it by deleting `pi/agent/patches/pi-permission-cd-home-prefix/` once a release contains the fix, then `pi update --extensions`; do not adapt the patch if the upstream shape differs.
+The patch only takes effect after a `/reload` or restart, since the bundle is built from it.
+
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
 Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
