@@ -58,7 +58,7 @@ secondary_model = "small"
 language = ["en", "es"]
 
 # Spellings whisper should prefer for words it mishears
-initial_prompt = "Omarchy, Hyprland, yadm, systemd, Telegram."
+initial_prompt = "Omarchy, Hyprland, yadm, systemd, Telegram, Claude, omamail."
 
 # Translate non-English speech to English
 translate = false
