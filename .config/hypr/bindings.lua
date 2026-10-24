@@ -117,6 +117,10 @@ o.bind("SHIFT + Insert", "Dictate hands-free", "voxtype record toggle")
 -- Laptop display; code:235 is xkb for KEY_SWITCHVIDEOMODE (evdev 227), sent by keyd for the F8 key (Super+P).
 o.bind("code:235", "Toggle laptop display", "omarchy-hyprland-monitor-internal toggle")
 
+-- Themes
+o.bind("SUPER + CTRL + T", "Theme menu", "omarchy-menu toggle theme")
+o.bind("SUPER + ALT + T", "Toggle gruvbox classic dark/light", "bash -lc '[[ $(<~/.local/state/omarchy/current/theme.name) == gruvbox-classic-light ]] && omarchy theme set gruvbox-classic || omarchy theme set gruvbox-classic-light'")
+
 -- Power profile
 o.bind("SUPER + ALT + P", "Cycle power profile", "omarchy-powerprofiles-cycle")
 
