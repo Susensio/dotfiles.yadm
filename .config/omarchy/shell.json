@@ -63,7 +63,25 @@
           ]
         },
         {
-          "id": "omamail"
+          "id": "omamail",
+          "refreshIntervalSec": 120,
+          "maxMessages": 50,
+          "heavyMessageRendering": "Show plain text first",
+          "contentDirection": "Auto",
+          "appearance": "System",
+          "defaultQuery": "in:inbox",
+          "notifyNewMail": "On",
+          "oauthPort": 9481,
+          "undoSendSeconds": 10,
+          "unifiedCalendarView": false,
+          "calendarRemindersEnabled": true,
+          "calendarSnoozeMinutes": 5,
+          "showBarIcon": true,
+          "unifiedMailboxes": false,
+          "suggestEvents": false,
+          "aiAgent": "Claude",
+          "aiModel": "",
+          "aiChatResetAt": 1792827477644
         },
         {
           "id": "omarchy.bluetooth"
