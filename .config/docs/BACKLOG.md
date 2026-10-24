@@ -80,6 +80,8 @@
   It hits browsers because Chromium asks `org.freedesktop.ScreenSaver` over D-Bus, which nothing on Hyprland owns, and wluma's `ext-idle-notify-v1` has no inhibitor semantics; `omarchy.media` does report `playing` from Chromium's MPRIS player, so the desktop is the only layer that can see the video.
   Chosen shape, not built: an `idle.dim` stage in `omarchy.idle` that skips while `omarchy.media` plays, actuating through wluma (`wluma set dim`) since wluma owns the backlight and gamma and would overwrite a `brightnessctl` write within seconds during video; `[idle] enabled = false` in the tracked `wluma/config.toml` either way. Package file, so the local version needs a `bugfix/` step (ADR-0057) or a user plugin under `omarchy/plugins/`.
   Blocked on upstream only for the AC/battery half: [PR #8595](https://github.com/omacom/omarchy/pull/8595) adds `idle.ac`/`idle.battery` off UPower's `onBattery` and is open but `CONFLICTING` since 2026-09-27; 4.0.6 and v4.5.0-rc1 both still carry one global `screensaver`/`lock` pair and an idle service with no power-source awareness.
+- gmailctl | New-machine setup for the private `Susensio/gmailctl-config` repo (Gmail filters and their delayed-rule Apps Script, private because they name people and providers): a bootstrap step cloning it to `~/.config/gmailctl` when `gh` is authenticated, plus an ADR for the private companion repo; `credentials.json` and `token.json` stay machine-local.
+- gmailctl | Publish the OAuth client shared by omamail and gmailctl out of Testing mode, so its tokens stop expiring every 7 days; needs app branding and a privacy-policy URL.
 
 ## Omarchy migration
 
