@@ -114,6 +114,9 @@ o.bind("Insert", "Start dictation", "voxtype record start")
 o.bind("Insert", "Stop dictation", "voxtype record stop", { release = true })
 o.bind("SHIFT + Insert", "Dictate hands-free", "voxtype record toggle")
 
+-- Laptop display; code:235 is xkb for KEY_SWITCHVIDEOMODE (evdev 227), sent by keyd for the F8 key (Super+P).
+o.bind("code:235", "Toggle laptop display", "omarchy-hyprland-monitor-internal toggle")
+
 -- Power profile
 o.bind("SUPER + ALT + P", "Cycle power profile", "omarchy-powerprofiles-cycle")
 
