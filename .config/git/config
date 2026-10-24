@@ -50,6 +50,7 @@
 
 [commit]
 	verbose = true           # Include diff in commit message editor
+	gpgsign = true           # Key has no passphrase, so every commit signs unattended (docs/adr/0100)
 
 [column]
 	ui = auto                # Output in columns when possible
@@ -76,3 +77,5 @@
 	path = lfs.config
 [gpg]
 	format = ssh
+[gpg "ssh"]
+	allowedSignersFile = /home/susensio/.config/git/allowed_signers
