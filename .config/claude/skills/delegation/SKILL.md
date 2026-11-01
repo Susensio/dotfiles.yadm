@@ -22,7 +22,7 @@ Resume a named agent with `SendMessage` when the follow-up needs what that agent
 Work returned undone -- out of scope, blocked, refused -- resumes rather than respawns.
 
 The web cannot be sized before it arrives, so it splits on whether the question is bounded.
-`WebFetch` against a URL in hand, answering one named question, stays here, or goes to `developer`, which holds `WebFetch` for a page its brief names.
+`WebFetch` against a URL in hand, answering one named question, stays here.
 Anything where which pages hold the answer is still unknown goes to `explorer` -- a `WebSearch`, a claim needing two sources agreed against each other, an issue tracker read down to its resolution.
 Unclear cases go out.
 
@@ -102,5 +102,4 @@ Propose that line and wait for the user to take it -- two tasks that happened to
 ## Nesting
 
 Check an agent holds `Agent` before briefing it to fan out: an explicit `tools:` list grants only what it names (tested, v2.1.223), and an agent without it works serially rather than reporting that it cannot.
-`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1` removes `Agent` from every spawned subagent whatever its `tools:` says; check `env` before briefing one to fan out, and where it is `1`, run the research from the caller and put the findings in the brief.
 A grandchild's results are unreliable once the parent has finished, so keep chains short and let each level return before the one above.
