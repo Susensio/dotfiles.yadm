@@ -1,10 +1,5 @@
 # Distro-sourced tools, installed through mise on machines without a variant for their distro.
 # Keep in sync with packages.toml##distro_family.arch; `tool` writes both (docs/adr/0046).
-# chafa has no mise registry entry and upstream ships no binaries, so it comes
-# from the distro (Debian 13: 1.14.5); the apt manager skips on machines without it.
-[bootstrap.packages]
-"apt:chafa" = "latest"
-
 [tools]
 bat = "latest"
 delta = { version = "latest", pacman = "git-delta", extra_assets = [

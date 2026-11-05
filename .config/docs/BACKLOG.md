@@ -13,7 +13,7 @@
   Get the pattern narrow enough to not false-positive on legitimate `-L`/`-S` usage.
   See `tmux-testing` skill's SKILL.md section 0 for the incident writeup.
 - mise | chafa went into `packages.toml##default` as a plain `chafa = "latest"` when it came from Omarchy, and mise has no such tool, so `mise bootstrap` failed on Debian with "chafa not found in mise tool registry".
-  The Arch variant had a correct `"pacman:chafa"`, so nothing on this machine ever exercised the default one; it now declares `"apt:chafa"` under `[bootstrap.packages]` and works on both.
+  The Arch variant had a correct `"pacman:chafa"`, so nothing on this machine ever exercised the default one; it now lives in `yadm/bootstrap.d/dependencies.txt` (mise's apt manager would not prompt for a sudo password: "no TTY is available").
   To catch this before a fresh machine does: add a CI check that resolves every tool named in both variants' `[tools]` against `mise registry` (the `mise` job, alongside the syntax ones), since a name the registry lacks can only fail on the machine that reads that variant.
   Worth fixing the habit too -- Omarchy additions belong in the Arch variant (or `tool install`), and the default variant needs a name mise actually knows.
 - ci | Explore [Boeing/config-file-validator](https://github.com/Boeing/config-file-validator) to replace `json-syntax` and `toml-syntax`; held back for its small following (about 500 stars).

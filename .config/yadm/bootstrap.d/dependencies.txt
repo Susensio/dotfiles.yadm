@@ -3,3 +3,5 @@ curl
 git
 jq
 wget
+# bin/preview; no mise tool, same package name on pacman and apt
+chafa
