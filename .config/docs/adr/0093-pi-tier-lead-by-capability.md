@@ -1,6 +1,6 @@
 # ADR-0093: Lead each Pi tier with the strongest model that answers, and demote a metered model behind a stronger cross-provider one
 
-Status: Accepted
+Status: Superseded by [ADR-0103](0103-pi-rung-order-shared-quota.md)
 Date: 2026-10-18
 Supersedes: [ADR-0092](0092-pi-tier-order-by-intelligence.md)
 
