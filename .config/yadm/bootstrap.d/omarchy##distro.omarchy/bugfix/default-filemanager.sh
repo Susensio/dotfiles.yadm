@@ -14,5 +14,5 @@ for command in omarchy-default-filemanager omarchy-launch-filemanager omarchy-la
 done
 
 apply_omarchy_patch filemanager-guard-reader.patch /usr/share/omarchy/shell/plugins/menu/MenuModel.js 1
-# Rebased on 4.0.4, whose editor rows gained "when" guards; the PR's rows are unchanged.
+# Rebased on 4.5, whose guard-reader list moved under the dictation row; the PR's rows are unchanged.
 apply_omarchy_patch filemanager-menu.patch /usr/share/omarchy/default/omarchy/omarchy-menu.jsonc 1

@@ -1,12 +1,10 @@
-diff --git a/shell/plugins/menu/MenuModel.js b/shell/plugins/menu/MenuModel.js
-index 53c49768e1f..3ae79e4ac97 100644
---- a/shell/plugins/menu/MenuModel.js
-+++ b/shell/plugins/menu/MenuModel.js
-@@ -397,6 +397,7 @@ var GUARD_READERS = [
+--- a/shell/plugins/menu/MenuModel.js	2026-11-05 18:02:32.854575673 +0100
++++ b/shell/plugins/menu/MenuModel.js	2026-11-05 18:02:32.861704906 +0100
+@@ -428,6 +428,7 @@
    "omarchy-default-agent",
    "omarchy-default-browser",
    "omarchy-default-editor",
 +  "omarchy-default-filemanager",
    "omarchy-default-terminal",
-   "omarchy-dns"
- ]
+   "omarchy-default-dictation",
+   "omarchy-dns",

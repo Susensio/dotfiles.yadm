@@ -84,8 +84,7 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 
 - `uwsm-mise-shims.sh`: [#13364](https://github.com/omacom/omarchy/pull/13364) drops `10-omarchy`'s `mise activate bash --shims`, which put the shims ahead of `environment.d`'s `PATH`.
 - `hypr-envs-path.sh`: [#13351](https://github.com/omacom/omarchy/pull/13351) drops the `PATH` prepend from `default/hypr/envs.lua`.
-- `keybindings-menu-submaps.sh`: [#13461](https://github.com/omacom/omarchy/pull/13461) prefixes submap bindings in the keybindings menu with the chord that enters their mode.
-  ADR-0076 removed every submap, so the step is a no-op locally.
+- `keybindings-menu-submaps.sh` was dropped after 4.5: with no submap bindings left (ADR-0076) it patched a menu that had nothing to group, and the patch no longer applies.
 - `keyboard-backlight-hibernate.sh`: [#13729](https://github.com/omacom/omarchy/pull/13729) (worktree `~/Projects/omarchy-kbd-hibernate`) restores the backlight after hibernation, which the pre-hibernate hook set to 0 with no `post` restore.
   Observe the next suspend-then-hibernate resume.
 - `nightlight-schedule-refresh.sh`: [#13684](https://github.com/omacom/omarchy/pull/13684) (worktree `~/Projects/omarchy-nightlight`) re-probes hyprsunset a second past every minute, so the 07:00/20:00 switches reach the bar ([issue #8286](https://github.com/omacom/omarchy/issues/8286)); `nightlight-probe-guard.patch` drops a probe that lands while a toggle is applying.

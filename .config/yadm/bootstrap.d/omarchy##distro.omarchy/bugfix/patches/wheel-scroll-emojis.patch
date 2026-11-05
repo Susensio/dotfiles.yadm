@@ -1,10 +1,9 @@
---- a/emojis/Emojis.qml
-+++ b/emojis/Emojis.qml
-@@ -338,6 +338,23 @@
-               width: parent.width
+--- a/emojis/Emojis.qml	2026-11-05 18:05:58.602537272 +0100
++++ b/emojis/Emojis.qml	2026-11-05 18:05:58.610591456 +0100
+@@ -308,6 +308,23 @@
              }
            }
-+
+ 
 +          // Qt's wheel step for a Flickable is fixed; this scrolls an eighth of the
 +          // view per notch, and touchpad deltas in proportion. Bounds start at originY,
 +          // which sections and delegates laid out above the view move away from 0.
@@ -21,6 +20,7 @@
 +              wheel.accepted = true
 +            }
 +          }
-         }
-       }
-     }
++
+           Column {
+             anchors.centerIn: parent
+             width: parent.width - 2 * root.contentMargin
