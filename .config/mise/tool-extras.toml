@@ -1,0 +1,76 @@
+# Per-tool settings mise would reject (docs/adr/0105): read by system-install,
+# discover-assets.py and ~/bin/tool, never by mise. Kept when a tool is removed.
+
+[aichat]
+extra_assets = [
+    "raw://v@scripts/completions/aichat.fish",
+]
+
+[herdr]
+extra_assets = [
+    "raw://v@skills/herdr/SKILL.md",
+    "raw://v@docs/next/website/src/content/docs/{agent-automation,cli-reference,concepts,config-reference,configuration,keyboard,persistence-remote,plugins,session-state,socket-api,troubleshooting}.mdx",
+]
+gen_completions = "completion fish"
+
+[zoxide]
+gen_shell_init = "init fish --cmd cd"
+
+[ruff]
+gen_completions = "generate-shell-completion fish"
+
+[taplo]
+gen_completions = "completions fish"
+
+[ty]
+gen_completions = "generate-shell-completion fish"
+
+[delta]
+extra_assets = [
+    "raw://etc/completion/completion.fish",
+]
+pacman = "git-delta"
+
+[eza]
+extra_assets = [
+    "release://v@completions-$MISE_TOOL_VERSION.tar.gz",
+    "release://v@man-$MISE_TOOL_VERSION.tar.gz",
+]
+
+[fzf]
+extra_assets = [
+    "raw://v@man/man1/fzf.1",
+]
+
+[gh]
+pacman = "github-cli"
+
+[helix]
+extra_assets = [
+    "raw://languages.toml",
+]
+
+[node]
+pacman = "nodejs"
+
+[pandoc]
+pacman = "pandoc-cli"
+
+[rust]
+pacman = "rustup"
+
+[tealdeer]
+extra_assets = [
+    "release://v@completions_fish>tldr.fish",
+]
+
+[tmux]
+extra_assets = [
+    "raw://tmux/tmux:tmux.1",
+]
+
+[yadm]
+extra_assets = [
+    "raw://@completion/fish/yadm.fish",
+    "raw://@yadm.1",
+]

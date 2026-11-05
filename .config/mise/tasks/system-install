@@ -7,6 +7,8 @@ set -euo pipefail
 
 SEP=$'\x1f'
 MISE_HOME=${XDG_DATA_HOME:-$HOME/.local/share}/mise
+# Settings mise would reject as tool options live here, keyed by tool name (docs/adr/0105)
+TOOL_EXTRAS=${XDG_CONFIG_HOME:-$HOME/.config}/mise/tool-extras.toml
 
 declare -A TARGET_DIRS=(
   [BIN]=${HOME}/.local/bin
@@ -89,6 +91,11 @@ get_installed_tools() {
     select($ARGS.positional == [] or IN(.name; $ARGS.positional[]))' --args "${filter_tools[@]}"
 }
 
+# One setting of the current tool as JSON; empty when it has none
+tool_extra() {
+  mise config get --file "$TOOL_EXTRAS" "${tool[name]}.$1" 2>/dev/null || true
+}
+
 init_tool_context() {
   local tool_json=$1
   tool=()
@@ -138,7 +145,7 @@ symlink() {
 process_extra_assets() {
   # (raw|release)://[owner/repo:][v@]path[>filename]
   local extra_assets=()
-  readarray -t extra_assets < <(echo "${tool[info]}" | jq -r '.tool_options.extra_assets[]?')
+  readarray -t extra_assets < <(tool_extra extra_assets | jq -r '.[]?')
 
   for asset in "${extra_assets[@]}"; do
     local expanded_asset
@@ -223,14 +230,14 @@ generate() {
 
 generate_completions() {
   local gen_completions
-  gen_completions=$(echo "${tool[info]}" | jq -r '.tool_options.gen_completions // empty')
+  gen_completions=$(tool_extra gen_completions)
   [[ -z "$gen_completions" ]] && return 0
   generate "$gen_completions" completion.fish
 }
 
 generate_shell_init() {
   local gen_shell_init
-  gen_shell_init=$(echo "${tool[info]}" | jq -r '.tool_options.gen_shell_init // empty')
+  gen_shell_init=$(tool_extra gen_shell_init)
   [[ -z "$gen_shell_init" ]] && return 0
   generate "$gen_shell_init" config.fish
 }

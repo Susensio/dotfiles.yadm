@@ -5,11 +5,11 @@ biome = "latest"
 "npm:yaml-language-server" = "latest"
 "pipx:code-review-graph" = "latest"
 lua-language-server = "latest"
-ruff = { version = "latest", gen_completions = "generate-shell-completion fish" }
+ruff = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 stylua = "latest"
-taplo = { version = "latest", symlink_bins = true, gen_completions = "completions fish" }
+taplo = { version = "latest", symlink_bins = true }
 tree-sitter = { version = "latest", symlink_bins = true }
-ty = { version = "latest", gen_completions = "generate-shell-completion fish" }
+ty = "latest"
 "npm:esbuild" = "latest"

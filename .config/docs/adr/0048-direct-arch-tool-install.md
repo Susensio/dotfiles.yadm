@@ -27,3 +27,7 @@ Bootstrap still uses the Arch variant for a fresh machine.
 The package declaration remains the ownership check, so `tool remove` does not uninstall unrelated pacman packages.
 Differently named package pairs use the `pacman` field beside their default mise declaration.
 This is a narrow exception to ADR-0044's bootstrap package wrapper because `tool` is already Arch-specific at that branch.
+
+## Corrections
+
+2026-11-05: mise 2026.11 began rejecting unknown tool options (jdx/mise#14629), so the `pacman` field stopped living on the declaration. It moved to `mise/tool-extras.toml` with the other custom fields — see [ADR-0105](0105-tool-extras-file.md), which supersedes this paragraph.

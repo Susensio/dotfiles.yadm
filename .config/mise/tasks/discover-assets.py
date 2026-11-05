@@ -23,7 +23,6 @@ from urllib.parse import quote
 
 import tomlkit
 import typer
-from tomlkit.items import InlineTable, Item, Table
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 TOOLS_ARGUMENT = typer.Argument(..., help="Installed global tools to inspect.")
@@ -187,34 +186,23 @@ def discover_kind(
     return assets, ambiguous
 
 
-def config_path_for(tool_name: str) -> Path:
-    configs = json.loads(mise("config", "ls", "--json"))
-    paths = [entry["path"] for entry in configs if tool_name in entry["tools"]]
-    if len(paths) != 1:
-        msg = f"expected one config declaration for {tool_name}, found {len(paths)}"
-        raise RuntimeError(msg)
-    return Path(paths[0])
+TOOL_EXTRAS = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "mise" / "tool-extras.toml"
 
 
-def add_assets(config_path: Path, tool_name: str, assets: set[str]) -> list[str]:
-    document = tomlkit.parse(config_path.read_text())
-    tools = document["tools"]
-    entry: Item = tools[tool_name]
-    if isinstance(entry.unwrap(), str):
-        replacement = tomlkit.inline_table()
-        replacement["version"] = entry
-        tools[tool_name] = replacement
-        entry = replacement
-    if not isinstance(entry, (InlineTable, Table)):
-        msg = f"cannot add extra_assets to {tool_name}: unsupported tool declaration"
-        raise TypeError(msg)
+def add_assets(tool_name: str, assets: set[str]) -> list[str]:
+    document = tomlkit.parse(TOOL_EXTRAS.read_text()) if TOOL_EXTRAS.exists() else tomlkit.document()
+    if tool_name not in document:
+        document[tool_name] = tomlkit.table()
+    entry = document[tool_name]
 
     existing = [str(asset) for asset in entry.get("extra_assets", [])]
     additions = sorted(assets.difference(existing))
     if not additions:
         return []
-    entry["extra_assets"] = [*existing, *additions]
-    config_path.write_text(tomlkit.dumps(document))
+    entry["extra_assets"] = tomlkit.array().multiline(True)
+    for asset in [*existing, *additions]:
+        entry["extra_assets"].append(asset)
+    TOOL_EXTRAS.write_text(tomlkit.dumps(document))
     return additions
 
 
@@ -263,7 +251,7 @@ def discover(
             for asset in sorted(assets):
                 typer.echo(f"would add {name}: {asset}")
             continue
-        additions = add_assets(config_path_for(name), name, assets)
+        additions = add_assets(name, assets)
         for asset in additions:
             typer.echo(f"discovered {name}: {asset}")
         if additions:
