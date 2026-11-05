@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Add repo if not present
-if command -v apt-get &> /dev/null && ! grep -rq "fish-shell" /etc/apt/sources.list*; then
-  log info "Adding fish shell repository..."
-  sudo add-apt-repository -y ppa:fish-shell/release-4
+# Newer fish than the distro's: PPA on Ubuntu, upstream OBS repo on Debian (extrepo has no fish entry).
+. /etc/os-release
+if command -v apt-get &> /dev/null && ! grep -rq "fish-shell\|shells:fish" /etc/apt/sources.list*; then
+  case "$ID" in
+    ubuntu)
+      log info "Adding fish shell repository..."
+      sudo add-apt-repository -y ppa:fish-shell/release-4
+      ;;
+    debian)
+      log info "Adding fish shell repository..."
+      obs="https://download.opensuse.org/repositories/shells:/fish:/release:/4/Debian_${VERSION_ID}"
+      sudo install -d -m 0755 /etc/apt/keyrings
+      curl -fsSL "$obs/Release.key" | sudo tee /etc/apt/keyrings/fish-shell.asc >/dev/null
+      echo "deb [signed-by=/etc/apt/keyrings/fish-shell.asc] $obs/ /" \
+        | sudo tee /etc/apt/sources.list.d/fish-shell.list >/dev/null
+      ;;
+  esac
 fi
 
 if ! command -v fish &> /dev/null; then
