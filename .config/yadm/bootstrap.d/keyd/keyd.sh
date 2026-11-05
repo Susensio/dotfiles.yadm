@@ -55,8 +55,11 @@ if ! id -nG "$USER" | grep -qw keyd; then
   sudo usermod -aG keyd "$USER"
 fi
 
-# Give $USER permissions to manage keyd
-if ! getfacl --omit-header "$SYSTEM_CONFIG" 2>/dev/null | grep -q "^user:$USER:rw"; then
+# Give $USER permissions to manage keyd; the ACL tools are a package of their own on Debian
+command -v setfacl &>/dev/null || pkg-install acl
+# Captured, not piped: grep -q closing the pipe early fails the command under pipefail
+acls=$(getfacl --omit-header "$SYSTEM_CONFIG" 2>/dev/null || true)
+if ! grep -q "^user:$USER:rw" <<<"$acls"; then
   sudo setfacl -m "u:$USER:rw" "$SYSTEM_CONFIG"
 fi
 if $config_changed; then
