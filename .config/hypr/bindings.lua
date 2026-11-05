@@ -20,11 +20,6 @@ for workspace = 1, 10 do
     hl.dsp.window.move({ workspace = tostring(workspace) }))
 end
 
--- Scratchpad: Omarchy's Quake console, with a workspace of its own.
-o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special("qconsole"))
-o.bind("SUPER + SHIFT + grave", "Move window to scratchpad",
-  hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
-
 -- Window
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
 -- Cycling reaches floating windows that directional focus skips.

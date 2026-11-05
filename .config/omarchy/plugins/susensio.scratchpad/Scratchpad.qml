@@ -17,8 +17,7 @@ BarWidget {
   id: root
   moduleName: "susensio.scratchpad"
 
-  // 4.5 renamed the console's workspace to qconsole.
-  readonly property string specialId: "qconsole"
+  readonly property string specialId: "term"
   readonly property string specialName: "special:" + specialId
 
   // monitor name -> special workspace shown on it; absent means none is shown.

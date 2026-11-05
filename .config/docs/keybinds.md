@@ -41,7 +41,7 @@ nvim exists as a fallback editor with its own leader and none of these letters; 
 | i / o | previous / next window | previous / next tab | previous / next workspace |
 | 1–9 | select window | select tab | select workspace |
 | Shift + 1–9 | – | – | move window to workspace |
-| ` | scratchpad popup | scratchpad popup | toggle Omarchy's Quake console |
+| ` | scratchpad popup | scratchpad popup | terminal pad |
 | m | man popup | man popup | WhatsApp pad |
 | n / p | next / previous session | next / previous agent | – |
 
@@ -49,10 +49,10 @@ tmux and herdr guard their pane focus at edges (tmux with `pane_at_*` conditions
 
 ## Pads
 
-Named special workspaces declared in `hypr/pads.lua`, one chord each: `a` is the agent pad, `XF86AudioPlay` is Spotify web, and `m` is WhatsApp.
+Named special workspaces declared in `hypr/pads.lua`, one chord each: `` ` `` is a terminal (Shift sends the focused window there), `a` is the agent pad, `XF86AudioPlay` is Spotify web, and `m` is WhatsApp.
+The terminal pad replaces Omarchy's Quake console, which stays loaded but unbound.
 A pad that names a window class pulls that app in wherever it was launched; the agent pad names none, so it fills only when opened first, which is what lets the menu open an agent anywhere.
-Their shape comes from the monitor's work area, recomputed when the layout changes.
-The surface on `` ` `` is Omarchy's console, not a pad.
+Every special workspace shares one shape, set by a single `s[true]` gap rule at the top of that file.
 
 ## Prefix (F12 = Caps + Space)
 
