@@ -96,8 +96,8 @@ o.bind("switch:off:Lid Switch", nil, "omarchy-hyprland-monitor-clamshell", { loc
 o.bind("SUPER + comma", "Dismiss last notification", "omarchy-shell notifications dismissOne")
 o.bind("SUPER + SHIFT + comma", "Dismiss all notifications", "omarchy-shell notifications dismissAll")
 o.bind("SUPER + CTRL + comma", "Notification history", "omarchy-shell notifications showHistory")
-o.bind_toggle("SUPER + ALT + comma", "Toggle silencing notifications", "notification-silencing")
-o.bind("SUPER + CTRL + ALT + comma", "Invoke last notification", "omarchy-shell notifications invokeLast")
+o.bind("SUPER + ALT + comma", "Act on newest notification", "omarchy-shell notifications act")
+o.bind("SUPER + CTRL + SHIFT + comma", "Notification keyboard control", "omarchy-shell notifications keyboard")
 
 -- Bar panels
 o.bind("SUPER + CTRL + W", "Wi-Fi panel", "omarchy-shell shell toggle omarchy.network")
