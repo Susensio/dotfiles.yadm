@@ -111,10 +111,8 @@ A file the PR adds goes in `files/` and is installed into the user's tree, where
 Once the package ships that path, the step removes its untouched copy and warns.
 `omarchy update` restores the unpatched files, and its `post-update.d/00_yadm-bootstrap.hook` reruns the bootstrap to patch them again.
 
-`bugfix/codex-usage-rpc.sh` applies the fix merged as [Omarchy PR #14049](https://github.com/omacom/omarchy/pull/14049) (our patch came from #12979, closed in its favour): Codex usage checks read replies and notifications from a shared byte buffer, so a reply arriving alongside a notification does not cause a false timeout.
-
-`bugfix/keyboard-backlight-restore.sh` applies [Omarchy PR #10364](https://github.com/omacom/omarchy/pull/10364): keyboard brightness is saved for one blank/restore cycle, and manual brightness changes discard that snapshot.
-This prevents screensaver dismissal from restoring an old off value, as reported in [issue #10767](https://github.com/omacom/omarchy/issues/10767), while preserving a deliberately disabled backlight.
+`omarchy-brightness-keyboard` saves the level for one blank/restore cycle since 4.5 ([#15908](https://github.com/omacom/omarchy/pull/15908)), which fixed the stale off value of [issue #10767](https://github.com/omacom/omarchy/issues/10767), so the `keyboard-backlight-restore` step carrying [PR #10364](https://github.com/omacom/omarchy/pull/10364) was dropped.
+Accepted gap until #10364 merges: a brightness change made on the lock screen is overwritten by the saved level on wake.
 On 2026-09-30 a suspend-then-hibernate session resumed with the keyboard light off, but the journal showed only suspend cycles, not hibernation; the hibernate-only hook did not act.
 The session snapshot `/run/user/1000/omarchy-keyboard-backlight-dell::kbd_backlight` held only a newline (mtime 2026-09-29 09:15), so `restore` passed an empty value to `brightnessctl`, which rejects it and leaves the snapshot in place; `omarchy-system-wake` masks that failure with its final successful command.
 The writer was a test, not the session: at 09:15:06 upstream's `system-sleep-ownership-migration-test.sh`, run from the PR #13729 worktree, stubbed only `brightnessctl` (empty stdout, exit 0), so the new hook's real `omarchy-brightness-keyboard off` saved that empty read into the host's `XDG_RUNTIME_DIR`; the failing assertion in the same run and the stub's replacement 26 s later (PR commit `996da554`) confirm it.

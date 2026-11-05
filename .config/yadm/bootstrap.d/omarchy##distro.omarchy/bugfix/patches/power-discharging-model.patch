@@ -1,7 +1,6 @@
-diff --git a/shell/plugins/panels/power/Model.js b/shell/plugins/panels/power/Model.js
---- a/shell/plugins/panels/power/Model.js
-+++ b/shell/plugins/panels/power/Model.js
-@@ -63,6 +63,19 @@ function chargeThresholdActive(device, onBattery, states) {
+--- shell/plugins/panels/power/Model.js
++++ shell/plugins/panels/power/Model.js
+@@ -63,6 +63,19 @@
    return Number(d.changeRate || 0) <= 0.2 || Number(d.timeToFull || 0) >= 8 * 60 * 60
  }
  
@@ -21,11 +20,11 @@ diff --git a/shell/plugins/panels/power/Model.js b/shell/plugins/panels/power/Mo
  function batteryIcon(device, onBattery, states) {
    var d = device || {}
    if (!d.isPresent) return ""
-@@ -98,6 +111,7 @@ if (typeof module !== "undefined") {
+@@ -119,6 +132,7 @@
      profileIcon: profileIcon,
      batteryFraction: batteryFraction,
      chargeThresholdActive: chargeThresholdActive,
 +    drawingFromBattery: drawingFromBattery,
      batteryIcon: batteryIcon,
-     modeLabel: modeLabel
-   }
+     modeLabel: modeLabel,
+     profileLabel: profileLabel,
