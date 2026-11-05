@@ -106,14 +106,10 @@ o.bind("SUPER + CTRL + A", "Audio panel", "omarchy-shell shell toggle omarchy.au
 o.bind("SUPER + CTRL + D", "Display panel", "omarchy-shell shell toggle omarchy.monitor")
 o.bind("SUPER + CTRL + P", "Power panel", "omarchy-shell shell toggle omarchy.power")
 
--- Dictation; voxtype ignores start while recording, so Insert ends a latch.
--- Release binds are transparent: Hyprland otherwise shadows a release once another key (Alt) was let go first (voxtype#804).
-o.bind("Insert", "Start dictation", "voxtype record start")
-o.bind("Insert", "Stop dictation", "voxtype record stop", { release = true, transparent = true })
-o.bind("SHIFT + Insert", "Dictate hands-free", "voxtype record toggle")
--- Spanish: multilingual small detects among en,es; --model swaps only this recording.
-o.bind("ALT + Insert", "Start Spanish dictation", "voxtype record start --model small")
-o.bind("ALT + Insert", "Stop Spanish dictation", "voxtype record stop", { release = true, transparent = true })
+-- Dictation (Superwhisper auto-detects the language): Insert holds to record,
+-- Shift + Insert toggles a latched session; release ends the held one.
+o.bind_hold("Insert", "Start dictation (hold)", "omarchy-dictation start", "Stop dictation (hold)", "omarchy-dictation stop")
+o.bind("SHIFT + Insert", "Toggle dictation", "omarchy-dictation toggle")
 
 -- Laptop display; code:235 is xkb for KEY_SWITCHVIDEOMODE (evdev 227), sent by keyd for the F8 key (Super+P).
 o.bind("code:235", "Toggle laptop display", "omarchy-hyprland-monitor-internal toggle")

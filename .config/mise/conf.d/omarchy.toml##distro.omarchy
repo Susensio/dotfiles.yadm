@@ -13,8 +13,7 @@
 "pacman:libreoffice-fresh" = "latest"
 "pacman:omacalc" = "latest"
 "pacman:pinta" = "latest"
-"pacman:voxtype-bin" = "latest"
-"pacman:wtype" = "latest"
+"pacman:superwhisper-bin" = "latest"
 "pacman:cliamp" = { state = "absent" }
 "pacman:kdenlive" = { state = "absent" }
 "pacman:lazydocker" = { state = "absent" }
@@ -23,6 +22,8 @@
 "pacman:obsidian" = { state = "absent" }
 "pacman:omacut" = { state = "absent" }
 "pacman:omawrite" = { state = "absent" }
+"pacman:voxtype-bin" = { state = "absent" }
+"pacman:wtype" = { state = "absent" }
 "pacman:xournalpp" = { state = "absent" }
 
 [bootstrap.hooks]

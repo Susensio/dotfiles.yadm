@@ -72,36 +72,14 @@ Omarchy's `default/hypr/envs.lua` puts `/usr/share/omarchy/bin` first on `PATH` 
 `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` patches the prepend out until the upstream fix ships ([ADR-0057](adr/0057-omarchy-bugfix-patch-steps.md)); a relogin applies it.
 `bin/overrides/omarchy-theme-set-tmux` disables Omarchy's tmux retint; `omarchy-theme-set` runs its updaters through `bash -lc`, so the override is reached, and the theme-set hook owns that work instead ([ADR-0075](adr/0075-omit-omarchy-tmux-updater.md)).
 
-## Dictation (voxtype)
+## Dictation (Superwhisper)
 
-`voxtype-bin` comes from the `omarchy` repo, and `omarchy-voxtype-install` copies `$OMARCHY_PATH/default/voxtype/config.toml` over `voxtype/config.toml`, so that tracked file is one of the configs an Omarchy command overwrites.
-Dictation defaults to English, with `base.en`, voxtype's and Omarchy's default, and `language = ["en", "es"]`, which `base.en` ignores (identical output with `en` on a Spanish clip).
-It must be a TOML array: the string `"en,es"` works only as the `--language` flag, and in the config whisper logs `unknown language 'en,es'` and `small` writes phonetic or English garbage.
-Alt + Insert records with multilingual `small` through `record start --model small`, the only per-recording override that changes the language behaviour: voxtype 1.1.1 has no per-recording language option.
-The daemon honors `--model` only for `model` and `whisper.secondary_model`; any other name logs `Cannot prepare unavailable model` and records with `base.en`, so `secondary_model = "small"` is required (before it was set, every Alt + Insert recording of 2026-10-24 ran `base.en`, which is why Spanish came out as gibberish).
-On 3 Spanish clips (2026-10-24) `small` and `base` both detected Spanish in 1.1–4.8s with small slips (`ven o de comprar`); `small` was slower and not clearly better, but was re-chosen after `base` typed Spanish live as phonetic gibberish (`Hola, aestosnapreva`).
-English spoken on that key is expected to be misdetected, as below.
-Streaming (`whisper.streaming`) is off: voxtype disowns the typing session on stop, so the tail of every dictation is dropped ([issue #804](https://github.com/peteonrails/voxtype/issues/804)), and with it on, push-to-talk needs a `transparent = true` release bind because Hyprland shadows a release while another key is held.
-Whisper picks one language token per clip and writes everything in it, so a wrong `es` comes out as a Spanish translation of English speech.
-On 4 English and 3 Spanish clips in this accent (`voxtype transcribe`, 2026-10-23), `small` with `["en", "es"]` wrote 3 of the 4 English clips in Spanish: detection ranked `gl` or `es` first and the list only narrowed `gl` to `es`; `auto` also wrote a Spanish clip in Greek.
-`medium` q5_0 got 5 of 7 at ~3× the time of `small`, and `large-v3-turbo` q5_0 got all 7 at ~5×, too slow here.
-Parakeet TDT 0.6B v3 (ONNX build), which has no language token, got all 7 at about the speed of `small`; its int8 variant was 2–3× faster with two small slips.
-It ignores `initial_prompt`, so names would need `[text.replacements]`; both it and turbo wrote `Omachi`.
-On the English clips `base.en` took ~0.9s with one slip (`wave` for `way`), against ~2.2s for an error-free `small.en` and ~5.5s for `small` with detection; the speed won.
-`flash_attention = true` is slower on this Intel GPU (measured 2026-10-21).
-`initial_prompt` carries the words Whisper mishears: adding `yadm, systemd, Telegram` fixed `Jan status`.
-
-Dictation is provisioned without `omarchy-voxtype-install`: `mise/conf.d/omarchy.toml##distro.omarchy` declares `voxtype-bin` and `wtype`, `voxtype/config.toml` is tracked, and `bootstrap.d/omarchy##distro.omarchy/voxtype.sh` does what a declaration cannot: it downloads the model the tracked config names, enables the Vulkan backend, enables the packaged `voxtype.service`, and marks `voxtype-install-invitation` done.
-The installer is skipped because it prompts, overwrites the tracked config with its template, and runs `voxtype setup gpu --enable` without `sudo` behind `|| true`, which fails with `Failed to remove existing /usr/bin/voxtype (need sudo?)` and leaves the CPU build: ~20s a transcription instead of ~0.6s.
-Reported upstream as [issue #11110](https://github.com/omacom/omarchy/issues/11110), with [issue #7099](https://github.com/omacom/omarchy/issues/7099) the same bug and open fixes in [PR #12901](https://github.com/omacom/omarchy/pull/12901) and [PR #13508](https://github.com/omacom/omarchy/pull/13508); those fix the installer, so they do not change this step.
-The package's own upgrade scriptlet keeps the backend: `pre_upgrade`/`post_upgrade` hand the active binary through `/tmp/.voxtype-backend-upgrade` and restore it, with `tests/voxtype-bin-install.sh` covering the GPU case.
-
-The model is a download the step must make: `voxtype transcribe` with a config naming a missing model lists the paths it searched and says to run `voxtype setup`, and only the `voxtype configure` TUI is documented to fetch one.
-`omarchy-done mark voxtype-install-invitation` matters because Omarchy's first-run provisioning installs `install-voxtype.hook` into `post-update.d`, which offers the installer once per machine whether or not voxtype is installed; accepting it would overwrite the config.
-`omarchy-hook` runs `post-update.d` in glob order, so the bootstrap hook is named `00_yadm-bootstrap.hook` to mark the invitation before that hook can offer it; a tracked no-op `install-voxtype.hook` would not hold, since `omarchy-hook-install` overwrites with `cp`.
-What stays Omarchy's keeps working off the command: the bar's `omarchy-voxtype-status`, and the menu's `omarchy-voxtype-config` and `omarchy-voxtype-model`, which open voxtype's own TUIs.
-`omarchy-voxtype-remove` deletes `~/.config/voxtype`, the tracked config, and the next bootstrap reinstalls the package.
-In 4.0.4 the installer did nothing else beyond `hyprctl reload` and a shell restart; a step Omarchy adds to it later would go unnoticed here.
+Superwhisper's cloud model is the dictation backend (`omarchy/defaults/dictation`), chosen on 2026-11-05 because it detects English and Spanish on its own, so one key serves both.
+Voxtype was dropped then: Whisper picks one language token per clip, which forced a per-language key (`base.en` on Insert, multilingual `small` on Alt + Insert) and still wrote English speech in Spanish; its measurements are in this file's history before that date.
+`hypr/bindings.lua` calls `omarchy-dictation`, so the backend can change without rebinding: Insert holds to record, Shift + Insert toggles a latched session.
+Omarchy's own Alt + Space and Right Alt keys stay unbound, since `hypr/hyprland.lua` skips its dictation bindings (ADR-0055).
+`mise/conf.d/omarchy.toml##distro.omarchy` declares `superwhisper-bin`; pacman does not run its per-user setup, so `bootstrap.d/omarchy##distro.omarchy/superwhisper.sh` runs `omarchy-install-dictation-superwhisper --background` once, where `superwhisper.service` is not yet enabled.
+That setup links the vendor's bar panel and agent skill into this tree; the links are ignored, like Omarchy's own skills.
 
 ## Patching Omarchy bugs
 
