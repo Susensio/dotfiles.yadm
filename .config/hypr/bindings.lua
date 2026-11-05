@@ -20,10 +20,12 @@ for workspace = 1, 10 do
     hl.dsp.window.move({ workspace = tostring(workspace) }))
 end
 
--- Scratchpad
-o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special("scratchpad"))
+-- Scratchpad: Omarchy's Quake console. 4.5 renamed its workspace, so the name is
+-- resolved here until the package on every machine ships qconsole.
+local console = package.loaded["default.hypr.qconsole"] and "qconsole" or "scratchpad"
+o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special(console))
 o.bind("SUPER + SHIFT + grave", "Move window to scratchpad",
-  hl.dsp.window.move({ workspace = "special:scratchpad", follow = false }))
+  hl.dsp.window.move({ workspace = "special:" .. console, follow = false }))
 
 -- Window
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
@@ -71,8 +73,10 @@ o.bind("SUPER + CTRL + RETURN", "Herdr", { omarchy = "terminal-herdr" })
 o.bind("SUPER + W", "Slim browser", { webapp = "https://www.google.com/" })
 o.bind("SUPER + SHIFT + W", "Browser", { omarchy = "browser" })
 o.bind("SUPER + E", "File manager", { omarchy = "filemanager" })
-o.bind("SUPER + A", "Agent", "omarchy-agent --pick")
+
+-- The agent pad itself is declared in hypr/pads.lua.
 o.bind("SUPER + SHIFT + A", "Claude", "omarchy-agent --claude")
+
 o.bind("XF86Calculator", "Calculator", { launch = "omacalc" })
 o.bind("SUPER + SPACE", "Omarchy menu", "omarchy-menu toggle")
 o.bind("SUPER + SHIFT + slash", "Keybindings", "omarchy-menu-keybindings")

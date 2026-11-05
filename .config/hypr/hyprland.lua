@@ -17,6 +17,7 @@ require("hypr.monitors")
 require("hypr.input")
 require("hypr.bindings")
 require("hypr.looknfeel")
+require("hypr.pads")
 require("hypr.autostart")
 
 -- wl-relabel identifies browser popups before mapping (docs/omarchy.md).

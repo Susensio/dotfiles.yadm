@@ -20,7 +20,7 @@ Super+P pressed within 35ms becomes the video-mode key (KEY_SWITCHVIDEOMODE, evd
 |---|---|---|---|
 | Editor | Control | helix's own splits | `helix/config.toml` |
 | Multiplexer | Alt | tmux panes and windows, herdr panes and tabs | `tmux/conf.d/20_keybinds.conf`, `herdr/config.toml` |
-| Desktop | Super | Hyprland windows and workspaces | `hypr/bindings.lua` |
+| Desktop | Super | Hyprland windows and workspaces | `hypr/bindings.lua`, `hypr/pads.lua` |
 | Modal tables | prefix, mode, or submap | resize, swap, close | see below |
 
 Held-modifier keys do navigation only.
@@ -42,10 +42,17 @@ nvim exists as a fallback editor with its own leader and none of these letters; 
 | 1–9 | select window | select tab | select workspace |
 | Shift + 1–9 | – | – | move window to workspace |
 | ` | scratchpad popup | scratchpad popup | toggle scratchpad workspace |
-| m | man popup | man popup | – |
+| m | man popup | man popup | WhatsApp pad |
 | n / p | next / previous session | next / previous agent | – |
 
 tmux and herdr guard their pane focus at edges (tmux with `pane_at_*` conditions); Hyprland's focus crosses monitors instead of stopping at edges.
+
+## Pads
+
+Named special workspaces declared in `hypr/pads.lua`, one chord each: `a` is the agent pad, `XF86AudioPlay` is Spotify web, and `m` is WhatsApp.
+A pad that names a window class pulls that app in wherever it was launched; the agent pad names none, so it fills only when opened first, which is what lets the menu open an agent anywhere.
+Their shape comes from the monitor's work area, recomputed when the layout changes.
+The surface on `` ` `` is Omarchy's console, not a pad.
 
 ## Prefix (F12 = Caps + Space)
 
