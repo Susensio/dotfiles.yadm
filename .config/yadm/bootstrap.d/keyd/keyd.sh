@@ -10,7 +10,9 @@ USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 if command -v apt-get &>/dev/null && ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null \
    && ! grep -rq "keyd-team" /etc/apt/sources.list*; then
   sudo apt-get update -qq
-  if ! apt-cache policy keyd | grep -q 'Candidate: [^(]'; then
+  # Capture first: grep -q closing the pipe early fails apt-cache under pipefail. C locale keeps "Candidate:" English.
+  policy=$(LC_ALL=C apt-cache policy keyd)
+  if ! grep -q 'Candidate: [^(]' <<<"$policy"; then
     log info "Adding keyd repository..."
     sudo add-apt-repository -y ppa:keyd-team/ppa
   fi
