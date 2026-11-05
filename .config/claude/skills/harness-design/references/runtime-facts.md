@@ -106,3 +106,8 @@ All probed at v2.1.238, against a throwaway `CLAUDE_CONFIG_DIR`.
   Suppression is the model reading it as known, not an enforced dedup -- nothing stops a second load (see below).
 - Loading a skill twice injects the body twice; there is no deduplication (tested, v2.1.238).
   Observed where an agent called `Skill` on the same skill twice in one session -- `git-commit` at 2808 and 2815 characters, `tmux_helper` at records 13 and 1100.
+
+## Nesting
+
+- A spawned subagent holds no `Agent` tool when `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1`, even with `Agent` in its `tools:` (probed, v2.1.316).
+  A cloud session's environment set it to `1`; the default is three layers below the main conversation, and `1` turns nesting off (documented, v2.1.316).

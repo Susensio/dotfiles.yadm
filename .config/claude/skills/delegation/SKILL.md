@@ -53,7 +53,7 @@ Nothing brings those branches back, and a cleanup sweep deletes unmerged ones (a
 `auditor` judges whether something written or proposed holds up, where being wrong is expensive.
 `documenter` writes down what you already decided, across however many files it reaches -- what to write is settled and only applying it is left.
 
-`leader` is the sixth, and is not on this list: it is the main-agent mode for a project (`claude --agent leader`), never a spawn.
+`leader` is the sixth, and is not on this list: it is the main-agent mode for a project (`claude --agent leader`, or `/act-as-leader` where that flag is unavailable), never a spawn.
 A subagent that wants what `leader` does wants to hand the work back to its caller.
 
 Each brief stands alone -- these agents have no memory of the conversation that spawned them.
