@@ -22,6 +22,8 @@
 !/.config/mise/
 # Machine-local mise tools; tracked ones live in conf.d (docs/adr/0045)
 /.config/mise/config.toml
+# Written by omarchy-mise-default-tools on every bootstrap (docs/adr/0049)
+/.config/mise/miserc.toml
 !/.config/python/
 !/.config/environment.d/
 !/.config/docs/
