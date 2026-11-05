@@ -33,4 +33,6 @@ agent/extensions/**/logs/
 # Omarchy-linked; no trailing slash: a symlink is a file, not a directory.
 agent/skills/omarchy
 agent/skills/diagnose-crash
+agent/skills/omarchy-app
+agent/skills/superwhisper
 agent/skills/herdr/
