@@ -98,6 +98,7 @@ The malformed snapshot was removed; a test that runs Omarchy commands must stub 
 
 `bugfix/keyboard-backlight-hibernate.sh` applies [Omarchy PR #13729](https://github.com/omacom/omarchy/pull/13729) to the `system-sleep/keyboard-backlight` hook that `omarchy-hibernation-setup` installs: it zeroed the backlight before hibernation (an ASUS S4 workaround) and never restored it, so a suspend-then-hibernate woke with the light off.
 The hook now calls `omarchy-brightness-keyboard off` before hibernating and `restore` after resume, sharing the command's save/restore; plain suspend is untouched.
+The PR was closed on 2026-10-29 in favour of [#15908](https://github.com/omacom/omarchy/pull/15908), which changes only `omarchy-brightness-keyboard` (a second blank no longer saves its own 0); Omarchy 4.5.0's hook still zeroes the backlight before hibernation with no restore, so the step stays.
 Both steps act on the laptop's `*kbd_backlight*` LED only: the Logitech MX Keys backlight is firmware-managed, creates no such LED node and its own brightness keys emit no input event, so it stays out of this handling ([ADR-0085](adr/0085-mx-keys-backlight-out-of-scope.md)).
 
 `bugfix/nightlight-schedule-refresh.sh` fixes [issue #8286](https://github.com/omacom/omarchy/issues/8286): the bar's night light indicator missed hyprsunset's scheduled switches, so it re-probes a second past every minute, when hyprsunset lands them.
