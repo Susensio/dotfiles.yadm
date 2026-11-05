@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Newer fish than the distro's: PPA on Ubuntu, upstream OBS repo on Debian (extrepo has no fish entry).
-. /etc/os-release
+# Upstream fish 4.x, newer than distros ship, published per distro (ADR-0104)
 if command -v apt-get &> /dev/null && ! grep -rq "fish-shell\|shells:fish" /etc/apt/sources.list*; then
+  . /etc/os-release
   case "$ID" in
-    ubuntu)
+    ubuntu|linuxmint)
       log info "Adding fish shell repository..."
       sudo add-apt-repository -y ppa:fish-shell/release-4
       ;;

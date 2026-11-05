@@ -6,10 +6,14 @@ USER_CONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/keyd/default.conf
 ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets
 USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 
-# Ubuntu 24.04, Mint 22's base, does not package keyd
-if command -v apt-get &>/dev/null && ! grep -rq "keyd-team" /etc/apt/sources.list*; then
-  log info "Adding keyd repository..."
-  sudo add-apt-repository -y ppa:keyd-team/ppa
+# Only where apt has no keyd at all, e.g. Ubuntu 24.04 (Mint 22's base); Debian 13 packages it
+if command -v apt-get &>/dev/null && ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null \
+   && ! grep -rq "keyd-team" /etc/apt/sources.list*; then
+  sudo apt-get update -qq
+  if ! apt-cache policy keyd | grep -q 'Candidate: [^(]'; then
+    log info "Adding keyd repository..."
+    sudo add-apt-repository -y ppa:keyd-team/ppa
+  fi
 fi
 
 if ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null; then
