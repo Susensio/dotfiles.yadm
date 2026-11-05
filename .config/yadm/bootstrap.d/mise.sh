@@ -21,4 +21,8 @@ mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 
 # Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files.
 # services carries the tool-update unit that `auto_update` relies on (ADR-0007).
+# The bootstrap pipes stderr through tee, and mise refuses to ask for a sudo password
+# unless stderr is a terminal, so cache it first. Only when packages differ: reruns stay silent.
+mise bootstrap packages status --missing &>/dev/null || sudo -v
+
 mise bootstrap --only packages,tools,services --yes --quiet
