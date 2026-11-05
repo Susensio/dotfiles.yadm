@@ -1,7 +1,9 @@
-# General dependencies
+# General dependencies, as `command [package]`
 curl
 git
 jq
 wget
 # bin/preview; no mise tool, same package name on pacman and apt
 chafa
+# keyd.sh grants the user the keyd config; Debian does not install acl
+setfacl acl

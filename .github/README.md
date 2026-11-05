@@ -4,6 +4,8 @@ Personal [yadm](https://yadm.io/) dotfiles, rooted at `$HOME`.
 
 ## New machine
 
+On a minimal Debian, install `curl` and `git` first: the bootstrap's dependency step comes after both.
+
 In Bash, keep the same shell open:
 
 ```bash
