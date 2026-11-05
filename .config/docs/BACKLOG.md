@@ -12,6 +12,10 @@
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."
   Get the pattern narrow enough to not false-positive on legitimate `-L`/`-S` usage.
   See `tmux-testing` skill's SKILL.md section 0 for the incident writeup.
+- mise | chafa went into `packages.toml##default` as a plain `chafa = "latest"` when it came from Omarchy, and mise has no such tool, so `mise bootstrap` failed on Debian with "chafa not found in mise tool registry".
+  The Arch variant had a correct `"pacman:chafa"`, so nothing on this machine ever exercised the default one; it now declares `"apt:chafa"` under `[bootstrap.packages]` and works on both.
+  To catch this before a fresh machine does: add a CI check that resolves every tool named in both variants' `[tools]` against `mise registry` (the `mise` job, alongside the syntax ones), since a name the registry lacks can only fail on the machine that reads that variant.
+  Worth fixing the habit too -- Omarchy additions belong in the Arch variant (or `tool install`), and the default variant needs a name mise actually knows.
 - ci | Explore [Boeing/config-file-validator](https://github.com/Boeing/config-file-validator) to replace `json-syntax` and `toml-syntax`; held back for its small following (about 500 stars).
   v2.3.0 passed all 28 tracked config files, naming each, and covered what the one-liners do not: YAML, the `.jsonc`, `.editorconfig`, and the `##` alternates through `-type-map='**/*.toml##*:toml'`.
   Skip its `validate-configs-action` wrapper: it has no `type-map` input and only scans directories.
