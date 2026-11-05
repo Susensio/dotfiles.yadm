@@ -20,12 +20,10 @@ for workspace = 1, 10 do
     hl.dsp.window.move({ workspace = tostring(workspace) }))
 end
 
--- Scratchpad: Omarchy's Quake console. 4.5 renamed its workspace, so the name is
--- resolved here until the package on every machine ships qconsole.
-local console = package.loaded["default.hypr.qconsole"] and "qconsole" or "scratchpad"
-o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special(console))
+-- Scratchpad: Omarchy's Quake console, with a workspace of its own.
+o.bind("SUPER + grave", "Scratchpad", hl.dsp.workspace.toggle_special("qconsole"))
 o.bind("SUPER + SHIFT + grave", "Move window to scratchpad",
-  hl.dsp.window.move({ workspace = "special:" .. console, follow = false }))
+  hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
 
 -- Window
 o.bind("SUPER + Q", "Close window", hl.dsp.window.close())
