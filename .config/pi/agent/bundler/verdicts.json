@@ -34,7 +34,11 @@
   },
   "pi-claude-bridge": {
     "decision": "bundle",
-    "reason": "@anthropic-ai/claude-agent-sdk stays external: it locates its native CLI through import.meta.url and would throw once inlined. Patched; the bundle is rebuilt when the patch stamp changes.",
+    "reason": "@anthropic-ai/claude-agent-sdk stays external: it locates its native CLI through import.meta.url and would throw once inlined. Patched; the bundle is rebuilt when the patch stamp changes. 0.10.0 added cache-trace.ts hits: the bundle lands at <pkg>/.pi-bundler/bundle.mjs, one level under the package, so its `../package.json` and its createRequire both see what src/ saw; a probe on 0.10.0 printed BRIDGE_VERSION 0.10.0 and sdk 0.3.308.",
+    "reviewedKinds": [
+      "pi-claude-bridge/src/cache-trace.ts:import.meta.url×2",
+      "pi-claude-bridge/src/cache-trace.ts:createRequire×1"
+    ],
     "externals": [
       "@anthropic-ai/claude-agent-sdk"
     ]
