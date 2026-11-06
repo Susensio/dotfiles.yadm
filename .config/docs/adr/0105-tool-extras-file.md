@@ -9,7 +9,9 @@ Date: 2026-11-05
 
 mise 2026.11 changed that. [jdx/mise#14629](https://github.com/jdx/mise/pull/14629) made `mise install` fail on any tool option the backend does not read. The `github` backend rejected the keys first, so a Debian bootstrap died on `pandoc`'s `pacman` field; aqua and core backends were still unchecked, so the rest passed, but nothing bound the two backends' behaviour to the config.
 
-A first test of the option check suggested moving only `pandoc`'s field. That reading was wrong in the other direction too: an earlier verdict that the option check rejected every key on every backend was noise from a polluted test config. What held after re-running against the isolated config was only the structural problem — these fields are not options at all, they are per-tool data of ours, and whatever past readers assumed, `tool remove` dropped them with the declaration (which had already been observed as odd behaviour).
+Only `pandoc` failed at first, because its key sat on a `github`-backed tool; the same keys on aqua and core tools still passed, since mise checks neither. That margin is not a guarantee: these fields are per-tool data of ours, not tool options, and they should not depend on which backends mise happens to validate.
+
+They also did not survive their own declaration: `tool remove` dropped the curated settings with the tool.
 
 Keeping them as declarations was rejected: it depends on which backends mise checks, and the check list only grows.
 A third file per tool (`mise/metadata/<tool>.toml`) added a directory walk to every reader for no gain over one file, which every reader already opens once.
@@ -29,4 +31,4 @@ A `tool remove` keeps the tool's settings, so reinstalling it is a one-line chan
 mise rejects nothing, on any backend, present or future.
 The declaration no longer shows what `system-install` will do for a tool; both halves must be read together.
 Costs: an empty `tool-extras.toml` exists on any machine whose tools all need nothing, and the file may name a tool that is not installed anywhere.
-The hook strings in `tools.toml` keep their post-AADR-0060 `--skip-tools` form without change, and the correction to ADR-0048's `pacman` field line is recorded there.
+The hook strings in `tools.toml` keep their post-ADR-0060 `--skip-tools` form without change, and the correction to ADR-0048's `pacman` field line is recorded there.
