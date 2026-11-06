@@ -52,7 +52,8 @@ runs:
         pacman -S --noconfirm --needed "${packages[@]}" omarchy sudo git || true
         pacman -T "${packages[@]}" omarchy sudo git
         useradd --create-home --uid 1000 --groups wheel dev
-        echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
+        # `sudo -v` asks unless every rule for the user is passwordless, and wheel's is not
+        printf '%s\n' "dev ALL=(ALL) NOPASSWD: ALL" "Defaults:dev !authenticate" > /etc/sudoers.d/dev
 
         # Omarchy's own modes for a root without btrfs and a user without a desktop session
         OMARCHY_SNAPPER_CONFIGURE_TEST=1 omarchy-apply-system --install-user dev --first-install
