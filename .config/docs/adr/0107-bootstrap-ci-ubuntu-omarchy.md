@@ -1,4 +1,4 @@
-# ADR-0106: Test the bootstrap from fresh machines in CI, on an Ubuntu runner, a bare Debian container and an Omarchy container booted into systemd, not a VM
+# ADR-0107: Test the bootstrap from fresh machines in CI, on an Ubuntu runner, a bare Debian container and an Omarchy container booted into systemd, not a VM
 
 Status: Accepted
 Date: 2026-10-07
@@ -25,7 +25,7 @@ Omarchy turned out to be two packages over Arch: `omarchy-settings`, installed b
 The Bootstrap workflow runs the README's new-machine steps on every push and pull request, on three fresh machines:
 
 - the `ubuntu-24.04` runner, Mint 22's base, a VM with systemd and a user manager started by lingering;
-- a `debian:13` container from the bare image, where the job installs only sudo, wget and a user, as a Debian install leaves one who can sudo, and the clone steps repeat `new-machine`'s on this branch: git through `pkg-install`, yadm, the clone and the bootstrap, which installs curl and the rest;
+- a `debian:13` container from the bare image, where the job installs only sudo, wget and a user, as a Debian install leaves one who can sudo, and the job runs the same `source <(curl -fsSL .../.config/yadm/new-machine)` the README gives, with environment overrides for this branch;
 - an `archlinux` container started with `docker run` and systemd as PID 1, made Omarchy the way its ISO does it from Omarchy's latest release: its pacman configuration and stable mirror, `omarchy-settings`, the ISO's package list and `omarchy`, then `omarchy-apply-system` and `omarchy-provision-user`, with Omarchy's own switches for a root without btrfs and a user without a desktop session.
 
 Making that machine is a local composite action, `.github/actions/omarchy`, so the workflow holds only the dotfiles' own steps.
@@ -38,7 +38,7 @@ A second bootstrap must then print nothing.
 
 The generic steps run against `apt` (twice, on two repository layouts) and `pacman` from scratch, the Omarchy step set against a current Omarchy, services included, and the README with them.
 Services are exercised on Ubuntu and Omarchy but not on Debian, whose container skips keyd's service, its user sync and mise's services; `bootstrap-test` skips their checks the same way.
-The Debian job repeats `new-machine`'s clone steps instead of running it, which hardcodes master's repository and cannot be pointed at a branch; a change there needs the same change in the job.
+All three jobs source `new-machine` from the branch under test, so the CI also exercises the README entry point; `NEW_MACHINE_BRANCH`, `NEW_MACHINE_REPO_URL` and `NEW_MACHINE_RAW_URL` override the defaults without changing what a real user runs.
 Steps that talk to a running desktop (Hyprland, Omarchy's shell) cannot be exercised; they have to tolerate its absence, which also covers bootstrapping over SSH or from a TTY.
 Hardware-dependent steps (hibernation, fingerprint readers) only take their absent branch.
 The Omarchy job follows Omarchy's installer, so a change in how the ISO installs means a change in the job, and the container runs privileged.

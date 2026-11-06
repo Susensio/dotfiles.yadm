@@ -34,13 +34,14 @@ jobs:
           # Stock Ubuntu's mode, which 10_xdg_compliance/sudo.sh relies on
           sudo chmod 755 /etc/sudoers.d
 
-      # The README's steps
+      # The README's command, on the branch under test
       - name: Clone and bootstrap
         run: |
+          export NEW_MACHINE_BRANCH=$BRANCH
+          export NEW_MACHINE_REPO_URL="https://github.com/$GITHUB_REPOSITORY.git"
+          export NEW_MACHINE_RAW_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$BRANCH"
           # shellcheck disable=SC1090
-          source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
-          yadm checkout -- ~/.config
-          yadm bootstrap
+          source <(curl -fsSL "$NEW_MACHINE_RAW_URL/.config/yadm/new-machine")
 
       # As the bootstrap asks once environment.d changed: restart the user manager
       - name: Log in again
@@ -81,23 +82,18 @@ jobs:
           # A login shell as dev, as a terminal has; the command is a string, or a script on stdin
           cat > /usr/local/bin/as-dev <<'EOF'
           #!/bin/sh
-          exec su --login dev --whitelist-environment=BRANCH,GITHUB_REPOSITORY,GITHUB_TOKEN -c "$1"
+          exec su --login dev --whitelist-environment=BRANCH,GITHUB_REPOSITORY,GITHUB_TOKEN,NEW_MACHINE_BRANCH,NEW_MACHINE_REPO_URL,NEW_MACHINE_RAW_URL -c "$1"
           EOF
           chmod +x /usr/local/bin/as-dev
 
-      # As new-machine does, from this branch: git, yadm, the clone, the bootstrap
+      # The README's command, on the branch under test; the image has no curl, so wget fetches it
       - name: Clone and bootstrap
         run: |
           as-dev 'bash -euo pipefail -s' <<'EOF'
-          raw=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$BRANCH
-          wget -qO- "$raw/bin/pkg-install" | bash -s git
-          yadm_dir=$(mktemp -d)
-          wget -qO "$yadm_dir/yadm" https://raw.githubusercontent.com/yadm-dev/yadm/3.5.0/yadm
-          chmod +x "$yadm_dir/yadm"
-          PATH=$yadm_dir:$PATH
-          yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
-          yadm checkout -- "$HOME"
-          yadm bootstrap
+          export NEW_MACHINE_BRANCH=$BRANCH
+          export NEW_MACHINE_REPO_URL="https://github.com/$GITHUB_REPOSITORY.git"
+          export NEW_MACHINE_RAW_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$BRANCH"
+          source <(wget -qO- "$NEW_MACHINE_RAW_URL/.config/yadm/new-machine")
           EOF
 
       # No user manager to import environment.d from, so the login's PATH is applied by hand
@@ -126,9 +122,10 @@ jobs:
         run: |
           # shellcheck disable=SC2016  # $0 and $1 expand in the container
           as-dev -euo pipefail -c '
-            source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b "$0" "https://github.com/$1.git"
-            yadm checkout -- ~/.config
-            yadm bootstrap
+            export NEW_MACHINE_BRANCH=$0
+            export NEW_MACHINE_REPO_URL="https://github.com/$1.git"
+            export NEW_MACHINE_RAW_URL="https://raw.githubusercontent.com/$1/$0"
+            source <(curl -fsSL "$NEW_MACHINE_RAW_URL/.config/yadm/new-machine")
           ' "$BRANCH" "$GITHUB_REPOSITORY"
 
       - name: Log in again
