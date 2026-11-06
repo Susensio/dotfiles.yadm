@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Restore missing declared clones without changing their source list (ADR-0072).
+# Numbered first: bugfix/ sorts before a plain name, and its omamail step edits a
+# clone this one installs, which on a fresh machine would land a run late.
 set -euo pipefail
 
 command -v omarchy &>/dev/null || exit 0
