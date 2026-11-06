@@ -63,6 +63,57 @@ jobs:
           echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
           exit 1
 
+  # Debian 13 from its bare image: no sudo, curl, git or user, so the prerequisites are
+  # installed as on a fresh machine. A container runs no systemd: the steps that
+  # need it (keyd's service, user services) skip themselves, the rest runs as usual.
+  debian:
+    runs-on: ubuntu-latest
+    container: debian:13
+    timeout-minutes: 20
+    steps:
+      # What a Debian install gives a user who can sudo, and the one tool the README needs
+      - name: Prepare a user
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq sudo wget ca-certificates
+          useradd --create-home --shell /bin/bash dev
+          echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
+          # A login shell as dev, as a terminal has; the command is a string, or a script on stdin
+          cat > /usr/local/bin/as-dev <<'EOF'
+          #!/bin/sh
+          exec su --login dev --whitelist-environment=BRANCH,GITHUB_REPOSITORY,GITHUB_TOKEN -c "$1"
+          EOF
+          chmod +x /usr/local/bin/as-dev
+
+      # As new-machine does, from this branch: git, yadm, the clone, the bootstrap
+      - name: Clone and bootstrap
+        run: |
+          as-dev 'bash -euo pipefail -s' <<'EOF'
+          raw=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$BRANCH
+          wget -qO- "$raw/bin/pkg-install" | bash -s git
+          yadm_dir=$(mktemp -d)
+          wget -qO "$yadm_dir/yadm" https://raw.githubusercontent.com/yadm-dev/yadm/3.5.0/yadm
+          chmod +x "$yadm_dir/yadm"
+          PATH=$yadm_dir:$PATH
+          yadm clone --no-bootstrap -b "$BRANCH" "https://github.com/$GITHUB_REPOSITORY.git"
+          yadm checkout -- "$HOME"
+          yadm bootstrap
+          EOF
+
+      # No user manager to import environment.d from, so the login's PATH is applied by hand
+      - name: Test
+        run: |
+          as-dev 'set -a; . .config/environment.d/10_xdg.conf; . .config/environment.d/11_path.conf; set +a
+            just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+
+      - name: Bootstrap again, silently
+        if: ${{ !cancelled() }}
+        run: |
+          out=$(as-dev .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          [ -z "$out" ] && exit 0
+          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
+          exit 1
+
   # Omarchy's ISO, replayed in an Arch container booted into systemd (actions/omarchy)
   omarchy:
     runs-on: ubuntu-latest

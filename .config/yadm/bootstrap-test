@@ -92,9 +92,12 @@ check "helix has the grammar tmux-grammar.sh builds" \
 echo "# agents"
 check "herdr integrations current" herdr_integrations_current
 
-echo "# services"
-check "keyd active" systemctl is-active keyd
-check "keyd-sync.path enabled" systemctl --user is-enabled keyd-sync.path
+# Not in a container, which has no systemd to run them
+if [[ -d /run/systemd/system ]]; then
+  echo "# services"
+  check "keyd active" systemctl is-active keyd
+  check "keyd-sync.path enabled" systemctl --user is-enabled keyd-sync.path
+fi
 
 ((failures == 0)) || {
   echo "$failures failed"
