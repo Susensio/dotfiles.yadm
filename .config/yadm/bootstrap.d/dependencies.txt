@@ -12,3 +12,5 @@ patch
 cmp diffutils
 # mise/tasks/system-install expands asset URLs with it; Debian ships it apart from gettext-base
 envsubst gettext
+# 12_locale.sh generates the locale environment.d asks for; Debian ships locale-gen apart from libc
+locale-gen locales
