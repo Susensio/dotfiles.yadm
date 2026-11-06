@@ -1,0 +1,164 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Soften wluma's learned curve and optionally write it back.
+
+wluma's state holds one brightness per (ALS, screen luma) observation, and the
+monotonic model keeps every one of them. That makes the curve jump when the
+screen content changes or when bare hands shade the light sensor.
+
+--collapse-luma averages the observations that share an ALS value and stores the
+average as luma 0, which is what wluma's own `capturer = "none"` does to its
+input: brightness then depends on ambient light only.
+--smooth averages each collapsed point with its neighbours in log10(als+1),
+turning a staircase over one or two lux into a ramp.
+
+Without --apply this only prints the resulting points.
+"""
+
+import argparse
+import copy
+import os
+import shutil
+import subprocess
+import sys
+import time
+
+STATE_DIR = os.path.expanduser("~/.local/state/wluma")
+
+
+def load_points(path):
+    # YAML subset: the entries are a flat list of als/luma/value maps.
+    points, entry = [], None
+    for line in open(path):
+        key, _, value = line.strip().partition(":")
+        if key == "- als":
+            entry = {"als": int(value)}
+        elif key in ("luma", "value") and entry is not None:
+            entry[key] = int(value)
+            if key == "value":
+                points.append(entry)
+                entry = None
+    return points
+
+
+def dump_yaml(output, points):
+    lines = [f"output_name: {output}", "entries:", "  brightness:"]
+    for point in points:
+        lines += [
+            f"  - als: {point['als']}",
+            f"    luma: {point['luma']}",
+            f"    value: {point['value']}",
+        ]
+    lines += ["  dim: []", "  temperature: []", ""]
+    return "\n".join(lines)
+
+
+def coordinate(als):
+    import math
+
+    return math.log10(als + 1.0)
+
+
+def collapse_luma(points):
+    # Same grouping as wluma's collapse_luma, including the rounding.
+    grouped = {}
+    for point in points:
+        total, count = grouped.get(point["als"], (0, 0))
+        grouped[point["als"]] = (total + point["value"], count + 1)
+    return [
+        {"als": als, "luma": 0, "value": round(total / count)}
+        for als, (total, count) in sorted(grouped.items())
+    ]
+
+
+def smooth(points, window):
+    if window <= 1:
+        return points
+    smoothed = []
+    for index, point in enumerate(points):
+        centre = coordinate(point["als"])
+        close = [p for p in points if abs(coordinate(p["als"]) - centre) <= window / 10.0]
+        close = close or [point]
+        smoothed.append(
+            {
+                "als": point["als"],
+                "luma": point["luma"],
+                "value": round(sum(p["value"] for p in close) / len(close)),
+            }
+        )
+    return deduplicate(smoothed)
+
+
+def deduplicate(points):
+    # Two observations at one ALS would be a contradiction the model must split.
+    unique = {}
+    for point in points:
+        unique.setdefault((point["als"], point["luma"]), point)
+    return list(unique.values())
+
+
+def show(title, points, maximum):
+    print(f"{title} ({len(points)} points):")
+    for point in points:
+        print(
+            f"  als {point['als']:>6}  luma {point['luma']:>3}  "
+            f"{point['value'] / maximum * 100:5.1f}%"
+        )
+
+
+def restart_service(action):
+    subprocess.run(["systemctl", "--user", action, "wluma.service"], check=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("output", nargs="?", default="eDP-1")
+    parser.add_argument("--state", default=STATE_DIR)
+    parser.add_argument(
+        "--keep-luma",
+        action="store_true",
+        help="keep the screen-luma dimension instead of collapsing it",
+    )
+    parser.add_argument(
+        "--smooth",
+        type=float,
+        default=0.0,
+        metavar="WINDOW",
+        help="average points within this distance in log10(als+1), e.g. 0.3",
+    )
+    parser.add_argument("--max-brightness", type=int, default=96000)
+    parser.add_argument("--apply", action="store_true", help="write the file and restart wluma")
+    args = parser.parse_args()
+
+    path = os.path.expanduser(f"{args.state}/{args.output}.yaml")
+    original = load_points(path)
+    if not original:
+        sys.exit(f"no learned points in {path}")
+
+    softened = copy.deepcopy(original)
+    if not args.keep_luma:
+        softened = collapse_luma(softened)
+    softened = smooth(softened, args.smooth)
+
+    show("before", original, args.max_brightness)
+    print()
+    show("after", softened, args.max_brightness)
+    if not args.apply:
+        print("\ndry run; pass --apply to write this and restart wluma")
+        return
+
+    # Stop the unit first: wluma rewrites its state on every learned point.
+    restart_service("stop")
+    backup = f"{path}.{time.strftime('%Y%m%d%H%M%S')}.bak"
+    shutil.copy(path, backup)
+    with open(path, "w") as f:
+        f.write(dump_yaml(args.output, softened))
+    restart_service("start")
+    print(f"\nwrote {path}, backup at {backup}")
+
+
+if __name__ == "__main__":
+    main()
