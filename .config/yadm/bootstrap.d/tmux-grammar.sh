@@ -22,6 +22,10 @@ LANGUAGES=$CONFIG_DIR/languages.toml
 # The grammar's scanner is C++: pacman's gcc brings c++, Debian's needs g++
 command -v c++ >/dev/null || pkg-install g++
 
+# ~/.config/.git points at yadm's bare repo: without a ceiling, a grammar source lacking
+# its own .git resolves to it, and helix's fetch rewrites yadm's origin and tags
+export GIT_CEILING_DIRECTORIES=${XDG_CONFIG_HOME:-$HOME/.config}
+
 log info "Building Helix's tmux grammar..."
 helix --grammar fetch
 helix --grammar build
