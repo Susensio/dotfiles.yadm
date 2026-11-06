@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Take a bare machine to this repository's configuration in one step: git and
-# yadm, the clone, then `yadm bootstrap`. Idempotent, so it also brings an
-# existing machine up to date.
+# Take a bare machine to this repository's configuration in one step: git, a
+# temporary yadm, the clone, then `yadm bootstrap`. Idempotent, so it also
+# brings an existing machine up to date.
 #
 #   bash <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/new-machine)
 #   bash <(wget -qO- https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/new-machine)
@@ -25,7 +25,7 @@ set -euo pipefail
 REPO_URL=https://github.com/Susensio/dotfiles.yadm.git
 REPO_BRANCH=master
 RAW_URL=https://raw.githubusercontent.com/Susensio/dotfiles.yadm/$REPO_BRANCH
-# `##distro_family` classes need at least this; Debian 12 and Ubuntu 24.04 carry 3.2
+# `##distro_family` classes need at least this, and this is the version fetched
 YADM_MIN=3.5.0
 YADM_URL=https://raw.githubusercontent.com/yadm-dev/yadm/$YADM_MIN/yadm
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -61,21 +61,20 @@ yadm_is_current() {
 }
 
 install_deps() {
-  local work missing=()
+  local work
   work=$(mktemp -d)
 
-  command -v git &> /dev/null || missing+=(git)
-  command -v yadm &> /dev/null || missing+=(yadm)
-  if (( ${#missing[@]} )); then
-    log "Installing ${missing[*]}..."
+  if ! command -v git &> /dev/null; then
+    log "Installing git..."
     fetch "$RAW_URL/bin/pkg-install" > "$work/pkg-install"
-    bash "$work/pkg-install" "${missing[@]}"
+    bash "$work/pkg-install" git
   fi
 
   if ! yadm_is_current; then
     # Held in a temp dir for this run only: the bootstrap installs the managed
-    # yadm itself, and a file in ~/.local/bin would block mise linking it
-    log "The distro's yadm is older than $YADM_MIN; fetching $YADM_MIN for this run..."
+    # yadm (pacman on Arch, mise elsewhere), so a distro package would be a
+    # second copy, and a file in ~/.local/bin would block mise linking its own
+    log "Fetching yadm $YADM_MIN for this run..."
     mkdir "$work/bin"
     fetch "$YADM_URL" > "$work/bin/yadm"
     chmod +x "$work/bin/yadm"
