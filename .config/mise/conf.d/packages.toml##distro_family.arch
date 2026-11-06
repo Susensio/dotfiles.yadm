@@ -1,6 +1,11 @@
 # Distro-sourced tools on Arch, installed by `mise bootstrap` through pacman.
 # distro_family, not distro: Omarchy's os-release has ID=omarchy, ID_LIKE=arch.
 # Keep in sync with packages.toml##default; `tool` writes both (docs/adr/0046).
+[settings]
+# Omarchy's system config declares node and uv, and mise then insists on installing them
+# for npm: and pipx: tools, offline and failing; pacman provides both, so leave them to PATH
+disable_tools = ["node", "uv"]
+
 [bootstrap.hooks]
 # pacman's rustup installs no toolchain
 post-packages = "rustup default >/dev/null 2>&1 || rustup default stable"
