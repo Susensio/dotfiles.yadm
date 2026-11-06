@@ -60,7 +60,7 @@ The step renders files only: running apps retint through Omarchy's theme-set hoo
 `omarchy/hooks/plugin-added.d/record-source` and `plugin-removed.d/forget-source` update the source list and the matching ignore rule when Omarchy successfully adds or removes a plugin.
 The hooks need `bugfix/plugin-lifecycle-hooks.sh` to apply [Omarchy PR #13743](https://github.com/omacom/omarchy/pull/13743) until Omarchy emits those events natively.
 They record only portable HTTPS or Git-over-SSH sources without embedded credentials; an Omarchy add from a local path still installs, but prints `Hook failed` and is not declared.
-`bootstrap.d/omarchy/plugins.sh` only reads the list: it installs a missing clone and never removes a declaration or touches an existing clone.
+`bootstrap.d/omarchy/00_plugins.sh` only reads the list: it installs a missing clone and never removes a declaration or touches an existing clone.
 A plugin removed without `omarchy plugin remove` is restored on the next bootstrap; use the lifecycle command for intentional removal.
 Locally authored plain-file plugins remain trackable beside the ignored clones: add their files to yadm explicitly, including copies created by `omarchy plugin clone`.
 A newly installed plugin still needs a shell restart to appear.
