@@ -5,6 +5,11 @@
 #   source <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/.config/yadm/new-machine)
 # Needs curl or wget to fetch itself.
 
+# The master URLs are defaults; CI points both at the branch under test. Not
+# REPO_URL: bootstrap.yadm.io, sourced below, sets that one to empty.
+NM_REPO=${NEW_MACHINE_REPO_URL:-https://github.com/Susensio/dotfiles.yadm.git}
+NM_RAW=${NEW_MACHINE_RAW_URL:-https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master}
+
 # A subshell, so set -e never reaches the shell this is sourced in
 (
   set -euo pipefail
@@ -16,9 +21,9 @@
   if ((${#missing[@]})); then
     installer=$(mktemp)
     if command -v curl &> /dev/null; then
-      curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/pkg-install > "$installer"
+      curl -fsSL "$NM_RAW/bin/pkg-install" > "$installer"
     else
-      wget -qO "$installer" https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/pkg-install
+      wget -qO "$installer" "$NM_RAW/bin/pkg-install"
     fi
     bash "$installer" "${missing[@]}"
   fi
@@ -32,7 +37,7 @@ source <(curl -fsSL https://bootstrap.yadm.io) || return 1
   set -euo pipefail
 
   if [[ ! -d ${XDG_DATA_HOME:-$HOME/.local/share}/yadm/repo.git ]]; then
-    yadm clone --no-bootstrap https://github.com/Susensio/dotfiles.yadm.git
+    yadm clone --no-bootstrap ${NEW_MACHINE_BRANCH:+-b "$NEW_MACHINE_BRANCH"} "$NM_REPO"
     yadm checkout -- "$HOME"
   fi
   yadm bootstrap
