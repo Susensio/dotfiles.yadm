@@ -9,6 +9,8 @@ CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/mise
 TOOLS_CONFIG=$CONFIG_DIR/conf.d/tools.toml
 PACKAGES_MISE=$CONFIG_DIR/conf.d/packages.toml##default
 PACKAGES_ARCH=$CONFIG_DIR/conf.d/packages.toml##distro_family.arch
+# Per-tool settings mise rejects, e.g. a differing pacman package name; they outlive `remove` (docs/adr/0105)
+TOOL_EXTRAS=$CONFIG_DIR/tool-extras.toml
 
 # @cmd Add global tools, or promote ones installed with plain `mise use -g`
 # @flag --lsp Install into the global LSP config
@@ -143,7 +145,7 @@ is_pacman_tool() {
 }
 
 pacman_package() {
-  mise config get --file "$PACKAGES_MISE" "tools.$1.pacman" 2>/dev/null || echo "$1"
+  mise config get --file "$TOOL_EXTRAS" "$1.pacman" 2>/dev/null || echo "$1"
 }
 
 # argc-generated variables
