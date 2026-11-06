@@ -64,48 +64,67 @@ jobs:
           echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
           exit 1
 
-  # Debian 13 from its bare image: no sudo, curl, git or user, so the prerequisites are
-  # installed as on a fresh machine. A container runs no systemd: the steps that
-  # need it (keyd's service, user services) skip themselves, the rest runs as usual.
+  # Debian 13 as installed: systemd as PID 1 with a user manager, a sudo user, and
+  # none of curl, git or yadm, so the prerequisites are installed as on a fresh machine.
+  # GitHub's container: key would replace PID 1, hence docker run, as for Omarchy below.
   debian:
     runs-on: ubuntu-latest
-    container: debian:13
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      # What a Debian install gives a user who can sudo, and the one tool the README needs
-      - name: Prepare a user
+      - name: Boot Debian
         run: |
-          apt-get update -qq
-          apt-get install -y -qq sudo wget ca-certificates
-          useradd --create-home --shell /bin/bash dev
-          echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
-          # A login shell as dev, as a terminal has; the command is a string, or a script on stdin
-          cat > /usr/local/bin/as-dev <<'EOF'
-          #!/bin/sh
-          exec su --login dev --whitelist-environment=BRANCH,GITHUB_REPOSITORY,GITHUB_TOKEN,NEW_MACHINE_BRANCH,NEW_MACHINE_REPO_URL,NEW_MACHINE_RAW_URL -c "$1"
+          sudo modprobe uinput
+          docker build --tag debian-systemd - <<'EOF'
+          FROM debian:13
+          RUN apt-get update -qq \
+           && apt-get install -y -qq systemd systemd-sysv dbus dbus-user-session sudo wget ca-certificates \
+           && useradd --create-home --uid 1000 --shell /bin/bash dev \
+           && echo "dev ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/dev
           EOF
-          chmod +x /usr/local/bin/as-dev
+          docker run --detach --name debian --privileged --cgroupns=host \
+            --volume /sys/fs/cgroup:/sys/fs/cgroup --tmpfs /run --tmpfs /run/lock \
+            debian-systemd /sbin/init
+          # systemctl cannot reach the bus until systemd has started, so --wait alone fails at once
+          for _ in $(seq 60); do
+            state=$(docker exec debian systemctl is-system-running 2>/dev/null || true)
+            case $state in running | degraded) break ;; esac
+            sleep 1
+          done
+          docker exec debian loginctl enable-linger dev
+          docker exec debian bash -c 'for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done'
+          # A login shell as the user, with its manager's bus, as a terminal has
+          sudo tee /usr/local/bin/as-dev >/dev/null <<'EOF'
+          #!/bin/sh
+          exec docker exec -i -u dev -w /home/dev -e USER=dev -e LOGNAME=dev -e GITHUB_TOKEN \
+            -e XDG_RUNTIME_DIR=/run/user/1000 -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+            debian bash --login "$@"
+          EOF
+          sudo chmod +x /usr/local/bin/as-dev
 
       # The README's command, on the branch under test; the image has no curl, so wget fetches it
       - name: Clone and bootstrap
         run: |
-          as-dev 'bash -euo pipefail -s' <<'EOF'
-          export NEW_MACHINE_BRANCH=$BRANCH
-          export NEW_MACHINE_REPO_URL="https://github.com/$GITHUB_REPOSITORY.git"
-          export NEW_MACHINE_RAW_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$BRANCH"
-          source <(wget -qO- "$NEW_MACHINE_RAW_URL/.config/yadm/new-machine")
-          EOF
+          # shellcheck disable=SC2016  # $0 and $1 expand in the container
+          as-dev -euo pipefail -c '
+            export NEW_MACHINE_BRANCH=$0
+            export NEW_MACHINE_REPO_URL="https://github.com/$1.git"
+            export NEW_MACHINE_RAW_URL="https://raw.githubusercontent.com/$1/$0"
+            source <(wget -qO- "$NEW_MACHINE_RAW_URL/.config/yadm/new-machine")
+          ' "$BRANCH" "$GITHUB_REPOSITORY"
 
-      # No user manager to import environment.d from, so the login's PATH is applied by hand
-      - name: Test
+      # As the bootstrap asks once environment.d changed: restart the user manager
+      - name: Log in again
         run: |
-          as-dev 'set -a; . .config/environment.d/10_xdg.conf; . .config/environment.d/11_path.conf; set +a
-            just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
+          docker exec debian systemctl restart user@1000
+          docker exec debian bash -c 'for _ in $(seq 30); do [ -S /run/user/1000/bus ] && break; sleep 1; done'
+
+      - name: Test
+        run: as-dev -c 'just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
 
       - name: Bootstrap again, silently
         if: ${{ !cancelled() }}
         run: |
-          out=$(as-dev .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
+          out=$(as-dev -c .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
           [ -z "$out" ] && exit 0
           echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
           exit 1
