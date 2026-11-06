@@ -134,11 +134,11 @@ Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `y
 
 ## pi model fallback
 
-Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carries [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
+Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carried [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
 The tier chains themselves were reordered on 2026-10-18 against Artificial Analysis Intelligence Index v4.3.2, first by [ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md) and then by [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md), which put `claude-sonnet-5-5` in front of `deepseek-v4.1-flash` so each tier leads with its strongest option; `alias/top` gained `glm-5.3` fourth.
 On 2026-11-05 `alias/top` gained `opencode-go/deepseek-v4-pro` second ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)), pushing `kimi-k2.7-code` to third, after the `Go caps each model separately` claim behind the cheap-rung ordering proved false: one shared quota is spent at each model's price.
 
-- The #162 hunk is gone: #163 shipped in pi-claude-bridge 0.9.2, so the `pi-claude-bridge-index` directory holds only the #148 hunks (checked 2026-10-21).
+- The #162 hunk is gone: #163 shipped in pi-claude-bridge 0.9.2, so the `pi-claude-bridge-index` directory carries only the #216 standalone route since 2026-11-06.
 - Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.
 - claude-bridge rewrote `pi/agent/claude-bridge.json` to `{ "askClaude": { "enabled": true }, }` during this work; a `yadm restore` brought back the committed file. Cause unknown; watch for a repeat before blaming the patch.
 

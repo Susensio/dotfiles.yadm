@@ -37,4 +37,5 @@ Direct (non-alias) bridge turns are unaffected: the notice still reaches the fai
 The `pi-claude-bridge-index` directory now couples two upstream changes with different drop conditions.
 The marker only detects the fully patched form, so a release that merges one and not the other reports drift and the directory must be regenerated against the new pristine file; dropping one hunk is a normal rebase, not a deletion of the directory.
 
-The #162 hunk was dropped once #163 shipped in 0.9.2 (2026-10-07); the directory and its `#148` marker now hold only the #148 hunks, which stay until [elidickinson/pi-claude-bridge#148](https://github.com/elidickinson/pi-claude-bridge/pull/148) does.
+The #162 hunk was dropped once #163 shipped in 0.9.2 (2026-10-07); the directory and its `#148` marker then held only the #148 hunks.
+The #148 hunks were dropped on 2026-11-06, after the maintainer declined its prompt-shape routing; the directory now carries [pi-claude-bridge#216](https://github.com/elidickinson/pi-claude-bridge/pull/216)'s explicit standalone route instead, which is what lets a reviewer call with its own system prompt reach Claude Code at all.
