@@ -140,6 +140,23 @@
     ],
     [
       {
+        "id": "external-status-mw4xq78t-6a2r15",
+        "type": "external-status",
+        "enabled": true,
+        "options": {
+          "raw": false,
+          "hideWhenEmpty": true,
+          "icon": "",
+          "text": "-",
+          "fg": "default",
+          "bg": "default",
+          "bold": false,
+          "externalStatusKey": "session-yolo",
+          "trimValue": 0,
+          "preserveTrimStyles": true
+        }
+      },
+      {
         "id": "external-status-mujek16c-w1iavk",
         "type": "external-status",
         "enabled": true,
@@ -237,6 +254,7 @@
       "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
+      "session-yolo",
       "usage",
       "zz-quota"
     ],
@@ -247,6 +265,7 @@
       "pi-permission-system",
       "pi-quotas-token-status",
       "pi-quotas-usage",
+      "session-yolo",
       "usage",
       "zz-quota"
     ]
