@@ -33,7 +33,12 @@
       "~/.npmrc": "deny",
       "~/.password-store/*": "deny",
       "~/.config/rclone/*": "deny",
-      "*.p12": "deny"
+      "*.p12": "deny",
+      "~/.pypirc": "deny",
+      "~/.config/pip/pip.conf": "deny",
+      "*.pfx": "deny",
+      "*.p8": "deny",
+      "~/.config/hub/*": "deny"
     },
     "path_write": {
       "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
@@ -55,10 +60,30 @@
       "*.key": "deny",
       "*.keyring": "deny",
       "*auth.json": "deny",
+      "~/.ssh/*": "deny",
+      "~/.gnupg/*": "deny",
+      "~/.local/share/gnupg/*": "deny",
+      "~/.config/gh/*": "deny",
       "*.envrc": "deny",
-      "*.credentials.json": "deny"
+      "~/.local/share/keyrings/*": "deny",
+      "~/.aws/*": "deny",
+      "~/.netrc": "deny",
+      "~/.git-credentials": "deny",
+      "~/.config/gcloud/*": "deny",
+      "~/.kube/config": "deny",
+      "~/.docker/config.json": "deny",
+      "*.credentials.json": "deny",
+      "~/.npmrc": "deny",
+      "~/.password-store/*": "deny",
+      "~/.config/rclone/*": "deny",
+      "*.p12": "deny",
+      "~/.pypirc": "deny",
+      "~/.config/pip/pip.conf": "deny",
+      "*.pfx": "deny",
+      "*.p8": "deny",
+      "~/.config/hub/*": "deny"
     },
-    "external_directory": {
+    "external_directory_write": {
       "*": "ask",
       "~/.config/*": "allow",
       "~/.local/*": "allow",
@@ -68,20 +93,8 @@
       "~/bin/*": "allow",
       "/tmp": "allow",
       "/tmp/*": "allow",
-      "/usr": "allow",
-      "/usr/*": "allow",
-      "/etc": "allow",
-      "/etc/*": "allow",
-      "/opt": "allow",
-      "/opt/*": "allow",
-      "/var/log": "allow",
-      "/var/log/*": "allow",
-      "/run": "allow",
-      "/run/*": "allow",
-      "/proc": "allow",
-      "/proc/*": "allow",
-      "/boot": "allow",
-      "/boot/*": "allow"
+      "~/.github": "allow",
+      "~/.github/*": "allow"
     },
     "external_directory_read": {
       "*": "ask",
@@ -95,7 +108,6 @@
       "/etc/*": "allow",
       "/opt": "allow",
       "/opt/*": "allow",
-      "/home": "allow",
       "/var/log": "allow",
       "/var/log/*": "allow",
       "/run": "allow",
@@ -127,14 +139,6 @@
       "strings *": "allow",
       "rm -rf /tmp/*": "allow",
       "set -e*": "allow",
-      "sudo *": {
-        "action": "deny",
-        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
-      },
-      "* sudo *": {
-        "action": "deny",
-        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
-      },
       "cat *": "allow",
       "head *": "allow",
       "tail *": "allow",
@@ -173,6 +177,20 @@
       "gh search *": "allow",
       "python3 pi/agent/skills/*": "allow",
       "python3 ~/.config/pi/agent/skills/*": "allow",
+      "gh run view*": "allow",
+      "gh run list*": "allow",
+      "gh run watch*": "allow",
+      "gh issue view*": "allow",
+      "journalctl --user*": "allow",
+      "python3": "allow",
+      "python3 -I": "allow",
+      "cp -r*": "allow",
+      "sed -i*": "allow",
+      "export GIT_DIR=$HOME/.local/share/yadm/repo.git": "allow",
+      "export GIT_DIR=\"/home/susensio/.local/share/yadm/repo.git\"": "allow",
+      "export GIT_DIR=\"$HOME/.local/share/yadm/repo.git\" GIT_WORK_TREE=\"$HOME\"": "allow",
+      "yadm commit*": "allow",
+      "git commit*": "allow",
       "git reset *": "ask",
       "yadm reset *": "ask",
       "git checkout *": "ask",
@@ -184,7 +202,15 @@
       "git stash *": "ask",
       "yadm stash *": "ask",
       "pkexec *": "ask",
-      "* pkexec *": "ask"
+      "* pkexec *": "ask",
+      "sudo *": {
+        "action": "deny",
+        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
+      },
+      "* sudo *": {
+        "action": "deny",
+        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
+      }
     },
     "skill": "allow",
     "read": "allow",
@@ -196,6 +222,9 @@
     "todo": "allow",
     "ask_user_question": "allow",
     "web_fetch": "allow",
-    "web_search": "allow"
+    "web_search": "allow",
+    "Agent": "allow",
+    "get_subagent_result": "allow",
+    "steer_subagent": "allow"
   }
 }
