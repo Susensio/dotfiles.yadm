@@ -19,6 +19,7 @@ hl.config({
 -- every touchpad; 1 cancels that out, so they scroll at the pad's own deltas.
 o.window("zapfast", { scroll_touchpad = 1 })
 o.window("spotifast", { scroll_touchpad = 1 })
+o.window("Omamail", { scroll_touchpad = 1 })
 
 -- One entry per mouse; the name comes from `hyprctl devices`. MX Master 3
 hl.device({ name = "logitech-mx-master-3-1", accel_profile = "flat", sensitivity = 0.8 })
