@@ -29,4 +29,8 @@ mise bootstrap packages status --missing &>/dev/null || sudo -v
 quiet=(--quiet)
 [[ -n ${DEBUG:-} ]] && quiet=()
 
-mise bootstrap --only packages,tools,services --yes "${quiet[@]}"
+# A container has no systemd to hold services
+only=packages,tools
+[[ -d /run/systemd/system ]] && only+=,services
+
+mise bootstrap --only "$only" --yes "${quiet[@]}"

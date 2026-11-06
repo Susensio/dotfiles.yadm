@@ -45,11 +45,14 @@ for script in "${scripts[@]}"; do
   log debug "$(printf '%6dms %s' "$ms" "${script#"$BOOTSTRAP_DIR"/}")"
 done
 
-# environment.d only applies from the next login
-login=$(date -d "$(systemctl --user show -P UserspaceTimestamp)" +%s)
-for conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
-  if (($(stat -c %Y "$conf") > login)); then
-    log warn "environment.d changed since login: log out and back in to apply it"
-    break
-  fi
-done
+# environment.d only applies from the next login; a machine without a user
+# manager, such as a container, has no login to compare with
+if login=$(systemctl --user show -P UserspaceTimestamp 2>/dev/null) && [[ -n $login ]]; then
+  login=$(date -d "$login" +%s)
+  for conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
+    if (($(stat -c %Y "$conf") > login)); then
+      log warn "environment.d changed since login: log out and back in to apply it"
+      break
+    fi
+  done
+fi
