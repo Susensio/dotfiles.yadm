@@ -1,0 +1,13 @@
+--- index.js
++++ index.js
+@@ -74,6 +74,10 @@
+ 				}, {
+ 					maxRetries: 0,
+ 					signal: attemptSignal,
++					// Local patch: pi-claude-bridge#216, drop once it ships and the extension sets this itself.
++					// A reviewer call carries its own system prompt and no tools, which the bridge
++					// refuses unless the call is marked standalone.
++					metadata: { promptKind: "standalone" },
+ 					timeoutMs: Math.max(1, Math.min(attemptTimeoutMs, deadline - Date.now())),
+ 					sessionId: `${SESSION_KEY_PREFIX}${options.sessionId}`,
+ 					...reasoning === "off" ? {} : { reasoning },

@@ -1,65 +1,290 @@
 --- index.ts
 +++ index.ts
-@@ -17,6 +17,7 @@
- import { makePromptStream, userMessage, type PromptStream } from "./prompt-stream.js";
- import { claudeCodeSettings, loadConfig, markAskClaudeDeprecationNoticeShown, markStartupNoticeShown, type Config } from "./config.js";
- import {
-+	assertSendableStandalonePrompt,
- 	collectPromptSkills,
- 	projectPromptCapture,
- 	sharedPromptCaptures,
-@@ -486,6 +487,25 @@
- 	};
+@@ -36,6 +36,7 @@
+ import { forgetSessionCwd, rememberSessionCwd, rememberSummarySession, sessionCwdFor, summarySessionFor } from "./session-cwd.js";
+ import { updateUsage, type SdkUsage } from "./usage.js";
+ import { rateLimitResponse } from "./rate-limit.js";
++import { isStandalonePrompt, runStandalone } from "./standalone.js";
+ import { BRIDGE_VERSION, packageVersion, setTraceNotifier, traceAssertReady, traceEvent, traceId, traceInput, traceQueryStart, traceSignalId, traceSnapshot, traceStrict } from "./cache-trace.js";
+ 
+ // --- Debug logging ---
+@@ -541,6 +542,28 @@
+ 	}
  }
  
-+/** A one-shot call rather than an agent turn: a system prompt, no tools, one user message. */
-+function isStandaloneCompletion(context: Context): context is Context & { systemPrompt: string } {
-+	return Boolean(context.systemPrompt)
-+		&& !context.tools?.length
-+		&& context.messages.length === 1
-+		&& context.messages[0].role === "user";
++function standaloneStreamFn(model: Model<any>, context: Context, options?: SimpleStreamOptions): AssistantMessageEventStream {
++	const stream = createAssistantMessageEventStream();
++	const effort = effortForReasoning(model, options?.reasoning);
++	const claudeExecutable = providerSettings.pathToClaudeCodeExecutable;
++	void runStandalone(model, context, options, stream, {
++		query: queryImpl,
++		spawnOptions: {
++			cwd: sessionCwdFor(options?.sessionId),
++			env: { ...process.env, ...CC_CHILD_ENV },
++			model: claudeCodeModelId(model, longContextSettings),
++			...(effort ? { effort } : {}),
++			...(claudeExecutable ? { pathToClaudeCodeExecutable: claudeExecutable } : {}),
++			...makeCliDebugOptions("standalone"),
++		},
++		prompt: (messages) => extractUserPromptBlocks(messages) ?? extractUserPrompt(messages) ?? "",
++		newOutput: (stopReason, error) => newAssistantOutput(model, "", stopReason, error),
++		resultError: resultErrorText,
++		debug,
++	});
++	return stream;
 +}
 +
-+/** Whether this call takes the standalone route. */
-+function servesAsStandalone(context: Context, enabled: boolean): context is Context & { systemPrompt: string } {
-+	return enabled
-+		&& isStandaloneCompletion(context)
-+		&& !promptCaptures.accountsFor(context.systemPrompt);
-+}
-+
-+function allowsExtensionSystemPrompts(): boolean {
-+	return providerSettings.allowExtensionSystemPrompts === true;
-+}
-+
- function extractIsolatedSummaryPrompt(messages: Context["messages"]): string {
- 	if (messages.length !== 1 || messages[0].role !== "user") {
- 		throw new Error(
-@@ -885,6 +905,8 @@
- 	setPiUI(ui: ExtensionUIContext | null) {
- 		piUI = ui;
- 	},
-+	isStandaloneCompletion,
-+	servesAsStandalone,
- 	toBridgeContext,
- 	isolatedStreamFn,
- 	effortForReasoning,
-@@ -1778,6 +1800,19 @@
- 		return isolatedStreamFn(model, context, options);
- 	}
+ function isolatedStreamFn(model: Model<any>, context: Context, options?: SimpleStreamOptions, traceCallId?: string): AssistantMessageEventStream {
+ 	const stream = createAssistantMessageEventStream();
+ 	void runIsolatedSummary(model, context, options, stream, traceCallId);
+@@ -1919,6 +1942,15 @@
+ 	context = toBridgeContext(context);
+ 	traceInput(traceCallId, sourceContext, context, model, options);
  
-+	// Local patch: pi-claude-bridge#148, drop once released.
-+	// An extension's standalone completion (a permission reviewer, say) carries its own
-+	// system prompt, which no agent boundary recorded. With no tools and a lone user
-+	// message there is no agent context for projection to lose, so when the user has
-+	// dropped Claude Code's preset, send the prompt as-is on the isolated path instead of
-+	// throwing. Checked before reentrancy: such calls typically arrive while the agent's
-+	// own query is parked at a tool boundary.
-+	if (servesAsStandalone(context, allowsExtensionSystemPrompts())) {
-+		assertSendableStandalonePrompt(context.systemPrompt);
-+		debug(`provider: standalone completion (${context.systemPrompt.length}-char unrecorded prompt, no tools) routed to isolated path`);
-+		return isolatedStreamFn(model, context, options);
++	// Local patch: pi-claude-bridge#216, drop once released.
++	// Local patch: pi-claude-bridge#216, drop once released.
++	// An extension's own one-turn call, opted out of prompt capture. Checked first: a
++	// standalone call that also sets cacheRetention:"none" still gets its guard.
++	if (isStandalonePrompt(options)) {
++		debug(`provider: standalone prompt routed to its own query, msgs=${context.messages.length}`);
++		return standaloneStreamFn(model, context, options);
 +	}
 +
- 	const stream = createAssistantMessageEventStream();
- 
- 	// DEBUG: trace followUp message triggering
+ 	// Pi's compaction, branch-summary and bug-report calls use cacheRetention:"none"
+ 	// in completeSummarization. Their prompts bypass the capture boundaries, so route
+ 	// them to an isolated persistSession:false CC process without session sync.
+--- sendable.ts
++++ sendable.ts
+@@ -0,0 +1,53 @@
++// Refuses prompt text that makes Claude Code's subscription path read a request as a
++// third-party app. Shared by the captured agent path and standalone prompts.
++
++import { debugLogPath } from "./log-paths.js";
++
++/** Pi's own preamble, the first section of every prompt pi renders for a session
++ *  without a custom prompt. Machine-generated, so operator text never carries it;
++ *  forwarding it makes Claude Code's subscription path read the request as a
++ *  third-party app. */
++export const PI_PREAMBLE = "You are an expert coding assistant operating inside pi";
++
++/** Both doc paths from pi's documentation-routing line. Anthropic's subscription gate
++ *  rejects a system prompt carrying both, while either alone passes (issues #883, #88). */
++const ANTHROPIC_THIRD_PARTY_TRIGGERS = ["docs/custom-provider.md", "docs/packages.md"];
++
++/** One piece of a prompt, named so a refusal can say where it found the text. */
++export type PromptPart = { label: string; text: string };
++
++/** Throws when any part carries pi's preamble at a line start, or the phrase pair
++ *  Anthropic's subscription gate rejects. `notes` add caller context to the refusal. */
++export function assertSendable(parts: readonly PromptPart[], scope: string, notes: readonly string[]): void {
++	const findings: string[] = [];
++	for (const { label, text } of parts) {
++		const offset = preambleAtLineStart(text);
++		if (offset !== -1) {
++			findings.push(`pi's preamble ("${PI_PREAMBLE}") in ${label}, at offset ${offset} of ${text.length} chars`);
++		}
++		// The pair has to co-occur in one part; the two phrases split across parts are not detected.
++		if (ANTHROPIC_THIRD_PARTY_TRIGGERS.every((trigger) => text.includes(trigger))) {
++			findings.push(`${ANTHROPIC_THIRD_PARTY_TRIGGERS.join(" and ")} in ${label}`);
++		}
++	}
++	if (findings.length === 0) return;
++
++	throw new Error([
++		`${scope}: refusing to send this prompt. Claude Code's Anthropic path reads a request`,
++		"  carrying pi's harness, or the phrase pair its subscription gate rejects, as a third-party",
++		"  app: it fails with 400 or is billed as extra usage.",
++		...findings.map((finding) => `  Found: ${finding}.`),
++		...notes,
++		"  If it is your own text, reword or remove it. CLAUDE_BRIDGE_DEBUG=1 writes the full prompt to",
++		`  ${debugLogPath()}.`,
++	].join("\n"));
++}
++
++/** Offset of pi's preamble at the start of a line, or -1. Mid-line mentions are someone
++ *  describing pi's prompt, not pi's prompt. */
++function preambleAtLineStart(text: string): number {
++	for (let offset = text.indexOf(PI_PREAMBLE); offset !== -1; offset = text.indexOf(PI_PREAMBLE, offset + PI_PREAMBLE.length)) {
++		if (offset === 0 || text[offset - 1] === "\n") return offset;
++	}
++	return -1;
++}
+--- standalone.ts
++++ standalone.ts
+@@ -0,0 +1,176 @@
++// Standalone prompts: one-turn side calls another extension makes through the session
++// model (a permission classifier, a title generator), marked with
++// `metadata.promptKind: "standalone"`. Their system prompt never passed a capture
++// boundary, so it goes to Claude Code verbatim instead of projected onto the
++// claude_code preset. No shared session, no QueryContext: pi's agent turn is untouched.
++//
++// Tools are advertised but never run. With `maxTurns: 1` Claude Code dispatches the
++// turn's tool calls to a stub handler and then stops before a second model call, so
++// the stub's result never reaches the model; the calls go back to pi as toolCall blocks.
++
++import type { AssistantMessage, AssistantMessageEventStream, Context, Model, SimpleStreamOptions, TextContent, ToolCall, UserMessage } from "@earendil-works/pi-ai";
++import type { Options, SDKMessage, query } from "@anthropic-ai/claude-agent-sdk";
++import type { ContentBlockParam } from "@anthropic-ai/sdk/resources";
++import { messageContentToText } from "./convert.js";
++import { createToolServer } from "./mcp-server.js";
++import { assertSendable, type PromptPart } from "./sendable.js";
++import { userMessage } from "./prompt-stream.js";
++import { MCP_SERVER_NAME, MCP_TOOL_PREFIX } from "./skills.js";
++import { updateUsage } from "./usage.js";
++
++const STANDALONE_PROMPT_KIND = "standalone";
++
++const NOT_EXECUTED = "Not executed: this tool call is returned to the caller.";
++
++export function isStandalonePrompt(options?: SimpleStreamOptions): boolean {
++	return options?.metadata?.promptKind === STANDALONE_PROMPT_KIND;
++}
++
++/** What the route borrows from index.ts. `spawnOptions` carries the per-call fields
++ *  index.ts owns (cwd, env, model, effort, executable, debug). */
++export type StandaloneDeps = {
++	query: typeof query;
++	spawnOptions: Options;
++	/** The user turn as content blocks when it carries images, else as text. */
++	prompt: (messages: Context["messages"]) => string | ContentBlockParam[];
++	newOutput: (stopReason: AssistantMessage["stopReason"], errorMessage?: string) => AssistantMessage;
++	resultError: (message: SDKMessage) => string | undefined;
++	debug: (...args: unknown[]) => void;
++};
++
++export async function runStandalone(
++	model: Model<any>,
++	context: Context,
++	options: SimpleStreamOptions | undefined,
++	stream: AssistantMessageEventStream,
++	deps: StandaloneDeps,
++): Promise<void> {
++	let sdkQuery: ReturnType<typeof query> | undefined;
++	let wasAborted = false;
++	const onAbort = () => {
++		wasAborted = true;
++		void sdkQuery?.interrupt().catch(() => {});
++		try { sdkQuery?.close(); } catch {}
++	};
++
++	try {
++		const messages = userTurn(context);
++		assertSendable(promptParts(context.systemPrompt, messages), "standalone prompt", []);
++		const prompt = deps.prompt(messages);
++		const tools = context.tools ?? [];
++		const piNameFor = new Map(tools.map((tool) => [`${MCP_TOOL_PREFIX}${tool.name}`, tool.name]));
++		const mcpServers = tools.length
++			? {
++				[MCP_SERVER_NAME]: createToolServer(MCP_SERVER_NAME, tools.map((tool) => ({
++					name: tool.name,
++					description: tool.description,
++					inputSchema: tool.parameters,
++					handler: async (toolCallId: string) => ({ toolCallId, content: [{ type: "text" as const, text: NOT_EXECUTED }], isError: true }),
++				}))),
++			}
++			: undefined;
++		deps.debug(`standalone: spawn model=${model.id} msgs=${messages.length} tools=${tools.length} systemPromptLen=${context.systemPrompt?.length ?? 0}`);
++
++		sdkQuery = deps.query({
++			prompt: typeof prompt === "string" ? prompt : (async function* () { yield userMessage(prompt); })(),
++			options: {
++				...deps.spawnOptions,
++				settings: { autoMemoryEnabled: false },
++				tools: [],
++				strictMcpConfig: true,
++				settingSources: [],
++				skills: [],
++				persistSession: false,
++				systemPrompt: context.systemPrompt ?? "",
++				permissionMode: "bypassPermissions",
++				maxTurns: 1,
++				...(mcpServers ? { mcpServers } : {}),
++			},
++		});
++		if (options?.signal) {
++			if (options.signal.aborted) onAbort();
++			else options.signal.addEventListener("abort", onAbort, { once: true });
++		}
++
++		const output = deps.newOutput("stop");
++		let errorText: string | undefined;
++		for await (const message of sdkQuery) {
++			if (wasAborted) break;
++			if (message.type === "assistant") {
++				for (const block of message.message.content) {
++					if (block.type === "text" && block.text) {
++						output.content.push({ type: "text", text: block.text });
++					} else if (block.type === "tool_use") {
++						const name = piNameFor.get(block.name);
++						if (name) output.content.push({ type: "toolCall", id: block.id, name, arguments: (block.input ?? {}) as ToolCall["arguments"] });
++						else deps.debug(`standalone: skipping tool_use for unserved tool ${block.name}`);
++					}
++				}
++			} else if (message.type === "result") {
++				updateUsage(output, message.usage, model);
++				const sawToolCall = output.content.some((block) => block.type === "toolCall");
++				// maxTurns stops the query right after the tool calls dispatch, which is the success case here.
++				if (!(sawToolCall && message.subtype === "error_max_turns")) errorText = deps.resultError(message);
++				if (sawToolCall) output.stopReason = "toolUse";
++				// The SDK throws after an error result, so stop at the first one.
++				break;
++			}
++		}
++
++		if (wasAborted) {
++			deps.debug("standalone: aborted");
++			stream.push({ type: "error", reason: "aborted", error: deps.newOutput("aborted", "Operation aborted") });
++		} else if (errorText || output.content.length === 0) {
++			const msg = errorText ?? "Claude Code returned no text or tool call";
++			deps.debug(`standalone: error ${msg}`);
++			stream.push({ type: "error", reason: "error", error: { ...output, stopReason: "error", errorMessage: msg } });
++		} else {
++			deps.debug(`standalone: done stopReason=${output.stopReason} blocks=${output.content.length}`);
++			pushReply(stream, output);
++		}
++		stream.end();
++	} catch (err) {
++		const msg = err instanceof Error ? err.message : String(err);
++		deps.debug("standalone: threw; pushing terminal error", err);
++		stream.push({ type: "error", reason: wasAborted ? "aborted" : "error", error: deps.newOutput(wasAborted ? "aborted" : "error", msg) });
++		stream.end();
++	} finally {
++		options?.signal?.removeEventListener("abort", onAbort);
++		try { sdkQuery?.close(); } catch {}
++	}
++}
++
++/** The messages as one user turn. Anything else is a conversation, which belongs on
++ *  the captured agent path. */
++function userTurn(context: Context): UserMessage[] {
++	const roles = context.messages.map((message) => message.role);
++	if (roles.length === 0 || roles.some((role) => role !== "user")) {
++		throw new Error(
++			`standalone prompt: expected one or more user messages and nothing else, got [${roles.join(",")}]`,
++		);
++	}
++	return context.messages as UserMessage[];
++}
++
++function promptParts(systemPrompt: string | undefined, messages: UserMessage[]): PromptPart[] {
++	const parts: PromptPart[] = systemPrompt ? [{ label: "the system prompt", text: systemPrompt }] : [];
++	messages.forEach((message, index) => {
++		parts.push({ label: `user message ${index + 1}`, text: messageContentToText(message.content) });
++	});
++	return parts;
++}
++
++function pushReply(stream: AssistantMessageEventStream, output: AssistantMessage): void {
++	stream.push({ type: "start", partial: output });
++	output.content.forEach((block, contentIndex) => {
++		if (block.type === "text") {
++			stream.push({ type: "text_start", contentIndex, partial: output });
++			stream.push({ type: "text_delta", contentIndex, delta: (block as TextContent).text, partial: output });
++			stream.push({ type: "text_end", contentIndex, content: (block as TextContent).text, partial: output });
++		} else if (block.type === "toolCall") {
++			stream.push({ type: "toolcall_start", contentIndex, partial: output });
++			stream.push({ type: "toolcall_end", contentIndex, toolCall: block, partial: output });
++		}
++	});
++	stream.push({ type: "done", reason: output.stopReason as "stop" | "toolUse", message: output });
++}

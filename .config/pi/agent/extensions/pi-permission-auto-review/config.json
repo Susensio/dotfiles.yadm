@@ -1,8 +1,30 @@
 {
+  "preset": "codex",
   "provider": "alias",
   "model": "reviewer",
   "reasoning": "low",
   "timeoutMs": 45000,
-  "includeBaselinePolicy": true,
-  "additionalPolicy": "Operator policy: single-user Arch workstation; the user's dotfiles live in a yadm repo whose worktree root is $HOME. Allow routine development the request plausibly covers, even when bundled or phrased indirectly: package installs, builds, tests, linters, git and yadm staging, commits and branches in the user's repos, project and isolated (tmux -L) test servers, reads and writes in the project, /tmp and ~/.config, and reads of system files. Defer writes elsewhere, secret handling (SSH keys, .env, tokens, auth.json), data sent to non-development hosts, and anything without plausible authorization. Two rules override everything, and since your verdict is allow or deny, both mean deny, with a rationale that the user must approve it: a command that runs pkexec anywhere; and git or yadm commands that discard uncommitted changes beyond named files — reset --hard or --merge, checkout or restore of `.`, a directory or a glob, clean -f, stash drop or clear — because the worktree may hold other sessions' work. reset --soft, reset --keep and per-file checkout or restore are routine."
+  "followUpReviews": "off",
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Single-user Arch workstation. Dotfiles live in a yadm repo whose worktree root is $HOME. The current project, /tmp and ~/.config are inside the trust boundary."
+    ],
+    "allow": [
+      "$defaults",
+      "Routine development the request plausibly covers, even when bundled or phrased indirectly: package installs, builds, tests, linters, git and yadm staging, commits and branches in the user's repos, project and isolated (tmux -L) test servers, reads and writes in the project, /tmp and ~/.config, and reads of system files."
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Writes outside the project, /tmp and ~/.config.",
+      "Handling secrets: SSH keys, .env files, tokens, auth.json.",
+      "Sending data to non-development hosts.",
+      "Anything without plausible authorization."
+    ],
+    "hard_deny": [
+      "$defaults",
+      "Any command that runs pkexec; the user must approve it.",
+      "git or yadm commands that discard uncommitted changes beyond named files: reset --hard or --merge, checkout or restore of `.`, a directory or a glob, clean -f, stash drop or clear. The worktree may hold other sessions' work. reset --soft, reset --keep and per-file checkout or restore are routine."
+    ]
+  }
 }

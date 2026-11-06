@@ -117,7 +117,10 @@ That package names with the session's own model and knows nothing about herdr ta
 Committed 2026-09-29: the permission system's auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `pi/agent/model-alias.json`), so an exhausted Codex quota fails over instead of turning every ask into a prompt.
 The chain was reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md)): `opencode-go/beam-free` is now its first Go rung and `opencode-go/claude-haiku-5-5` the first quota-bound one, because free capacity outlasts metered capacity once the plan drains.
 
-- The `claude-bridge/claude-haiku-5-5` target works only through the `pi-claude-bridge-index` and `-prompt-capture` patches plus `provider.allowExtensionSystemPrompts: true` in `pi/agent/claude-bridge.json`; drop the #148 hunks once [#148](https://github.com/elidickinson/pi-claude-bridge/pull/148) ships in a release.
+- The `claude-bridge/claude-haiku-5-5` target works only through three patches carrying [pi-claude-bridge#216](https://github.com/elidickinson/pi-claude-bridge/pull/216) (open): `pi-claude-bridge-index` and `-prompt-capture` add its standalone route on 0.10.0, and `pi-permission-auto-review-standalone` marks the reviewer's calls `promptKind: "standalone"`.
+  #148 and its `allowExtensionSystemPrompts` option were dropped 2026-11-06, after the maintainer declined prompt-shape routing.
+  The standalone route takes user messages only, so a follow-up review failed in milliseconds and deferred to the operator; the reviewer runs with `followUpReviews: "off"`.
+  Drop the bridge patches once #216 ships in a release, and the auto-review patch once the extension sets the marker itself.
 - `pi-model-alias-shared-registry` was dropped 2026-10-20: [#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) shipped in `pi-model-fallback-alias` 0.2.1. Untested: that a subagent's copy no longer fails alias calls without the patch.
 - Untested: whether `deepseek-v4.1-flash` and `mimo-v2.6-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.
 

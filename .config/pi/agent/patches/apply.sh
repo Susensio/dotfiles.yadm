@@ -48,5 +48,11 @@ if [ ! -f "$orig_path" ] || ! cmp -s "$target" "$orig_path"; then
 fi
 
 cp "$orig_path" "$target"
+# A patch may create files beside the target (a patch that adds a module). Start from
+# their absence: the drift check above restores only the target, so re-applying an
+# existing created file would append a second copy of its contents.
+for created in $(awk '/^\+\+\+ /{f=$2} /^@@ -0,0/{print f}' "$patch_file"); do
+    rm -f "$(dirname "$target")/$created"
+done
 patch -d "$(dirname "$target")" -p0 --forward --quiet < "$patch_file"
 echo "apply.sh [$name]: applied"
