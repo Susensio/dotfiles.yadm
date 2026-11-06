@@ -10,3 +10,5 @@ setfacl acl
 gcc
 patch
 cmp diffutils
+# mise/tasks/system-install expands asset URLs with it; Debian ships it apart from gettext-base
+envsubst gettext
