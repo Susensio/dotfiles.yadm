@@ -1,14 +1,30 @@
 {
-  "version": 1,
-  "idle": {
-    "screensaver": 300,
-    "lock": 900
-  },
   "bar": {
-    "position": "top",
-    "transparent": false,
-    "centerAnchor": "omarchy.clock",
+    "background": "opaque",
     "layout": {
+      "center": [
+        {
+          "birthYear": 1990,
+          "format": "HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "id": "omarchy.clock",
+          "lifeExpectancy": 90,
+          "verticalFormat": "HH\n—\nmm"
+        }
+      ],
+      "centerBegin": [
+        {
+          "id": "omarchy.indicators"
+        }
+      ],
+      "centerEnd": [
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
       "left": [
         {
           "id": "omarchy.workspaces"
@@ -21,29 +37,17 @@
           "id": "susensio.scratchpad"
         }
       ],
-      "center": [
+      "right": [
         {
-          "id": "omarchy.indicators"
-        },
-        {
-          "id": "omarchy.clock",
-          "format": "HH:mm",
-          "formatAlt": "d MMMM 'W'ww yyyy",
-          "verticalFormat": "HH\n—\nmm",
-          "birthYear": 1990,
-          "lifeExpectancy": 90
+          "hidden": [
+            "chrome_status_icon_1"
+          ],
+          "id": "omarchy.tray",
+          "pinned": []
         },
         {
           "id": "omarchy.keyboard-layout"
         },
-        {
-          "id": "omarchy.weather"
-        },
-        {
-          "id": "omarchy.system-update"
-        }
-      ],
-      "right": [
         {
           "id": "akitaonrails.ai-usagebar",
           "lastSelectedEntryId": "anthropic",
@@ -52,36 +56,32 @@
           "showValue": true
         },
         {
+          "id": "omarchy.agents"
+        },
+        {
           "id": "omarchy.spacer",
           "size": 6
         },
         {
-          "id": "omarchy.tray",
-          "pinned": [],
-          "hidden": [
-            "chrome_status_icon_1"
-          ]
-        },
-        {
-          "id": "omamail",
-          "refreshIntervalSec": 120,
-          "maxMessages": 50,
-          "heavyMessageRendering": "Show plain text first",
-          "contentDirection": "Auto",
+          "aiAgent": "Claude",
+          "aiChatResetAt": 1792827477644,
+          "aiModel": "",
           "appearance": "System",
-          "defaultQuery": "in:inbox",
-          "notifyNewMail": "On",
-          "oauthPort": 9481,
-          "undoSendSeconds": 10,
-          "unifiedCalendarView": false,
           "calendarRemindersEnabled": true,
           "calendarSnoozeMinutes": 5,
+          "contentDirection": "Auto",
+          "defaultQuery": "in:inbox",
+          "heavyMessageRendering": "Show plain text first",
+          "id": "omamail",
+          "maxMessages": 50,
+          "notifyNewMail": "On",
+          "oauthPort": 9481,
+          "refreshIntervalSec": 120,
           "showBarIcon": true,
-          "unifiedMailboxes": false,
           "suggestEvents": false,
-          "aiAgent": "Claude",
-          "aiModel": "",
-          "aiChatResetAt": 1792827477644
+          "undoSendSeconds": 10,
+          "unifiedCalendarView": false,
+          "unifiedMailboxes": false
         },
         {
           "id": "omarchy.bluetooth"
@@ -98,12 +98,23 @@
         {
           "id": "omarchy.power"
         }
+      ],
+      "tray": [
+        {
+          "id": "superwhisper.panel"
+        }
       ]
-    }
+    },
+    "position": "top"
+  },
+  "idle": {
+    "lock": 900,
+    "screensaver": 300
   },
   "plugins": [
     {
       "id": "rohaquinlop.agent-collectors"
     }
-  ]
+  ],
+  "version": 1
 }
