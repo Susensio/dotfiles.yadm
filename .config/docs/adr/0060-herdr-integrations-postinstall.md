@@ -30,3 +30,8 @@ Without the flag `mise run` installs every missing tool before the task, so on a
 The task also takes an exclusive `flock` for its run: under parallel installs a harness's hook and herdr's full sync fire together and both write that harness's config.
 
 2026-10-07: preferring the hook's install path covered herdr's own hook only; claude's and pi's fell back to PATH, where a fresh Omarchy bootstrap found Omarchy's older /usr/bin/herdr and, after herdr's hook, overwrote current integrations with older ones. The task now asks mise for its herdr and skips when there is none yet, leaving that harness to herdr's own hook.
+
+2026-11-06: the hooks call `mise/tasks/herdr-integrations` directly, not `mise run --skip-tools herdr-integrations`.
+`--skip-tools` stopped the bootstrap hang but not the hooks of several auto-updating tools (`auto_update`) firing together: four `mise run` processes stuck in `futex_wait`, each holding some of the same mise lockfiles and waiting on the others, and the bootstrap then waited on herdr's install lock behind them.
+The script needs no `mise run`: it reads `MISE_TOOL_NAME` and `MISE_TOOL_INSTALL_PATH` from the hook's environment and serializes itself with `flock`.
+The lock-order cause is inferred from the stuck processes, not read from mise's source.

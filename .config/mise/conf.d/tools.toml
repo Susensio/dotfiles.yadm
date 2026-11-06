@@ -6,15 +6,15 @@
 [tools]
 aichat = "latest"
 argc = "latest"
-# --skip-tools: else each hook's mise installs every missing tool, racing this install
-claude = { version = "latest", postinstall = "mise run --skip-tools herdr-integrations", auto_update = "4h" }
-codex = { version = "latest", symlink_bins = true, postinstall = "mise run --skip-tools herdr-integrations", auto_update = "4h" }
+# Hooks call the script, not `mise run`: nested mise runs deadlock on its lockfiles (ADR-0060)
+claude = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations", auto_update = "4h" }
+codex = { version = "latest", symlink_bins = true, postinstall = "$HOME/.config/mise/tasks/herdr-integrations", auto_update = "4h" }
 "github:mbrt/gmailctl" = "latest"
 "npm:@google/clasp" = "latest"
 "github:tmuxpack/tpack" = "latest"
-herdr = { version = "latest", postinstall = "mise run --skip-tools herdr-integrations" }
+herdr = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
 opencode = { version = "latest", auto_update = "4h" }
-pi = { version = "latest", postinstall = "mise run --skip-tools herdr-integrations" }
+pi = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
 usage = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = "latest"
