@@ -29,7 +29,11 @@
       "~/.config/gcloud/*": "deny",
       "~/.kube/config": "deny",
       "~/.docker/config.json": "deny",
-      "*.credentials.json": "deny"
+      "*.credentials.json": "deny",
+      "~/.npmrc": "deny",
+      "~/.password-store/*": "deny",
+      "~/.config/rclone/*": "deny",
+      "*.p12": "deny"
     },
     "path_write": {
       "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
@@ -60,6 +64,8 @@
       "~/.local/*": "allow",
       "~/.cache/*": "allow",
       "~/Projects/*": "allow",
+      "~/bin": "allow",
+      "~/bin/*": "allow",
       "/tmp": "allow",
       "/tmp/*": "allow",
       "/usr": "allow",
@@ -125,6 +131,10 @@
         "action": "deny",
         "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
       },
+      "* sudo *": {
+        "action": "deny",
+        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
+      },
       "cat *": "allow",
       "head *": "allow",
       "tail *": "allow",
@@ -151,6 +161,12 @@
       "command -v*": "allow",
       "yadm log*": "allow",
       "yadm show*": "allow",
+      "yadm ls-files*": "allow",
+      "yadm check-ignore*": "allow",
+      "python3 -I pi/agent/skills/*": "allow",
+      "python3 -I ~/.config/pi/agent/skills/*": "allow",
+      "chmod +x *": "allow",
+      "cut *": "allow",
       "gh pr view*": "allow",
       "gh pr diff*": "allow",
       "gh pr list*": "allow",

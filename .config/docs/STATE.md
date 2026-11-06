@@ -1,5 +1,13 @@
 # State
 
+## Omamail keepLoaded patch (2026-11-06)
+
+Goal: Omamail's window appears as soon as the bar icon is clicked, instead of rebuilding its whole QML composition on every summon (~1.3 s here).
+Omarchy's panel loader keeps a plugin's panel between summons only when its manifest sets `keepLoaded`, so the key belongs in Omamail's manifest; [huacnlee/omamail#464](https://github.com/huacnlee/omamail/pull/464) carries it and [ADR-0106](adr/0106-omamail-keep-loaded-patch.md) holds the reasoning and the drop condition.
+Locally, `yadm/bootstrap.d/omarchy/bugfix/omamail-keep-loaded.sh` inserts it into the untracked clone and rescans plugins.
+Finish it by deleting that step once a release carries the key; until then `omarchy plugin update omamail` needs `git -C ~/.config/omarchy/plugins/omamail checkout -- manifest.json` first, and the bootstrap after the update re-applies the step.
+The resident panel costs about 40 MB of shell RSS and lives for the session; a leak across a long session is unverified.
+
 ## pi-permission-system cd home-prefix patch (2026-10-24)
 
 The patch library carries `pi-permission-cd-home-prefix`, the `~` / `~/…` cd-target fold, because 41.0.0 resolves a relative token after such a `cd` against the session cwd and asks about a path that does not exist.
@@ -144,5 +152,6 @@ On 2026-11-05 `alias/top` gained `opencode-go/deepseek-v4-pro` second ([ADR-0103
 `git/allowed_signers` carries the same public key, which is what turns the local `U` (signed, unknown signer) into `G`.
 
 - Opened [yadm PR #550](https://github.com/yadm-dev/yadm/pull/550), which restores `ln -nfs` in `ln_relative()` so two concurrent `auto-alt` runs replace the link instead of one failing; reported `verified: true` on `develop` `bbb58e6`, with [issue #549](https://github.com/yadm-dev/yadm/issues/549) as the report and a comment on [#538](https://github.com/yadm-dev/yadm/pull/538) recording that #538 fixes only the steady-state case.
-- Until a 3.5.0 release carries the change, `bootstrap.d/omarchy##distro.omarchy/omarchy##distro.omarchy` regenerates whenever two yadm commands overlap. Delete the self-link; it is the known release-side defect, not a new fault, and it stays untracked.
+- Until a yadm release carries the change, `bootstrap.d/omarchy##distro.omarchy/omarchy##distro.omarchy` regenerates whenever two yadm commands overlap; `bootstrap.d/yadm-alt-selflink.sh` removes it on every bootstrap (so after a pull or an `omarchy update`), and the link is untracked either way.
+  Delete that step once PR #550 is in a release: `maintenance` reports the PR when it merges, and merged is not released, so compare `yadm version` first.
 - The PR's `test_alt_concurrent` is the only new failure-free test: the 20 other failures in `test/test_alt.py` need template processors (`envtpl`, `j2cli`, `j2`, `esh`) this machine does not have, and predate the change.

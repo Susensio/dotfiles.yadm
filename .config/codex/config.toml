@@ -1,5 +1,7 @@
-model = "gpt-6-sol"
-model_reasoning_effort = "high"
+# Free sign-in rejects the gpt-6-sol / gpt-5.6-sol pins; luna is the cheapest tier it serves.
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+review_model = "gpt-5.6-luna"
 sandbox_mode = "workspace-write"
 approval_policy = "on-request"
 approvals_reviewer = "auto_review"

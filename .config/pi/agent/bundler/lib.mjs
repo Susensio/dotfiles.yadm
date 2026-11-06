@@ -27,7 +27,14 @@ export const MARKER = "owner";
 export const VERDICTS_PATH = new URL("./verdicts.json", import.meta.url).pathname;
 
 // Pi supplies these to extensions as virtual modules; they must never be inlined.
-export const ESBUILD_EXTERNALS = ["--external:@earendil-works/*", "--external:@mariozechner/*"];
+// `typebox` (and its subpaths) joined them in pi 1.5.0, which maps it, and the legacy
+// `@sinclair/typebox`, to its own copy; esbuild cannot resolve it from node_modules.
+export const ESBUILD_EXTERNALS = [
+  "--external:@earendil-works/*",
+  "--external:@mariozechner/*",
+  "--external:typebox",
+  "--external:@sinclair/typebox",
+];
 
 // `alias` maps a specifier prefix to a path relative to the package, for
 // `package.json` "imports" targets esbuild will not resolve (extensionless).

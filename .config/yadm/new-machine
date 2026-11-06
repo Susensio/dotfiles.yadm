@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Set up a new machine: install curl and git, clone this repository over any
+# files in the way, run `yadm bootstrap`.
+# Source it, so yadm keeps working in this shell afterwards:
+#   source <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/.config/yadm/new-machine)
+# Needs curl or wget to fetch itself. Stays defined as `new_machine` for reruns.
+
+new_machine() {
+  local raw_url=https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master
+  local repo_url=https://github.com/Susensio/dotfiles.yadm.git
+  local missing=() tool installer
+
+  for tool in curl git; do
+    command -v "$tool" &> /dev/null || missing+=("$tool")
+  done
+  if ((${#missing[@]})); then
+    # pkg-install is the repo's one install routine for every distro
+    installer=$(mktemp)
+    if command -v curl &> /dev/null; then
+      curl -fsSL "$raw_url/bin/pkg-install" > "$installer" || return
+    else
+      wget -qO "$installer" "$raw_url/bin/pkg-install" || return
+    fi
+    bash "$installer" "${missing[@]}" || return
+  fi
+
+  # Defines a yadm() that runs yadm remotely until the permanent one is on PATH
+  source <(curl -fsSL https://bootstrap.yadm.io) || return
+
+  # Not `yadm introspect repo`: the remote yadm() prints a warning on stdout
+  if [[ ! -d ${XDG_DATA_HOME:-$HOME/.local/share}/yadm/repo.git ]]; then
+    yadm clone --no-bootstrap "$repo_url" || return
+    # A new machine takes the repository's files over any in the way
+    yadm checkout -- "$HOME" || return
+  fi
+  yadm bootstrap || return
+
+  # mise links the permanent yadm into ~/.local/bin, which a login would add to PATH
+  PATH=$HOME/.local/bin:$PATH
+}
+
+new_machine
