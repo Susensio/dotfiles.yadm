@@ -2,7 +2,9 @@
 # Web-app launcher entries we keep from Omarchy's preinstalls. They install
 # through omarchy-webapp-install and run after preinstalls.sh, whose
 # omarchy-webapp-remove-all would otherwise sweep them.
-# Spotify stands in while spotifast cannot play: https://github.com/crmne/spotifast/issues/283
+# Spotify stands in on this machine, where spotifast's audio key is refused; upstream closed
+# that issue by adding Spotify Soloist, which needs Premium plus a Soloist key, so this entry
+# stays until Soloist is set up: https://github.com/crmne/spotifast/issues/283
 # Gmail, the mailto: handler, is installed by mime.sh instead; WhatsApp is
 # zapfast, a declared package with upstream's own desktop entry (ADR-0102).
 set -euo pipefail
