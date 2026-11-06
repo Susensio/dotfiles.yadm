@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "theme": "omarchy-system",
   "defaultProvider": "alias",
   "defaultModel": "mid",
@@ -45,5 +45,12 @@
     "opencode-go/mimo-v2.6-flash",
     "opencode-go/beam-free",
     "mistral/ministral-14b-2512"
-  ]
+  ],
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:@tintinweb/pi-subagents\",\"scope\":\"user\"}": "0.23.1",
+    "{\"source\":\"npm:pi-footer\",\"scope\":\"user\"}": "0.5.1",
+    "{\"source\":\"npm:@gotgenes/pi-permission-system\",\"scope\":\"user\"}": "42.0.0",
+    "{\"source\":\"npm:pi-model-fallback-alias\",\"scope\":\"user\"}": "0.2.1",
+    "{\"source\":\"npm:@narumitw/pi-usage\",\"scope\":\"user\"}": "0.69.2"
+  }
 }
