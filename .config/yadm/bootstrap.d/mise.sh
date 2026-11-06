@@ -21,21 +21,26 @@ mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 
 # Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files.
 # services carries the tool-update unit that `auto_update` relies on (ADR-0007).
-# `status --missing` exits 0 only when every package matches, absent ones included, and
-# the packages pass is then a no-op that still costs seconds and runs its hooks, so skip it.
-# Otherwise the bootstrap pipes stderr through tee, and mise refuses to ask for a sudo
-# password unless stderr is a terminal, so cache it first.
-only=tools
+# Each part runs only when its own status says something differs: a pass that changes
+# nothing still costs seconds and runs its hooks, and the status checks are cheap or,
+# for packages, cheaper. `ls --missing` lists tools to install and prints nothing otherwise.
+parts=()
+# The bootstrap pipes stderr through tee, and mise refuses to ask for a sudo password
+# unless stderr is a terminal, so cache it first.
 if ! mise bootstrap packages status --missing &>/dev/null; then
   sudo -v
-  only=packages,tools
+  parts+=(packages)
 fi
+[[ -n $(mise ls --global --missing 2>/dev/null) ]] && parts+=(tools)
+# A container has no systemd to hold services
+if [[ -d /run/systemd/system ]] && ! mise bootstrap services status --missing &>/dev/null; then
+  parts+=(services)
+fi
+((${#parts[@]})) || exit 0
 
 # --quiet would hide the downloads and hooks worth watching in a debug run
 quiet=(--quiet)
 [[ -n ${DEBUG:-} ]] && quiet=()
 
-# A container has no systemd to hold services
-[[ -d /run/systemd/system ]] && only+=,services
-
+only=$(IFS=,; echo "${parts[*]}")
 mise bootstrap --only "$only" --yes "${quiet[@]}"
