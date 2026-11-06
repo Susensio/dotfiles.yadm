@@ -6,6 +6,9 @@ USER_CONFIG=${XDG_CONFIG_HOME:-${HOME}/.config}/keyd/default.conf
 ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets
 USER_SYSTEMD_DIR=${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user
 
+# A container has the package and the files but no service manager to run them
+[[ -d /run/systemd/system ]] && systemd=true || systemd=false
+
 # Only where apt has no keyd at all, e.g. Ubuntu 24.04 (Mint 22's base); Debian 13 packages it
 if command -v apt-get &>/dev/null && ! command -v keyd &>/dev/null && ! command -v keyd.rvaiya &>/dev/null \
    && ! grep -rq "keyd-team" /etc/apt/sources.list*; then
@@ -29,7 +32,7 @@ if ! command -v keyd &>/dev/null && command -v keyd.rvaiya &>/dev/null; then
   sudo mandb --quiet
 fi
 
-if ! systemctl is-enabled --quiet keyd || ! systemctl is-active --quiet keyd; then
+if $systemd && { ! systemctl is-enabled --quiet keyd || ! systemctl is-active --quiet keyd; }; then
   log info "Enabling keyd..."
   sudo systemctl enable --now keyd
 fi
@@ -61,11 +64,12 @@ acls=$(getfacl --omit-header "$SYSTEM_CONFIG" 2>/dev/null || true)
 if ! grep -q "^user:$USER:rw" <<<"$acls"; then
   sudo setfacl -m "u:$USER:rw" "$SYSTEM_CONFIG"
 fi
-if $config_changed; then
+if $systemd && $config_changed; then
   sudo keyd reload
 fi
 
 # --- Systemd Sync Setup ---
+$systemd || exit 0
 units_changed=false
 for unit in keyd-sync.path keyd-sync.service; do
   if ! cmp -s "$ASSETS_DIR/$unit" "$USER_SYSTEMD_DIR/$unit"; then
