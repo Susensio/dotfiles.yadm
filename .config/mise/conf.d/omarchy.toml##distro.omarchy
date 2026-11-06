@@ -29,4 +29,6 @@
 [bootstrap.hooks]
 # Omarchy's tldr conflicts with tealdeer. Not `absent`: tealdeer provides tldr,
 # so mise would remove tealdeer on every run
-pre-packages = "if pacman -Qq tldr 2>/dev/null | grep -qx tldr; then sudo pacman -R --noconfirm tldr; fi"
+# wluma builds with rust, which yay installs and which conflicts with the rustup of
+# packages.toml (ADR-0102); rustup provides rust, so it goes in first
+pre-packages = "if pacman -Qq tldr 2>/dev/null | grep -qx tldr; then sudo pacman -R --noconfirm tldr; fi; pacman -Qq rustup >/dev/null 2>&1 || sudo pacman -S --needed --noconfirm rustup"
