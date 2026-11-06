@@ -4,22 +4,18 @@ Personal [yadm](https://yadm.io/) dotfiles, rooted at `$HOME`.
 
 ## New machine
 
-On a minimal Debian, install `curl` and `git` first: the bootstrap's dependency step comes after both.
-
-In Bash, keep the same shell open:
+One command installs git and yadm, clones this repository and runs `yadm bootstrap`:
 
 ```bash
-source <(curl -fsSL https://bootstrap.yadm.io) && yadm clone --no-bootstrap -b master https://github.com/Susensio/dotfiles.yadm.git
+bash <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/new-machine)
 ```
 
-On Omarchy, review any pre-existing files reported by the clone, then check out the tracked versions:
+A standard Debian ships wget but not curl; use `wget -qO-` there.
+A minimal image with neither needs one first: `sudo apt-get install -y curl`.
+
+On Omarchy the clone stops at the files it already finds. Review them, then rerun with `--checkout`
+to take the tracked versions:
 
 ```bash
-yadm checkout -- ~/.config
-```
-
-Finally:
-
-```bash
-yadm bootstrap
+bash <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/bin/new-machine) --checkout
 ```
