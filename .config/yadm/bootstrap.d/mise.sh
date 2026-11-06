@@ -25,4 +25,8 @@ mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
 # unless stderr is a terminal, so cache it first. Only when packages differ: reruns stay silent.
 mise bootstrap packages status --missing &>/dev/null || sudo -v
 
-mise bootstrap --only packages,tools,services --yes --quiet
+# --quiet would hide the downloads and hooks worth watching in a debug run
+quiet=(--quiet)
+[[ -n ${DEBUG:-} ]] && quiet=()
+
+mise bootstrap --only packages,tools,services --yes "${quiet[@]}"
