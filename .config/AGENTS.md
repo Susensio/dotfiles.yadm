@@ -27,6 +27,7 @@ XDG config repo for `~/.config`, managed with yadm.
 - Before proposing tools, services or generation mechanisms, read `docs/principles.md`.
 - Before changing global Claude configuration, read `docs/harness.md` for its location and sandbox path constraints.
 - Before changing bindings shared across tools, read `docs/keybinds.md`.
+- Before adding or moving a package, tool, dependency or system daemon, read `docs/packages.md`.
 
 ## tmux/
 
