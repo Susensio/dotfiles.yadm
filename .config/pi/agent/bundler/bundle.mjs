@@ -16,6 +16,7 @@
 // guess, and a fresh install overwrites both, so the hook is idempotent.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
@@ -26,7 +27,9 @@ import {
   PACKAGE_NAME,
   MARKER,
   STATE_DIR,
+  AGENT_DIR,
   VERDICTS_PATH,
+  enabledPackages,
   packageEntries,
   patchState,
   patchStamp,
@@ -207,6 +210,22 @@ function screenNow() {
   return report;
 }
 
+// The screen costs seconds and a postinstall or bootstrap runs this on every pass, so a
+// pass whose inputs match the last clean one stops here. The inputs: the lockfile, the
+// package list, the verdicts, this tool's own sources, and each package's patched files.
+const FINGERPRINT = join(NPM_DIR, ".pi-bundler.fingerprint");
+function fingerprint() {
+  const h = createHash("sha256");
+  const dir = new URL(".", import.meta.url).pathname;
+  const files = [join(NPM_DIR, "package-lock.json"), join(AGENT_DIR, "settings.json"), VERDICTS_PATH]
+    .concat(readdirSync(dir).filter((f) => f.endsWith(".mjs")).sort().map((f) => join(dir, f)));
+  for (const f of files) h.update(f).update(existsSync(f) ? readFileSync(f) : "");
+  for (const name of enabledPackages()) h.update(name).update(patchStamp(name));
+  return h.digest("hex");
+}
+const wanted = !revert && !only && quiet ? fingerprint() : null;
+if (wanted && existsSync(FINGERPRINT) && readFileSync(FINGERPRINT, "utf8") === wanted) process.exit(0);
+
 const names = revert
   ? [...new Set([...Object.keys(verdicts), ...statefulPackages()])]
   : // The report decides, not verdicts.json: a package with no hazard needs no
@@ -215,6 +234,7 @@ const names = revert
     .filter(([, r]) => r.decision === "bundle")
     .map(([name]) => name);
 
+let clean = true;
 for (const name of names) {
   if (only && name !== only) continue;
   if (revert) {
@@ -223,6 +243,7 @@ for (const name of names) {
     continue;
   }
   const [line, changed] = build(name, verdicts[name] ?? {});
+  if (/ (FAILED|REFUSED)/.test(line)) clean = false;
   if (!quiet || changed) console.log(line);
 }
 
@@ -234,6 +255,9 @@ if (!revert) {
     if (!quiet || changed) console.log(line);
   }
 }
+
+// Recorded only after a pass with nothing to retry, so a failure is tried again
+if (wanted && clean) writeFileSync(FINGERPRINT, wanted);
 
 if (only && !revert && !names.includes(only)) {
   console.error(`bundle: ${only} is not bundleable per the screen; run \`node screen.mjs\` for why`);
