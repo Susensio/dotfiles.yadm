@@ -9,7 +9,8 @@
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "omarchy.clock",
           "lifeExpectancy": 90,
-          "verticalFormat": "HH\n—\nmm"
+          "verticalFormat": "HH\n—\nmm",
+          "weekStartDay": "monday"
         }
       ],
       "centerBegin": [

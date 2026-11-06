@@ -163,7 +163,8 @@ foot, Omarchy's terminal, starts a non-login shell by default, so `bashrc` would
 `foot/foot.ini` sets `shell=/usr/bin/bash --login` for §4 to hold; its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
 
 ## 8.1 Locale
-`12_locale.conf` sets `LC_TIME=en_GB.UTF-8` and leaves `LANG` at `en_US.UTF-8`, so messages stay English while dates, day and month names, and the week start — including the Omarchy clock's calendar — are Monday-first ([ADR-0091](adr/0091-monday-first-lc-time.md)).
+`12_locale.conf` sets `LC_TIME=en_GB.UTF-8` and leaves `LANG` at `en_US.UTF-8`, so messages stay English while dates and day and month names are Monday-first ([ADR-0091](adr/0091-monday-first-lc-time.md)).
+The Omarchy clock's calendar is not one of its consumers: since Omarchy 4.5.0 it takes its default week start from the display language, so `weekStartDay` in `omarchy/shell.json` pins it ([ADR-0108](adr/0108-omarchy-clock-week-start.md)).
 It is an ordinary `environment.d` variable, so it obeys §8's rules: the user manager owns it, `hl.env` would shadow it, and uwsm does not override it because nothing else exports `LC_TIME`.
 The locale itself is root-owned data in `/usr/lib/locale/locale-archive`; `bootstrap.d/12_locale.sh` enables the `en_GB.UTF-8` line in `/etc/locale.gen` and runs `locale-gen` while `locale -a` still lacks it.
 

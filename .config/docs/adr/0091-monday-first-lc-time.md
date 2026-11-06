@@ -32,3 +32,9 @@ The setting depends on `environment.d` being loaded at all: a process started wi
 The step rewrites `/etc/locale.gen` and then runs `locale-gen`, which rebuilds the whole locale archive rather than adding one entry, so it happens once per machine and only while the locale is still missing.
 An Omarchy update that resets `locale.gen` to its package state is repaired on the next bootstrap.
 The clock's own `weekStartDay` stays unset on purpose: setting it would mask the locale and hide a broken `environment.d` from the calendar that depends on it.
+
+## Corrections
+
+2026-11-06: the Consequences said the clock's calendar followed `LC_TIME` and that its `weekStartDay` stayed unset on purpose.
+Omarchy 4.5.0 moved the calendar's default week start to the display language's `formatLocale` (`en` → `en-US`), so it opened on Sunday again with `LC_TIME=en_GB.UTF-8` still in force; [ADR-0108](0108-omarchy-clock-week-start.md) pins `weekStartDay` instead.
+The `LC_TIME` decision above stands for shell dates, and only the calendar claim is superseded.

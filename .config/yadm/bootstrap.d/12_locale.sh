@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# environment.d/12_locale.conf exports LC_TIME=en_GB.UTF-8 so dates, and the
-# clock's calendar, start weeks on Monday (docs/adr/0091). The locale has to
-# exist in glibc's archive first: an ungenerated name makes LC_TIME consumers
-# warn and fall back to C. Generating it is root work, so it happens here.
+# environment.d/12_locale.conf exports LC_TIME=en_GB.UTF-8 so shell dates start
+# weeks on Monday (docs/adr/0091). The locale has to exist in glibc's archive
+# first: an ungenerated name makes LC_TIME consumers warn and fall back to C.
+# Generating it is root work, so it happens here.
 set -euo pipefail
 
 command -v locale-gen >/dev/null || exit 0
