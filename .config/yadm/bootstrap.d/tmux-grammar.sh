@@ -19,6 +19,9 @@ LANGUAGES=$CONFIG_DIR/languages.toml
 # machine that already holds a grammar built from the old revision.
 [[ -e $GRAMMAR && ! $LANGUAGES -nt $GRAMMAR ]] && exit 0
 
+# The grammar's scanner is C++: pacman's gcc brings c++, Debian's needs g++
+command -v c++ >/dev/null || pkg-install g++
+
 log info "Building Helix's tmux grammar..."
 helix --grammar fetch
 helix --grammar build
