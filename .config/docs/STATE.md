@@ -113,14 +113,6 @@ The chain was reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-i
 - `pi-model-alias-shared-registry` was dropped 2026-10-20: [#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) shipped in `pi-model-fallback-alias` 0.2.1. Untested: that a subagent's copy no longer fails alias calls without the patch.
 - Untested: whether `deepseek-v4.1-flash` and `mimo-v2.6-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.
 
-## pi subagent resume
-
-Committed 2026-09-30 (`pi: carry pi-subagents#286 for evicted subagent resume`): the `pi-subagents-resume-evicted-*` patches carry [tintinweb/pi-subagents#286](https://github.com/tintinweb/pi-subagents/pull/286), so the `Agent` tool resumes an evicted subagent from its saved session, across `/reload` and restarts.
-
-- Drop both patches when #286 ships; upstream had been idle since 2026-09-03, with 55 open PRs.
-- Keeps `@tintinweb/pi-subagents` on source (~190 ms of startup, ADR-0067).
-- Verified live 2026-09-30: after `/reload` wiped the in-memory record, resuming a probe agent by its old ID reopened the saved conversation (it answered a token only that conversation held) and kept the same ID.
-
 ## pi model catalog
 
 Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `yadm/bootstrap.d/pi/models.sh` refreshes `pi/agent/models-store.json` once a day, because pi only refreshes when the TUI model selector opens and a headless machine therefore keeps the catalog bundled with its installed version.
