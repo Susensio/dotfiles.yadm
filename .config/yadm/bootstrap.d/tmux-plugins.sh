@@ -3,7 +3,11 @@
 # Sorts after mise.sh, which installs tpack.
 set -euo pipefail
 
-command -v tmux >/dev/null || exit 0
+# Every machine declares tmux; its absence means the link was never made (system-install failed)
+command -v tmux >/dev/null || {
+  log warn "tmux is not on PATH, tmux plugins not installed: run mise run system-install"
+  exit 0
+}
 
 socket=bootstrap-$$
 trap 'tmux -L "$socket" kill-server 2>/dev/null' EXIT

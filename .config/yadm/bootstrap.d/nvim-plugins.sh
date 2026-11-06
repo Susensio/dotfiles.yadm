@@ -3,6 +3,10 @@
 # Sorts after mise.sh, which installs nvim outside Arch.
 set -euo pipefail
 
-command -v nvim >/dev/null || exit 0
+# Every machine declares nvim; its absence means the link was never made (system-install failed)
+command -v nvim >/dev/null || {
+  log warn "nvim is not on PATH, nvim plugins not installed: run mise run system-install"
+  exit 0
+}
 
 nvim --headless +qa

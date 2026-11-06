@@ -9,7 +9,11 @@
 # that step installs.
 set -euo pipefail
 
-command -v helix >/dev/null || exit 0
+# Every machine declares helix; its absence means the link was never made (system-install failed)
+command -v helix >/dev/null || {
+  log warn "helix is not on PATH, helix tmux grammar not built: run mise run system-install"
+  exit 0
+}
 
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/helix
 GRAMMAR=$CONFIG_DIR/runtime/grammars/tmux.so
