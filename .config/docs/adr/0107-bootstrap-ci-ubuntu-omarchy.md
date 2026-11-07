@@ -42,3 +42,15 @@ All three jobs source `new-machine` from the branch under test, so the CI also e
 Steps that talk to a running desktop (Hyprland, Omarchy's shell) cannot be exercised; they have to tolerate its absence, which also covers bootstrapping over SSH or from a TTY.
 Hardware-dependent steps (hibernation, fingerprint readers) only take their absent branch.
 The Omarchy job follows Omarchy's installer, so a change in how the ISO installs means a change in the job, and the container runs privileged.
+
+## Corrections
+
+2026-11-07: the Debian job boots under systemd, not as a plain `container:`.
+A container without it had left the paths a real Debian machine takes (keyd's service, the user units, tailscaled) unexercised, behind guards that existed only for the job.
+The job builds a `debian:13` image with systemd, dbus, sudo and wget, boots it as PID 1 the way the Omarchy job boots Arch, and runs the same restart-login, test and silent-rerun steps as the other two; it still has no curl, git or yadm, so the prerequisites path is exercised.
+Booting it found two gaps a bare image hides: no `locales` package, so no `locale-gen`, and `/usr/sbin` missing from a user's PATH.
+The `/run/systemd/system` guards stay, as the capability check for a chroot or container, but no job now takes their absent branch.
+
+2026-11-07: a step that reports state which only a person can change, such as tailscale's login, does not warn from the bootstrap.
+It printed on every run, which a CI machine never resolves, so the silent second run could not pass.
+`maintenance` reports such state instead, and the second run stays strict: any output fails it.
