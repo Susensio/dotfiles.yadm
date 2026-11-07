@@ -87,11 +87,6 @@ local_drift() {
     { systemctl --failed --plain --no-legend; systemctl --user --failed --plain --no-legend; } 2>/dev/null |
       awk '{ print "  failed unit: " $1 }'
   fi
-  # A login needs a browser, so the bootstrap cannot do it and stays silent about it
-  if command -v tailscale &>/dev/null &&
-    [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then
-    echo "  tailscale: not logged in; run 'tailscale up'"
-  fi
   if command -v pacman &>/dev/null; then
     find /etc \( -name '*.pacnew' -o -name '*.pacsave' \) 2>/dev/null | sed 's/^/  config to merge: /' || true
   fi

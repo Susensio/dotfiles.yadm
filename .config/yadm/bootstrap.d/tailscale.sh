@@ -50,4 +50,7 @@ if ! tailscale debug prefs 2>/dev/null | grep -q "\"OperatorUser\": \"$USER\""; 
   sudo tailscale set --operator="$USER"
 fi
 
-# Login needs a browser, so it stays manual: `maintenance` reports it while the node is logged out
+# Login needs a browser, so it stays a manual step
+if [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then
+  log warn "tailscale: not logged in; run 'tailscale up'"
+fi
