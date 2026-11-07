@@ -9,6 +9,9 @@ set -a
 . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/11_path.conf"
 set +a
 
+# Debian leaves /usr/sbin off a user's PATH, so locale-gen and friends read as missing
+[[ :$PATH: == *:/usr/sbin:* ]] || PATH=$PATH:/usr/sbin:/sbin
+
 # Keep this run's warnings for `maintenance`, after they scroll away (docs/adr/0096)
 log_file=${XDG_STATE_HOME:-$HOME/.local/state}/yadm/bootstrap.log
 mkdir -p "${log_file%/*}"
