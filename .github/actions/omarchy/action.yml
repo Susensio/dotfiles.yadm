@@ -11,6 +11,16 @@ runs:
   using: composite
   steps:
     # GitHub's container: key keeps its own process as PID 1, so not through it
+    - name: Diagnose theme
+      shell: bash
+      run: |
+        docker exec -u dev -e USER=dev -e LOGNAME=dev omarchy bash -lc '
+          PI_CODING_AGENT_DIR=$XDG_CONFIG_HOME/pi/agent
+          omarchy-theme-set-pi; echo rc=$?
+          cmp "$HOME/.local/state/omarchy/current/theme/pi.json" "$PI_CODING_AGENT_DIR/themes/omarchy-system.json"; echo cmp=$?
+          ls -l --time-style=full-iso "$PI_CODING_AGENT_DIR/themes"
+        ' || true
+
     - name: Boot Arch
       shell: bash
       run: |
