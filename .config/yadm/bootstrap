@@ -55,7 +55,9 @@ done
 if login=$(systemctl --user show -P UserspaceTimestamp 2>/dev/null) && [[ -n $login ]]; then
   login=$(date -d "$login" +%s)
   for conf in "${XDG_CONFIG_HOME:-$HOME/.config}"/environment.d/*.conf; do
-    if (($(stat -c %Y "$conf") > login)); then
+    # -L: systemd reads the resolved file, and yadm rewrites an alt link in
+    # place, which moves the link's own mtime without changing what it holds
+    if (($(stat -L -c %Y "$conf" 2>/dev/null || echo 0) > login)); then
       log warn "environment.d changed since login: log out and back in to apply it"
       break
     fi
