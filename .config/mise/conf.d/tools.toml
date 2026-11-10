@@ -1,20 +1,35 @@
 # Tracked tools installed through mise on every machine; distro-sourced ones live in
 # packages.toml (docs/adr/0046). The global config.toml is machine-local (docs/adr/0045).
-# `auto_update` is served by mise's tool-update service (settings.toml), never by the
-# invocation: ADR-0007's links bypass mise's shims. pi is left out because its extension
-# API moves between releases and our patches and bundler ride on it.
+#
+# No tool here sets `auto_update`. An unattended upgrade of a harness rewrites the machine
+# under live sessions: it unlinks the binary a running process is executing from, reverts
+# patched node_modules, and can land a version an installed extension's peers reject — with
+# nobody watching to reload or roll back. Harness updates are deliberate: `mise up <tool>`,
+# or `pi update`, whose selfUpdateCommand is `mise up pi` (settings.json). The tool-update
+# service in settings.toml therefore has nothing to act on and stays declared for the day a
+# non-harness tool wants it.
+#
+# minimum_release_age = "0s" on every harness below, because a harness and the extensions
+# that pin their peers to it must move together: the 24h default let pi stay at 1.5.0 while
+# pi-claude-bridge 0.12.0 auto-updated to one requiring pi >=1.5.1 (ADR-0112). These entries
+# re-declare tools omarchy's /etc/mise/conf.d/omarchy-tools.toml already sets to "0s"; a
+# later [tools] entry replaces the earlier one wholesale, so the option has to be repeated
+# here or it is silently lost.
 [tools]
 aichat = "latest"
 argc = "latest"
 # Hooks call the script, not `mise run`: nested mise runs deadlock on its lockfiles (ADR-0060)
-claude = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations", auto_update = "4h" }
-codex = { version = "latest", symlink_bins = true, postinstall = "$HOME/.config/mise/tasks/herdr-integrations", auto_update = "4h" }
+claude = { version = "latest", minimum_release_age = "0s", postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
+codex = { version = "latest", minimum_release_age = "0s", symlink_bins = true, postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
 "github:mbrt/gmailctl" = "latest"
 "npm:@google/clasp" = "latest"
 "github:tmuxpack/tpack" = "latest"
 herdr = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
-opencode = { version = "latest", auto_update = "4h" }
-pi = { version = "latest", postinstall = "$HOME/.config/mise/tasks/herdr-integrations" }
+opencode = { version = "latest", minimum_release_age = "0s" }
+# pi moves last and heals the rest: its hook reapplies patches, rebuilds the bundles that
+# carry them, checks every declared extension's peers against the pi that just landed, and
+# then syncs herdr. A failing peer check fails the install instead of waiting for a turn.
+pi = { version = "latest", minimum_release_age = "0s", postinstall = "$HOME/.config/mise/tasks/pi-postinstall" }
 usage = "latest"
 xdg-ninja = { version = "latest", symlink_bins = true }
 zoxide = "latest"

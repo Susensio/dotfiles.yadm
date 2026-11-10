@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+#MISE quiet=true
+# Bring pi's extension install back into a working state after pi itself moves, and
+# refuse to stay quiet when it cannot. Wired as pi's tool postinstall (tools.toml).
+#
+# Why this exists: pi packages are npm dependencies resolved by their own ranges, so a
+# `pi update --extensions` can install an extension whose peerDependencies demand a newer
+# pi than the one on disk. Nothing in pi or mise compares the two, and the failure shows up
+# as a broken turn minutes later (ADR-0112). This task runs on the one event that can fix
+# it — pi landing — and does the three things that have to follow in order.
+#
+# Order matters: patches edit the extension sources, so they run before the bundler, which
+# inlines those sources into the bundle pi actually loads.
+
+set -uo pipefail
+
+agent_dir=${PI_CODING_AGENT_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/pi/agent}
+npm_dir=$agent_dir/npm
+fail=0
+
+# 1. Reapply local patches. reapply-all.sh exits 0 even when a patch no longer applies, so
+#    read its output rather than its status: a stale .orig must be visible, not retried.
+#    The task itself notifies herdr, which is judged separately in step 4.
+if [[ -f $agent_dir/patches/reapply-all.sh ]]; then
+    out=$(sh "$agent_dir/patches/reapply-all.sh" 2>&1) || true
+    if [[ -n $out ]]; then
+        printf '%s\n' "$out" >&2
+        fail=1
+    fi
+fi
+
+# 2. Rebuild the bundles that carry the patched sources.
+if [[ -f $agent_dir/bundler/run.sh ]]; then
+    out=$(sh "$agent_dir/bundler/run.sh" 2>&1) || true
+    if [[ -n $out ]]; then
+        printf '%s\n' "$out" >&2
+        fail=1
+    fi
+fi
+
+# 3. Compare every installed package's declared peers with the pi that just landed.
+#    Only the host-provided peers matter, which is why this reads peerDependencies and not
+#    dependencies: pi supplies those itself. The single-quoted Node program is deliberate —
+#    it must reach node unexpanded (shellcheck SC2016).
+# shellcheck disable=SC2016
+if [[ -d $npm_dir/node_modules ]]; then
+    peer_report=$(node -e '
+const { readdirSync, readFileSync, existsSync } = require("node:fs");
+const { join } = require("node:path");
+const [nm] = process.argv.slice(1);
+// Only the packages the user declared, not the whole transitive tree.
+const root = JSON.parse(readFileSync(join(nm, "package.json"), "utf8"));
+const declared = Object.keys(root.dependencies || {});
+const HOST = /^@earendil-works\//;
+const cmp = (a, b) => {
+  const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) { if ((pa[i]||0) !== (pb[i]||0)) return (pa[i]||0) - (pb[i]||0); }
+  return 0;
+};
+const satisfies = (have, range) => {
+  // Installed pi is a concrete version; ranges here are ">=", "^", or "*".
+  const v = have.replace(/^[^0-9]*/, "");
+  if (range === "*" || range === "") return true;
+  for (const part of range.split("||").map((s) => s.trim())) {
+    const m = part.match(/^(>=|\^|~|>)?\s*v?(\d+\.\d+\.\d+)/);
+    if (!m) continue;
+    const c = cmp(v, m[2]);
+    if (m[1] === ">=" && c >= 0) return true;
+    if (m[1] === "^" && c >= 0 && v.split(".")[0] === m[2].split(".")[0]) return true;
+    if (m[1] === "~" && c >= 0 && v.split(".").slice(0,2).join(".") === m[2].split(".").slice(0,2).join(".")) return true;
+    if (m[1] === ">" && c > 0) return true;
+  }
+  return false;
+};
+// mise sets MISE_TOOL_VERSION for a tool postinstall; fall back to asking the binary.
+const have = (process.env.MISE_TOOL_VERSION || process.env.PI_VERSION || "").trim();
+if (!have) {
+  console.error("pi-postinstall: cannot determine the installed pi version (MISE_TOOL_VERSION unset); skipping the peer check");
+  process.exit(0);
+}
+let bad = 0;
+for (const name of declared) {
+  const pkgPath = join(nm, "node_modules", name, "package.json");
+  if (!existsSync(pkgPath)) continue;
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  for (const [dep, range] of Object.entries(pkg.peerDependencies || {})) {
+    if (!HOST.test(dep)) continue;
+    if (!satisfies(have, range)) {
+      console.error(`pi ${have} does not satisfy ${name}@${pkg.version}, which requires ${dep} ${range}`);
+      bad = 1;
+    }
+  }
+}
+process.exit(bad);
+' "$npm_dir" 2>&1) || peer_rc=$?
+    peer_rc=${peer_rc:-0}
+    if (( peer_rc != 0 )); then
+        [[ -n $peer_report ]] && printf '%s\n' "$peer_report" >&2
+        printf '%s\n' "pi-postinstall: an extension requires a newer pi than is installed; run 'mise up pi' or lower that extension's range" >&2
+        fail=1
+    fi
+fi
+
+# 4. herdr's agent-state integrations follow the harness version. Reported, never fatal:
+#    herdr prints standing notices (a shared extension directory with OMP, an absent
+#    harness) on stderr whether or not anything is wrong, so output is passed through and
+#    only the exit status is judged — a failing herdr install is a real problem.
+task=$HOME/.config/mise/tasks/herdr-integrations
+if [[ -x $task ]]; then
+    out=$("$task" 2>&1)
+    rc=$?
+    [[ -n $out ]] && printf '%s\n' "$out" >&2
+    if (( rc != 0 )); then
+        printf '%s\n' "pi-postinstall: herdr integration install failed (exit $rc)" >&2
+        fail=1
+    fi
+fi
+
+exit "$fail"

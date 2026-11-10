@@ -27,6 +27,8 @@ When the two disagree, the ADR is right and this file is a defect.
 - `omarchy.toml##distro.omarchy` is Omarchy's preinstalls, one `latest` or `absent` per package, plus `aur:` entries (ADR-0049, ADR-0102).
   `aur:` has no pins and no `absent`; `yay` or `paru` and `base-devel` are prerequisites that `00_dependencies.sh` checks for.
 - `tool-extras.toml` sits outside `conf.d/` so mise never reads it (ADR-0105).
+- No tool declares `auto_update`, so harness versions move only through `mise up` or `pi update` (ADR-0112).
+  `pi`'s tool postinstall runs `mise/tasks/pi-postinstall`, which reapplies patches, rebuilds the bundles, checks every declared extension's peers against the pi that just landed, and syncs herdr.
 - `dependencies.txt` lists `command [package]` per line.
   A name that differs between distros cannot go there and needs its own step.
 
