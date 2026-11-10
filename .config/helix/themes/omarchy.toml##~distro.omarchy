@@ -1,0 +1,4 @@
+# Non-Omarchy stand-in for `theme = "omarchy"`: yadm links this file to
+# helix/themes/omarchy.toml only where the distro.omarchy symlink beside it
+# does not apply, so the name in config.toml resolves on every machine.
+inherits = "gruvbox_transparent"
