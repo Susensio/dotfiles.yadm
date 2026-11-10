@@ -32,7 +32,7 @@ When the two disagree, the ADR is right and this file is a defect.
 
 ## Bootstrap order
 
-`yadm/bootstrap` runs every executable in `bootstrap.d/` in sorted order, each silent when nothing changes (ADR-0005).
+`yadm/bootstrap` runs every executable in `bootstrap.d/` in sorted order, each changing nothing on a rerun (ADR-0005, ADR-0111).
 
 1. `00_dependencies.sh` installs `dependencies.txt` and checks the AUR prerequisites.
 2. `20_fish.sh`, `keyd/` and similar steps add third-party apt repositories only where needed (ADR-0104).

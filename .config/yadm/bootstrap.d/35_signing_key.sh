@@ -35,20 +35,15 @@ if ! command -v gh &>/dev/null; then
 fi
 
 # Listing and creating signing keys needs this scope, which gh's default login lacks.
-# Login and refresh are browser flows, so they run only with a terminal to show the code.
+# Login and refresh are browser flows, so a step only names the command (docs/adr/0111).
 scope=admin:ssh_signing_key
 if ! gh auth status &>/dev/null; then
-  fix=(gh auth login --hostname github.com --web --scopes "$scope")
-elif ! gh api -i user 2>/dev/null | grep -i '^x-oauth-scopes:' | grep -q "$scope"; then
-  fix=(gh auth refresh --hostname github.com --scopes "$scope")
+  log warn "signing key: gh not logged in; run 'gh auth login --web --scopes $scope'"
+  exit 0
 fi
-if [[ -n ${fix[*]:-} ]]; then
-  if [[ -t 0 ]]; then
-    "${fix[@]}" || true
-  else
-    log warn "signing key: gh needs the $scope scope; run '${fix[*]}'"
-    exit 0
-  fi
+if ! gh api -i user 2>/dev/null | grep -i '^x-oauth-scopes:' | grep -q "$scope"; then
+  log warn "signing key: gh lacks the $scope scope; run 'gh auth refresh --scopes $scope'"
+  exit 0
 fi
 
 # A failed listing must not fall through to a blind POST: GitHub answers a

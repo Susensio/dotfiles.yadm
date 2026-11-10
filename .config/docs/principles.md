@@ -23,7 +23,7 @@ Cost: every lazy-rendered surface has a builder, and generated state rots when t
 ## Idempotent
 
 The bootstrap is safe to rerun any time, and rerun it does.
-Each step checks before acting, and is silent when nothing changes [0005, 0056]; bugfix steps apply a patch only when the forward one matches, so a fix that has landed upstream makes the step a silent no-op rather than a spurious error [0057].
+Each step checks before acting, and a rerun changes nothing and calls no `sudo`, which CI checks by state rather than output [0005, 0111]; a step warns every run about a login it cannot do for you, naming the command; bugfix steps apply a patch only when the forward one matches, so a fix that has landed upstream makes the step a silent no-op rather than a spurious error [0057].
 
 Idempotency also enabled a design choice: state that is checked on every run might as well be recomputed from its source every time, so caching is rarely worth it.
 tmux re-derives its own location at relaunch [0010], tool routing is derived from the declaration [0046], the tmux palette is re-rendered from a tracked template on each theme switch [0052].

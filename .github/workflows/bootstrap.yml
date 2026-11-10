@@ -55,14 +55,10 @@ jobs:
           # FAIL lines become annotations on the run's summary page
           bash --login -c 'cd && just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
 
-      # Steps print only what they change
-      - name: Bootstrap again, silently
+      # Nothing may change: no sudo, no file under $HOME, no state drift (docs/adr/0111)
+      - name: Bootstrap again, changing nothing
         if: ${{ !cancelled() }}
-        run: |
-          out=$(~/.config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
-          [ -z "$out" ] && exit 0
-          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
-          exit 1
+        run: ~/.config/yadm/bootstrap-rerun-check | sed 's/^FAIL /::error::&/'
 
   # Debian 13 from its bare image: no sudo, curl, git or user, so the prerequisites are
   # installed as on a fresh machine. A container runs no systemd: the steps that
@@ -102,13 +98,10 @@ jobs:
           as-dev 'set -a; . .config/environment.d/10_xdg.conf; . .config/environment.d/11_path.conf; set +a
             just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
 
-      - name: Bootstrap again, silently
+      # Nothing may change: no sudo, no file under $HOME, no state drift (docs/adr/0111)
+      - name: Bootstrap again, changing nothing
         if: ${{ !cancelled() }}
-        run: |
-          out=$(as-dev .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
-          [ -z "$out" ] && exit 0
-          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
-          exit 1
+        run: as-dev .config/yadm/bootstrap-rerun-check | sed 's/^FAIL /::error::&/'
 
   # Omarchy's ISO, replayed in an Arch container booted into systemd (actions/omarchy)
   omarchy:
@@ -136,10 +129,7 @@ jobs:
       - name: Test
         run: as-dev -c 'just --justfile .config/justfile bootstrap-test' | sed 's/^FAIL /::error::&/'
 
-      - name: Bootstrap again, silently
+      # Nothing may change: no sudo, no file under $HOME, no state drift (docs/adr/0111)
+      - name: Bootstrap again, changing nothing
         if: ${{ !cancelled() }}
-        run: |
-          out=$(as-dev -c .config/yadm/bootstrap 2>&1 || echo "failed: exit $?")
-          [ -z "$out" ] && exit 0
-          echo "::error title=Second bootstrap is not silent::${out//$'\n'/%0A}"
-          exit 1
+        run: as-dev -c .config/yadm/bootstrap-rerun-check | sed 's/^FAIL /::error::&/'

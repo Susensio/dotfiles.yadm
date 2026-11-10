@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# A second bootstrap must change nothing (docs/adr/0111): it makes no privileged
+# call, writes no file under $HOME, and leaves the state snapshot below as it was.
+# What it prints is not checked, so a step may warn on every run about state it
+# cannot fix, such as a login that needs a browser.
+# Meant for CI and other quiet machines: any file another process writes under
+# $HOME while the bootstrap runs counts as the bootstrap's. RERUN_IGNORE lists
+# path prefixes to skip, for files a CI runner writes itself.
+set -u
+
+bootstrap=${BOOTSTRAP:-${XDG_CONFIG_HOME:-$HOME/.config}/yadm/bootstrap}
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+# State a step can change without writing a file under $HOME or calling sudo;
+# each such step needs an entry here, or its rerun goes unchecked.
+snapshot() {
+  echo "## tailscale prefs"
+  if command -v tailscale &>/dev/null; then tailscale debug prefs 2>&1; fi
+  echo "## enabled units"
+  if command -v systemctl &>/dev/null; then
+    systemctl list-unit-files --state=enabled --plain --no-legend 2>&1
+    systemctl --user list-unit-files --state=enabled --plain --no-legend 2>&1
+  fi
+  echo "## packages"
+  if command -v pacman &>/dev/null; then
+    pacman -Q 2>&1
+  elif command -v dpkg-query &>/dev/null; then
+    dpkg-query -W 2>&1
+  fi
+  echo "## sudoers.d"
+  find /etc/sudoers.d -printf '%m %u %p\n' 2>&1 | sort
+}
+
+# Records each call and passes it through, so every violation is reported
+# rather than the first one ending the run.
+real_sudo=$(command -v sudo || true)
+if [[ -n $real_sudo ]]; then
+  mkdir "$work/shim"
+  cat >"$work/shim/sudo" <<EOF
+#!/bin/sh
+printf '%s\n' "\$*" >> "$work/sudo-calls"
+exec "$real_sudo" "\$@"
+EOF
+  chmod +x "$work/shim/sudo"
+  export PATH=$work/shim:$PATH
+fi
+
+snapshot >"$work/before"
+touch "$work/marker"
+
+"$bootstrap"
+status=$?
+
+snapshot >"$work/after"
+
+indent() { sed 's/^/        /'; }
+
+failures=0
+fail() {
+  failures=$((failures + 1))
+  echo "FAIL  $1"
+}
+
+((status == 0)) || fail "second bootstrap exited $status"
+
+if [[ -s $work/sudo-calls ]]; then
+  fail "second bootstrap called sudo"
+  indent <"$work/sudo-calls"
+fi
+
+# nvim rewrites its shada file on every exit, and its plugin step starts it headless
+state=${XDG_STATE_HOME:-$HOME/.local/state}
+skip=(! -path "$HOME/.cache/*" ! -path "$state/yadm/bootstrap.log" ! -path "$state/nvim/*")
+for prefix in ${RERUN_IGNORE:-}; do skip+=(! -path "$prefix/*"); done
+written=$(find "$HOME" -type f -newer "$work/marker" "${skip[@]}" 2>/dev/null)
+if [[ -n $written ]]; then
+  fail "second bootstrap wrote files under \$HOME"
+  printf '%s\n' "$written" | indent
+fi
+
+if ! diff=$(diff -u "$work/before" "$work/after"); then
+  fail "second bootstrap changed machine state"
+  printf '%s\n' "$diff" | indent
+fi
+
+((failures == 0)) && echo "ok    second bootstrap changed nothing"
+exit $((failures > 0))

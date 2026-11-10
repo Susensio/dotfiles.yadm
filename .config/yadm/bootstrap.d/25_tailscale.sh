@@ -50,7 +50,8 @@ if ! tailscale debug prefs 2>/dev/null | grep -q "\"OperatorUser\": \"$USER\""; 
   sudo tailscale set --operator="$USER"
 fi
 
-# Login needs a browser, so it stays a manual step
+# Login needs a browser, so a step never starts it: it warns with the command on
+# every run until someone does it (docs/adr/0111).
 if [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then
   log warn "tailscale: not logged in; run 'tailscale up'"
   exit 0

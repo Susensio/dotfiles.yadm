@@ -38,7 +38,7 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
 - The editor menu writes `EDITOR` into `environment.d/tools.conf` ([ADR-0047](adr/0047-helix-canonical-editor-name.md)).
 - The text-size slider (`omarchy display text size`) sets three things at once: `[font] base-size` in `omarchy/shell.toml`, the font size in `foot/foot.ini`, and GTK's `text-scaling-factor` in dconf, which is not tracked.
 
-After `yadm pull`, the `post_pull` hook reruns the bootstrap, which is silent when there is nothing to do ([ADR-0056](adr/0056-silent-idempotent-bootstrap.md)).
+After `yadm pull`, the `post_pull` hook reruns the bootstrap, which changes nothing when there is nothing to do ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
 
 ## Theme templates
 

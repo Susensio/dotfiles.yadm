@@ -1,6 +1,6 @@
 # ADR-0056: Make bootstrap steps check before acting, silent and sudo-free when nothing changes, instead of reapplying everything or a shared sync helper
 
-Status: Accepted
+Status: Superseded by [ADR-0111](0111-rerun-checked-by-state-logins-warn.md)
 Date: 2026-09-26
 
 ## Context
