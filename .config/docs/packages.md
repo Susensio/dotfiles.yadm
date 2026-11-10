@@ -44,10 +44,10 @@ When the two disagree, the ADR is right and this file is a defect.
 
 - Prefer a declaration to a step; write a step only for what a declaration cannot express (a daemon, a repository, per-user setup).
 - A step may install a package only when a declaration cannot: it needs a repository added first, depends on hardware, or installs the installer itself.
-  Today that is `mise.sh`, `20_fish.sh`, `keyd/keyd.sh`, `tailscale.sh`, `omarchy/fingerprint.sh`, and `tmux-grammar.sh`.
+  Today that is `mise.sh`, `20_fish.sh`, `keyd/keyd.sh`, `25_tailscale.sh`, `omarchy/fingerprint.sh`, and `tmux-grammar.sh`.
 - `tmux-grammar.sh` installs `g++` itself: `dependencies.txt` passes names unchanged, Arch has no `g++` package (its `gcc` provides `c++`), and Debian needs `g++`.
 - Gate a step on the capability it needs, not on a distro name (ADR-0044).
-  A step adding an apt repository does not pin distros: it probes upstream for `ID`, then `ID_LIKE`, with the codename, and takes the first published match (`tailscale.sh`).
+  A step adding an apt repository does not pin distros: it probes upstream for `ID`, then `ID_LIKE`, with the codename, and takes the first published match (`25_tailscale.sh`).
   `20_fish.sh` still branches on `ID` (ADR-0104).
 - `tool remove` and a dropped declaration do not uninstall `aur:` packages; only `absent` removes, and only for `pacman:`.
 - A removal by `absent` uses `pacman -R`, so orphaned dependencies stay.
