@@ -5,7 +5,8 @@
 # cannot fix, such as a login that needs a browser.
 # Meant for CI and other quiet machines: any file another process writes under
 # $HOME while the bootstrap runs counts as the bootstrap's. RERUN_IGNORE lists
-# path prefixes to skip, for files a CI runner writes itself.
+# path prefixes to skip, for files a CI runner writes itself, and RERUN_SETTLE
+# is how long the first run's detached jobs are given to finish.
 set -u
 
 bootstrap=${BOOTSTRAP:-${XDG_CONFIG_HOME:-$HOME/.config}/yadm/bootstrap}
@@ -45,6 +46,10 @@ EOF
   chmod +x "$work/shim/sudo"
   export PATH=$work/shim:$PATH
 fi
+
+# The first run leaves detached jobs behind, such as omarchy-theme-set's app
+# hooks, and a write that lands late is the first run's, not this one's.
+sleep "${RERUN_SETTLE:-10}"
 
 snapshot >"$work/before"
 touch "$work/marker"
