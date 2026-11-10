@@ -39,6 +39,7 @@ Several Omarchy commands edit files yadm tracks, so a `yadm diff` after them is 
 - The text-size slider (`omarchy display text size`) sets three things at once: `[font] base-size` in `omarchy/shell.toml`, the font size in `foot/foot.ini`, and GTK's `text-scaling-factor` in dconf, which is not tracked.
 
 After `yadm pull`, the `post_pull` hook reruns the bootstrap, which changes nothing when there is nothing to do ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
+Reaching this machine or `nuc` from another is in [access.md](access.md).
 
 ## Theme templates
 
@@ -46,7 +47,7 @@ After `yadm pull`, the `post_pull` hook reruns the bootstrap, which changes noth
 Bootstrap selects it through Omarchy when the current theme is absent or different; a headless first run applies the background link and renders files for the next login without retinting running applications.
 Omarchy renders `omarchy/themed/` into `~/.local/state/omarchy/current/theme`, state yadm ignores, only during a theme set ([ADR-0052](adr/0052-direct-omarchy-tmux-palette.md)).
 Hyprland cannot read `colors.toml` at load time, so `hypr/looknfeel.lua` requires the rendered `hypr-palette.lua`, and a clone that predates the template fails its config rather than merely losing styling.
-`bootstrap.d/omarchy/theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.
+`bootstrap.d/omarchy/00_theme.sh` re-renders whenever a tracked or update-refreshed template, or the current theme's `colors.toml`, is missing from the theme directory or newer than its render; it reloads Hyprland after (headless rendering skips Omarchy's reload) and stays silent when nothing is stale.
 `themed/shell.toml.tpl` pins only the bar surface to the theme's `darker_background`, shadowing the stock shell template that renders every other surface; a machine-level `omarchy/shell.toml` key would win over the rendered file.
 `themed/pi.json.tpl` renders the stock Pi template's roles from other colors: tool titles and syntax variables from the foreground, links from the theme's blue, tool output from a foreground/bright-blue mix, and the running and finished tool boxes from the theme's green and cyan, leaving the accent to Pi's prompt and spinner rather than to every panel and border.
 Herdr has no theme file, so the `theme-set.d/herdr` hook writes `[theme] name` into the tracked `herdr/config.toml` and `herdr/scratchpad.toml`: the built-in a user theme names in its `herdr.theme`, a mapped built-in for a stock theme, otherwise `terminal` ([ADR-0099](adr/0099-herdr-builtin-theme-per-omarchy-theme.md)).

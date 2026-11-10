@@ -149,6 +149,16 @@ On 2026-11-05 `alias/top` gained `opencode-go/deepseek-v4-pro` second ([ADR-0103
 - Not yet applied: `sudo cryptsetup refresh --allow-discards --persistent root` needs the passphrase in a terminal; until then `bootstrap.d/luks-discards.sh` warns.
 - Unverified: after the next boot, `findmnt -no OPTIONS /` should list `discard=async`; if not, enable `fstrim.timer` instead.
 
+## Tailscale mesh and signing keys (2026-11-10)
+
+`dell` and `nuc` both answer Tailscale SSH on their tailnet IP, and `dell` reaches `nuc` by name with no key; `nuc` keeps OpenSSH on its LAN address as the fallback ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), matrix in [access.md](access.md)).
+`35_signing_key.sh` mints and registers a per-machine signing key, and CI checks the second bootstrap by what it changed ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
+
+- Unverified: the phone reaching `nuc` by tailnet name with no credential. Termux's `ssh` should offer "none" authentication; a phone app that demands one cannot.
+- `dell` runs no sshd, so it is reachable only through Tailscale SSH, and every other machine's bootstrap has yet to run the signing step.
+- `nuc`'s homelab `docs/STATE.md` still lists an SSH key added to GitHub as signing *and* auth, which ADR-0109 rejects; the auth half should go when that file is next edited.
+- Left over on GitHub: `chuwi`'s authentication key (162582085) and `nuc`'s 2023 RSA key (87867050) contradict the record and are unreferenced by it.
+
 ## yadm alt race and commit signing (2026-10-24)
 
 `~/.ssh/id_ed25519` now exists without a passphrase and `commit.gpgsign` is on, so every commit signs unattended ([ADR-0100](adr/0100-passphraseless-signing-key.md)).
