@@ -52,5 +52,10 @@
     "{\"source\":\"npm:@gotgenes/pi-permission-system\",\"scope\":\"user\"}": "42.0.0",
     "{\"source\":\"npm:pi-model-fallback-alias\",\"scope\":\"user\"}": "0.2.1",
     "{\"source\":\"npm:@narumitw/pi-usage\",\"scope\":\"user\"}": "0.69.2"
-  }
+  },
+  "selfUpdateCommand": [
+    "mise",
+    "up",
+    "pi"
+  ]
 }

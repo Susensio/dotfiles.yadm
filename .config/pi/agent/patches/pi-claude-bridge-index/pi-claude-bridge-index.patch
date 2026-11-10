@@ -1,17 +1,17 @@
 --- index.ts
 +++ index.ts
-@@ -36,6 +36,7 @@
+@@ -32,6 +32,7 @@
  import { forgetSessionCwd, rememberSessionCwd, rememberSummarySession, sessionCwdFor, summarySessionFor } from "./session-cwd.js";
  import { updateUsage, type SdkUsage } from "./usage.js";
  import { rateLimitResponse } from "./rate-limit.js";
 +import { isStandalonePrompt, runStandalone } from "./standalone.js";
  import { BRIDGE_VERSION, packageVersion, setTraceNotifier, traceAssertReady, traceEvent, traceId, traceInput, traceQueryStart, traceSignalId, traceSnapshot, traceStrict } from "./cache-trace.js";
- 
- // --- Debug logging ---
-@@ -541,6 +542,28 @@
- 	}
+ import { DEBUG, debug, makeCliDebugOptions, moduleInstanceId } from "./debug.js";
+ import { CC_CHILD_ENV, ccChildEnv, CLAUDE_MD_EXCLUDES, errorMessage, REASONING_TO_EFFORT, resultErrorText } from "./cc-child.js";
+@@ -366,6 +367,28 @@
  }
  
+ /** `context` must already be in bridge shape (toBridgeContext). */
 +function standaloneStreamFn(model: Model<any>, context: Context, options?: SimpleStreamOptions): AssistantMessageEventStream {
 +	const stream = createAssistantMessageEventStream();
 +	const effort = effortForReasoning(model, options?.reasoning);
@@ -37,10 +37,11 @@
  function isolatedStreamFn(model: Model<any>, context: Context, options?: SimpleStreamOptions, traceCallId?: string): AssistantMessageEventStream {
  	const stream = createAssistantMessageEventStream();
  	void runIsolatedSummary(model, context, options, stream, traceCallId);
-@@ -1919,6 +1942,15 @@
+@@ -1702,6 +1725,15 @@
+ 	const sourceContext = context;
  	context = toBridgeContext(context);
  	traceInput(traceCallId, sourceContext, context, model, options);
- 
++
 +	// Local patch: pi-claude-bridge#216, drop once released.
 +	// Local patch: pi-claude-bridge#216, drop once released.
 +	// An extension's own one-turn call, opted out of prompt capture. Checked first: a
@@ -49,67 +50,10 @@
 +		debug(`provider: standalone prompt routed to its own query, msgs=${context.messages.length}`);
 +		return standaloneStreamFn(model, context, options);
 +	}
-+
+ 
  	// Pi's compaction, branch-summary and bug-report calls use cacheRetention:"none"
  	// in completeSummarization. Their prompts bypass the capture boundaries, so route
- 	// them to an isolated persistSession:false CC process without session sync.
---- sendable.ts
-+++ sendable.ts
-@@ -0,0 +1,53 @@
-+// Refuses prompt text that makes Claude Code's subscription path read a request as a
-+// third-party app. Shared by the captured agent path and standalone prompts.
-+
-+import { debugLogPath } from "./log-paths.js";
-+
-+/** Pi's own preamble, the first section of every prompt pi renders for a session
-+ *  without a custom prompt. Machine-generated, so operator text never carries it;
-+ *  forwarding it makes Claude Code's subscription path read the request as a
-+ *  third-party app. */
-+export const PI_PREAMBLE = "You are an expert coding assistant operating inside pi";
-+
-+/** Both doc paths from pi's documentation-routing line. Anthropic's subscription gate
-+ *  rejects a system prompt carrying both, while either alone passes (issues #883, #88). */
-+const ANTHROPIC_THIRD_PARTY_TRIGGERS = ["docs/custom-provider.md", "docs/packages.md"];
-+
-+/** One piece of a prompt, named so a refusal can say where it found the text. */
-+export type PromptPart = { label: string; text: string };
-+
-+/** Throws when any part carries pi's preamble at a line start, or the phrase pair
-+ *  Anthropic's subscription gate rejects. `notes` add caller context to the refusal. */
-+export function assertSendable(parts: readonly PromptPart[], scope: string, notes: readonly string[]): void {
-+	const findings: string[] = [];
-+	for (const { label, text } of parts) {
-+		const offset = preambleAtLineStart(text);
-+		if (offset !== -1) {
-+			findings.push(`pi's preamble ("${PI_PREAMBLE}") in ${label}, at offset ${offset} of ${text.length} chars`);
-+		}
-+		// The pair has to co-occur in one part; the two phrases split across parts are not detected.
-+		if (ANTHROPIC_THIRD_PARTY_TRIGGERS.every((trigger) => text.includes(trigger))) {
-+			findings.push(`${ANTHROPIC_THIRD_PARTY_TRIGGERS.join(" and ")} in ${label}`);
-+		}
-+	}
-+	if (findings.length === 0) return;
-+
-+	throw new Error([
-+		`${scope}: refusing to send this prompt. Claude Code's Anthropic path reads a request`,
-+		"  carrying pi's harness, or the phrase pair its subscription gate rejects, as a third-party",
-+		"  app: it fails with 400 or is billed as extra usage.",
-+		...findings.map((finding) => `  Found: ${finding}.`),
-+		...notes,
-+		"  If it is your own text, reword or remove it. CLAUDE_BRIDGE_DEBUG=1 writes the full prompt to",
-+		`  ${debugLogPath()}.`,
-+	].join("\n"));
-+}
-+
-+/** Offset of pi's preamble at the start of a line, or -1. Mid-line mentions are someone
-+ *  describing pi's prompt, not pi's prompt. */
-+function preambleAtLineStart(text: string): number {
-+	for (let offset = text.indexOf(PI_PREAMBLE); offset !== -1; offset = text.indexOf(PI_PREAMBLE, offset + PI_PREAMBLE.length)) {
-+		if (offset === 0 || text[offset - 1] === "\n") return offset;
-+	}
-+	return -1;
-+}
---- standalone.ts
+--- /dev/null
 +++ standalone.ts
 @@ -0,0 +1,176 @@
 +// Standalone prompts: one-turn side calls another extension makes through the session
@@ -287,4 +231,60 @@
 +		}
 +	});
 +	stream.push({ type: "done", reason: output.stopReason as "stop" | "toolUse", message: output });
++}
+--- /dev/null
++++ sendable.ts
+@@ -0,0 +1,53 @@
++// Refuses prompt text that makes Claude Code's subscription path read a request as a
++// third-party app. Shared by the captured agent path and standalone prompts.
++
++import { debugLogPath } from "./log-paths.js";
++
++/** Pi's own preamble, the first section of every prompt pi renders for a session
++ *  without a custom prompt. Machine-generated, so operator text never carries it;
++ *  forwarding it makes Claude Code's subscription path read the request as a
++ *  third-party app. */
++export const PI_PREAMBLE = "You are an expert coding assistant operating inside pi";
++
++/** Both doc paths from pi's documentation-routing line. Anthropic's subscription gate
++ *  rejects a system prompt carrying both, while either alone passes (issues #883, #88). */
++const ANTHROPIC_THIRD_PARTY_TRIGGERS = ["docs/custom-provider.md", "docs/packages.md"];
++
++/** One piece of a prompt, named so a refusal can say where it found the text. */
++export type PromptPart = { label: string; text: string };
++
++/** Throws when any part carries pi's preamble at a line start, or the phrase pair
++ *  Anthropic's subscription gate rejects. `notes` add caller context to the refusal. */
++export function assertSendable(parts: readonly PromptPart[], scope: string, notes: readonly string[]): void {
++	const findings: string[] = [];
++	for (const { label, text } of parts) {
++		const offset = preambleAtLineStart(text);
++		if (offset !== -1) {
++			findings.push(`pi's preamble ("${PI_PREAMBLE}") in ${label}, at offset ${offset} of ${text.length} chars`);
++		}
++		// The pair has to co-occur in one part; the two phrases split across parts are not detected.
++		if (ANTHROPIC_THIRD_PARTY_TRIGGERS.every((trigger) => text.includes(trigger))) {
++			findings.push(`${ANTHROPIC_THIRD_PARTY_TRIGGERS.join(" and ")} in ${label}`);
++		}
++	}
++	if (findings.length === 0) return;
++
++	throw new Error([
++		`${scope}: refusing to send this prompt. Claude Code's Anthropic path reads a request`,
++		"  carrying pi's harness, or the phrase pair its subscription gate rejects, as a third-party",
++		"  app: it fails with 400 or is billed as extra usage.",
++		...findings.map((finding) => `  Found: ${finding}.`),
++		...notes,
++		"  If it is your own text, reword or remove it. CLAUDE_BRIDGE_DEBUG=1 writes the full prompt to",
++		`  ${debugLogPath()}.`,
++	].join("\n"));
++}
++
++/** Offset of pi's preamble at the start of a line, or -1. Mid-line mentions are someone
++ *  describing pi's prompt, not pi's prompt. */
++function preambleAtLineStart(text: string): number {
++	for (let offset = text.indexOf(PI_PREAMBLE); offset !== -1; offset = text.indexOf(PI_PREAMBLE, offset + PI_PREAMBLE.length)) {
++		if (offset === 0 || text[offset - 1] === "\n") return offset;
++	}
++	return -1;
 +}
