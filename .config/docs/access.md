@@ -27,6 +27,14 @@ OpenSSH keeps the LAN address, which is why the matrix has two rows per host and
 `25_tailscale.sh` runs the opt-in on every machine that has the daemon, so a fresh machine gets it on its first bootstrap once `tailscale up` has been done by hand.
 The tailnet policy is not in the repository: no local `tailscale` subcommand reads or writes it, so it stays a console edit.
 
+## GitHub
+
+Nothing needs an authentication key on GitHub: every machine pushes over HTTPS with `gh`'s token, including `nuc`, whose yadm and homelab remotes are both `https://` and whose `gh auth status` reports the `https` protocol.
+The account therefore holds signing keys only, one per machine, so the two slots stay 1:1: a machine's single keypair is registered once, for signatures.
+The slots differ only in what a stolen private half buys. As a signing key it forges commits, which GitHub's persistent verification records keep from rewriting history, and it cannot push or open a shell. As an authentication key it can push to every repository.
+
+A machine that later needs `git@github.com:` clones registers that same keypair in the authentication slot too; one keypair filling both is expected, and it is not the shared-key anti-pattern, which is about a key opening shells on many hosts.
+
 ## Signing keys
 
 Each machine mints its own passphraseless `<machine>-signing` key and registers its public half on GitHub.
