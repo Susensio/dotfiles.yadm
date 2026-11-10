@@ -71,7 +71,9 @@ fi
 
 # nvim rewrites its shada file on every exit, and its plugin step starts it headless
 state=${XDG_STATE_HOME:-$HOME/.local/state}
-skip=(! -path "$HOME/.cache/*" ! -path "$state/yadm/bootstrap.log" ! -path "$state/nvim/*")
+# mise takes its lockfiles on any invocation, which touches them
+skip=(! -path "$HOME/.cache/*" ! -path "$state/yadm/bootstrap.log" ! -path "$state/nvim/*"
+  ! -path "${XDG_DATA_HOME:-$HOME/.local/share}/mise/*.lock")
 for prefix in ${RERUN_IGNORE:-}; do skip+=(! -path "$prefix/*"); done
 written=$(find "$HOME" -type f -newer "$work/marker" "${skip[@]}" 2>/dev/null)
 if [[ -n $written ]]; then

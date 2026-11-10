@@ -7,7 +7,10 @@ YADM_REPO=${XDG_DATA_HOME:-$HOME/.local/share}/yadm/repo.git
 yadm_git() { git --git-dir="$YADM_REPO" --work-tree="$HOME" "$@"; }
 
 # Version controlled gitconfig
-yadm_git config include.path "${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
+# git rewrites the config file even when the value is unchanged
+yadm_gitconfig="${XDG_CONFIG_HOME:-${HOME}/.config}"/yadm/gitconfig
+yadm_git config --get-all include.path | grep -qxF "$yadm_gitconfig" ||
+  yadm_git config include.path "$yadm_gitconfig"
 # Let plain git work inside .config, for tooling that shells out to it and
 # cannot be told about yadm. Git refuses to track a path named .git, so this
 # pointer cannot live in the repo and has to be recreated per machine.

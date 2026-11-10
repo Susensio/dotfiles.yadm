@@ -17,7 +17,9 @@ fi
 # Integrate with fish. User vendor dir, so it never overwrites a packaged copy.
 FISH_COMPLETIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fish/vendor_completions.d"
 mkdir --parents "$FISH_COMPLETIONS_DIR"
-mise completion fish >"$FISH_COMPLETIONS_DIR/mise.fish"
+completion=$(mise completion fish)
+[[ -f $FISH_COMPLETIONS_DIR/mise.fish && $(<"$FISH_COMPLETIONS_DIR/mise.fish") == "$completion" ]] ||
+  printf '%s\n' "$completion" >"$FISH_COMPLETIONS_DIR/mise.fish"
 
 # Machine-wide: every [bootstrap.packages] entry mise loads, not only tool's files.
 # services carries the tool-update unit that `auto_update` relies on (ADR-0007).
