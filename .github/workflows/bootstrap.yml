@@ -58,7 +58,8 @@ jobs:
       # Nothing may change: no sudo, no file under $HOME, no state drift (docs/adr/0111)
       - name: Bootstrap again, changing nothing
         if: ${{ !cancelled() }}
-        run: ~/.config/yadm/bootstrap-rerun-check | sed 's/^FAIL /::error::&/'
+        # The runner writes its own logs under $HOME
+        run: RERUN_IGNORE=$HOME/actions-runner ~/.config/yadm/bootstrap-rerun-check | sed 's/^FAIL /::error::&/'
 
   # Debian 13 as installed: systemd as PID 1 with a user manager, a sudo user, and
   # none of curl, git or yadm, so the prerequisites are installed as on a fresh machine.
