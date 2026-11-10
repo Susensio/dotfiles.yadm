@@ -4,7 +4,7 @@
 # machine into runtime/grammars, which helix/.gitignore excludes. `use-grammars`
 # in languages.toml keeps the fetch to that single grammar.
 #
-# The name sorts after mise.sh on purpose: locale `sort` ignores punctuation, so
+# The name sorts after 30_mise.sh on purpose: locale `sort` ignores punctuation, so
 # a `helix.sh` would run before it, and the helix binary arrives with the tools
 # that step installs.
 set -euo pipefail

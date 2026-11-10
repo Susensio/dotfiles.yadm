@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Trim Omarchy's preinstalls to the apps actually used. Mirrors
 # omarchy-remove-preinstalls without its prompt, and without its blanket rm over
-# ~/.local/bin, where mise.sh links our own claude, codex, gh... The packages are
-# mise/conf.d/omarchy.toml##distro.omarchy's, applied by mise.sh.
+# ~/.local/bin, where 30_mise.sh links our own claude, codex, gh... The packages are
+# mise/conf.d/omarchy.toml##distro.omarchy's, applied by 30_mise.sh.
 # The launcher entries we keep or add ourselves are installed by webapps.sh and
 # tui-apps.sh, which run after this so the remove-all sweeps cannot take them.
 set -euo pipefail

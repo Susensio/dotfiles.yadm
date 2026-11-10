@@ -36,15 +36,15 @@ When the two disagree, the ADR is right and this file is a defect.
 
 1. `00_dependencies.sh` installs `dependencies.txt` and checks the AUR prerequisites.
 2. `20_fish.sh`, `keyd/` and similar steps add third-party apt repositories only where needed (ADR-0104).
-3. `mise.sh` installs mise, then runs `mise bootstrap --only` for whichever of `packages`, `tools` and `services` report something missing.
+3. `30_mise.sh` installs mise, then runs `mise bootstrap --only` for whichever of `packages`, `tools` and `services` report something missing.
    `--only packages` applies every `[bootstrap.packages]` entry mise has loaded, not one file's (ADR-0049).
-4. The rest, including `omarchy/`, run after `mise.sh` and can rely on its tools.
+4. The rest, including `omarchy/`, run after `30_mise.sh` and can rely on its tools.
 
 ## Rules of thumb
 
 - Prefer a declaration to a step; write a step only for what a declaration cannot express (a daemon, a repository, per-user setup).
 - A step may install a package only when a declaration cannot: it needs a repository added first, depends on hardware, or installs the installer itself.
-  Today that is `mise.sh`, `20_fish.sh`, `keyd/keyd.sh`, `25_tailscale.sh`, `omarchy/fingerprint.sh`, and `tmux-grammar.sh`.
+  Today that is `30_mise.sh`, `20_fish.sh`, `keyd/keyd.sh`, `25_tailscale.sh`, `omarchy/fingerprint.sh`, and `tmux-grammar.sh`.
 - `tmux-grammar.sh` installs `g++` itself: `dependencies.txt` passes names unchanged, Arch has no `g++` package (its `gcc` provides `c++`), and Debian needs `g++`.
 - Gate a step on the capability it needs, not on a distro name (ADR-0044).
   A step adding an apt repository does not pin distros: it probes upstream for `ID`, then `ID_LIKE`, with the codename, and takes the first published match (`25_tailscale.sh`).

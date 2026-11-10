@@ -53,4 +53,13 @@ fi
 # Login needs a browser, so it stays a manual step
 if [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then
   log warn "tailscale: not logged in; run 'tailscale up'"
+  exit 0
+fi
+
+# Meshing machines needs the server, not the client, so this is what makes
+# `ssh` to any of them work without keys (docs/adr/0109). The policy half
+# cannot live here: no local tailscale subcommand reads or writes the ACL.
+if ! tailscale debug prefs 2>/dev/null | grep -q '"RunSSH": true'; then
+  log info "Enabling Tailscale SSH..."
+  tailscale set --ssh
 fi

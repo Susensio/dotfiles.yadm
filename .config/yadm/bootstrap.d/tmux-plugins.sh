@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sourcing tmux.conf runs tpack, which installs the declared plugins.
-# Sorts after mise.sh, which installs tpack.
+# Sorts after 30_mise.sh, which installs tpack.
 set -euo pipefail
 
 # Every machine declares tmux; its absence means the link was never made (system-install failed)
