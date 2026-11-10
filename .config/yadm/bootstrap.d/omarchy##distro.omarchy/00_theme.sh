@@ -6,6 +6,8 @@
 # already matches the tracked choice.
 # Only rendered files change here; running apps still retint through Omarchy's
 # theme-set hook.
+# The 00_ prefix orders it before the bugfix steps that read the rendered theme,
+# pi's among them, which otherwise only catch up on the next bootstrap.
 set -euo pipefail
 
 command -v omarchy-theme-set &>/dev/null || exit 0
