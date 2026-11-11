@@ -29,8 +29,11 @@ if [[ -f $agent_dir/patches/reapply-all.sh ]]; then
     fi
 fi
 
-# 2. Rebuild the bundles that carry the patched sources.
-if [[ -f $agent_dir/bundler/run.sh ]]; then
+# 2. Rebuild the bundles that carry the patched sources. esbuild is its own mise tool, so
+#    on a fresh machine it can land after pi; skip then, the npm postinstall the bootstrap
+#    wires builds the bundles once it exists.
+if [[ -f $agent_dir/bundler/run.sh ]] &&
+    { [[ -n ${PI_BUNDLER_ESBUILD:-} && -e $PI_BUNDLER_ESBUILD ]] || command -v esbuild &>/dev/null; }; then
     out=$(sh "$agent_dir/bundler/run.sh" 2>&1) || true
     if [[ -n $out ]]; then
         printf '%s\n' "$out" >&2

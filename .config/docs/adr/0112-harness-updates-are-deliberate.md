@@ -114,3 +114,8 @@ a `PI_PREAMBLE` guard that 0.12.0 removed upstream, so it could never apply agai
 was rebased onto 0.12.0's layout, where hunk 2's anchor had moved. Both were checked by
 diffing the patched tree's `tsc` error set against pristine 0.12.0's: identical, so the
 rebase introduced no new type errors.
+
+On a fresh machine esbuild, its own mise tool, can land after pi, and the bundler prints
+"esbuild not found", which the hook counts as failure and which aborted the bootstrap in CI.
+The hook now skips the rebuild while esbuild is absent; the npm postinstall the bootstrap
+wires builds the bundles once it exists.
