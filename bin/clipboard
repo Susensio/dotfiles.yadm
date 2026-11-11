@@ -5,24 +5,31 @@
 
 set -euo pipefail
 
-DISPLAY="${DISPLAY:-:0}"
-export DISPLAY
 FALLBACK_FILE="${XDG_RUNTIME_DIR:-/tmp}/clipboard_${USER:-shared}"
 
 get_system() {
-  if uname -r | grep -q -i "microsoft"; then
+  # Over SSH the host's own clipboard isn't the user's; OSC 52 reaches their terminal.
+  if [[ -n "${SSH_CONNECTION:-}" ]]; then
+    echo "osc52"
+  elif uname -r | grep -q -i "microsoft"; then
     echo "wsl"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     echo "macos"
   elif [[ "${XDG_SESSION_TYPE:-}" == "wayland" ]]; then
     echo "wayland"
-  elif [[ "${XDG_SESSION_TYPE:-}" == "x11" ]] || [[ -n "$DISPLAY" ]]; then
+  elif [[ -n "${DISPLAY:-}" ]]; then
     echo "x11"
   elif [[ -n "${TMUX:-}" ]]; then
     echo "tmux"
   else
     echo "fallback"
   fi
+}
+
+save_fallback() {
+  rm -f "$FALLBACK_FILE"
+  cat > "$FALLBACK_FILE"
+  chmod 600 "$FALLBACK_FILE"
 }
 
 copy_to_clipboard() {
@@ -47,12 +54,22 @@ copy_to_clipboard() {
       pbcopy
       ;;
     tmux)
-      tmux load-buffer -
+      tmux load-buffer -w -
+      ;;
+    osc52)
+      # tmux -w wraps OSC 52 itself; outside tmux write it to the terminal, keeping a local copy for paste.
+      if [[ -n "${TMUX:-}" ]]; then
+        tmux load-buffer -w -
+      else
+        local data sel=c
+        data=$(cat)
+        [[ "$argc_selection" == "primary" ]] && sel=p
+        printf '\e]52;%s;%s\a' "$sel" "$(printf %s "$data" | base64 -w0)" > /dev/tty
+        printf %s "$data" | save_fallback
+      fi
       ;;
     fallback)
-      rm -f "$FALLBACK_FILE"
-      cat > "$FALLBACK_FILE"
-      chmod 600 "$FALLBACK_FILE"
+      save_fallback
       ;;
     *)
       echo "Error: Unsupported or unknown system: $system" >&2
@@ -84,6 +101,14 @@ paste_from_clipboard() {
       ;;
     tmux)
       tmux save-buffer -
+      ;;
+    osc52)
+      # OSC 52 is write-only here; paste what this host last copied.
+      if [[ -n "${TMUX:-}" ]]; then
+        tmux save-buffer -
+      elif [[ -f "$FALLBACK_FILE" ]]; then
+        cat "$FALLBACK_FILE"
+      fi
       ;;
     fallback)
       if [[ -f "$FALLBACK_FILE" ]]; then
