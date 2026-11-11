@@ -112,3 +112,11 @@ Each script's docstring holds why it exists and what it was probed against; this
 The nudging hooks keep quiet after their first word by stamping a marker under `$TMPDIR/claude-hook-nudge`.
 
 For how a new piece of harness content should be slotted in (agent vs. skill vs. rule vs. `CLAUDE.md` vs. a doc like this one), see the `harness-design` skill — it's the doctrine this whole layout follows.
+
+## Quota cost: Pi vs Claude Code
+
+Measured 2026-11-11 on `claude-sonnet-5-5`, one read-only summarize task, two runs each (Pi via the `claude-bridge` provider).
+Pi used less input: cache writes 4–7k against 20–33k, cache reads about 30k against 52–64k, 3 turns against 5, output about equal.
+A trivial "reply ok" prompt showed the same shape: 10k against 24k cache-write tokens of fixed overhead.
+The gap is partly configuration, not only the harness; Claude Code loads a larger system prompt, tool set and skills.
+Not measured: the account's usage meter, whether the bridge bills the same quota, and edit-heavy or subagent-heavy work.
