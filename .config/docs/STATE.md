@@ -94,11 +94,13 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 - `hypr-envs-path.sh`: [#13351](https://github.com/omacom/omarchy/pull/13351) drops the `PATH` prepend from `default/hypr/envs.lua`.
 - `keybindings-menu-submaps.sh` was dropped after 4.5: with no submap bindings left (ADR-0076) it patched a menu that had nothing to group, and the patch no longer applies.
 - `keyboard-backlight-hibernate.sh`: [#13729](https://github.com/omacom/omarchy/pull/13729) restores the backlight after hibernation, which the pre-hibernate hook sets to 0 with no `post` restore.
-  Closed 2026-10-29 in favour of #15908, which does not touch the hook (4.5.0 still zeroes with no restore); a comment asking to reopen it is drafted, not posted. Observe the next suspend-then-hibernate resume.
+  Closed 2026-10-29 in favour of #15908, which does not touch the hook (4.5.0-3 still zeroes with no restore); a reopen request was posted 2026-11-06 and is unanswered (checked 2026-11-11), so the step stays.
+  Observe the next suspend-then-hibernate resume.
 - `nightlight-schedule-refresh.sh`: [#13684](https://github.com/omacom/omarchy/pull/13684) (worktree `~/Projects/omarchy-nightlight`) re-probes hyprsunset a second past every minute, so the 07:00/20:00 switches reach the bar ([issue #8286](https://github.com/omacom/omarchy/issues/8286)); `nightlight-probe-guard.patch` drops a probe that lands while a toggle is applying.
   Observe the next scheduled switches, including one crossed while suspended.
-  [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) merged 2026-10-09, but the newest release is still v0.4.0 (2026-07-13) and the installed binary has no `on-switch` flag, so the polling stays until a release ships (checked 2026-10-21); `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` then replaces it.
+  [hyprwm/hyprsunset#95](https://github.com/hyprwm/hyprsunset/pull/95) (per-profile `on-switch`) merged 2026-10-09, but the newest release is still v0.4.0 (2026-07-13) and the installed binary has no `on-switch` flag, so the polling stays until the first release after v0.4.0 ships (checked 2026-11-11; no later tag exists yet); `on-switch = omarchy-shell -q nightlight refresh` in `hypr/hyprsunset.conf` then replaces it.
 - `pi-theme-agent-dir.sh`: applies [#13693](https://github.com/omacom/omarchy/pull/13693), so `omarchy-theme-set-pi` honours `PI_CODING_AGENT_DIR` ([issue #13691](https://github.com/omacom/omarchy/issues/13691)).
+  #13693 closed unmerged 2026-11-07 for review-queue hygiene; #13691 is still open and 4.5.0-3 still hardcodes the path, so the patch stays (checked 2026-11-11).
 - `default-editor-mime.sh`: applies [#7446](https://github.com/omacom/omarchy/pull/7446), so text files opened from a file manager follow the menu's editor; `mime.sh` points at its handler and keeps doing so after the step goes.
   A review proposing the handler in the shipped `mimeapps.list` instead is on the PR, branch `default-editor-handler-review` on the fork; refresh the patch if the PR adopts it.
 - `default-filemanager.sh`: applies [#10542](https://github.com/omacom/omarchy/pull/10542), a Defaults entry for the file manager; Super + E calls its `omarchy-launch-filemanager`, so revert that binding if the PR is rejected.
@@ -109,7 +111,7 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 ## pi session naming
 
 ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/session-name.ts`.
-The session-id fix for opencode gateways ([TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19), merged 2026-09-28) ships in `pi-session-name` 0.1.7 (2026-10-08), a package of its own, not in `pi-agent-extensions`.
+The session-id fix for opencode gateways ([TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19), merged 2026-09-28) shipped as `@tinysquid/pi-auto-session-name` 0.2.2 (published with the merge), not in `pi-session-name` (a different package).
 That package names with the session's own model and knows nothing about herdr tabs, while ours runs on the cheap alias tier and renames the tab over the socket, so the extension stays (checked 2026-10-18).
 
 ## pi permission reviewer
