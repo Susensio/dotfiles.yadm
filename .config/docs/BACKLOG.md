@@ -1,5 +1,7 @@
 # Backlog
 
+- yadm | Secrets in sops + age, and new-machine logins approved from a phone: designed, the login half built on a branch, waiting on the owner's acceptance and one-time key setup.
+  See `yadm/PROPOSAL-secrets.md`.
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care. Omarchy snapshots only `/` (config `root`), only before updates, and disables `snapper-timeline.timer`; nothing covers `/home`, so the 2026-09-30 `yadm reset --hard` that wiped every uncommitted tracked change took hours of session forensics to undo (most recovered, `codex/config.toml` lost).
   Shape: a `home` config (hourly, keep ~24 hourly / 7 daily / 4 weekly) as an idempotent bootstrap step plus a short ADR, one `pkexec`, and `btrfs-assistant` (Arch `extra`) as the GUI to browse and restore.
   Care points: Omarchy's `install/config/snapper.sh` rewrites `SNAPPER_CONFIGS="root"` in `/etc/conf.d/snapper`, which silently drops a `home` timeline from the stock timers, so run `home` from its own systemd timer; `omarchy-snapshot create` loops over every config, so update snapshots will include `/home` too; make `~/.cache` (and other churny dirs) separate subvolumes so snapshots stay small; snapshots are not backups (same disk).
