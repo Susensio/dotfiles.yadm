@@ -67,7 +67,8 @@ A suspected leak of the key: the same, and rotate everything, since git history 
 Agreed with the homelab repository's plans:
 
 - `nuc`'s service secrets are sops files in that repository, encrypted to `nuc`'s root-only age key and the owner's.
-- Its agent gets a Unix user, a GitHub account and a signing key of its own, and none of the owner's credentials; it keeps sudo.
+- Its agent gets a Unix user and a signing key of its own, so its commits are told from the owner's; it keeps sudo, and works on GitHub with a token of the owner's.
+  A GitHub account of its own is the step to take if it starts opening pull requests on other people's repositories.
   Commits signed by the owner or by the agent deploy.
 - gickup mirrors every repository of the owner's onto `nuc`, `secrets` included, encrypted as on GitHub.
 - `nuc` is rebuilt when its backup disk arrives: Debian and ext4 as now, the agent's user from first boot instead of a live migration, disk encryption with TPM unlock if the box has a TPM. Nothing here depends on the encryption.
@@ -80,7 +81,7 @@ Agreed with the homelab repository's plans:
 - `key.age` is on GitHub and mirrored to `nuc`, so only the passphrase protects it there.
 - sops encrypts values, not names: variable and file names are readable to anyone who can read the repository.
 - `gh` logins cannot be revoked one machine at a time.
-- Until `nuc` is rebuilt, its agent runs as the owner with the owner's GitHub token.
+- The homelab agent acts on GitHub as the owner, and until `nuc` is rebuilt it also runs as the owner.
 
 ## Weighed and dropped
 
