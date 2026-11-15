@@ -87,7 +87,7 @@ Otherwise one entry per line, with an indented block under any entry needing a r
 # Backlog
 
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
-  See tmux/PROPOSAL-tmux-notify.md.
+  See docs/plans/tmux-notify.md.
 - auth | Token refresh fails after 24h offline.
   Only when the refresh lands during clock skew over 60s.
   Tried: widening the leeway window, no change.
