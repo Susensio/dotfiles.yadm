@@ -88,9 +88,33 @@ Agreed with the homelab repository (`docs/plan-secrets.md` and `docs/plan-hermes
 
 ## Build
 
-1. Done on the branch, to test on `dell` and merge: the login warnings, `new-machine`'s logins, `sops` and `age` declared, the agent denies, `docs/access.md`.
-2. The owner, by hand, outside any AI session: `age-keygen`, `key.age`, the paper copy, the `secrets` repository, moving the `.env` files in.
-   Not before the homelab agent has its own deploy keys in place of the owner's `gh` token.
-3. Then: the key step in `new-machine`, the manifest step with its passphrase path for unencrypted machines, the `maintenance` check, and the ADR.
+Nothing below is done until its line says so; `docs/STATE.md` tracks where this stands.
+
+**1. The login half: built on branch `ccr-b7a9887e-24583a`, to test on `dell` and merge.**
+It holds the login warnings, `new-machine`'s logins, `sops` and `age` declared, the agent denies and `docs/access.md`.
+Checks before merging:
+
+- `tailscale up --qr --ssh --operator=$USER` prints a QR code (on a logged-in machine, read it from `tailscale up --help` instead of logging out).
+- `GH_BROWSER=true gh auth login --hostname github.com --git-protocol https --web --scopes admin:ssh_signing_key` prints a code and opens no browser.
+- In Claude and in pi, asking the agent to run `sops --version` or `age --version` is refused.
+
+**2. The owner's one-time setup, by hand, outside any AI session.**
+Not before the homelab agent has its own deploy keys in place of the owner's `gh` token.
+
+    age-keygen -o key.txt                 # prints the public key, age1...
+    age -p -o key.age key.txt             # asks the six-or-seven-word passphrase
+    # print key.txt on paper, then:
+    install -D -m 600 key.txt ~/.config/sops/age/keys.txt && shred -u key.txt
+
+    gh repo create secrets --private --clone && cd secrets
+    printf 'creation_rules:\n  - age: age1...\n' > .sops.yaml
+    mv ../key.age .
+    cp ~/.config/aichat/.env aichat.env && sops -e -i aichat.env    # once per .env file
+    git add -A && git commit -m "secrets: first files" && git push
+
+The same `age1...` public key goes to the homelab repository as the administrator's recipient.
+
+**3. The rest, once `secrets` exists.**
+The key step in `new-machine`, the manifest step with its passphrase path for unencrypted machines, the `maintenance` check, then the ADR and the removal of this file.
 
 Untested: `SOPS_AGE_KEY` carrying the key for one run, and whether `GH_BROWSER=true` keeps `gh` from opening a browser.
