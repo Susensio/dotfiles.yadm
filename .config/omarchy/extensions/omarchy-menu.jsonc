@@ -4,7 +4,11 @@
   "remove.preinstalls": { "when": "false" },
   "install.preinstalls": { "when": "false" },
   // Sleep like the lid does, per ADR-0069; suspend-then-hibernate fails without a hibernation target
+  // BUG: 4.5 blanks every field an override omits, so label, icon and when are restated here; drop them once the merge fix lands (omacom/omarchy#15229)
   "system.suspend": {
+    "label": "Suspend",
+    "icon": "󰒲",
+    "when": "! omarchy-toggle-enabled suspend-off && ! omarchy-sleep-disabled",
     "action": "if omarchy-hibernation-available; then systemctl suspend-then-hibernate; else systemctl suspend; fi"
   }
 }

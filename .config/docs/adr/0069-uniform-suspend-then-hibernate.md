@@ -22,3 +22,9 @@ A per-caller AC check (the lid's old `HandleLidSwitchExternalPower=suspend`) was
 Unplugging a sleeping laptop now starts the hibernate countdown instead of leaving it in s2idle indefinitely.
 A plain `systemctl suspend` typed by hand still only suspends; accepted, since no config reaches it short of wrapping `systemctl`.
 The menu override masks any upstream change to what Suspend runs, while its label, icon, guard and position keep following upstream.
+
+## Corrections
+
+2026-11-14: the last Consequence said the entry's label, icon and guard keep following upstream.
+Omarchy 4.5's merge blanks every field a user override omits, so reusing the id for the action alone left the row labelled `system.suspend`, iconless and without its `when:` guard; the tracked extension restates all three beside the action until the merge fix lands ([omacom/omarchy#15229](https://github.com/omacom/omarchy/issues/15229), open, with [#10007](https://github.com/omacom/omarchy/pull/10007) and [#12255](https://github.com/omacom/omarchy/pull/12255) pending).
+The action and the position still override upstream as decided above.
