@@ -35,14 +35,16 @@ if ! command -v gh &>/dev/null; then
 fi
 
 # Listing and creating signing keys needs this scope, which gh's default login lacks.
-# Login and refresh are browser flows, so a step only names the command (docs/adr/0111).
+# A step never starts a login, so it only names the command (docs/adr/0111).
+# The device flow prints a code any signed-in browser can approve at
+# github.com/login/device; GH_BROWSER=true keeps it from opening one here (docs/plans/secrets.md).
 scope=admin:ssh_signing_key
 if ! gh auth status &>/dev/null; then
-  log warn "signing key: gh not logged in; run 'gh auth login --web --scopes $scope'"
+  log warn "signing key: gh not logged in; run 'GH_BROWSER=true gh auth login --hostname github.com --git-protocol https --web --scopes $scope' and approve the code at github.com/login/device"
   exit 0
 fi
 if ! gh api -i user 2>/dev/null | grep -i '^x-oauth-scopes:' | grep -q "$scope"; then
-  log warn "signing key: gh lacks the $scope scope; run 'gh auth refresh --scopes $scope'"
+  log warn "signing key: gh lacks the $scope scope; run 'GH_BROWSER=true gh auth refresh --hostname github.com --scopes $scope' and approve the code at github.com/login/device"
   exit 0
 fi
 

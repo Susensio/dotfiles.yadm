@@ -19,6 +19,7 @@
       "*auth.json": "deny",
       "~/.ssh/*": "deny",
       "~/.gnupg/*": "deny",
+      "~/.config/sops/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -62,6 +63,7 @@
       "*auth.json": "deny",
       "~/.ssh/*": "deny",
       "~/.gnupg/*": "deny",
+      "~/.config/sops/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -210,6 +212,22 @@
       "* sudo *": {
         "action": "deny",
         "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
+      },
+      "sops *": {
+        "action": "deny",
+        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+      },
+      "* sops *": {
+        "action": "deny",
+        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+      },
+      "age *": {
+        "action": "deny",
+        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+      },
+      "* age *": {
+        "action": "deny",
+        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
       }
     },
     "skill": "allow",

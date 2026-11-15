@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Set up a new machine: install curl and git, clone this repository over any
-# file in the way, run `yadm bootstrap`, and leave yadm usable in this shell.
+# file in the way, run `yadm bootstrap` (with the logins in between at a
+# terminal), and leave yadm usable in this shell.
 # Source it (a `bash <(...)` run does the same without the yadm function):
 #   source <(curl -fsSL https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master/.config/yadm/new-machine)
 # Needs curl or wget to fetch itself.
@@ -42,6 +43,46 @@ source <(curl -fsSL https://bootstrap.yadm.io) || return 1
   fi
   yadm bootstrap
 ) || return 1
+
+# Logins a bootstrap step never starts (ADR-0111), run here because a person is
+# at the terminal; a phone or any signed-in machine approves them (docs/plans/secrets.md).
+if [[ -t 0 && -t 1 ]]; then
+  (
+    set -euo pipefail
+
+    # environment.d applies only from the next login, as in the bootstrap
+    set -a
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/10_xdg.conf"
+    . "${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/11_path.conf"
+    set +a
+
+    logged_in=false
+    if command -v tailscale &> /dev/null \
+      && [[ $(tailscale status --json 2> /dev/null | jq -r .BackendState) == NeedsLogin ]]; then
+      echo "Tailscale: approve this login on your phone or a signed-in machine"
+      tailscale up --qr --ssh --operator="$USER"
+      logged_in=true
+    fi
+
+    scope=admin:ssh_signing_key
+    if command -v gh &> /dev/null; then
+      if ! gh auth status &> /dev/null; then
+        echo "GitHub: approve the code at github.com/login/device on your phone or a signed-in machine"
+        GH_BROWSER=true gh auth login --hostname github.com --git-protocol https --web --scopes "$scope"
+        logged_in=true
+      elif ! gh api -i user 2> /dev/null | grep -i '^x-oauth-scopes:' | grep -q "$scope"; then
+        echo "GitHub: approve the code at github.com/login/device to add the $scope scope"
+        GH_BROWSER=true gh auth refresh --hostname github.com --scopes "$scope"
+        logged_in=true
+      fi
+    fi
+
+    # TODO: clone the secrets repository and decrypt key.age here once it exists (docs/plans/secrets.md).
+
+    # The steps that warned about these logins finish now
+    if $logged_in; then yadm bootstrap; fi
+  ) || return 1
+fi
 
 # The bootstrap links mise's yadm here; a login would put it on PATH
 PATH=$HOME/.local/bin:$PATH
