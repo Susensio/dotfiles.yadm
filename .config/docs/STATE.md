@@ -5,7 +5,8 @@
 Goal: API keys tracked in one private `secrets` repository instead of loose `.env` files, and a new machine set up with one command, two approvals on a phone or another machine, and one passphrase.
 The design, what was dropped and the steps are in `docs/plans/secrets.md`; it is proposed, not accepted, and no ADR exists yet.
 Built: the login half, on branch `ccr-b7a9887e-24583a`, passing CI and untested on a real machine.
-Next, in order: the owner tests and merges that branch on `dell`; the homelab agent gets its own user and deploy keys (the homelab repository's `docs/plan-hermes-user.md`); the owner creates the age key and the `secrets` repository by hand; then the key step, the manifest step and the `maintenance` check are built and the ADR written.
+Next, in order: the owner tests and merges that branch on `dell`; the owner creates the age key and the `secrets` repository by hand; then the key step, the manifest step and the `maintenance` check are built and the ADR written.
+Independent of that, `nuc` is rebuilt when its backup disk arrives, with the homelab agent as its own user from first boot.
 
 ## Omamail keepLoaded patch (2026-11-06)
 
