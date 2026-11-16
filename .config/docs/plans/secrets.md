@@ -62,7 +62,7 @@ A yadm pre-commit hook refuses a commit that would store a file marked for git-c
 
 **Incidents.**
 A lost machine: revoke the GitHub CLI's authorization first (every machine logs in again, one device code each), remove the device from the tailnet, then rotate what that machine could read.
-A suspected leak of a key: rotate every secret it protects, since git history keeps the old ciphertext; git-crypt cannot re-key a repository in place, so a new git-crypt key means re-adding the files under it; a new age key means re-encrypting the files in `secrets` to it.
+A suspected leak of a key: rotate every secret it protects, since git history keeps the old ciphertext; git-crypt cannot re-key a repository in place, so a new git-crypt key means re-adding the files under it; a new passphrase means re-locking the key files in `secrets`.
 
 ## The homelab side
 
