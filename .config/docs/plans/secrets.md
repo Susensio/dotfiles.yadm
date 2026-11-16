@@ -30,8 +30,8 @@ A private repository, `secrets`, holds the keys and nothing else:
 
 Each repository has its own git-crypt key, so a compromised `nuc` leaks the homelab's secrets and not the dotfiles'.
 
-The age key is also printed once on paper.
-One passphrase therefore unlocks everything, and the paper covers a forgotten passphrase or a lost GitHub account.
+One passphrase therefore unlocks everything, and it is kept in the owner's browser password manager, so it cannot be forgotten; reading the secrets then needs both the Google and the GitHub account.
+There is no paper copy: every machine of the owner's holds the key in plain, and losing all of them together with GitHub would cost rotating the API keys, which are rotatable by rule, not data.
 The homelab repository uses git-crypt the same way, with its own key: its secret files are plain in the checkout where compose reads them, and encrypted in git.
 An agent is limited by having an identity of its own, not by rules on the owner's machines.
 A service account, such as the homelab agent's, never gets the key or the repository.
@@ -114,7 +114,7 @@ Not done before step 3's pre-commit hook exists, so a plain secret cannot slip i
 
     age-keygen -o key.txt                       # prints the public key, age1...
     age -p -o key.age key.txt                   # asks the passphrase: four or five random words
-    # print key.txt on paper, then:
+    # save the passphrase in the browser's password manager, then:
     install -D -m 600 key.txt ~/.config/age/key.txt && shred -u key.txt
 
     yadm git-crypt init
