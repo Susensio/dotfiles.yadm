@@ -1,6 +1,6 @@
 # State
 
-## Secrets in sops + age, phone-approved logins (2026-11-15)
+## Secrets with yadm git-crypt, phone-approved logins (2026-11-15, git-crypt since 2026-11-16)
 
 Goal: API keys tracked in one private `secrets` repository instead of loose `.env` files, and a new machine set up with one command, two approvals on a phone or another machine, and one passphrase.
 The design, what was dropped and the steps are in `docs/plans/secrets.md`; it is proposed, not accepted, and no ADR exists yet.

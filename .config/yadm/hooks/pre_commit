@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# A file marked for git-crypt but staged before its .gitattributes line would be
+# committed in plain, and this repository is public (docs/plans/secrets.md).
+# git-crypt status exits non-zero exactly when a marked file is staged unencrypted.
+command -v git-crypt &> /dev/null || exit 0
+# A repository that never ran git-crypt init has nothing marked
+[[ -d $YADM_HOOK_REPO/git-crypt ]] || exit 0
+if ! out=$(GIT_DIR=$YADM_HOOK_REPO GIT_WORK_TREE=$YADM_HOOK_WORK git-crypt status -e 2>&1); then
+  printf '%s\n' "$out" >&2
+  printf '%s\n' "refusing to commit: unstage the file, then add it again now that .gitattributes marks it" >&2
+  exit 1
+fi

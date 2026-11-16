@@ -132,6 +132,6 @@ Not done before step 3's pre-commit hook exists, so a plain secret cannot slip i
     yadm push
 
 **3. The rest, once `secrets` exists.**
-Before step 2: `git-crypt` declared and `sops` dropped, the pre-commit hook, the agent denies for `git-crypt` and its key. After it: the key step in `new-machine`, the `maintenance` check, then the ADR (which also relaxes ADR-0100) and the removal of this file.
+Before step 2, built on branch `ccr-b7a9887e-24583a`: `git-crypt` declared and `sops` dropped, the pre-commit hook (`yadm/hooks/pre_commit`, which refuses when `git-crypt status -e` fails), the agent denies for `git-crypt` and the keys. Debian 13 ships git-crypt 0.7.0. After it: the key step in `new-machine`, the `maintenance` check, then the ADR (which also relaxes ADR-0100) and the removal of this file.
 
 Untested: whether `GH_BROWSER=true` keeps `gh` from opening a browser.
