@@ -4,6 +4,7 @@
 !.gitignore
 !CLAUDE.md
 !settings.json
+!settings.cloud.json
 !keybindings.json
 !statusline.sh
 !agents/

@@ -28,7 +28,10 @@
       "NotebookEdit",
       "PushNotification",
       "RemoteTrigger",
-      "ScheduleWakeup"
+      "ScheduleWakeup",
+      "Bash(sops *)",
+      "Bash(age *)",
+      "Read(~/.config/sops/**)"
     ],
     "ask": [
       "Bash(pkexec *)"
