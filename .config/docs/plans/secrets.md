@@ -56,6 +56,7 @@ ADR-0100 allowed a key without a passphrase only on an encrypted root, and `nuc`
 The rule is relaxed with this plan's ADR: keys without passphrases on the owner's own machines, disk encryption recommended and not required.
 
 **Checks.**
+`bin/secret-add <file>` is how a secret file is tracked: it marks the file in the `.gitattributes` beside it, drops a `.gitignore` line that named it, stages it, checks the staged copy is ciphertext, and commits; it refuses a file already committed in plain, which would need rotating rather than encrypting.
 A yadm pre-commit hook refuses a commit that would store a file marked for git-crypt in plain (`git-crypt status -e`): a file committed before its `.gitattributes` line is published unencrypted.
 `maintenance` reports commits in `secrets` not yet pushed.
 
@@ -124,11 +125,8 @@ Not done before step 3's pre-commit hook exists, so a plain secret cannot slip i
     mv ../key.age ../dotfiles.git-crypt.key.age .
     git add -A && git commit -m "secrets: keys" && git push
 
-    # then, for each secret file, the attribute first and the file second:
-    echo '.env filter=git-crypt diff=git-crypt' >> ~/.config/aichat/.gitattributes
-    yadm add ~/.config/aichat/.gitattributes && yadm commit -m "aichat: encrypt its .env"
-    yadm add ~/.config/aichat/.env && yadm commit -m "aichat: track its .env, encrypted"
-    yadm git-crypt status -e                     # must list nothing
+    # then, for each secret file:
+    secret-add ~/.config/aichat/.env
     yadm push
 
 **3. The rest, once `secrets` exists.**
