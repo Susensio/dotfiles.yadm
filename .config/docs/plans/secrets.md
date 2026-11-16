@@ -1,4 +1,4 @@
-# Proposal: secrets with yadm and git-crypt, one age key, and new-machine logins approved from a phone
+# Proposal: secrets with yadm and git-crypt, one passphrase, and new-machine logins approved from a phone
 
 Status: proposed, not accepted. A design write-up, not a decision — see `docs/BACKLOG.md`.
 An ADR is written when it is accepted; until then this file changes freely.
@@ -19,22 +19,22 @@ git-crypt's key is a random key file, so the public ciphertext cannot be guessed
 This is yadm's own supported mechanism (`yadm git-crypt`), and it needs no decrypt step of ours.
 Only secrets that can be rotated go in; recovery material (GitHub 2FA codes, the LUKS passphrase) stays offline.
 
-**One age key opens everything.**
-The owner's age key, one line of text, is stored unprotected in `~/.config/age/key.txt` on every machine of the owner's, `nuc` included, so nothing prompts after setup.
-It does one job: it protects the git-crypt keys.
-A private repository, `secrets`, holds the keys and nothing else:
-
-- `key.age`: the age key, protected with a passphrase of four or five random words, not reused anywhere (`age -p`, whose scrypt makes each guess cost about a second, so an attacker holding the file manages thousands of guesses a second, not billions);
-- `dotfiles.git-crypt.key.age`: the dotfiles' git-crypt key, encrypted to the age key;
-- `homelab.git-crypt.key.age`: the homelab repository's git-crypt key, encrypted to the age key.
-
+**One passphrase opens everything.**
 Each repository has its own git-crypt key, so a compromised `nuc` leaks the homelab's secrets and not the dotfiles'.
+After `git-crypt unlock` a key lives inside its repository's own git directory, so nothing prompts day to day.
+To reach a new machine, each key is exported and locked with one passphrase of four or five random words, not reused anywhere (`age -p`, whose scrypt makes each guess cost about a second, so an attacker holding the file manages thousands of guesses a second, not billions).
+A private repository, `secrets`, holds those locked keys and nothing else:
 
-One passphrase therefore unlocks everything, and it is kept in the owner's browser password manager, so it cannot be forgotten; reading the secrets then needs both the Google and the GitHub account.
-There is no paper copy: every machine of the owner's holds the key in plain, and losing all of them together with GitHub would cost rotating the API keys, which are rotatable by rule, not data.
+- `dotfiles.git-crypt.key.age`;
+- `homelab.git-crypt.key.age`.
+
+An age key pair in between (passphrase, then age key, then git-crypt keys) was dropped as a layer with no job once the homelab left sops: age is only the tool that applies the passphrase.
+
+The passphrase is kept in the owner's browser password manager, so it cannot be forgotten; reading the secrets then needs both the Google and the GitHub account.
+There is no paper copy: every unlocked machine of the owner's holds the keys, and losing all of them together with GitHub would cost rotating the API keys, which are rotatable by rule, not data.
 The homelab repository uses git-crypt the same way, with its own key: its secret files are plain in the checkout where compose reads them, and encrypted in git.
 An agent is limited by having an identity of its own, not by rules on the owner's machines.
-A service account, such as the homelab agent's, never gets the key or the repository.
+A service account, such as the homelab agent's, never gets the dotfiles' key or the `secrets` repository.
 
 **New machine: one command, one device the owner has, one passphrase.**
 `new-machine` runs the bootstrap, then, at a terminal, loads `environment.d` and runs what is missing:
@@ -42,13 +42,13 @@ A service account, such as the homelab agent's, never gets the key or the reposi
 1. `tailscale up --qr` and `gh auth login` in device-code mode with the local browser suppressed.
    Both are approved on the phone or on a machine with a signed-in browser; with neither, on any browser with the GitHub password and a recovery code.
    A headless machine is no different.
-2. Clone `secrets`, decrypt `key.age` with the passphrase into `~/.config/age/key.txt`, decrypt `dotfiles.git-crypt.key.age` with it, and `yadm git-crypt unlock` the dotfiles with that key, which puts every secret in place.
+2. Clone `secrets`, decrypt `dotfiles.git-crypt.key.age` with the passphrase into a temporary file, `yadm git-crypt unlock` the dotfiles with it, which puts every secret in place, and shred the file.
 
 Then it runs the bootstrap again.
 Bootstrap steps keep ADR-0111's rule: a step never starts a login, so hooks, CI and the post-update run only warn.
 
 **Agents.**
-Claude and pi are denied `age` and `git-crypt` outright, and reading the age key file and the git-crypt key yadm keeps under its repository.
+Claude and pi are denied `age` and `git-crypt` outright, and reading the git-crypt key yadm keeps under its repository.
 These are guardrails against accidents, not isolation: the keys are usable by anything running as the owner, and an unlocked secret file is readable by an agent whatever the denies say.
 
 **Signing keys.**
@@ -112,18 +112,15 @@ Checks before merging:
 **2. The owner's one-time setup, by hand, outside any AI session.**
 Not done before step 3's pre-commit hook exists, so a plain secret cannot slip into the public repository.
 
-    age-keygen -o key.txt                       # prints the public key, age1...
-    age -p -o key.age key.txt                   # asks the passphrase: four or five random words
-    # save the passphrase in the browser's password manager, then:
-    install -D -m 600 key.txt ~/.config/age/key.txt && shred -u key.txt
-
+    cd "$(mktemp -d)"
     yadm git-crypt init
     yadm git-crypt export-key gc.key
-    age -r age1... -o dotfiles.git-crypt.key.age gc.key && shred -u gc.key
+    age -p -o dotfiles.git-crypt.key.age gc.key && shred -u gc.key   # four or five random words, saved in the password manager
 
+    d=$PWD; mkdir -p ~/Projects && cd ~/Projects
     gh repo create secrets --private --clone && cd secrets
-    mv ../key.age ../dotfiles.git-crypt.key.age .
-    git add -A && git commit -m "secrets: keys" && git push
+    mv "$d"/dotfiles.git-crypt.key.age .
+    git add -A && git commit -m "secrets: dotfiles key" && git push -u origin HEAD
 
     # then, for each secret file:
     yadm add-secret ~/.config/aichat/.env
