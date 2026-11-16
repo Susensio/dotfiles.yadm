@@ -52,7 +52,7 @@ fi
 
 # A step never starts a login: it warns with the command on every run until
 # someone does it (docs/adr/0111). --qr lets a phone or another signed-in
-# machine approve it, so a headless box needs no browser (docs/plans/secrets.md).
+# machine approve it, so a headless box needs no browser (docs/adr/0115).
 # up resets any preference it is not given, so it repeats the operator above
 # and the SSH opt-in below.
 if [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then

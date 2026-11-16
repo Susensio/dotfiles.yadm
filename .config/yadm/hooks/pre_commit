@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A file marked for git-crypt but staged before its .gitattributes line would be
-# committed in plain, and this repository is public (docs/plans/secrets.md).
+# committed in plain, and this repository is public (docs/adr/0115).
 # git-crypt status exits non-zero exactly when a marked file is staged unencrypted.
 command -v git-crypt &> /dev/null || exit 0
 # A repository that never ran git-crypt init has nothing marked

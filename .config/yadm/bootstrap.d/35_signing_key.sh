@@ -37,7 +37,7 @@ fi
 # Listing and creating signing keys needs this scope, which gh's default login lacks.
 # A step never starts a login, so it only names the command (docs/adr/0111).
 # The device flow prints a code any signed-in browser can approve at
-# github.com/login/device; GH_BROWSER=true keeps it from opening one here (docs/plans/secrets.md).
+# github.com/login/device; GH_BROWSER=true keeps it from opening one here (docs/adr/0115).
 scope=admin:ssh_signing_key
 if ! gh auth status &>/dev/null; then
   log warn "signing key: gh not logged in; run 'GH_BROWSER=true gh auth login --hostname github.com --git-protocol https --web --scopes $scope' and approve the code at github.com/login/device"

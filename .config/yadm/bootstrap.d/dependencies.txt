@@ -14,5 +14,5 @@ cmp diffutils
 envsubst gettext
 # 12_locale.sh generates the locale environment.d asks for; Debian ships locale-gen apart from libc
 locale-gen locales
-# docs/plans/secrets.md: secrets in this repository are encrypted with yadm git-crypt; same package name on pacman and apt
+# docs/adr/0115: secrets in this repository are encrypted with yadm git-crypt; same package name on pacman and apt
 git-crypt

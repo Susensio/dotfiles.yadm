@@ -217,19 +217,19 @@
       },
       "git-crypt *": {
         "action": "deny",
-        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       },
       "* git-crypt *": {
         "action": "deny",
-        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       },
       "age *": {
         "action": "deny",
-        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       },
       "* age *": {
         "action": "deny",
-        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       }
     },
     "skill": "allow",
