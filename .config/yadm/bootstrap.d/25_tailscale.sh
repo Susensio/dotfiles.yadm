@@ -50,10 +50,13 @@ if ! tailscale debug prefs 2>/dev/null | grep -q "\"OperatorUser\": \"$USER\""; 
   sudo tailscale set --operator="$USER"
 fi
 
-# Login needs a browser, so a step never starts it: it warns with the command on
-# every run until someone does it (docs/adr/0111).
+# A step never starts a login: it warns with the command on every run until
+# someone does it (docs/adr/0111). --qr lets a phone or another signed-in
+# machine approve it, so a headless box needs no browser (docs/plans/secrets.md).
+# up resets any preference it is not given, so it repeats the operator above
+# and the SSH opt-in below.
 if [[ $(tailscale status --json 2>/dev/null | jq -r .BackendState) == NeedsLogin ]]; then
-  log warn "tailscale: not logged in; run 'tailscale up'"
+  log warn "tailscale: not logged in; run 'tailscale up --qr --ssh --operator=$USER' and approve it on your phone or a signed-in machine"
   exit 0
 fi
 
