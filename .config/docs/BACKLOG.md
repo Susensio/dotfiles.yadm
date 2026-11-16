@@ -1,6 +1,6 @@
 # Backlog
 
-- yadm | Secrets in sops + age, and new-machine logins approved from a phone: designed, the login half built on a branch, waiting on the owner's acceptance and one-time key setup.
+- yadm | Secrets with yadm git-crypt and one age key, and new-machine logins approved from a phone: designed, the login half built on a branch, waiting on the owner's acceptance and one-time key setup.
   See `docs/plans/secrets.md`.
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care. Omarchy snapshots only `/` (config `root`), only before updates, and disables `snapper-timeline.timer`; nothing covers `/home`, so the 2026-09-30 `yadm reset --hard` that wiped every uncommitted tracked change took hours of session forensics to undo (most recovered, `codex/config.toml` lost).
   Shape: a `home` config (hourly, keep ~24 hourly / 7 daily / 4 weekly) as an idempotent bootstrap step plus a short ADR, one `pkexec`, and `btrfs-assistant` (Arch `extra`) as the GUI to browse and restore.

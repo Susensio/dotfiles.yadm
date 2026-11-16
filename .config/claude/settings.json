@@ -29,9 +29,11 @@
       "PushNotification",
       "RemoteTrigger",
       "ScheduleWakeup",
-      "Bash(sops *)",
+      "Bash(git-crypt *)",
+      "Bash(yadm git-crypt *)",
       "Bash(age *)",
-      "Read(~/.config/sops/**)"
+      "Read(~/.config/age/**)",
+      "Read(~/.local/share/yadm/repo.git/git-crypt/**)"
     ],
     "ask": [
       "Bash(pkexec *)"

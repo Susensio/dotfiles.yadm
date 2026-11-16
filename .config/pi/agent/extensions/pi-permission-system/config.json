@@ -19,7 +19,8 @@
       "*auth.json": "deny",
       "~/.ssh/*": "deny",
       "~/.gnupg/*": "deny",
-      "~/.config/sops/*": "deny",
+      "~/.config/age/*": "deny",
+      "~/.local/share/yadm/repo.git/git-crypt/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -63,7 +64,8 @@
       "*auth.json": "deny",
       "~/.ssh/*": "deny",
       "~/.gnupg/*": "deny",
-      "~/.config/sops/*": "deny",
+      "~/.config/age/*": "deny",
+      "~/.local/share/yadm/repo.git/git-crypt/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -213,21 +215,21 @@
         "action": "deny",
         "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
       },
-      "sops *": {
+      "git-crypt *": {
         "action": "deny",
-        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
       },
-      "* sops *": {
+      "* git-crypt *": {
         "action": "deny",
-        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
       },
       "age *": {
         "action": "deny",
-        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
       },
       "* age *": {
         "action": "deny",
-        "reason": "The owner's secrets and age key are not for agents: run sops and age yourself (docs/plans/secrets.md)."
+        "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/plans/secrets.md)."
       }
     },
     "skill": "allow",
