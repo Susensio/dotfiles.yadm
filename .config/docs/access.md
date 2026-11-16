@@ -46,6 +46,6 @@ A new machine's line in `git/allowed_signers` is printed for a person to commit,
 No step starts a login.
 On every run a step that needs a login warns with the exact command and exits, and the warning reaches `~/.local/state/yadm/bootstrap.log` for `maintenance` to replay ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
 
-Neither login needs a browser on the machine itself (`docs/plans/secrets.md`).
+Neither login needs a browser on the machine itself ([ADR-0115](adr/0115-yadm-git-crypt-one-passphrase.md)).
 `tailscale up --qr` prints a URL and a QR code, and `gh auth login --web` with `GH_BROWSER=true` prints a code for `github.com/login/device`; the phone or any machine with a signed-in browser approves either, so a headless machine is set up the same way.
 `new-machine` runs both when a person is at its terminal, between its two bootstrap passes; hooks, CI and the post-update run only see the warnings.

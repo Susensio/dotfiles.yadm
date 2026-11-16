@@ -1,7 +1,7 @@
 # Backlog
 
-- yadm | Secrets with yadm git-crypt and one age key, and new-machine logins approved from a phone: designed, the login half built on a branch, waiting on the owner's acceptance and one-time key setup.
-  See `docs/plans/secrets.md`.
+- yadm | Secrets, what is left after [ADR-0115](adr/0115-yadm-git-crypt-one-passphrase.md): the homelab repository takes git-crypt with its own key, locked with the same passphrase and kept at its root as `git-crypt.key.age`, not in `~/Projects/secrets`; `new-machine` clones `secrets`, runs `age -d` and `yadm git-crypt unlock` where its `TODO:` stands; `maintenance` reports unpushed commits in `~/Projects/secrets`; the login half's checks run on a real machine (`tailscale up --qr` prints a QR code, `GH_BROWSER=true gh auth login --web` opens no browser).
+  Until `nuc` is rebuilt, the homelab agent runs as the owner there.
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care. Omarchy snapshots only `/` (config `root`), only before updates, and disables `snapper-timeline.timer`; nothing covers `/home`, so the 2026-09-30 `yadm reset --hard` that wiped every uncommitted tracked change took hours of session forensics to undo (most recovered, `codex/config.toml` lost).
   Shape: a `home` config (hourly, keep ~24 hourly / 7 daily / 4 weekly) as an idempotent bootstrap step plus a short ADR, one `pkexec`, and `btrfs-assistant` (Arch `extra`) as the GUI to browse and restore.
   Care points: Omarchy's `install/config/snapper.sh` rewrites `SNAPPER_CONFIGS="root"` in `/etc/conf.d/snapper`, which silently drops a `home` timeline from the stock timers, so run `home` from its own systemd timer; `omarchy-snapshot create` loops over every config, so update snapshots will include `/home` too; make `~/.cache` (and other churny dirs) separate subvolumes so snapshots stay small; snapshots are not backups (same disk).
