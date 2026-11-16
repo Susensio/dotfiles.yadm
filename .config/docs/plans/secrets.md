@@ -24,7 +24,7 @@ The owner's age key, one line of text, is stored unprotected in `~/.config/age/k
 It does one job: it protects the git-crypt keys.
 A private repository, `secrets`, holds the keys and nothing else:
 
-- `key.age`: the age key, protected with a passphrase of six or seven random words (`age -p`);
+- `key.age`: the age key, protected with a passphrase of four or five random words, not reused anywhere (`age -p`, whose scrypt makes each guess cost about a second, so an attacker holding the file manages thousands of guesses a second, not billions);
 - `dotfiles.git-crypt.key.age`: the dotfiles' git-crypt key, encrypted to the age key;
 - `homelab.git-crypt.key.age`: the homelab repository's git-crypt key, encrypted to the age key.
 
@@ -113,7 +113,7 @@ Checks before merging:
 Not done before step 3's pre-commit hook exists, so a plain secret cannot slip into the public repository.
 
     age-keygen -o key.txt                       # prints the public key, age1...
-    age -p -o key.age key.txt                   # asks the six-or-seven-word passphrase
+    age -p -o key.age key.txt                   # asks the passphrase: four or five random words
     # print key.txt on paper, then:
     install -D -m 600 key.txt ~/.config/age/key.txt && shred -u key.txt
 
