@@ -41,7 +41,10 @@
       "~/.config/pip/pip.conf": "deny",
       "*.pfx": "deny",
       "*.p8": "deny",
-      "~/.config/hub/*": "deny"
+      "~/.config/hub/*": "deny",
+      "*id_rsa*": "deny",
+      "*id_ed25519*": "deny",
+      "*.gpg": "deny"
     },
     "path_write": {
       "~/.config/pi/agent/extensions/pi-permission-system/config.json": "ask"
@@ -87,7 +90,10 @@
       "~/.config/pip/pip.conf": "deny",
       "*.pfx": "deny",
       "*.p8": "deny",
-      "~/.config/hub/*": "deny"
+      "~/.config/hub/*": "deny",
+      "*id_rsa*": "deny",
+      "*id_ed25519*": "deny",
+      "*.gpg": "deny"
     },
     "external_directory_write": {
       "*": "ask",
@@ -118,8 +124,6 @@
       "/var/log/*": "allow",
       "/run": "allow",
       "/run/*": "allow",
-      "/proc": "allow",
-      "/proc/*": "allow",
       "/boot": "allow",
       "/boot/*": "allow",
       "/sys/*": "allow"
@@ -159,8 +163,10 @@
       "uniq *": "allow",
       "mkdir *": "allow",
       "touch *": "allow",
-      "git branch*": "allow",
-      "git remote*": "allow",
+      "git branch --show-current*": "allow",
+      "git branch -a*": "allow",
+      "git branch -vv*": "allow",
+      "git remote -v*": "allow",
       "yadm alt*": "allow",
       "grep *": "allow",
       "cd *": "allow",
@@ -190,8 +196,6 @@
       "journalctl --user*": "allow",
       "python3": "allow",
       "python3 -I": "allow",
-      "cp -r*": "allow",
-      "sed -i*": "allow",
       "export GIT_DIR=$HOME/.local/share/yadm/repo.git": "allow",
       "export GIT_DIR=\"/home/susensio/.local/share/yadm/repo.git\"": "allow",
       "export GIT_DIR=\"$HOME/.local/share/yadm/repo.git\" GIT_WORK_TREE=\"$HOME\"": "allow",
@@ -233,6 +237,14 @@
         "action": "deny",
         "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       },
+      "* ~/.ssh*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.gnupg*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.config/age*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.local/share/keyrings*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.local/share/gnupg*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.config/gh*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* *auth.json*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* *.env": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
       "gpg *": {
         "action": "deny",
         "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/plans/vault.md)."
