@@ -22,7 +22,7 @@
     "alias/top",
     "alias/mid",
     "alias/cheap",
-    "claude-bridge/claude-fable-5-1",
+    "claude-bridge/claude-fable-5-2",
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
     "claude-bridge/claude-haiku-5-5",
@@ -44,6 +44,8 @@
     "opencode-go/minimax-m3.1-flash",
     "opencode-go/mimo-v2.6-flash",
     "opencode-go/beam-free",
+    "opencode-go/longcat-2.5-free",
+    "opencode-go/hy4-flash-free",
     "mistral/ministral-14b-2512"
   ],
   "extensionChangelogVersions": {
