@@ -1,6 +1,6 @@
 # Proposal: a pass vault in the `secrets` repository, and git-crypt unlocked with its GPG key
 
-Status: proposed on 2026-11-18, not built. It would amend [ADR-0115](../adr/0115-yadm-git-crypt-one-passphrase.md) where it says how the git-crypt key is kept; how secrets are encrypted in the dotfiles does not change.
+Status: accepted by the owner on 2026-11-18, not built; the migration below is done by hand, outside any AI session. It would amend [ADR-0115](../adr/0115-yadm-git-crypt-one-passphrase.md) where it says how the git-crypt key is kept; how secrets are encrypted in the dotfiles does not change.
 
 ## Problem
 
@@ -50,10 +50,63 @@ On `nuc` the GPG key can be deleted from the keyring after the unlock, so the ag
 
 This replaces the `TODO:` in `new-machine` (clone `secrets`, `age -d`, `yadm git-crypt unlock`).
 
-## Build, once accepted
+## Migration
 
-1. By hand, outside any AI session: make the GPG key, export it protected, `pass init` in `secrets`, move the restic password and recovery codes in, `yadm git-crypt add-gpg-user`, test an unlock in a throwaway clone, then delete `dotfiles.git-crypt.key.age`.
-2. `new-machine`: the three steps above; `gnupg` and `pass` in the dependencies; the agent denies.
-3. ADR-0115 amended (the key part) and `docs/secrets.md` brought in line.
+The old path, `dotfiles.git-crypt.key.age` with its passphrase, stays working until the new one has been proven on two machines.
+Every step ends with a check; a failed check stops the migration, and the old path is still there.
+
+**0. Before anything.**
+- `gnupg` and `pass` installed on `dell` and `nuc`; the agent denies for `pass` and `gpg` merged first.
+- Choose the master passphrase (five or six random words) and write the paper copy first. Type it three times from the paper before using it.
+- Note the current state: `yadm status` clean, `sha256sum ~/.config/aichat/.env` written down, `secrets` pushed.
+
+**1. The GPG key, on `dell`.**
+
+       gpg --quick-gen-key "secrets vault" ed25519 cert,sign never     # the master passphrase
+       gpg --quick-add-key <FPR> cv25519 encr never
+
+No expiry: an expired subkey stops `pass` and git-crypt from encrypting.
+Check: `gpg --list-secret-keys <FPR>` shows the key and its encryption subkey.
+
+**2. The exported key is protected.** The one mistake that cannot be seen later is an export without a passphrase, committed.
+
+       gpg --export-secret-keys --armor <FPR> > ~/Projects/secrets/vault-key.asc
+       G=$(mktemp -d); gpg --homedir "$G" --import ~/Projects/secrets/vault-key.asc
+       echo test | gpg --homedir "$G" -e -r <FPR> | gpg --homedir "$G" -d     # must ask for the passphrase
+       rm -rf "$G"
+
+Check: the decrypt asked for the passphrase and printed `test`. Only then `git add vault-key.asc`.
+
+**3. The store.**
+`PASSWORD_STORE_DIR=~/Projects/secrets` in `environment.d`, then `pass init <FPR>`, `pass insert homelab/restic`, the GitHub recovery codes as `github/recovery-codes`.
+Check on `nuc`: `pass show homelab/restic | sha256sum` equals `sudo sha256sum /etc/homelab/restic-password` (without the trailing newline difference: compare with `printf %s`). Commit and push `secrets`.
+
+**4. git-crypt for the GPG key.** This commits `.git-crypt/keys/default/0/<FPR>.gpg` into the public dotfiles: public-key ciphertext, safe, but published for good, so check the fingerprint first.
+
+       yadm git-crypt add-gpg-user <FPR>
+
+Check in a throwaway clone with a fresh keyring, nothing from the live machine:
+
+       G=$(mktemp -d); D=$(mktemp -d)
+       gpg --homedir "$G" --import ~/Projects/secrets/vault-key.asc
+       git clone -q https://github.com/Susensio/dotfiles.yadm "$D"
+       (cd "$D" && GNUPGHOME="$G" git-crypt unlock && sha256sum .config/aichat/.env)
+       rm -rf "$G" "$D"
+
+The sum matches the one from step 0. Push the dotfiles.
+
+**5. A second machine.** On `nuc`, as `susensio`: pull `secrets`, `gpg --import vault-key.asc`, `yadm pull`, `yadm git-crypt unlock` (already unlocked: check it decrypts nothing new and `yadm status` stays clean), `pass show homelab/restic`.
+Then delete the secret key from `nuc`'s keyring (`gpg --delete-secret-keys <FPR>`), as the design says.
+
+**6. Retire the old path,** only after steps 4 and 5 passed: `git rm dotfiles.git-crypt.key.age` in `secrets`, the made-up restic entry out of the browser password manager, `new-machine` switched to the new steps.
+The old key file stays in `secrets`' history; it still opens the same git-crypt key, so the old passphrase must not be reused anywhere.
+
+**Rollback** at any step before 6: delete what the step added (`vault-key.asc`, the store files, the `.git-crypt/keys/default/0/` entry via `git rm`), and the old path still works.
+After 6: the old key file is in `secrets`' history (`git show <commit>:dotfiles.git-crypt.key.age`).
+
+## Build after the migration
+
+1. `new-machine`: clone `secrets`, `gpg --import vault-key.asc`, `yadm git-crypt unlock`; `gnupg` and `pass` in the dependencies.
+2. ADR-0115 amended (the key part) and `docs/secrets.md` brought in line.
 
 The homelab side is its own plan (`docs/plans/secrets.md` in that repository): its secrets stay on the box under restic, and only the restic password lives here.
