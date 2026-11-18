@@ -72,7 +72,7 @@ Check: `gpg --list-secret-keys <FPR>` shows the key and its encryption subkey.
 
        gpg --export-secret-keys --armor <FPR> > ~/Projects/secrets/vault-key.asc
        G=$(mktemp -d); gpg --homedir "$G" --import ~/Projects/secrets/vault-key.asc
-       echo test | gpg --homedir "$G" -e -r <FPR> | gpg --homedir "$G" -d     # must ask for the passphrase
+       echo test | gpg --homedir "$G" --trust-model always -e -r <FPR> | gpg --homedir "$G" -d     # must ask for the passphrase
        rm -rf "$G"
 
 Check: the decrypt asked for the passphrase and printed `test`. Only then `git add vault-key.asc`.
