@@ -1,9 +1,24 @@
 # State
 
-## Secrets with yadm git-crypt (2026-11-15, accepted 2026-11-16)
+## Secrets: the pass vault (2026-11-18, accepted)
 
-Done: the dotfiles side, recorded in ADR-0115, working rules in `docs/secrets.md`.
-Left, in `docs/BACKLOG.md`: homelab key, the key step in `new-machine`, the `maintenance` check, testing the logins on a real machine.
+The cloud session that designed this ended here; the agent on the owner's machine continues from this section.
+
+Done:
+- ADR-0115 (git-crypt in the dotfiles, `yadm add-secret`, the `pre_commit` hook) is live; aichat's `.env` is encrypted.
+- `docs/plans/vault.md` is accepted: `~/Projects/secrets` becomes a `pass` store whose GPG key, committed there protected by the master passphrase, also unlocks the dotfiles' git-crypt (`yadm git-crypt add-gpg-user`), replacing `dotfiles.git-crypt.key.age` and age.
+- Agents are denied `gpg`, `pass` and `~/Projects/secrets` (Claude and pi); `gnupg` and `pass` are dependencies; `PASSWORD_STORE_DIR` is set in `environment.d/tools.conf`.
+- The homelab no longer keeps secrets in git (its `docs/plans/secrets.md`); only its restic password goes into this vault.
+
+Now, the owner, by hand, outside any AI session: the migration in `docs/plans/vault.md`, steps 0 to 6. An agent never runs it, and never reads the store, the key or the passphrase.
+
+After the owner says the migration is done, the agent:
+1. `new-machine`: replace the `TODO:` with: clone `secrets` into `~/Projects/secrets` (the `gh` login is already done there), `gpg --import ~/Projects/secrets/vault-key.asc`, `yadm git-crypt unlock`; skip quietly when `secrets` cannot be cloned, as the logins do.
+2. Amend ADR-0115 where it says how the key is kept (the GPG key in the vault, no age file, the paper copy now exists), and bring `docs/secrets.md` and `docs/access.md` in line; the agent denies for `age` can go once nothing uses age.
+3. `maintenance`: report commits in `~/Projects/secrets` not yet pushed (`git -C ~/Projects/secrets status -sb`, no decryption).
+4. On a real machine, the login checks still open in `docs/BACKLOG.md`.
+
+Until the migration is done, the old path stays: `dotfiles.git-crypt.key.age` in `secrets`, opened with `age -d`, then `yadm git-crypt unlock <key>`.
 
 ## Omamail keepLoaded patch (2026-11-06)
 
