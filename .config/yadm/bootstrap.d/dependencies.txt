@@ -16,3 +16,6 @@ envsubst gettext
 locale-gen locales
 # docs/adr/0115: secrets in this repository are encrypted with yadm git-crypt; same package name on pacman and apt
 git-crypt
+# docs/plans/vault.md: the recovery secrets are a pass store in ~/Projects/secrets, encrypted with one GPG key
+gpg gnupg
+pass

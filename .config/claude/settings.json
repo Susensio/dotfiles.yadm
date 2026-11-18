@@ -33,7 +33,10 @@
       "Bash(yadm git-crypt *)",
       "Bash(age *)",
       "Read(~/.config/age/**)",
-      "Read(~/.local/share/yadm/repo.git/git-crypt/**)"
+      "Read(~/.local/share/yadm/repo.git/git-crypt/**)",
+      "Bash(gpg *)",
+      "Bash(pass *)",
+      "Read(~/Projects/secrets/**)"
     ],
     "ask": [
       "Bash(pkexec *)"

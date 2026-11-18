@@ -21,6 +21,7 @@
       "~/.gnupg/*": "deny",
       "~/.config/age/*": "deny",
       "~/.local/share/yadm/repo.git/git-crypt/*": "deny",
+      "~/Projects/secrets/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -66,6 +67,7 @@
       "~/.gnupg/*": "deny",
       "~/.config/age/*": "deny",
       "~/.local/share/yadm/repo.git/git-crypt/*": "deny",
+      "~/Projects/secrets/*": "deny",
       "~/.local/share/gnupg/*": "deny",
       "~/.config/gh/*": "deny",
       "*.envrc": "deny",
@@ -230,6 +232,14 @@
       "* age *": {
         "action": "deny",
         "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
+      },
+      "gpg *": {
+        "action": "deny",
+        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/plans/vault.md)."
+      },
+      "pass *": {
+        "action": "deny",
+        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/plans/vault.md)."
       }
     },
     "skill": "allow",
