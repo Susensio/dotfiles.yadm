@@ -79,7 +79,7 @@ Check: the decrypt asked for the passphrase and printed `test`. Only then `git a
 
 **3. The store.**
 `PASSWORD_STORE_DIR=~/Projects/secrets` in `environment.d`, then `pass init <FPR>`, `pass insert homelab/restic`, the GitHub recovery codes as `github/recovery-codes`.
-Check on `nuc`: `pass show homelab/restic | sha256sum` equals `sudo sha256sum /etc/homelab/restic-password` (without the trailing newline difference: compare with `printf %s`). Commit and push `secrets`.
+Check: on `dell`, `pass show homelab/restic | tr -d '\n' | sha256sum`; on `nuc`, `sudo tr -d '\n' </etc/homelab/restic-password | sha256sum`; the two sums are equal. Commit and push `secrets`.
 
 **4. git-crypt for the GPG key.** This commits `.git-crypt/keys/default/0/<FPR>.gpg` into the public dotfiles: public-key ciphertext, safe, but published for good, so check the fingerprint first.
 
