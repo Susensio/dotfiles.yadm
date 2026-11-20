@@ -8,6 +8,9 @@ Agents stay denied `gpg`, `pass`, `age` and `git-crypt` and the vault directory 
 
 Still open:
 - Step 5, the second machine: rides the fresh-format `nuc` rebuild, whose `new-machine` bootstrap carries the vault steps and is itself the proof on a real machine; the login checks in `docs/BACKLOG.md` (Tailscale QR, `gh` device flow) run there too.
+  - The 2026-11-20 nuc run surfaced two real failures, both fixed since and both needing a nuc rerun: the tracked alt link dirtied the tree, so `git-crypt unlock` refused and the vault is still locked there (untracked in `helix: untrack the alt link that left every non-omarchy tree dirty`), and `new-machine`'s `(...) || return 1` masked errexit, so the unlock failure ran a second bootstrap and exited 0 (`yadm: catch failures in new-machine subshells...`).
+  - Also unverified on nuc: the GitHub account's key list holds two keys with empty titles, so `35_machine_key.sh`'s POST (which titles with the hostname) likely never ran there; `authorized_keys` was not seeded either. Both land on the rerun once the tree is clean.
+  - Rerun: `yadm pull && yadm alt`, then `yadm git-crypt unlock` (the vault key is imported), then `yadm bootstrap`, which registers the keypair in both slots and seeds `authorized_keys` once sshd answers.
 - `maintenance` reports unpushed commits in `~/.local/share/secrets` and entries not in git (built 2026-11-20, `maintenance: report the vault's unpushed and uncommitted drift`), because `pass` commits without pushing and its git half fails silently.
 
 ## Omamail keepLoaded patch (2026-11-06)
