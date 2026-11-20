@@ -37,58 +37,12 @@ The patch only takes effect after a `/reload` or restart, since the bundle is bu
 
 ## Omarchy gruvbox and Helix upstream handoff (2026-09-30)
 
-Goal: submit a faithful classic-gruvbox theme, improve the generic Helix fallback, and use Helix's bundled vendor themes where there is a defensible match.
-These are separate contributions; the naming of stock `gruvbox` (currently gruvbox-material) is a related, potentially breaking decision, not an approved rename.
-Do not treat a swap of the classic palette tiers as accepted; the vivid variants were tried and rejected.
+The roadmap, completed upstream work and local-experiment constraints are in [`docs/plans/gruvbox-upstream.md`](plans/gruvbox-upstream.md); this section holds only live state.
 
-### Completed upstream work
-
-- Commented on [Helix template PR #6696](https://github.com/omacom/omarchy/pull/6696#issuecomment-5905412528): supported its semantic palette and contrast-safe transparent/inverted UI, asked whether removing `color0`–`color8` aliases should retain compatibility for custom themes inheriting `omarchy` or be called out as a migration, and noted that generic `bright_*` syntax defaults vary in contrast and meaning across themes.
-  PR #6696 was open at the time of the comment; check its current status and responses before proposing template edits.
-- Opened [Omarchy PR #13843](https://github.com/omacom/omarchy/pull/13843) (`Susensio:fix/helix-theme-link`, commit `1cc49b20`) for the Helix provisioning bug.
-  It adds a one-time migration for already-installed Helix and provisions the link on future theme switches for Helix installed outside Omarchy's installer; both paths only create a missing `~/.config/helix/themes/omarchy.toml` if the rendered target exists, preserving existing files and even dangling custom symlinks.
-  No dotfiles patch is required: it does not change the selected Helix theme or overwrite user config.
-  Follow the PR to merge and test on update; if the rendered target is absent during its one-time migration, the next theme change will provision it.
-  Do not apply the migration to the live machine just to exercise it.
-
-### Current local experiment (not the intended upstream implementation)
-
-- `omarchy/themes/gruvbox-classic/colors.toml` maps morhetz gruvbox's neutral hues to plain `red`…`cyan` and its actual bright hues to `bright_*`; background `#282828`, darker surfaces `#1d2021`/`#161616`, foreground `#ebdbb2`, accent `#fe8019`.
-  **Do not swap tiers without a new decision**: that would change terminal ANSI 1–6 and throw away the faithful 0/1 gruvbox mapping.
-  Omarchy's resolver forces `color7 = foreground`, so fully canonical ANSI white is not representable here; this is an accepted constraint to describe when proposing the theme, not a reason to reverse hue tiers.
-  Decide explicitly whether the non-ANSI `orange` role should remain neutral `#d65d0e` or become vivid `#fe8019` for generated clients; avoid silently changing it.
-- The scratch `gruvbox-vivid` and `gruvbox-vivid-flat` themes (bright tones in the plain slots) were tried and deleted on 2026-10-03.
-  Against `terminal_color_0..15` in morhetz `colors/gruvbox.vim`, classic matches 14/16 slots (only 7 and 15, forced by the resolver to `foreground`/`bright_foreground`), vivid-flat 8/16, vivid 2/16.
-  Swapping to vivid changed nothing visible in Herdr's `terminal` theme, whose greys come from slots 7 and 8, identical in all variants.
-- `omarchy/themed/helix.toml.tpl` is a tracked local override with vivid syntax roles (`red_bright`, `green_bright`, etc.) and transparent `ui.background`.
-  It was rendered and parsed without unresolved placeholders or Helix warnings, but it can wash out other themes whose bright roles are lighter tints and should **not** be submitted wholesale as a generic fallback.
-  `helix/config.toml` selects `omarchy` (since 2026-10-21; before that `gruvbox_transparent`, a small overlay inheriting Helix's `gruvbox`); Herdr selects vendor `gruvbox`.
-  The observed vendor theme preference and transparent Helix background should be preserved in later comparisons.
-
-### Remaining contributions and decisions
-
-1. **Classic gruvbox theme PR:** audit all current `gruvbox-classic` assets and compare the palette against morhetz gruvbox, terminal/Omarchy rendering, and vendor Helix before touching tiers; retain neutral→plain and bright→`bright_*` unless a specific counterexample justifies a change.
-   The local theme presently has `backgrounds/`, `colors.toml`, `icons.theme`, and `neovim.lua`; a representative stock theme also ships `hyprland.lua`, `vscode.json`, `preview.png`, `preview-unlock.png`, and `unlock.png`.
-   Verify which assets Omarchy actually requires before creating them, produce legitimate previews/background permissions, run upstream `./test/all` in a proper checkout, and provide before/after images for visual changes.
-   Current stock `gruvbox` uses gruvbox-material colors but classic `ellisonleao/gruvbox.nvim`, so check Neovim integration for both themes.
-   Posted [Suggestions Discussion #13864](https://github.com/omacom/omarchy/discussions/13864) (2026-09-30): option 1 adds `gruvbox-classic` beside unchanged `gruvbox`; option 2 renames stock to `gruvbox-material` with a `theme.name` migration and gives classic the short name (our lean).
-   The editor-config mismatch (material palette, classic `neovim.lua`/`vscode.json`) was kept out of the discussion on purpose, as an implementation detail for the PR.
-   Wait for a maintainer answer before implementing; do not bundle the rename without one.
-2. **Better generic Helix fallback:** first follow [#6696](https://github.com/omacom/omarchy/pull/6696) and the review comment, and compare its result against the stock template and the local override across dark and light stock themes.
-   The stock template largely uses only plain hues and collapses some syntax distinctions; #6696 names the palette semantically, adds bare `markup.heading`, moves constants to orange, and refines parameters/special roles.
-   Do not open a competing change to the same file while that PR is live.
-   Establish concrete remaining regressions with contrast and screenshots before a follow-up PR; bright roles are **not** universally safe as generic drawing roles (especially on light themes), and transparency plus legible statusline/menu must survive.
-   The local override should eventually be revised or removed by explicit choice after testing the merged fallback; no local config rewrite was approved in this session.
-3. **Vendor-Helix `inherits` mapping:** the existing theme-staging/rendering path already honors a theme-shipped `helix.toml` ahead of `default/themed/helix.toml.tpl`.
-   Propose a **Suggestions Discussion**, then a small PR with verified vendor-name overlays rather than copied full theme implementations; [closed PR #945](https://github.com/omacom/omarchy/pull/945) was rejected for maintaining full per-editor schemes, so explain how vendor inheritance reduces that burden, without assuming a maintainer will accept it.
-   Candidate pairs to verify against the actual stock colors/backgrounds and installed Helix runtime: `gruvbox` (material)→`gruvbox-material`, `gruvbox-classic`→`gruvbox`, `catppuccin`→`catppuccin_mocha`, `catppuccin-latte`→`catppuccin_latte`, `everforest`→`everforest_dark`, `flexoki-light`→`flexoki_light`, `kanagawa`→`kanagawa`, `nord`→`nord`, `rose-pine`→`rose_pine_dawn`, `tokyo-night`→`tokyonight`; `ristretto`→`monokai_pro_ristretto` needs closer visual checking.
-   Exclude generic lookalikes such as `white`→`emacs` or `vantablack`→`modus_vivendi` without a real brand match.
-   Each overlay must include `"ui.background" = { }` beside `inherits = "…"`; shipping it suppresses fallback-template generation, and a bare inherit would lose Omarchy's transparency.
-   Local proof (2026-10-03): `omarchy/themes/gruvbox-classic/helix.toml` ships `inherits = "gruvbox"` plus `"ui.background" = { }`; `omarchy-theme-set` copied it to the current theme verbatim, bypassing the local `helix.toml.tpl`. `helix/config.toml` now selects `omarchy`, so it shows live.
-   Confirm Helix syntax and palette compatibility for each pair, test switching and cloning/staging, and re-evaluate if classic/stock gruvbox names change.
-
-Upstream procedure: work in an Omarchy fork checkout, follow upstream `AGENTS.md` and `agents/skills/{migrations,install-scripts}.md` as applicable, run focused tests and `./test/all`, and keep upstream source edits out of `/usr/share/omarchy` and this dotfiles tree.
-The local contribution guide still says `basecamp/omarchy`, while the live GitHub repository used for these PRs is `omacom/omarchy`; verify the live destination before filing.
+- Open upstream: [PR #13843](https://github.com/omacom/omarchy/pull/13843) (Helix theme provisioning) and Suggestions Discussion [#13864](https://github.com/omacom/omarchy/discussions/13864) (gruvbox naming), waiting on maintainer answers; #6696 (Helix template) was open at the time of its review comment — check before proposing template edits.
+- The local override `omarchy/themed/helix.toml.tpl` is live (vivid syntax roles, transparent background) and must be revised or removed by explicit choice after the merged fallback is tested.
+- Live selections: Helix uses `omarchy`, Herdr uses vendor `gruvbox`.
+- Standing constraint: do not swap the classic gruvbox palette tiers or submit the vivid variant wholesale; the vivid scratch themes were tried and deleted on 2026-10-03.
 
 ## Omarchy migration
 
@@ -98,13 +52,8 @@ Setup and the standing oddities are in `docs/omarchy.md`; `~/Projects/omarchy` i
   If a pane's ANSI palette or a redraw turns out to matter, the dropped pane-TTY OSC writes and `SIGWINCH`/`refresh-client` are the first candidates to restore into the hook.
 - ADR-0069: observe menu Suspend on battery hibernating after 5h, the lid on AC staying suspended, and an unplug during sleep starting the countdown.
 - `fingerprint.sh` has not run on a fresh machine; Dell's driver crashed fprintd once at enroll stage 9 of 12, then enrolled cleanly on a retry.
-- ADR-0076 applied 2026-09-29: window mode replaced by chords (Super + Ctrl + hjkl resize, repeatable; Super + Shift + hjkl swap; Super + Alt + hjkl window to monitor), the power key climbing modifiers (suspend-then-hibernate, Ctrl lock, Super system menu, Alt screensaver, all `locked`), the Print family (plain screenshot, Super capture menu, Shift OCR, Ctrl QR, Alt color picker), notification history on Super + Ctrl + comma and silencing on Super + Alt + comma, and the Super + Ctrl panel family (W network, B bluetooth, A audio, D display, P power; the clipboard manager keeps Super + Ctrl + V).
-  `hyprctl reload` clean, `hyprctl configerrors` empty, binds with mods spot-checked (SHIFT 65, CTRL 68), `omarchy menu keybindings --print` lists the chords; `omarchy-restart-shell` picked up the bar without the poctek submap widget.
-  Same-day additions: Super + Alt + the panel letter flips the thing (W wifi radio via nmcli, B bluetooth rfkill via omarchy-bluetooth-power, P power-profile cycle via the local `omarchy-powerprofiles-cycle` — wraps performance → power-saver → balanced and notifies with the profile's icon; the one-liner first bound inline was reversed per request and moved into `~/bin`; P first sat on Super + Alt + power and moved), dictation on Insert push-to-talk with Shift + Insert latching hands-free and bare Insert ending the latch (moved off F9, whose bare press emits no event; observe live: hold, latch, and latch-then-Insert), and zen mode as Super + Z maximize itself (a `f[1]` workspace rule widens the side gaps to 160, about 4:3 here; replaces the square-aspect toggle).
-  The initial local square-aspect binding mistakenly used `o.bind_toggle`, which prefixes `omarchy-toggle-` onto its third argument; Omarchy correctly uses plain `o.bind` for this command, and the binding that replaced it is a Lua function of our own. `omarchy-powerprofiles-cycle` ran a full verified cycle (performance → power-saver → balanced → performance) and restored balanced afterwards.
-  Observe live: the chords (especially Super + Alt + hjkl's `window.move({ monitor })`, wiki-verified but unexercised here), Shift + Power's suspend (untestable without sleeping; the command matches the lid and the menu's overridden Suspend), Ctrl + Print's QR decode, zen mode (2026-10-02: on throwaway windows the maximized window measured 1212x910 under the bar and the hidden tiles kept their pixels through a zen/un-zen; kept by the user 2026-10-03), and the wifi/bluetooth toggles' state reaching the bar panels.
-  Not adopted, still menu-reachable: calculator, bar-panel digits, reminders, transparency/gaps toggles, width save/restore, monitor scaling.
-  Adopted later, unexercised from the keyboard: Super + Shift + / keybindings menu, Super + Alt + N and I nightlight and idle toggles, Super + Ctrl + Alt + comma last notification, Super + Alt + Z cursor zoom (Shift resets); the binds load with `hyprctl configerrors` empty.
+- ADR-0076 applied 2026-09-29: chords, the power-key cluster, the Print family, the notification and panel families, and zen mode are all live; the full inventory and its corrections live in the record (`omarchy menu keybindings --print` lists the set).
+  Still to observe live: Super + Alt + hjkl's `window.move({ monitor })` (wiki-verified, unexercised), Shift + Power's suspend, Ctrl + Print's QR decode, dictation's hold/latch/latch-then-Insert, and the wifi/bluetooth toggles' state reaching the bar panels; zen mode was measured and kept 2026-10-03, and the later-adopted keys (keybindings menu, nightlight/idle toggles, last notification, cursor zoom) load clean but are unexercised from the keyboard.
 
 ### Bugfix steps waiting on upstream
 
@@ -130,20 +79,14 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 
 ## pi session naming
 
-ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/session-name.ts`.
-The session-id fix for opencode gateways ([TinySquid/pi-agent-extensions#19](https://github.com/TinySquid/pi-agent-extensions/pull/19), merged 2026-09-28) shipped as `@tinysquid/pi-auto-session-name` 0.2.2 (published with the merge), not in `pi-session-name` (a different package).
-That package names with the session's own model and knows nothing about herdr tabs, while ours runs on the cheap alias tier and renames the tab over the socket, so the extension stays (checked 2026-10-18).
+ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/session-name.ts`, running on the cheap alias tier and renaming the herdr tab over the socket — the shipped `@tinysquid/pi-auto-session-name` alternative (checked 2026-10-18) names with the session's own model and knows nothing about herdr tabs, so the extension stays.
 
 ## pi permission reviewer
 
-Committed 2026-09-29: the permission system's auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (chain in `pi/agent/model-alias.json`), so an exhausted Codex quota fails over instead of turning every ask into a prompt.
-The chain was reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md)): `opencode-go/beam-free` is now its first Go rung and `opencode-go/claude-haiku-5-5` the first quota-bound one, because free capacity outlasts metered capacity once the plan drains.
+Committed 2026-09-29, reordered 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md)) and 2026-11-05 ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)): the auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (`pi/agent/model-alias.json`).
 
-- The `claude-bridge/claude-haiku-5-5` target works only through three patches carrying [pi-claude-bridge#216](https://github.com/elidickinson/pi-claude-bridge/pull/216) (open): `pi-claude-bridge-index` and `-prompt-capture` add its standalone route on 0.10.0, and `pi-permission-auto-review-standalone` marks the reviewer's calls `promptKind: "standalone"`.
-  #148 and its `allowExtensionSystemPrompts` option were dropped 2026-11-06, after the maintainer declined prompt-shape routing.
-  The standalone route takes user messages only, so a follow-up review failed in milliseconds and deferred to the operator; the reviewer runs with `followUpReviews: "off"`.
+- The `claude-bridge/claude-haiku-5-5` rung works only through three patches carrying [pi-claude-bridge#216](https://github.com/elidickinson/pi-claude-bridge/pull/216) (open): `pi-claude-bridge-index` and `-prompt-capture` add the standalone route, `pi-permission-auto-review-standalone` marks the reviewer's calls `promptKind: "standalone"`; the reviewer runs with `followUpReviews: "off"` because the standalone route takes user messages only.
   Drop the bridge patches once #216 ships in a release, and the auto-review patch once the extension sets the marker itself.
-- `pi-model-alias-shared-registry` was dropped 2026-10-20: [#30](https://github.com/unrelentingfox/pi-model-fallback-alias/pull/30) shipped in `pi-model-fallback-alias` 0.2.1. Untested: that a subagent's copy no longer fails alias calls without the patch.
 - Untested: whether `deepseek-v4.1-flash` and `mimo-v2.6-flash` judge risky asks as well as `codex-auto-review` does; only safe commands were exercised.
 
 ## pi model catalog
@@ -156,13 +99,11 @@ Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `y
 
 ## pi model fallback
 
-Committed 2026-10-05 (`pi: keep claude-bridge synthetic notices off the stream`): ADR-0084 carried [elidickinson/pi-claude-bridge#163](https://github.com/elidickinson/pi-claude-bridge/pull/163) as the `pi-claude-bridge-index` patch, so a Claude quota limit fails over instead of pinning `alias/top` and `alias/reviewer` to Claude Code.
-The tier chains themselves were reordered on 2026-10-18 against Artificial Analysis Intelligence Index v4.3.2, first by [ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md) and then by [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md), which put `claude-sonnet-5-5` in front of `deepseek-v4.1-flash` so each tier leads with its strongest option; `alias/top` gained `glm-5.3` fourth.
-On 2026-11-05 `alias/top` gained `opencode-go/deepseek-v4-pro` second ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)), pushing `kimi-k2.7-code` to third, after the `Go caps each model separately` claim behind the cheap-rung ordering proved false: one shared quota is spent at each model's price.
+Committed 2026-10-05 and reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md), [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md)) and 2026-11-05 ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)); the ADRs carry the chain orders and their reasons.
 
-- The #162 hunk is gone: #163 shipped in pi-claude-bridge 0.9.2, so the `pi-claude-bridge-index` directory carries only the #216 standalone route since 2026-11-06.
-- Untested live: the fix is covered by pi-claude-bridge's `keeps a synthetic report off the stream, so failover is still possible`, not by an exhausted-quota run against a real chain.
-- claude-bridge rewrote `pi/agent/claude-bridge.json` to `{ "askClaude": { "enabled": true }, }` during this work; a `yadm restore` brought back the committed file. Cause unknown; watch for a repeat before blaming the patch.
+- `pi-claude-bridge-index` now carries only the #216 standalone route (since 2026-11-06, the #163 half having shipped in 0.9.2).
+- Untested live: the failover fix is covered by pi-claude-bridge's own test, not by an exhausted-quota run against a real chain.
+- claude-bridge once rewrote `pi/agent/claude-bridge.json` during this work and a `yadm restore` brought back the committed file; cause unknown, watch for a repeat before blaming the patch.
 
 ## SSD trim
 
