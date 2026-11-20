@@ -51,7 +51,7 @@
         },
         {
           "id": "akitaonrails.ai-usagebar",
-          "lastSelectedEntryId": "anthropic",
+          "lastSelectedEntryId": "opencode-go",
           "showAll": true,
           "showProvider": false,
           "showValue": true
@@ -103,6 +103,9 @@
       "tray": [
         {
           "id": "superwhisper.panel"
+        },
+        {
+          "id": "io.github.nobledoodle.omarchroma"
         }
       ]
     },
