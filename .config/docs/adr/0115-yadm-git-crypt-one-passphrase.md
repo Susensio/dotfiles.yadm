@@ -42,10 +42,19 @@ This relaxes [ADR-0100](0100-passphraseless-signing-key.md): keys without passph
 
 ## Consequences
 
-Editing a secret is editing a file and committing; no decrypt step of ours exists, and a new machine needs one `age -d` and one `yadm git-crypt unlock`.
+Editing a secret is editing a file and committing; no decrypt step of ours exists, and a new machine needs one `age -d` and one `yadm git-crypt unlock` (superseded: see Corrections).
 Secret contents are public ciphertext, safe while the git-crypt key is; file names stay visible, and the history keeps old ciphertext, so a leaked key means rotating every secret it covers and re-adding the files under a new key, because git-crypt cannot re-key in place.
 `dotfiles.git-crypt.key.age` is on GitHub and mirrored to `nuc`, so only the passphrase protects it there; `age -p`'s scrypt makes each guess cost about a second, which four or five random words, used nowhere else, withstand.
 A new passphrase means re-locking every key file.
 Anything running as the owner or root on any of the owner's machines reads every unlocked secret; the agent denies are guardrails against accidents, not isolation, and the answer to a compromise is rotating.
 A file committed in plain before its `.gitattributes` line is published unencrypted, which the hook and `add-secret` exist to prevent.
 `gh` logins cannot be revoked one machine at a time.
+
+## Corrections
+
+2026-11-20: the key-keeping paragraphs above no longer describe the live mechanism; `docs/plans/vault.md` was accepted and its migration completed the same day.
+The git-crypt key is no longer an age-locked export in a private repository: the vault's GPG key (`~/.local/share/secrets/vault-key.asc`, protected by the master passphrase, the store a tool-read directory rather than a project) wraps it through the committed stub (`git-crypt add-gpg-user`), so a fresh clone needs only `gpg --import` and `yadm git-crypt unlock` — no `age -d`, no key file copied.
+The paper copy the Decision declined was replaced on acceptance by a deliberate choice: the master passphrase is held in memory only, verified by an occasional decrypt drill, with no paper copy to lose.
+The homelab's own locked key (`git-crypt.key.age` at its repository root) was retired with it: the homelab keeps no secrets in git at all now (its `docs/plans/secrets.md`, accepted 2026-11-18).
+The `age` and git-crypt denies for Claude and pi stay — as guardrails against accidents by any secrets tool, not because age is part of this design anymore.
+The rest of the record — plain-file marking, `add-secret`, the `pre_commit` guard, the relaxation of ADR-0100 — is unchanged.

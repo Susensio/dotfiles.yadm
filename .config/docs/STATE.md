@@ -1,27 +1,14 @@
 # State
 
-## Secrets: the pass vault (2026-11-18, accepted)
+## Secrets: the pass vault (2026-11-18, accepted; migration complete on `dell`)
 
-The cloud session that designed this ended here; the agent on the owner's machine continues from this section.
+`docs/plans/vault.md` is done on `dell` (steps 0–4 passed 2026-11-20: stub published, throwaway clone unlocked by it alone, `.env` sum equal, fresh-keyring passphrase asked) and step 6 retired the age file with it; ADR-0115's Corrections section now records the key-keeping change (vault GPG key, no age file) and the memory-only master passphrase with its decrypt drill, replacing the paper copy the plan first wanted.
+The vault lives at `~/.local/share/secrets` (tool-read, not a project), `new-machine` clones it, imports `vault-key.asc` and runs `yadm git-crypt unlock` with no key file, and the homelab keeps no secrets in git at all (its own plans); only its restic password is a `pass` entry.
+Agents stay denied `gpg`, `pass`, `age` and `git-crypt` and the vault directory (Claude and pi): the `age` deny is a guardrail now, not part of the flow, and a step never runs those commands (ADR-0111).
 
-Done:
-- ADR-0115 (git-crypt in the dotfiles, `yadm add-secret`, the `pre_commit` hook) is live; aichat's `.env` is encrypted.
-- `docs/plans/vault.md` is accepted: `~/.local/share/secrets` becomes a `pass` store whose GPG key, committed there protected by the master passphrase, also unlocks the dotfiles' git-crypt (`yadm git-crypt add-gpg-user`), replacing `dotfiles.git-crypt.key.age` and age.
-- Agents are denied `gpg`, `pass` and the vault directory (Claude and pi); `gnupg` and `pass` are dependencies; `PASSWORD_STORE_DIR` is set in `environment.d/tools.conf`. The vault moved from `~/Projects/secrets` to `~/.local/share/secrets` on 2026-11-20: a tool-read store, not a project one; `new-machine` and the docs follow.
-- The homelab no longer keeps secrets in git (its `docs/plans/secrets.md`); only its restic password goes into this vault.
-
-Now, the owner, by hand, outside any AI session: the migration in `docs/plans/vault.md`, steps 0 to 6. An agent never runs it, and never reads the store, the key or the passphrase.
-
-Steps 0–4 passed on `dell` on 2026-11-20 (stub published, throwaway clone unlocked by it alone, `.env` sum equal to the live file, fresh-keyring passphrase asked); step 5 rides the fresh-format `nuc`, whose `new-machine` bootstrap carries the vault steps below and is itself the second-machine proof; step 6 retires the age file afterwards.
-The paper copy of the master passphrase was declined: it is held in memory only, verified by drill (`CLEAR_PASSPHRASE --mode=normal`, then a decrypt), a drill to repeat occasionally. This amends the follow-up ADR below.
-
-After step 5 passes on `nuc`, the agent:
-1. Done 2026-11-20, ahead of the rest because the fresh `nuc` bootstrap needs it: `new-machine` now clones `secrets`, `gpg --import vault-key.asc`, `yadm git-crypt unlock`, skipped quietly when the store cannot be cloned, as the logins are. The old `TODO:` is gone (commit `yadm: new-machine imports the vault key and unlocks git-crypt`).
-2. Amend ADR-0115 where it says how the key is kept (the GPG key in the vault, no age file, no paper copy, memory-only with the drill above), and bring `docs/secrets.md` and `docs/access.md` in line; the agent denies for `age` can go once nothing uses age.
-3. `maintenance`: report commits in `~/.local/share/secrets` not yet pushed (`git -C ~/.local/share/secrets status -sb`, no decryption).
-4. On a real machine, the login checks still open in `docs/BACKLOG.md`.
-
-Until step 6 retires it, the old path stays: `dotfiles.git-crypt.key.age` in `secrets`, opened with `age -d`, then `yadm git-crypt unlock <key>`.
+Still open:
+- Step 5, the second machine: rides the fresh-format `nuc` rebuild, whose `new-machine` bootstrap carries the vault steps and is itself the proof on a real machine; the login checks in `docs/BACKLOG.md` (Tailscale QR, `gh` device flow) run there too.
+- `maintenance` reports unpushed commits in `~/.local/share/secrets` and entries not in git (built 2026-11-20, `maintenance: report the vault's unpushed and uncommitted drift`), because `pass` commits without pushing and its git half fails silently.
 
 ## Omamail keepLoaded patch (2026-11-06)
 

@@ -1,6 +1,6 @@
 # Secrets
 
-[ADR-0115](adr/0115-yadm-git-crypt-one-passphrase.md) records why secrets are encrypted with yadm's git-crypt and one passphrase.
+[ADR-0115](adr/0115-yadm-git-crypt-one-passphrase.md) records why secrets are encrypted with yadm's git-crypt and the vault's GPG key (its Corrections section has the key-keeping change from the original one-passphrase age file; `docs/plans/vault.md` is the accepted design).
 This file is the working rules.
 
 ## What becomes a secret file
@@ -44,7 +44,7 @@ The same procedure with a different key still applies where the vault key must n
 The vault's GPG key (in `~/.local/share/secrets`, `vault-key.asc` protected by the master passphrase) encrypts the pass store and, through the committed stub, every git-crypt repository above.
 A new machine imports it (`gpg --import`), then `yadm git-crypt unlock` with no key file; the stub travels with each clone.
 The homelab keeps no git-crypt key in git at all (`docs/plans/secrets.md` in that repository); its restic password is a `pass` entry instead.
-Claude and pi are denied `gpg`, `pass`, `age` and `git-crypt`, so those commands are run by hand.
+Claude and pi are denied `gpg`, `pass`, `age` and `git-crypt`, so those commands are run by hand; the `age` deny is a guardrail against a secrets tool the design no longer uses, not part of the flow.
 
 A suspected leak of a key: rotate every secret it covers, then re-add the files under a new key.
 A leaked vault key widens to every repository whose stub names it, and stubs stay in history, so that rotation covers them all.
