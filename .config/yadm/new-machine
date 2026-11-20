@@ -11,7 +11,13 @@
 NM_REPO=${NEW_MACHINE_REPO_URL:-https://github.com/Susensio/dotfiles.yadm.git}
 NM_RAW=${NEW_MACHINE_RAW_URL:-https://raw.githubusercontent.com/Susensio/dotfiles.yadm/master}
 
-# A subshell, so set -e never reaches the shell this is sourced in
+# A subshell, so set -e never reaches the shell this is sourced in.
+# Not `(...) || return 1` nor `if ! (...)`: any conditional context suspends
+# errexit for the whole subshell — a failing command inside is masked and the
+# block runs on (bash(1), "the shell does not exit if the command that fails
+# is part of ... any command executed in a && or || list, or if the command's
+# return value is being inverted via !") — so it runs as a plain statement
+# and its status is read afterwards.
 (
   set -euo pipefail
 
@@ -28,7 +34,9 @@ NM_RAW=${NEW_MACHINE_RAW_URL:-https://raw.githubusercontent.com/Susensio/dotfile
     fi
     bash "$installer" "${missing[@]}"
   fi
-) || return 1
+)
+status=$?
+[[ $status == 0 ]] || return 1
 
 # Defines yadm(), remote until the permanent one is installed; subshells inherit it
 source <(curl -fsSL https://bootstrap.yadm.io) || return 1
@@ -42,7 +50,9 @@ source <(curl -fsSL https://bootstrap.yadm.io) || return 1
     yadm checkout -- "$HOME"
   fi
   yadm bootstrap
-) || return 1
+)
+status=$?
+[[ $status == 0 ]] || return 1
 
 # Logins a bootstrap step never starts (ADR-0111), run here because a person is
 # at the terminal; a phone or any signed-in machine approves them (docs/adr/0115).
@@ -90,7 +100,9 @@ if [[ -t 0 && -t 1 ]]; then
 
     # The steps that warned about these logins finish now
     if $logged_in; then yadm bootstrap; fi
-  ) || return 1
+  )
+  status=$?
+  [[ $status == 0 ]] || return 1
 fi
 
 # The bootstrap links mise's yadm here; a login would put it on PATH
