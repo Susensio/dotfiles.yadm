@@ -5,6 +5,9 @@ os:
 gui:
   scrollHeight: 10
 promptToReturnFromSubprocess: false
+# SSH signing (gpg.format=ssh) never prompts lazygit can't handle, so reword/amend is safe
+git:
+  overrideGpg: true
 customCommands:
   - key: <ctrl-a>
     context: files
