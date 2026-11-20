@@ -50,6 +50,8 @@
 !/.local/share/yadm/archive
 !/.github
 !/bin
+# git-crypt keeps its per-key stubs at the repo root, which yadm makes $HOME
+!/.git-crypt
 
 
 # Junk inside the folders above, wherever it appears. Last so it wins over
