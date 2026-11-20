@@ -28,6 +28,12 @@ START_CWD="$PWD"
 [[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="${HERDR_ACTIVE_PANE_CWD:-}"
 [[ -n "$START_CWD" && -d "$START_CWD" ]] || START_CWD="$HOME"
 
+# A stopped scratch session would restore its stale saved cwd instead of the
+# workspace root (server log: "restored session already has workspaces; ignoring
+# startup cwd"), so discard the snapshot; a running session refuses the delete
+# and its live shell is preserved.
+herdr session delete "scratchpad-$WK_ID" >/dev/null 2>&1 || true
+
 # cd before exec so the inner herdr creates its startup workspace here.
 # Do not route the nested client back to the outer server's socket or session.
 # stderr only carries the shutdown notice from scratchpad-shell, which the popup
