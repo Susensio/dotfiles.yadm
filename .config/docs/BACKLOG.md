@@ -93,7 +93,7 @@
   If the cause is the restart racing re-enumeration, fix with a delay or a wait for the USB device, as a local drop-in or an upstream report; test with a short-delay `systemctl suspend-then-hibernate` loop, checking each resume for a fprintd crash and a working `fprintd-verify`.
   `fprintd` also segfaults in the vendor `libfprint-tod-goodix-53xc-0.0.6.so` (package `libfprint-2-tod1-xps9300-bin`), four times from 2026-10-23 to 2026-11-05, the last two inside `fp_device_close_sync`; systemd restarts it, and the blob is closed source, so only a package update can fix it.
   Counted again 2026-11-11: crashes continue after 4.5.0-3, so the retry backoff was not the cause (see the resume-failure notes above).
-- gmailctl | New-machine setup for the private `Susensio/gmailctl-config` repo (Gmail filters and their delayed-rule Apps Script, private because they name people and providers): a bootstrap step cloning it to `~/.config/gmailctl` when `gh` is authenticated, plus an ADR for the private companion repo; `credentials.json` and `token.json` stay machine-local.
+- gmailctl | New-machine setup for the private `Susensio/gmailctl-config` repo (Gmail filters and their delayed-rule Apps Script, private because they name people and providers): a bootstrap step cloning it to `~/.config/gmailctl` when `gh` is authenticated, plus an ADR for the private companion repo; `credentials.json` is git-crypted there with the vault key (ADR-0117) and `token.json` is minted by `gmailctl auth` on each machine.
 - gmailctl | Publish the OAuth client shared by omamail and gmailctl out of Testing mode, so its tokens stop expiring every 7 days; needs app branding and a privacy-policy URL.
 
 ## Omarchy migration
