@@ -3,17 +3,22 @@
 # requires-python = ">=3.11"
 # dependencies = ["matplotlib", "questionary"]
 # ///
-"""Inspect wluma's learned curve, plot it, and remove points you pick.
+"""Inspect wluma's learned curve, plot it, and edit the points behind it.
 
 Reads the observations wluma saved under ~/.local/state/wluma/<output>.yaml and
 rebuilds the monotonic model from wluma src/predictor/controller/monotonic.rs
-(lux scale, ALS increasing, luma decreasing, luma-aware), so the surface shown
-is the one wluma predicts from.
+(lux scale, ALS increasing, luma decreasing, luma-aware), so the surface shows
+what wluma predicts rather than the raw stored values.
 
-The picker marks points the rest of the data disagrees with. Removing one stops
-wluma from honouring a brightness it once learned under different conditions;
-wluma relearns as you keep adjusting, so this is a recurring cleanup rather
-than a permanent fix.
+By default it marks the points the rest of the data disagrees with; removing one
+stops wluma honouring a brightness it once learned under different conditions.
+--collapse-luma and --smooth instead rewrite the curve as an ambient-light ramp,
+which is the migration for `capturer = "none"`: wluma then asks the model for
+luma 0, and observations learned at a brighter luma leave that row unanchored,
+so brightness stays high in the dark until they are folded away.
+
+wluma relearns as you keep adjusting, so both edits are a recurring cleanup
+rather than a permanent fix.
 """
 
 import argparse
@@ -31,33 +36,60 @@ LUX_COORDINATE_MAX = 6.0
 LUMA_COORDINATE_MAX = 5.0
 LUMA_SCALE = 20.0
 STATE_DIR = os.path.expanduser("~/.local/state/wluma")
+KINDS = ("brightness", "dim", "temperature")
+ALS_CHANNELS = ("in_illuminance", "in_illuminance0", "in_illuminance_clear")
+# ALS is logarithmic but 0 lux is a real reading, so the plots use the model's own
+# coordinate and only the ticks name lux.
+LUX_TICKS = (
+    (0, "0"),
+    (1, "1"),
+    (10, "10"),
+    (100, "100"),
+    (1_000, "1k"),
+    (10_000, "10k"),
+    (100_000, "100k"),
+    (1_000_000, "1M"),
+)
 
 
-def load_points(path):
-    # YAML subset: the entries are a flat list of als/luma/value maps.
-    points, entry = [], None
+def load_state(path):
+    """Return (output_name, {kind: points}), keeping every group in the file."""
+    output, group, entry = None, None, None
+    state = {kind: [] for kind in KINDS}
     with open(path) as handle:
         for line in handle:
             key, _, value = line.strip().partition(":")
-            if key == "- als":
+            if key == "output_name":
+                output = value.strip()
+            elif key in KINDS:
+                group = key
+            elif key == "- als":
+                # A flat entries list is the pre-2.0 layout and holds brightness.
+                group = group or "brightness"
                 entry = {"als": int(value)}
             elif key in ("luma", "value") and entry is not None:
                 entry[key] = int(value)
                 if key == "value":
-                    points.append(entry)
+                    state[group].append(entry)
                     entry = None
-    return points
+    return output, state
 
 
-def dump_points(output, points):
-    lines = [f"output_name: {output}", "entries:", "  brightness:"]
-    for point in points:
-        lines += [
-            f"  - als: {point['als']}",
-            f"    luma: {point['luma']}",
-            f"    value: {point['value']}",
-        ]
-    return "\n".join(lines + ["  dim: []", "  temperature: []", ""])
+def dump_state(output, state):
+    lines = [f"output_name: {output}", "entries:"]
+    for kind in KINDS:
+        points = state[kind]
+        if not points:
+            lines.append(f"  {kind}: []")
+            continue
+        lines.append(f"  {kind}:")
+        for point in points:
+            lines += [
+                f"  - als: {point['als']}",
+                f"    luma: {point['luma']}",
+                f"    value: {point['value']}",
+            ]
+    return "\n".join(lines + [""])
 
 
 def coordinate(als):
@@ -80,10 +112,6 @@ def lerp(left, right, fraction):
     return left + (right - left) * fraction
 
 
-def orient_als(als):
-    return min(max(coordinate(als), 0.0), LUX_COORDINATE_MAX)
-
-
 def orient_luma(luma):
     return LUMA_COORDINATE_MAX - min(max(luma / LUMA_SCALE, 0.0), LUMA_COORDINATE_MAX)
 
@@ -93,7 +121,7 @@ class Model:
 
     def __init__(self, points):
         self.als_max = max([coordinate(p["als"]) for p in points] + [LUX_COORDINATE_MAX])
-        self.xs = sorted({0.0, self.als_max} | {orient_als(p["als"]) for p in points})
+        self.xs = sorted({0.0, self.als_max} | {self.als_knot(p["als"]) for p in points})
         self.ys = sorted({0.0, LUMA_COORDINATE_MAX} | {orient_luma(p["luma"]) for p in points})
         width, height = len(self.xs), len(self.ys)
         minimum = min(p["value"] for p in points)
@@ -105,11 +133,12 @@ class Model:
         anchor_max = [None] * (width * height)
         for point in points:
             index = self.ys.index(orient_luma(point["luma"])) * width + self.xs.index(
-                orient_als(point["als"])
+                self.als_knot(point["als"])
             )
             value = point["value"]
-            anchor_min[index] = min(value, anchor_min[index] or value)
-            anchor_max[index] = max(value, anchor_max[index] or value)
+            low, high = anchor_min[index], anchor_max[index]
+            anchor_min[index] = value if low is None else min(low, value)
+            anchor_max[index] = value if high is None else max(high, value)
 
         lower = [minimum] * (width * height)
         for y in range(height):
@@ -135,8 +164,11 @@ class Model:
 
         self.values = [(lo + hi) / 2.0 for lo, hi in zip(lower, upper)]
 
+    def als_knot(self, als):
+        return min(max(coordinate(als), 0.0), self.als_max)
+
     def predict(self, als, luma):
-        x = min(max(coordinate(als), 0.0), self.als_max)
+        x = self.als_knot(als)
         y = orient_luma(luma)
         width = len(self.xs)
         x0, x1, tx = interval(self.xs, x)
@@ -146,7 +178,7 @@ class Model:
         return lerp(bottom, top, ty)
 
 
-def find_outliers(points, backlight_max, tolerance=10.0):
+def find_outliers(points, backlight_max, tolerance):
     # Leave-one-out: a point is odd when the rest of the data predicts a very
     # different brightness for its own condition. The monotonic model keeps
     # contradictions, so its prediction at an anchor always equals that anchor.
@@ -173,14 +205,53 @@ def label(index, point, backlight_max, outliers):
     return line
 
 
-def read_als():
-    # wluma takes the first IIO channel under /sys/bus/iio/devices.
-    for path in sorted(glob.glob("/sys/bus/iio/devices/*/in_illuminance_raw")):
-        directory = os.path.dirname(path)
-        return round(
-            (read_int(path) + read_float(directory, "in_illuminance_offset"))
-            * read_float(directory, "in_illuminance_scale")
+def collapse_luma(points):
+    # Same grouping and round-half-up as wluma's collapse_luma.
+    grouped = {}
+    for point in points:
+        total, count = grouped.get(point["als"], (0, 0))
+        grouped[point["als"]] = (total + point["value"], count + 1)
+    return [
+        {"als": als, "luma": 0, "value": (total + count // 2) // count}
+        for als, (total, count) in sorted(grouped.items())
+    ]
+
+
+def smooth(points, window):
+    if window <= 0:
+        return points
+    smoothed = []
+    for point in points:
+        centre = coordinate(point["als"])
+        close = [p for p in points if abs(coordinate(p["als"]) - centre) <= window]
+        smoothed.append(
+            {
+                "als": point["als"],
+                "luma": point["luma"],
+                "value": round(sum(p["value"] for p in (close or [point])) / len(close or [point])),
+            }
         )
+    return deduplicate(smoothed)
+
+
+def deduplicate(points):
+    # Two observations at one ALS and luma would be a contradiction the model must split.
+    unique = {}
+    for point in points:
+        unique.setdefault((point["als"], point["luma"]), point)
+    return list(unique.values())
+
+
+def read_als():
+    # wluma reads the first IIO channel it finds, trying these names in order.
+    for channel in ALS_CHANNELS:
+        for path in sorted(glob.glob(f"/sys/bus/iio/devices/*/{channel}_raw")):
+            directory = os.path.dirname(path)
+            scale = read_float(
+                directory, f"{channel}_scale", "in_illuminance_scale", default=1.0
+            ) or 1.0
+            offset = read_float(directory, f"{channel}_offset", "in_illuminance_offset", default=0.0)
+            return round((read_int(path) + offset) * scale)
     return None
 
 
@@ -189,12 +260,14 @@ def read_int(path):
         return int(f.read().strip())
 
 
-def read_float(directory, name):
-    try:
-        with open(f"{directory}/{name}") as f:
-            return float(f.read().strip())
-    except OSError:
-        return 1.0 if name.endswith("scale") else 0.0
+def read_float(directory, *names, default):
+    for name in names:
+        try:
+            with open(f"{directory}/{name}") as f:
+                return float(f.read().strip())
+        except OSError:
+            continue
+    return default
 
 
 def read_backlight_max(output):
@@ -204,44 +277,93 @@ def read_backlight_max(output):
     sys.exit("cannot find max_brightness; pass --max-brightness")
 
 
-def render(points, backlight_max, als, out, output):
+def render(points, model, outliers, backlight_max, als, out, output):
     import numpy as np
+    import matplotlib.patheffects as path_effects
     from matplotlib import pyplot as plt
-
-    model = Model(points)
-    outliers = find_outliers(points, backlight_max)
+    from matplotlib.ticker import FixedLocator
 
     figure = plt.figure(figsize=(14, 6))
     surface = figure.add_subplot(121, projection="3d")
     contour = figure.add_subplot(122)
 
-    alses = np.logspace(0, 4.2, 120)
+    coords = np.linspace(0.0, model.als_max, 120)
+    alses = 10.0**coords - 1.0
     lumas = np.linspace(0, 100, 120)
     grid = np.array([[model.predict(a, l) for a in alses] for l in lumas]) / backlight_max * 100
 
     surface.plot_surface(
-        np.log10(alses + 1), lumas, grid, cmap="viridis", alpha=0.85, linewidth=0
+        coords,
+        lumas,
+        grid,
+        cmap="viridis",
+        alpha=0.85,
+        linewidth=0,
+        rcount=120,
+        ccount=120,
     )
-    filled = contour.contourf(alses, lumas, grid, 20, cmap="viridis")
-    contour.set_xscale("log")
+    filled = contour.contourf(coords, lumas, grid, 20, cmap="viridis")
+    contour.xaxis.set_major_locator(FixedLocator([coordinate(lux) for lux, _ in LUX_TICKS]))
+    contour.set_xticklabels([name for _, name in LUX_TICKS])
+    contour.set_xlim(-0.05, model.als_max + 0.05)
 
     def scatter(subplot, subset, **kwargs):
+        x = [coordinate(p["als"]) for p in subset]
+        y = [p["luma"] for p in subset]
         if subplot is surface:
-            subplot.scatter(
-                [math.log10(p["als"] + 1) for p in subset],
-                [p["luma"] for p in subset],
-                [p["value"] / backlight_max * 100 for p in subset],
-                **kwargs,
-            )
+            subplot.scatter(x, y, [p["value"] / backlight_max * 100 for p in subset], **kwargs)
         else:
-            subplot.scatter([p["als"] for p in subset], [p["luma"] for p in subset], **kwargs)
+            subplot.scatter(x, y, **kwargs)
 
     scatter(surface, points, c="r", s=40)
     scatter(contour, points, c="r", s=40, edgecolors="w")
-    flagged = [points[index] for index in outliers]
-    if flagged:
-        scatter(surface, flagged, facecolors="none", edgecolors="red", s=300, linewidths=2)
-        scatter(contour, flagged, facecolors="none", edgecolors="red", s=300, linewidths=2)
+
+    # Number every observation so a picker row and a point are the same thing.
+    stroke = [path_effects.withStroke(linewidth=2.5, foreground="black")]
+    for index, point in enumerate(points):
+        x, y = coordinate(point["als"]), point["luma"]
+        contour.annotate(
+            str(index),
+            (x, y),
+            textcoords="offset points",
+            xytext=(8, 5),
+            fontsize=9,
+            color="white",
+            zorder=6,
+            path_effects=stroke,
+        )
+        surface.text(
+            x,
+            y,
+            point["value"] / backlight_max * 100,
+            str(index),
+            fontsize=8,
+            color="white",
+            zorder=6,
+            path_effects=stroke,
+        )
+
+    # One unambiguous mark for the point the rest of the data disagrees with most.
+    if outliers:
+        worst = max(outliers, key=lambda index: abs(outliers[index]))
+        scatter(
+            surface,
+            [points[worst]],
+            marker="v",
+            s=560,
+            facecolors="none",
+            edgecolors="white",
+            linewidths=2.6,
+        )
+        scatter(
+            contour,
+            [points[worst]],
+            marker="v",
+            s=560,
+            facecolors="none",
+            edgecolors="white",
+            linewidths=2.6,
+        )
 
     lumas_sampled = (0, 25, 50, 75, 100)
     if als is not None:
@@ -253,19 +375,18 @@ def render(points, backlight_max, als, out, output):
             s=40,
             marker="x",
         )
-        contour.axvline(als, color="cyan", alpha=0.6)
+        contour.axvline(coordinate(als), color="cyan", alpha=0.6)
 
-    surface.set_xlabel("log10(ALS+1)")
+    surface.set_xlabel("ALS (lux, log scale)")
     surface.set_ylabel("screen luma")
     surface.set_zlabel("backlight %")
-    contour.set_xlabel("ALS (lux)")
+    contour.set_xlabel("ALS (lux, log scale)")
     contour.set_ylabel("screen luma")
     figure.colorbar(filled, ax=contour, label="backlight %")
-    figure.suptitle(f"wluma {output}: {len(points)} learned points")
+    marked = "" if not outliers else ", ▽ disagrees most"
+    figure.suptitle(f"wluma {output}: {len(points)} learned points{marked}")
     figure.savefig(out, dpi=100)
     plt.close(figure)
-    return model, outliers
-
 
 
 def report(points, model, outliers, backlight_max, als):
@@ -290,6 +411,19 @@ def report(points, model, outliers, backlight_max, als):
             )
 
 
+def show(title, points, backlight_max):
+    # Print what wluma predicts, not what is stored: a rewrite can leave the
+    # stored values non-monotonic, and the model then compromises them.
+    model = Model(points)
+    print(f"{title} ({len(points)} points):")
+    for point in points:
+        print(
+            f"  als {point['als']:>6}  luma {point['luma']:>3}  "
+            f"stored {point['value'] / backlight_max * 100:5.1f}%  "
+            f"predicts {model.predict(point['als'], point['luma']) / backlight_max * 100:5.1f}%"
+        )
+
+
 def pick(points, backlight_max, outliers):
     """Let the user mark points to remove. Returns original indexes."""
     import questionary
@@ -304,17 +438,14 @@ def pick(points, backlight_max, outliers):
             points[index]["als"],
         ),
     )
-    try:
-        answer = questionary.checkbox(
-            "Mark points to remove, ENTER to confirm",
-            choices=[
-                Choice(label(index, points[index], backlight_max, outliers), value=index)
-                for index in order
-            ],
-            instruction="(arrows move, space marks, a all, ENTER confirm, Ctrl-C cancels)",
-        ).ask()
-    except KeyboardInterrupt:
-        return []
+    answer = questionary.checkbox(
+        "Mark points to remove, ENTER to confirm",
+        choices=[
+            Choice(label(index, points[index], backlight_max, outliers), value=index)
+            for index in order
+        ],
+        instruction="(arrows move, space marks, a all, ENTER confirm, Ctrl-C cancels)",
+    ).ask()
     return answer or []
 
 
@@ -322,14 +453,16 @@ def restart_wluma(action):
     subprocess.run(["systemctl", "--user", action, "wluma.service"], check=True)
 
 
-def apply(points, path, output):
+def apply(state, path, output):
     # Stop first: wluma rewrites its state on every learned point.
     restart_wluma("stop")
-    backup = f"{path}.{time.strftime('%Y%m%d%H%M%S')}.bak"
-    shutil.copy(path, backup)
-    with open(path, "w") as f:
-        f.write(dump_points(output, points))
-    restart_wluma("start")
+    try:
+        backup = f"{path}.{time.strftime('%Y%m%d%H%M%S')}.bak"
+        shutil.copy(path, backup)
+        with open(path, "w") as f:
+            f.write(dump_state(output, state))
+    finally:
+        restart_wluma("start")
     print(f"wrote {path}; backup at {backup}")
 
 
@@ -340,19 +473,74 @@ def main():
     parser.add_argument("--als", type=int, help="ALS value to evaluate (default: live reading)")
     parser.add_argument("--max-brightness", type=int)
     parser.add_argument("--png", default="/tmp/wluma-curve.png")
+    parser.add_argument(
+        "--tolerance",
+        type=float,
+        default=10.0,
+        help="how far, in percent of the backlight range, a point may disagree with the rest (default: 10)",
+    )
     parser.add_argument("--remove-flagged", action="store_true", help="remove every flagged point")
     parser.add_argument("--no-pick", action="store_true", help="only report and plot")
+    parser.add_argument(
+        "--collapse-luma",
+        action="store_true",
+        help='fold each ALS group into one luma-0 point, the migration for capturer = "none"',
+    )
+    parser.add_argument(
+        "--smooth",
+        type=float,
+        default=0.0,
+        metavar="WINDOW",
+        help="average each point with its neighbours within this distance in log10(als+1), e.g. 0.3",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="write the --collapse-luma/--smooth result and restart wluma",
+    )
     args = parser.parse_args()
 
     path = os.path.expanduser(f"{args.state}/{args.output}.yaml")
-    points = load_points(path)
+    loaded, state = load_state(path)
+    output = loaded or args.output
+    points = state["brightness"]
     if not points:
-        sys.exit(f"no learned points in {path}")
+        sys.exit(f"no learned brightness points in {path}")
     backlight_max = args.max_brightness or read_backlight_max(args.output)
     als = args.als if args.als is not None else read_als()
 
     matplotlib.use("Agg")
-    model, outliers = render(points, backlight_max, als, args.png, args.output)
+
+    if args.collapse_luma or args.smooth:
+        migrated = collapse_luma(points) if args.collapse_luma else points
+        migrated = smooth(migrated, args.smooth)
+        # Store what wluma will predict: the averages can still contradict each
+        # other, and the model then compromises them into a curve the file does
+        # not describe. Writing the prediction back leaves the surface unchanged
+        # and makes the file agree with it.
+        model = Model(migrated)
+        migrated = [
+            {**point, "value": round(model.predict(point["als"], point["luma"]))}
+            for point in migrated
+        ]
+        show("before", points, backlight_max)
+        print()
+        show("after", migrated, backlight_max)
+        if not args.apply:
+            print("\ndry run; pass --apply to write this and restart wluma")
+            return
+        state["brightness"] = migrated
+        apply(state, path, output)
+        model = Model(migrated)
+        outliers = find_outliers(migrated, backlight_max, args.tolerance)
+        render(migrated, model, outliers, backlight_max, als, args.png, output)
+        print(f"\nupdated plot: {args.png}")
+        subprocess.run(["preview", args.png], check=False)
+        return
+
+    model = Model(points)
+    outliers = find_outliers(points, backlight_max, args.tolerance)
+    render(points, model, outliers, backlight_max, als, args.png, output)
     report(points, model, outliers, backlight_max, als)
     subprocess.run(["preview", args.png], check=False)
 
@@ -367,8 +555,11 @@ def main():
     print(f"removed {len(picked)} point(s):")
     for index in picked:
         print(f"  {label(index, points[index], backlight_max, outliers)}")
-    apply(kept, path, args.output)
-    render(kept, backlight_max, als, args.png, args.output)
+    state["brightness"] = kept
+    apply(state, path, output)
+    model = Model(kept)
+    outliers = find_outliers(kept, backlight_max, args.tolerance)
+    render(kept, model, outliers, backlight_max, als, args.png, output)
     print(f"updated plot: {args.png}")
     subprocess.run(["preview", args.png], check=False)
 
