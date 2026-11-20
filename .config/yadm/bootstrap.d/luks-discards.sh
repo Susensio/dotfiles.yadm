@@ -5,6 +5,9 @@
 set -euo pipefail
 
 root=$(findmnt -no SOURCE / | sed 's/\[.*//')
+# A container's overlay, or any root with no device to walk, has no crypt mapping;
+# lsblk fails on such a name and errexit would take the step down with it.
+[[ $root == /dev/* ]] || exit 0
 # The crypt device is found by walking the chain, not by asking the root's own
 # device: a host whose root sits on LVM (or any other layer) above the LUKS
 # mapping would otherwise skip this check silently.  PATH keeps /dev/mapper/…
