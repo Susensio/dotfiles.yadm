@@ -33,3 +33,7 @@ A hand-made checkout that never runs yadm sees Helix's warning once and its buil
 Installing Omarchy onto an already-bootstrapped machine switches the link on the next yadm git command, or an explicit `yadm alt`, rather than on the install itself.
 Omarchy's own provisioning of this path (upstream PR #13843) only creates a missing link and therefore coexists: a yadm alt run replaces whichever link is there with the same effective target.
 `gruvbox_transparent.toml` stays as the inherited base instead of being folded into the fallback.
+
+## Corrections
+
+2026-12-14: the commit that first applied this decision left the materialised link `helix/themes/omarchy.toml` in the index, which the Decision had just ruled out: on every non-Omarchy machine `yadm alt` rewrites the link to the negated alternate's file, so the tracked path reads modified and `git-crypt unlock` refuses the dirty tree, leaving the vault locked on a fresh machine. It was the repository's only tracked plain-plus-`##` pair; the link is now untracked and covered by yadm's auto-exclude as this record prescribed all along.
