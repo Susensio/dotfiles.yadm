@@ -6,8 +6,8 @@ The cloud session that designed this ended here; the agent on the owner's machin
 
 Done:
 - ADR-0115 (git-crypt in the dotfiles, `yadm add-secret`, the `pre_commit` hook) is live; aichat's `.env` is encrypted.
-- `docs/plans/vault.md` is accepted: `~/Projects/secrets` becomes a `pass` store whose GPG key, committed there protected by the master passphrase, also unlocks the dotfiles' git-crypt (`yadm git-crypt add-gpg-user`), replacing `dotfiles.git-crypt.key.age` and age.
-- Agents are denied `gpg`, `pass` and `~/Projects/secrets` (Claude and pi); `gnupg` and `pass` are dependencies; `PASSWORD_STORE_DIR` is set in `environment.d/tools.conf`.
+- `docs/plans/vault.md` is accepted: `~/.local/share/secrets` becomes a `pass` store whose GPG key, committed there protected by the master passphrase, also unlocks the dotfiles' git-crypt (`yadm git-crypt add-gpg-user`), replacing `dotfiles.git-crypt.key.age` and age.
+- Agents are denied `gpg`, `pass` and the vault directory (Claude and pi); `gnupg` and `pass` are dependencies; `PASSWORD_STORE_DIR` is set in `environment.d/tools.conf`. The vault moved from `~/Projects/secrets` to `~/.local/share/secrets` on 2026-11-20: a tool-read store, not a project one; `new-machine` and the docs follow.
 - The homelab no longer keeps secrets in git (its `docs/plans/secrets.md`); only its restic password goes into this vault.
 
 Now, the owner, by hand, outside any AI session: the migration in `docs/plans/vault.md`, steps 0 to 6. An agent never runs it, and never reads the store, the key or the passphrase.
@@ -18,7 +18,7 @@ The paper copy of the master passphrase was declined: it is held in memory only,
 After step 5 passes on `nuc`, the agent:
 1. Done 2026-11-20, ahead of the rest because the fresh `nuc` bootstrap needs it: `new-machine` now clones `secrets`, `gpg --import vault-key.asc`, `yadm git-crypt unlock`, skipped quietly when the store cannot be cloned, as the logins are. The old `TODO:` is gone (commit `yadm: new-machine imports the vault key and unlocks git-crypt`).
 2. Amend ADR-0115 where it says how the key is kept (the GPG key in the vault, no age file, no paper copy, memory-only with the drill above), and bring `docs/secrets.md` and `docs/access.md` in line; the agent denies for `age` can go once nothing uses age.
-3. `maintenance`: report commits in `~/Projects/secrets` not yet pushed (`git -C ~/Projects/secrets status -sb`, no decryption).
+3. `maintenance`: report commits in `~/.local/share/secrets` not yet pushed (`git -C ~/.local/share/secrets status -sb`, no decryption).
 4. On a real machine, the login checks still open in `docs/BACKLOG.md`.
 
 Until step 6 retires it, the old path stays: `dotfiles.git-crypt.key.age` in `secrets`, opened with `age -d`, then `yadm git-crypt unlock <key>`.

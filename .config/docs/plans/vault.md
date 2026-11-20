@@ -18,7 +18,7 @@ ADR-0115 dropped `pass` because the secrets then in question were files tools re
 
 ## Design
 
-- `secrets` (private, `~/Projects/secrets`) becomes a `pass` store: one GPG-encrypted file per entry, e.g. `homelab/restic`, `github/recovery-codes`.
+- `secrets` (private, `~/.local/share/secrets`) becomes a `pass` store: one GPG-encrypted file per entry, e.g. `homelab/restic`, `github/recovery-codes`.
 - One GPG key, made for this store alone, encrypts it. Its private half is exported protected by the master passphrase and committed in the same repository, so from outside the store is one thing behind one passphrase, like a KeePass file.
 - The dotfiles' git-crypt key is added for that GPG key (`yadm git-crypt add-gpg-user <id>`), which commits the git-crypt key encrypted to the GPG public key into the dotfiles. A new machine unlocks with `yadm git-crypt unlock` and no exported key file; `dotfiles.git-crypt.key.age` and age go.
   That committed file is public-key ciphertext: it gives an attacker nothing to guess a passphrase against, unlike a passphrase-locked key file.
@@ -70,15 +70,15 @@ Check: `gpg --list-secret-keys <FPR>` shows the key and its encryption subkey.
 
 **2. The exported key is protected.** The one mistake that cannot be seen later is an export without a passphrase, committed.
 
-       gpg --export-secret-keys --armor <FPR> > ~/Projects/secrets/vault-key.asc
-       G=$(mktemp -d); gpg --homedir "$G" --import ~/Projects/secrets/vault-key.asc
+       gpg --export-secret-keys --armor <FPR> > ~/.local/share/secrets/vault-key.asc
+       G=$(mktemp -d); gpg --homedir "$G" --import ~/.local/share/secrets/vault-key.asc
        echo test | gpg --homedir "$G" --trust-model always -e -r <FPR> | gpg --homedir "$G" -d     # must ask for the passphrase
        rm -rf "$G"
 
 Check: the decrypt asked for the passphrase and printed `test`. Only then `git add vault-key.asc`.
 
 **3. The store.**
-`PASSWORD_STORE_DIR=~/Projects/secrets` in `environment.d`, then `pass init <FPR>`, `pass insert homelab/restic`, the GitHub recovery codes as `github/recovery-codes`.
+`PASSWORD_STORE_DIR=~/.local/share/secrets` in `environment.d`, then `pass init <FPR>`, `pass insert homelab/restic`, the GitHub recovery codes as `github/recovery-codes`.
 Check: on `dell`, `pass show homelab/restic | tr -d '\n' | sha256sum`; on `nuc`, `sudo tr -d '\n' </etc/homelab/restic-password | sha256sum`; the two sums are equal. Commit and push `secrets`.
 
 **4. git-crypt for the GPG key.** This commits `.git-crypt/keys/default/0/<FPR>.gpg` into the public dotfiles: public-key ciphertext, safe, but published for good, so check the fingerprint first.
@@ -88,7 +88,7 @@ Check: on `dell`, `pass show homelab/restic | tr -d '\n' | sha256sum`; on `nuc`,
 Check in a throwaway clone with a fresh keyring, nothing from the live machine:
 
        G=$(mktemp -d); D=$(mktemp -d)
-       gpg --homedir "$G" --import ~/Projects/secrets/vault-key.asc
+       gpg --homedir "$G" --import ~/.local/share/secrets/vault-key.asc
        git clone -q https://github.com/Susensio/dotfiles.yadm "$D"
        (cd "$D" && GNUPGHOME="$G" git-crypt unlock && sha256sum .config/aichat/.env)
        rm -rf "$G" "$D"

@@ -41,7 +41,7 @@ The same procedure with a different key still applies where the vault key must n
 
 ## Keys
 
-The vault's GPG key (in `~/Projects/secrets`, `vault-key.asc` protected by the master passphrase) encrypts the pass store and, through the committed stub, every git-crypt repository above.
+The vault's GPG key (in `~/.local/share/secrets`, `vault-key.asc` protected by the master passphrase) encrypts the pass store and, through the committed stub, every git-crypt repository above.
 A new machine imports it (`gpg --import`), then `yadm git-crypt unlock` with no key file; the stub travels with each clone.
 The homelab keeps no git-crypt key in git at all (`docs/plans/secrets.md` in that repository); its restic password is a `pass` entry instead.
 Claude and pi are denied `gpg`, `pass`, `age` and `git-crypt`, so those commands are run by hand.

@@ -79,9 +79,10 @@ if [[ -t 0 && -t 1 ]]; then
 
     # The vault (docs/plans/vault.md): its GPG key also unlocks this repository's
     # git-crypt. Skipped quietly when the store cannot be cloned, as the logins are.
-    if [[ ! -d $HOME/Projects/secrets ]] && gh repo clone Susensio/secrets "$HOME/Projects/secrets" &> /dev/null; then
+    VAULT=$HOME/.local/share/secrets
+    if [[ ! -d $VAULT ]] && gh repo clone Susensio/secrets "$VAULT" &> /dev/null; then
       echo "Vault: the GPG key asks for the master passphrase"
-      gpg --import "$HOME/Projects/secrets/vault-key.asc"
+      gpg --import "$VAULT/vault-key.asc"
       yadm git-crypt unlock
     fi
 
