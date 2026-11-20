@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.5.0",
+  "lastChangelogVersion": "1.5.2",
   "theme": "omarchy-system",
   "defaultProvider": "alias",
   "defaultModel": "mid",
@@ -26,11 +26,8 @@
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
     "claude-bridge/claude-haiku-5-5",
-    "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6.1-sol",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6.1-terra",
     "opencode-go/mimo-v2.6-pro",
     "opencode-go/glm-5.3",
     "opencode-go/glm-5.3-flash",
@@ -41,6 +38,7 @@
     "opencode-go/kimi-k2.7-code",
     "opencode-go/kimi-k3.1-pro",
     "opencode-go/gemini-4-argon",
+    "opencode-go/qwen3.8-flash",
     "opencode-go/minimax-m3.1-flash",
     "opencode-go/mimo-v2.6-flash",
     "opencode-go/beam-free",
@@ -49,11 +47,12 @@
     "mistral/ministral-14b-2512"
   ],
   "extensionChangelogVersions": {
-    "{\"source\":\"npm:@tintinweb/pi-subagents\",\"scope\":\"user\"}": "0.23.1",
+    "{\"source\":\"npm:@tintinweb/pi-subagents\",\"scope\":\"user\"}": "0.26.1",
     "{\"source\":\"npm:pi-footer\",\"scope\":\"user\"}": "0.5.1",
-    "{\"source\":\"npm:@gotgenes/pi-permission-system\",\"scope\":\"user\"}": "42.0.0",
+    "{\"source\":\"npm:@gotgenes/pi-permission-system\",\"scope\":\"user\"}": "42.2.0",
     "{\"source\":\"npm:pi-model-fallback-alias\",\"scope\":\"user\"}": "0.2.1",
-    "{\"source\":\"npm:@narumitw/pi-usage\",\"scope\":\"user\"}": "0.69.2"
+    "{\"source\":\"npm:@narumitw/pi-usage\",\"scope\":\"user\"}": "0.69.3",
+    "{\"source\":\"npm:@mzwing/pi-permission-auto-review\",\"scope\":\"user\"}": "1.0.2"
   },
   "selfUpdateCommand": [
     "mise",
