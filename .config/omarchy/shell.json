@@ -103,9 +103,6 @@
       "tray": [
         {
           "id": "superwhisper.panel"
-        },
-        {
-          "id": "io.github.nobledoodle.omarchroma"
         }
       ]
     },

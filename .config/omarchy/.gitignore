@@ -12,4 +12,3 @@ plugins/omamail/
 plugins/superwhisper-panel
 # Lock file omarchy-dictation takes while it switches backends
 defaults/*.lock
-plugins/io.github.nobledoodle.omarchroma/
