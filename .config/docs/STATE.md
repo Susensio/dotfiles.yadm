@@ -118,7 +118,7 @@ Committed 2026-10-05 and reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier
 ## Tailscale mesh and signing keys (2026-11-10)
 
 `dell` and `nuc` both answer Tailscale SSH on their tailnet IP, and `dell` reaches `nuc` by name with no key; `nuc` keeps OpenSSH on its LAN address as the fallback ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), superseded for the signing/auth split by [ADR-0117](adr/0117-one-key-two-slots.md); matrix in [access.md](access.md)).
-`35_signing_key.sh` mints and registers a per-machine signing key, and CI checks the second bootstrap by what it changed ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
+`35_machine_key.sh` mints and registers the per-machine keypair in both GitHub slots, and CI checks the second bootstrap by what it changed ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
 
 - Unverified: the phone reaching `nuc` by tailnet name with no credential. Termux's `ssh` should offer "none" authentication; a phone app that demands one cannot.
 - `dell` runs no sshd, so it is reachable only through Tailscale SSH, and every other machine's bootstrap has yet to run the signing step.

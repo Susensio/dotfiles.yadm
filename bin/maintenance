@@ -80,6 +80,16 @@ local_drift() {
     echo "  unpushed commits on $(yadm branch --show-current)"
     echo "    yadm log @{upstream}..HEAD"
   fi
+  # The vault (docs/plans/vault.md): pass commits, never pushes, and its git half
+  # fails silently (docs/secrets.md), so both halves are checked here.
+  local vault=${PASSWORD_STORE_DIR:-$HOME/.local/share/secrets}
+  if git -C "$vault" rev-parse --git-dir &>/dev/null; then
+    if (($(git -C "$vault" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0) > 0)); then
+      echo "  unpushed commits in the vault"
+      echo "    git -C $vault push"
+    fi
+    git -C "$vault" status --porcelain --untracked-files=all | cut -c4- | sed "s|^|  vault file not in git: $vault/|"
+  fi
   if [[ -f $bootstrap_log ]]; then
     sed 's/\x1b\[[0-9;]*m//g' "$bootstrap_log" | grep -E '^\[(WARN|ERROR)\]|WARNING' | sed 's/^/  bootstrap: /' || true
   fi

@@ -4,7 +4,7 @@
   Until `nuc` is rebuilt, the homelab agent runs as the owner there.
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care; the shape and care points are the plan [`docs/plans/snapper-home.md`](plans/snapper-home.md) (Omarchy snapshots only `/`, only before updates, and disables the timeline timer; the 2026-09-30 `yadm reset --hard` took hours of forensics to undo).
 - yadm | `nuc`'s signing-key rotation, resolved by its rebuild: the passphraseless `nuc-signing` key on an unencrypted root (the gap [ADR-0100](adr/0100-passphraseless-signing-key.md) left) goes away when the box is reinstalled on LUKS (the homelab's `docs/plans/rebuild.md`, decided 2026-11-20), so the bootstrap's "encrypt the root" option is the one taken.
-  What is left is the paperwork at the rebuild: the new machine mints its own `<machine>-signing` key, so delete the old `nuc-signing` on GitHub and swap its `git/allowed_signers` line for the new public half (the bootstrap prints that line for a person to commit).
+  Done 2026-11-20, ahead of the rebuild: the dead `nuc-signing` entries are deleted from GitHub and `git/allowed_signers` (the wipe destroyed the private half), and the remaining signing keys are re-titled with bare machine names (`dell`, `chuwi`), so all the rebuild leaves is the new line the bootstrap prints for the person to commit.
   The old key stays trusted until then; nothing else reads it.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `docs/plans/tmux-notify.md`.

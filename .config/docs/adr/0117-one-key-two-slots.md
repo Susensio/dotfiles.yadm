@@ -19,19 +19,21 @@ The directory would automate one pasted line — `nuc`'s LAN fallback — that r
 
 ## Decision
 
-One passphraseless keypair per machine, registered on GitHub in the signing slot, and wherever a machine needs an SSH credential (today only `nuc`'s LAN sshd fallback), the same keypair fills the authentication slot too: pasted into `authorized_keys` by hand at the box, never fetched from GitHub, and not registered in the account's authentication-key list beyond what a LAN fallback ever needs.
+One passphraseless keypair per machine, registered on GitHub in **both** slots: the signing slot (its original job) and the authentication slot, so the account's key list is the directory of who "I" am.
+Both slots title the key with the bare machine name (`dell`, `nuc`): each list is read on its own, and the name says which machine exists, not which use the key serves; ADR-0109's `-signing` suffix went when the key stopped being single-purpose (the existing registrations were re-titled 2026-11-20, same key material).
+Publish and subscribe are both automated, on the bootstrap: the signing-key step registers the keypair in both slots, and a new authorized_keys step seeds every machine whose sshd answers from the account's public key list, replacing the file wholesale so a revoked key leaves on the next bootstrap.
+The account is read only when a bootstrap runs — a first install or a `yadm pull`'s rerun — never on a timer: those are the moments the machine already bets on the account (it just cloned the account's repositories), so the trust window adds nothing new.
 The keypair never authenticates anything over the tailnet; Tailscale SSH stays the mesh.
 
-Keep declining the key directory: no machine reads `api.github.com/users/…/keys` as an `authorized_keys` source, and GitHub's job stays signature verification.
-
-Password authentication stays off everywhere; `nuc`'s LAN sshd is key-only like every other path.
+Password authentication stays off everywhere; `nuc`'s LAN sshd is key-only like every other path, and the tailnet-down/GitHub-up lockout the directory answers is covered by the seeded LAN fallback rather than a password.
 
 ## Consequences
 
 A stolen private key from any machine now both forges commits and opens the LAN fallback on `nuc`; the blast radii merge, accepted because they only separate against threats that take whole home directories anyway.
-Rotating a signing key (a suspected leak, a machine's retirement) now also rotates that machine's SSH credential, so the paste into `authorized_keys` and the `allowed_signers` line change together, and both are printed by the bootstrap step.
-`git/allowed_signers` and the GitHub profile now name fingerprints that open a shell on `nuc`'s LAN fallback; the account that hosts them stays guarded by its two-factor and its scoped tokens, which is the same trust it already carries for signatures.
+Rotating a signing key (a suspected leak, a machine's retirement) now also rotates that machine's SSH credential: the authentication-slot entry is deleted on GitHub, the signing entry and the `allowed_signers` line change with it, and every machine's next bootstrap drops the old public half from `authorized_keys` — the wholesale replace is what makes revocation propagate.
+A compromised account can now add an authentication key that grants the LAN fallback on every sshd machine at its next bootstrap; this is the accepted cost of the directory, narrower than a standing pull (which would make it silent root within a cycle) because a bootstrap is an operator-initiated moment, and the account already needed re-signing keys to be similarly trusted by deploys.
+The account's key list is load-bearing for the LAN fallbacks; `new-machine`'s login now requests the `admin:public_key` scope beside the signing one.
 
-`nuc`'s LAN fallback needs its line pasted once at the rebuild (the wipe erases the entry that held `dell`'s key); `docs/access.md`'s matrix row for it flips to the same keypair.
+`nuc`'s LAN fallback needs no paste at the rebuild (the bootstrap seeds it once sshd answers); `docs/access.md`'s matrix row for it flips to "seeded from the account's key list".
 Fail2ban or sshd rate-limiting on the LAN is optional hardening rather than the guard a password door would need, since nothing guesses at keys.
-The signing-key bootstrap step keeps refusing to mint a passphraseless key where the root is not encrypted, per ADR-0100; the homelab rebuild makes that premise true on every machine, so no exception is expected.
+The machine-key bootstrap step (`35_machine_key.sh`) keeps refusing to mint a passphraseless key where the root is not encrypted, per ADR-0100; the homelab rebuild makes that premise true on every machine, so no exception is expected.

@@ -64,7 +64,9 @@ if [[ -t 0 && -t 1 ]]; then
       logged_in=true
     fi
 
-    scope=admin:ssh_signing_key
+    # Both slots of the one keypair (docs/adr/0117): signing, and the
+    # authentication list that every sshd machine seeds its authorized_keys from.
+    scope=admin:ssh_signing_key,admin:public_key
     if command -v gh &> /dev/null; then
       if ! gh auth status &> /dev/null; then
         echo "GitHub: approve the code at github.com/login/device on your phone or a signed-in machine"
