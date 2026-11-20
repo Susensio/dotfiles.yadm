@@ -40,9 +40,27 @@ if [[ -d /run/systemd/system ]] && ! mise bootstrap services status --missing &>
 fi
 ((${#parts[@]})) || exit 0
 
-# --quiet would hide the downloads and hooks worth watching in a debug run
+only=$(IFS=,; echo "${parts[*]}")
+
+# The status checks named the parts; say what is coming before the quiet minutes.
+# `ls --missing` names the tools; `packages status` would name packages too, but
+# counting them here would run the check twice, so the part's own line stays generic.
+tools=$(mise ls --global --missing --json 2>/dev/null | jq -r 'keys_unsorted | join(", ")')
+if [[ -n $tools ]]; then
+  log info "mise: installing ${tools}"
+fi
+for part in "${parts[@]}"; do
+  case $part in
+    packages) log info "mise: installing every [bootstrap.packages] entry" ;;
+    services) log info "mise: applying services" ;;
+  esac
+done
+
+# --quiet hides the 3-second progress-bar frames mise re-renders line by line when
+# stderr is not a tty (the bootstrap pipes it through tee); DEBUG drops the filter to
+# watch the downloads and hooks instead.
 quiet=(--quiet)
 [[ -n ${DEBUG:-} ]] && quiet=()
 
-only=$(IFS=,; echo "${parts[*]}")
 mise bootstrap --only "$only" --yes "${quiet[@]}"
+log info "mise bootstrap done (${only})"
