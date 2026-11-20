@@ -20,9 +20,12 @@ fail=0
 
 # 1. Reapply local patches. reapply-all.sh exits 0 even when a patch no longer applies, so
 #    read its output rather than its status: a stale .orig must be visible, not retried.
+#    The one exception is a line the library tags `rebased:`, its own successful repair of a
+#    patch a package update moved; that is not drift to fix (ADR-0112).
 #    The task itself notifies herdr, which is judged separately in step 4.
 if [[ -f $agent_dir/patches/reapply-all.sh ]]; then
     out=$(sh "$agent_dir/patches/reapply-all.sh" 2>&1) || true
+    out=$(grep -v 'rebased:' <<<"$out" || true)
     if [[ -n $out ]]; then
         printf '%s\n' "$out" >&2
         fail=1

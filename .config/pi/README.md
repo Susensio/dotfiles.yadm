@@ -24,7 +24,8 @@ Track a new file by adding it to the whitelist, above the knockouts at the end, 
   `/permission-audit` turns the permission log into proposed config edits.
 - **Extension bundling** roughly halves startup but changes how modules load ([ADR-0067](../docs/adr/0067-bundle-pi-extensions.md)).
   When an extension hangs or misbehaves, run `node agent/bundler/bundle.mjs --revert` and retest before debugging the extension itself; run `/bundle-review` after installing or updating a package.
-- **Local patches** in `agent/patches/` carry upstream fixes not yet released, and keep their package off the bundler; `agent/patches/reapply-all.sh` reapplies them after a package update.
+- **Local patches** in `agent/patches/` carry upstream fixes not yet released, and keep their package off the bundler; `agent/patches/reapply-all.sh` reapplies them after a package update, rebasing one the release moved onto the new file and refreshing its `.orig`/`.patch` when the merge is clean ([ADR-0116](../docs/adr/0116-pi-patch-auto-rebase.md)).
+  A patch whose merge conflicts is left unpatched and warned about; a clean merge is a suggestion, not a proof, so read the regenerated diff and delete a patch whose fix has landed upstream instead of keeping it.
 - **Stray extension output** goes to `agent/tui-captured-output.log` with a warning while a TUI session runs, through `agent/extensions/tui-output-guard.ts`, instead of landing in the editor.
 - **Web tools** need `/web-tools` run once before `web_search` or `web_fetch` work.
 - **`bash-readonly`** gives the explorer and tester a disposable writable view of the project; it does not isolate the network.

@@ -10,6 +10,8 @@
 #
 # Patches only a byte-identical pristine target, unlike the Omarchy bugfix steps'
 # fuzz-free patch check: npm updates land silently and some patches touch permission code.
+# A target a release moved is rebased onto the new file by rebase.py first (ADR-0116),
+# which refreshes the .orig and the patch; this script still decides whether it applies.
 #
 # Exit 0: applied (or already applied). Exit 1: drifted/missing - patch needs
 # a manual rebase against the .orig in this directory.
