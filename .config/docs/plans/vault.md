@@ -1,6 +1,6 @@
 # Proposal: a pass vault in the `secrets` repository, and git-crypt unlocked with its GPG key
 
-Status: accepted by the owner on 2026-11-18, not built; the migration below is done by hand, outside any AI session. It would amend [ADR-0115](../adr/0115-yadm-git-crypt-one-passphrase.md) where it says how the git-crypt key is kept; how secrets are encrypted in the dotfiles does not change.
+Status: built and live (the hand migration passed 2026-11-20 on `dell`, steps 0–6, and the vault proved itself on `nuc`'s rebuild the same night: `pass show homelab/restic` answers there). Entries as built: `homelab/restic`, `homelab/luks`, `dell/luks` (no `github/recovery-codes`; the plan's example name never got used, and the store holds two more entries than the plan sketched — LUKS passphrases under machine names). It amends [ADR-0115](../adr/0115-yadm-git-crypt-one-passphrase.md) where it says how the git-crypt key is kept; how secrets are encrypted in the dotfiles does not change.
 
 ## Problem
 
