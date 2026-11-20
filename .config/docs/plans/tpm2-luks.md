@@ -102,12 +102,12 @@ Then try the Limine Snapshots entry: without `btrfs-overlayfs` it either fails t
    Also resume: lid → suspend-then-hibernate → resume, expecting the PIN prompt (the resume path is the same initramfs).
 
 ## What the PIN changes in the threat model (the ADR's content)
-
 - PCR 11 measures the UKI, so every kernel update rebuilds it and breaks the seal; the next boot asks for the long passphrase once, and a re-enroll restores the PIN path (`systemd-cryptenroll` again, same command).  Accepted: one long-passphrase boot per kernel update is no worse than today's every-boot passphrase.
 - The seal without Secure Boot proves only "this boot chain ran": the ESP is unencrypted and public, so an attacker who can also guess or observe the PIN unlocks the disk.  The PIN raises that bar from zero (TPM-only, the shape the backlog first sketched) to a knowledge factor; the other half is Secure Boot via sbctl, deliberately out of scope (the backlog's own analysis).
 - A firmware update, a TPM clear, or a `SetupMode` change falls back to the long passphrase prompt; nothing is lost, and the PIN is re-enrolled after re-sealing.
 - Shoulder-surfing and smudge attacks now watch a 6-digit PIN instead of a passphrase; the lock screen still guards the running system, so the PIN defends the boot path only.
 - Hibernation is not TPM-gated here: resume asks the PIN the same way a cold boot does, since both ask at the same initramfs prompt.
+- The deliberate contrast with `nuc`'s rebuild (the homelab's `docs/plans/rebuild.md`): there, Secure Boot is on and the enrollment takes no PIN, because the point is the unattended reboot — a server no one types at — while `dell`'s PIN is exactly what makes up for Secure Boot being off here.
 
 ## Rollback
 
@@ -117,7 +117,6 @@ Then try the Limine Snapshots entry: without `btrfs-overlayfs` it either fails t
 - The fallback UKI entry stays in the Limine menu until the PIN boot has proven itself; after that, remove it and the entry's re-add note.
 
 ## After completion
-
 - The ADR records the taken-up decision (PIN supersedes the backlog's "PIN ruled out"), the busybox→sd-encrypt switch, and the accepted limitations (kernel-update re-enrolls, Snapshots-entry writable boot dead, Secure Boot out of scope); the plan is deleted at acceptance and the backlog entry goes with it.
 - A silent idempotent bootstrap step like `luks-discards.sh` warns when the sd-encrypt drop-in, the crypttab line, or the keyslot count drifts (a reinstalled system or a header restore leaves no TPM slot and nothing warns today).
 - `docs/secrets.md` gains a line: the LUKS passphrase's paper copy and the header image live in the offline set.
