@@ -77,7 +77,13 @@ if [[ -t 0 && -t 1 ]]; then
       fi
     fi
 
-    # TODO: clone the secrets repository and decrypt the git-crypt key here (docs/secrets.md, docs/BACKLOG.md).
+    # The vault (docs/plans/vault.md): its GPG key also unlocks this repository's
+    # git-crypt. Skipped quietly when the store cannot be cloned, as the logins are.
+    if [[ ! -d $HOME/Projects/secrets ]] && gh repo clone Susensio/secrets "$HOME/Projects/secrets" &> /dev/null; then
+      echo "Vault: the GPG key asks for the master passphrase"
+      gpg --import "$HOME/Projects/secrets/vault-key.asc"
+      yadm git-crypt unlock
+    fi
 
     # The steps that warned about these logins finish now
     if $logged_in; then yadm bootstrap; fi
