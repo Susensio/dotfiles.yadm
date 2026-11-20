@@ -1,14 +1,14 @@
 # Access
 
 How to reach each machine, and with what credential.
-[ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md) records why the mesh is Tailscale SSH rather than keys, and why a signing key never doubles as an authentication key.
+[ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md) recorded why the mesh is Tailscale SSH rather than keys, and why the account is never read as an `authorized_keys` source; [ADR-0117](adr/0117-one-key-two-slots.md) supersedes its signing/auth separation: one per-machine keypair now fills both GitHub slots where a path needs a key at all.
 
 ## The matrix
 
 | From | To | Path | Credential |
 |---|---|---|---|
 | `dell` | `nuc` | tailnet name, `ssh nuc` | Tailscale identity |
-| `dell` | `nuc` | `192.168.1.103`, port 22 | `dell`'s signing key in `~/.ssh/authorized_keys` |
+| `dell` | `nuc` | `192.168.1.103`, port 22 | `dell`'s signing key in `~/.ssh/authorized_keys` (the same keypair, per ADR-0117; the rebuild-day wipe erases the old entry, so it is pasted again at the box) |
 | phone | `nuc` | tailnet name, port 22 | Tailscale identity, no key |
 | phone | `nuc` | LAN address | not set up: no phone key on `nuc` |
 | anything | `dell` | tailnet name | Tailscale identity: `dell` runs no sshd |
@@ -29,16 +29,15 @@ The tailnet policy is not in the repository: no local `tailscale` subcommand rea
 
 ## GitHub
 
-Nothing needs an authentication key on GitHub: every machine pushes over HTTPS with `gh`'s token, including `nuc`, whose yadm and homelab remotes are both `https://` and whose `gh auth status` reports the `https` protocol.
-The account therefore holds signing keys only, one per machine, so the two slots stay 1:1: a machine's single keypair is registered once, for signatures.
-The slots differ only in what a stolen private half buys. As a signing key it forges commits, which GitHub's persistent verification records keep from rewriting history, and it cannot push or open a shell. As an authentication key it can push to every repository.
-
-A machine that later needs `git@github.com:` clones registers that same keypair in the authentication slot too; one keypair filling both is expected, and it is not the shared-key anti-pattern, which is about a key opening shells on many hosts.
+Nothing reads the account as a key directory ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md) declined it; [ADR-0117](adr/0117-one-key-two-slots.md) keeps it declined): no machine pulls `api.github.com/users/…/keys` into `authorized_keys`, and the account's `admin:public_key` scope therefore stays what it is, a convenience for hand-registrations.
+Every machine pushes over HTTPS with `gh`'s token, including `nuc`, whose yadm and homelab remotes are both `https://` and whose `gh auth status` reports the `https` protocol.
+The account holds signing keys only, one per machine, so the slots stay 1:1: a machine's single keypair is registered once, for signatures; where it also authenticates a LAN fallback, the paste into `authorized_keys` is hand-made at the box, never fetched.
+The slots differ only in what a stolen private half buys. As a signing key it forges commits, which GitHub's persistent verification records keep from rewriting history; wherever the same keypair also authenticates SSH, it opens that one fallback shell too ([ADR-0117](adr/0117-one-key-two-slots.md)).
 
 ## Signing keys
 
-Each machine mints its own passphraseless `<machine>-signing` key and registers its public half on GitHub.
-`35_signing_key.sh` does that, and refuses to generate on a machine whose root is not encrypted, since [ADR-0100](adr/0100-passphraseless-signing-key.md) accepted a passphraseless key only because LUKS covers it at rest.
+Each machine mints its own passphraseless `<machine>-signing` key and registers its public half on GitHub, in the signing slot only (the authentication slot stays empty unless a LAN fallback needs a paste).
+`35_signing_key.sh` does that, and refuses to generate on a machine whose root is not encrypted, since [ADR-0100](adr/0100-passphraseless-signing-key.md) accepted a passphraseless key only because LUKS covers it at rest; after `nuc`'s LUKS rebuild the premise holds fleet-wide.
 A new machine's line in `git/allowed_signers` is printed for a person to commit, because that file is this fleet's trust list and a bootstrap step has no business rewriting it.
 
 ## Logins a step cannot do

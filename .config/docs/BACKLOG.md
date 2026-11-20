@@ -3,11 +3,9 @@
 - yadm | Secrets: the `pass` vault (`docs/plans/vault.md`, accepted 2026-11-18, at `~/.local/share/secrets`). Done: agent denies for `gpg`, `pass` and the vault directory, `gnupg` and `pass` in the dependencies, `PASSWORD_STORE_DIR`. Next: the owner's migration by hand (steps 0 to 6), then `new-machine` clones `secrets`, imports `vault-key.asc` and runs `yadm git-crypt unlock` where its `TODO:` stands, and ADR-0115 is amended; `maintenance` reports unpushed commits in the vault; the login half's checks run on a real machine (`tailscale up --qr` prints a QR code, `GH_BROWSER=true gh auth login --web` opens no browser).
   Until `nuc` is rebuilt, the homelab agent runs as the owner there.
 - omarchy | snapper: **important** — set up timeline snapshots of `/home`, with care; the shape and care points are the plan [`docs/plans/snapper-home.md`](plans/snapper-home.md) (Omarchy snapshots only `/`, only before updates, and disables the timeline timer; the 2026-09-30 `yadm reset --hard` took hours of forensics to undo).
-- yadm | `nuc`'s signing key is passphraseless on an unencrypted root, which is the case [ADR-0100](adr/0100-passphraseless-signing-key.md) deliberately did not cover: it accepted a passphraseless key only because LUKS encrypts `/home` at rest, and `nuc` has no LUKS, so a copied `~/.ssh/id_ed25519` there is a total compromise with no cracking step.
-  `35_signing_key.sh` refuses to mint one on such a machine and warns, so this key predates the step and nothing manages it.
-  The key is registered as `nuc-signing` and trusted in `git/allowed_signers`, and it signed a test commit there that verified locally.
-  Options: encrypt the root, give the key a passphrase plus an agent unlock, or move signing for `nuc`-authored commits onto a machine that is encrypted.
-  Revoking means deleting `nuc-signing` on GitHub and dropping its `allowed_signers` line.
+- yadm | `nuc`'s signing-key rotation, resolved by its rebuild: the passphraseless `nuc-signing` key on an unencrypted root (the gap [ADR-0100](adr/0100-passphraseless-signing-key.md) left) goes away when the box is reinstalled on LUKS (the homelab's `docs/plans/rebuild.md`, decided 2026-11-20), so the bootstrap's "encrypt the root" option is the one taken.
+  What is left is the paperwork at the rebuild: the new machine mints its own `<machine>-signing` key, so delete the old `nuc-signing` on GitHub and swap its `git/allowed_signers` line for the new public half (the bootstrap prints that line for a person to commit).
+  The old key stays trusted until then; nothing else reads it.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `docs/plans/tmux-notify.md`.
   Blocked on tmux ≥ 3.8: this box is `tmux 3.7_c-1` and `new-pane` has no geometry flags (`-x/-y/-X/-Y`), so the floating toast cannot be built.

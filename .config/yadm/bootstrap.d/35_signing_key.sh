@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# One passphraseless signing key per machine (docs/adr/0109): generated here,
-# uploaded by gh, and printed for a person to commit to git/allowed_signers.
-# The upload is the only hosted half; a signature needs the private key, which
-# never leaves this machine.
+# One passphraseless signing key per machine (docs/adr/0109, superseded by 0117
+# for the signing/auth split): generated here, uploaded by gh, and printed for
+# a person to commit to git/allowed_signers.  The upload is the only hosted
+# half; a signature needs the private key, which never leaves this machine.
 set -euo pipefail
 
 key="$HOME/.ssh/id_ed25519"
@@ -12,7 +12,11 @@ signers="${XDG_CONFIG_HOME:-$HOME/.config}/git/allowed_signers"
 
 # ADR-0100 accepted a passphraseless key only because LUKS covers it at rest;
 # anywhere else this would mint an unprotected total-compromise secret.
-if [[ $(lsblk -dno TYPE "$(findmnt -no SOURCE / | sed 's/\[.*//')" 2>/dev/null) != crypt ]]; then
+# The chain is walked, not the root device inspected: a rebuilt host can sit on
+# LVM (or any other layer) above the crypt device, and asking the top device
+# alone would refuse a machine that is encrypted.
+root=$(findmnt -no SOURCE / | sed 's/\[.*//')
+if ! lsblk -sno TYPE "$root" 2>/dev/null | grep -qx crypt; then
   log warn "signing key: root is not encrypted; run 'ssh-keygen -t ed25519 -C \"$title\"' by hand"
   exit 0
 fi

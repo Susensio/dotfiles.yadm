@@ -1,6 +1,6 @@
 # ADR-0109: Mesh the machines on Tailscale SSH and mint one passphraseless signing key per machine, instead of reusing signing keys as SSH auth keys or syncing GitHub auth keys
 
-Status: Accepted
+Status: Superseded by [ADR-0117](0117-one-key-two-slots.md)
 Date: 2026-11-10
 
 ## Context

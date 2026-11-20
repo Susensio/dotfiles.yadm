@@ -112,18 +112,18 @@ Committed 2026-10-05 and reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier
 
 [ADR-0098](adr/0098-luks-discards-header-flag.md): TRIM reaches the SSD through the LUKS2 header's persistent `allow-discards` flag and btrfs's default async discard.
 
-- Not yet applied: `sudo cryptsetup refresh --allow-discards --persistent root` needs the passphrase in a terminal; until then `bootstrap.d/luks-discards.sh` warns.
-- Unverified: after the next boot, `findmnt -no OPTIONS /` should list `discard=async`; if not, enable `fstrim.timer` instead.
+- Applied and verified 2026-11-20: `lsblk --discard` shows the `root` mapping passing discards (`DISC-MAX 2T`) and `findmnt -no OPTIONS /` lists `discard=async`, so `fstrim.timer` stays off.
+- `bootstrap.d/luks-discards.sh` now walks the device chain to find the crypt device instead of asking the root's own device, so a rebuilt host whose root sits on LVM above the LUKS mapping is checked rather than silently skipped.
 
 ## Tailscale mesh and signing keys (2026-11-10)
 
-`dell` and `nuc` both answer Tailscale SSH on their tailnet IP, and `dell` reaches `nuc` by name with no key; `nuc` keeps OpenSSH on its LAN address as the fallback ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), matrix in [access.md](access.md)).
+`dell` and `nuc` both answer Tailscale SSH on their tailnet IP, and `dell` reaches `nuc` by name with no key; `nuc` keeps OpenSSH on its LAN address as the fallback ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), superseded for the signing/auth split by [ADR-0117](adr/0117-one-key-two-slots.md); matrix in [access.md](access.md)).
 `35_signing_key.sh` mints and registers a per-machine signing key, and CI checks the second bootstrap by what it changed ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
 
 - Unverified: the phone reaching `nuc` by tailnet name with no credential. Termux's `ssh` should offer "none" authentication; a phone app that demands one cannot.
 - `dell` runs no sshd, so it is reachable only through Tailscale SSH, and every other machine's bootstrap has yet to run the signing step.
-- `nuc`'s homelab `docs/STATE.md` still lists an SSH key added to GitHub as signing *and* auth, which ADR-0109 rejects; the auth half should go when that file is next edited.
-- Left over on GitHub: `chuwi`'s authentication key (162582085) and `nuc`'s 2023 RSA key (87867050) contradict the record and are unreferenced by it.
+- `nuc`'s homelab `docs/STATE.md` listed an SSH key added to GitHub as signing *and* auth; [ADR-0117](adr/0117-one-key-two-slots.md) now allows one keypair filling both, so that line is no longer a contradiction, though the auth registration itself is unused.
+- Left over on GitHub: none — `gh api user/keys` returns an empty list (checked 2026-11-20), so `chuwi`'s authentication key (162582085) and `nuc`'s 2023 RSA key (87867050) are both gone; the account holds three signing keys only (`chuwi`, `dell`, `nuc`).
 
 ## yadm alt race and commit signing (2026-10-24)
 
