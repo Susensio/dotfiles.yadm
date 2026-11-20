@@ -18,7 +18,8 @@ The bootstrap trims Omarchy's preinstalls itself ([ADR-0049](adr/0049-omarchy-pr
 Omarchy symlinks its skills into `$HOME`-relative agent roots: `~/.agents`, `~/.claude`, `~/.codex`, `~/.pi/agent`, `~/.hermes`, and later `~/.gemini/config`.
 This layout rehomes the agents that take a config-directory variable and deletes those `$HOME` copies, leaving the skills in `~/.config/claude`, `~/.config/codex`, `~/.config/pi/agent`, `~/.config/opencode`, `~/.config/hermes` and the generic `~/.config/.agents` ([ADR-0068](adr/0068-xdg-agent-skill-roots.md)).
 `omarchy update` migrations recreate the `$HOME` links, so the post-update bootstrap removes them again.
-Antigravity has no such variable, so the agent and its skill were removed instead.
+Antigravity has no such variable, so the agent and its skill were removed instead; the installed Omarchy's migrations recreate `~/.gemini/config` links, and the skills step drops them unconditionally.
+Superwhisper's `setup-user` links its agent skill into the same `$HOME` roots; the skills step rehomes it into each installed agent's XDG skills root the same way (ADR-0068 Corrections), and warns about anything unknown left behind, so a new writer surfaces instead of accumulating.
 
 ## Keybindings
 
@@ -83,7 +84,7 @@ Voxtype was dropped then: Whisper picks one language token per clip, which force
 `hypr/bindings.lua` calls `omarchy-dictation`, so the backend can change without rebinding: Insert holds to record, Shift + Insert toggles a latched session.
 Omarchy's own Alt + Space and Right Alt keys stay unbound, since `hypr/hyprland.lua` skips its dictation bindings (ADR-0055).
 `mise/conf.d/omarchy.toml##distro.omarchy` declares `superwhisper-bin`; pacman does not run its per-user setup, so `bootstrap.d/omarchy##distro.omarchy/superwhisper.sh` runs `omarchy-install-dictation-superwhisper --background` once, where `superwhisper.service` is not yet enabled.
-That setup links the vendor's bar panel and agent skill into this tree; the links are ignored, like Omarchy's own skills.
+That setup links the vendor's bar panel and agent skill into this tree; the panel link is ignored, and the skill link is rehomed into each installed agent's XDG skills root by the skills bootstrap step (ADR-0068 Corrections), because setup-user and Omarchy's migrations keep rewriting the `$HOME` copies.
 
 ## Patching Omarchy bugs
 

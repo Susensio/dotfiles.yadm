@@ -43,3 +43,13 @@ An agent whose variable is not yet applied keeps its `$HOME` copy until a login 
 Omarchy's Hermes provisioning keeps writing into `~/.hermes`, which Hermes no longer reads, until an Omarchy release follows `HERMES_HOME`; its Hermes removal deletes `~/.hermes` and `~/.config/Hermes`, so a Hermes moved to `~/.config/hermes` has to be cleaned up by hand.
 
 Antigravity's separate-quota fallback, its bwrap wrapper and its harness mention are gone.
+
+## Corrections
+
+2026-11-20: the claim that an Omarchy install leaves no agent remnants in `$HOME` was false for links outside Omarchy's own tree.
+Superwhisper's `setup-user` links its agent skill into the same `$HOME` roots (`~/.agents/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.pi/agent/skills`) from the dictation installer and Omarchy's migrations, and the removal keyed on Omarchy's skills tree never touched it.
+The skills bootstrap step now also rehomes that link, keyed on its `/opt/superwhisper/assets/agent-skill` target, into each installed agent's XDG skills root — same Decision, extended to a second vendor's links.
+Not into `$XDG_CONFIG_HOME/.agents/skills`: that generic root is read only by project-level discovery (pi scans `.agents/skills` walking up from the working directory, herdr's mirrors are this repo's project skills), while the agents' user-level generic root stays hardcoded at `~/.agents/skills`.
+
+2026-11-20: the installed Omarchy now writes one root the 4.0.4 tree did not — Antigravity's `~/.gemini/config/skills`, from migration and provisioning.
+No redirect variable exists (the original Decision's ground for not keeping it), so it gets the generic-`.agents` treatment instead: the skills step unconditionally drops links keyed on Omarchy's tree, and a warning pass derived from the agents table flags whatever remains in a `$HOME` skill root — closing this record's "nothing warns when one appears" limitation for known writers; a new root still needs its own drop line or table entry, and a warning, to be handled.
