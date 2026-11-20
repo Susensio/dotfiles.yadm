@@ -140,3 +140,7 @@
   No upstream issue or PR exists (searched `omacom/omarchy` on 2026-11-11); PR #16073 only covers a sender withdrawing its own notification.
   Shape: in `shell/plugins/notifications/Service.qml`, on the `activewindowv2` refresh (`hyprRefresh`), close with `closeToast(key, "dismissed")` each open toast whose `windowForSource(row.source)` (or `windowForPid`) has `focusOrder === 0`.
   Either carry it as another bugfix step after drafting an upstream feature request with `report-issue`, or only the request.
+- yadm | `30_mise.sh` announces its parts and tool list, then runs `mise bootstrap --quiet` (commit `yadm: announce the mise parts...`): a terminal gets minutes of silence beyond those lines, because the bootstrap pipes stderr through tee, mise never sees a tty, and its unquieted output re-renders the progress bar as stacked lines every 3 s.
+  The better shape found but not taken: wrap the run in a pty (`script -qefc "mise bootstrap ..." /dev/null`) when stderr is a tty, so mise renders its native in-place progress bar while the tee log stays line-clean; CI and `DEBUG=` keep today's behavior.
+  Open questions before adopting: exit-code propagation through `script` (verified `-e` returns the child's status on failure, but a full timed run was cut short), whether mise's postinstall hooks behave with a pty, and whether the tee log's ANSI escapes are worth stripping.
+  A mise setting that keeps event lines but drops the 3-second frames in non-tty mode would remove the need for the wrapper entirely; none existed as of 2026.11.0.
