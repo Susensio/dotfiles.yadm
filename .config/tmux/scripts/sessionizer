@@ -83,7 +83,7 @@ list_sources() {
     done
   # Dedups on name/label (field 3) -- works for paths too, since
   # path_to_row is deterministic: same path always yields the same name.
-  } | awk -W interactive -F"$SEP" '!seen[$3]++'
+  } | awk -F"$SEP" '!seen[$3]++'
 }
 
 if [[ "${1:-}" == "--list" ]]; then
