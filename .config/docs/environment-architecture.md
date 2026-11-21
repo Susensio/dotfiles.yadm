@@ -85,6 +85,16 @@ On Mint that is `gnome-terminal-server`, activated once by Cinnamon; on Omarchy 
 * **The Limit:** Only shells get this.
   Anything else Hyprland or Cinnamon launches (apps, launchers, menus) keeps the session-start environment until the next login.
 
+### 4a. What a Pull Overwrites: the `PATH` Edge
+`_env_pull` does `set -gx` for every name the manager reports, and the manager exports `PATH`, so an interactive (or login) fish — or `env_reload` in the current one — replaces the shell's `PATH` wholesale with the manager's.
+Per-shell `PATH` edits are therefore ephemeral here:
+
+* **Dropped:** a venv's `bin/` prepend, a direnv-style prepend, any ad-hoc `PATH=...` export inherited into the nested shell.
+* **Kept:** variables the manager does not define, such as `VIRTUAL_ENV` — a venv keeps its markers but loses its interpreter from `PATH`, which is a stale activation, not a clean exit.
+* **Unaffected:** `PATH=whatever ./script` and every `fish -c` command; `fish -c` never pulls (ADR-0003 amendment), so one-shot and script entrypoints keep their export. Only nesting into an interactive shell can drop it.
+
+Durable `PATH` changes belong in `environment.d` (then `env_reload`); for an ephemeral one that must survive a nested interactive shell, `fish -C 'set -gx PATH /my/venv/bin $PATH'` re-prepends after the pull (`conf.d` runs before `-C`), or re-activate the venv (`source .venv/bin/activate.fish`) after the nested shell starts.
+
 ## 5. Shell Lifecycle & Transitions
 
 ### The Bash-to-Fish Relay

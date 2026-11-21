@@ -11,6 +11,11 @@
 # A failed fetch must keep the current env, never prune it: the interactive
 # trigger lets a shell outlive its user manager, and erasing on failure
 # would wipe this shell's PATH mid-session instead of leaving it stale.
+#
+# The pull overwrites every manager-owned name wholesale, PATH included, so
+# per-shell PATH edits (venv bin, direnv, ad-hoc exports) reset on nesting
+# and env_reload; see ADR-0003's amendment and environment-architecture.md
+# §4a for the failure modes and workarounds.
 function _env_pull -d "Import systemd user environment into fish"
     if not _env_fetch >/dev/null
         return 1
