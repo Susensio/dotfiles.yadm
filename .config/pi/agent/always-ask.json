@@ -1,4 +1,4 @@
 {
-  "$comment": "Bash command globs that always reach you, never an automated approval: always-ask.ts prompts for them, unless a link before it in authorizerChain decides first. Matched against the whole command; * is any text.",
-  "commands": ["pkexec *"]
+  "$comment": "Bash command globs that always reach you, never an automated approval: always-ask.ts prompts for them, unless a link before it in authorizerChain decides first. Matched against the whole command; * is any text. Only pkexec is listed: privilege policy otherwise lives in the rule map's positional 'sudo *' rule and in the reviewer's written policy, not in word-boundary matching.",
+  "commands": ["pkexec *", "* pkexec *"]
 }

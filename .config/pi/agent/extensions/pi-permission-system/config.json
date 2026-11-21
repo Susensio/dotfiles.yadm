@@ -221,11 +221,7 @@
       "* pkexec *": "ask",
       "sudo *": {
         "action": "deny",
-        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
-      },
-      "* sudo *": {
-        "action": "deny",
-        "reason": "Use pkexec for privileged commands; it opens the desktop fingerprint authentication dialog."
+        "reason": "A command led by sudo runs as root with no visible prompt. Local root goes through pkexec (fingerprint); remote root through a TTY the operator elevated (ssh -t host sudo -i) that the agent then types into. This rule matches the first word only, so it never fires on prose."
       },
       "git-crypt *": {
         "action": "deny",
