@@ -41,3 +41,7 @@ The Pi policy first said pkexec is "never allowed", and the reviewer answered wi
 2026-10-01: the reviewer's reply schema is `allow | deny`, so the `defer` it was told to return was unreachable; the policy now says deny, with a rationale that the user must approve, which fails closed instead of reaching the pane.
 The Pi rules `pkexec *` and `* pkexec *`, kept last, catch pkexec as the command or as a separate argument (`yay --sudo pkexec`); the matcher has no word boundaries, a bare `*pkexec*` also stopped reads of files named after pkexec, and rarer spellings fall to the catch-all ask and the reviewer's policy.
 With `yoloMode: true` in the local config every ask had become an allow before the reviewer ran, and that `yay` call opened polkit unannounced; yolo is now off.
+
+2026-11-21: the `* sudo *` deny was removed ([ADR-0119](0119-privilege-out-of-command-text.md)).
+Its rationale was the local invisible prompt, but as a mid-string pattern it denied prose that mentioned the verb (a commit message, an ADR title) while missing the spellings that execute it after a quote (`"sudo …"`, `'sudo …'`), so it neither held the line nor stayed out of the way.
+`sudo *` remains and now matches on position alone; remote root moved to a TTY the operator elevates, and a verb hidden inside a shell is left to the reviewer's `hard_deny`.
