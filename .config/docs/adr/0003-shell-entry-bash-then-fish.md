@@ -19,3 +19,14 @@ Login-shell status is the trigger: `fish/conf.d/01_environment.fish` runs `_env_
 Terminals stay correct after an `env_reload` without restarting the terminal server or relogging in, and bash still works as the POSIX entry point tools expect.
 Trade-off: two shell startups per terminal instead of one; `exec` discards any bash-level state (aliases, exported vars set only in `bashrc`) since it doesn't fork; and the relay is a two-file contract (`bashrc` and `01_environment.fish`) that's easy to break by editing only one side.
 
+## Amendment (2026-11-20)
+
+The login trigger proved to be a POSIX-era proxy that every terminal had to opt into with its own spelling: foot pins `bash --login`, tmux gets login fish only through its empty `default-command` convention, and herdr panes and the scratchpad wrapper — non-login — shipped a stale `PASSWORD_STORE_DIR` until `env_reload` ran.
+`fish` never reads profile, so login status never meant "env loading" for it, only a boolean `conf.d` could check.
+
+The fish-side trigger is now `status is-interactive; or status is-login`: every pane, popup and nested interactive fish pulls at start, whatever flag the launcher passed, and a login fish still pulls when non-interactive, preserving the `fish -lc` script entry that `ssh nuc`'s `clipboard` path depends on ([ADR-0113](0113-osc52-copy-over-ssh.md)).
+`fish -c` stays pull-free and inherits, and `~/.config/profile`'s bash pull is unchanged: bash keeps the login doorbell because that is what makes profile run; the two doors fetch the same store.
+A failed fetch now keeps the current environment instead of pruning (`_env_pull` guard), since an interactive shell can outlive its user manager.
+
+Accepted consequence: a nested interactive fish re-pulls and re-overrides with manager values, so a hand-exported var shadowed by the manager resets on nesting; the freshness of every interactive shell is worth more than preserving ad-hoc overrides across nesting.
+

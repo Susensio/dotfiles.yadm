@@ -59,8 +59,8 @@ Understanding *when* files are sourced is critical to avoiding race conditions.
 ### Phase 3: The Shell Layer (The Interactive Experience)
 1.  **Terminal Startup:** You open a terminal.
     `gnome-terminal-server` (child of systemd) spawns a shell.
-2.  **The Fish Transition:** `~/.config/bash/bashrc` detects a plain interactive session and `exec fish --login`.
-3.  **The Final Sync:** `01_environment.fish` detects a login shell and calls `_env_pull`.
+2.  **The Fish Transition:** `~/.config/bash/bashrc` detects a plain interactive session and `exec fish`, passing `--login` when bash was itself a login shell.
+3.  **The Final Sync:** `01_environment.fish` detects an interactive (or login) shell and calls `_env_pull`.
     *   **Action:** Fetches the current environment from `systemd --user`, including session overrides.
 
 ## 3. The Static Base: `environment.d`
@@ -76,12 +76,12 @@ Session managers can override individual names in the same user manager.
     Every consumer of `show-environment` filters these six names out before importing: `fish/functions/environment/_env_fetch.fish`'s `readonly_vars` list, and an inline `grep -Ev '^(PWD|USER|HOME|SHELL|SHLVL|_)='` in both `~/.config/profile` and `~/.config/X11/xsessionrc`.
     See [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md) for why each of the three keeps its own copy instead of sharing one.
 
-## 4. Why `_env_pull` and Login Shells are Mandatory
+## 4. Why `_env_pull` and Fresh Shells are Mandatory
 A new terminal inherits its environment from whatever launched it, and that launcher's environment was fixed when the session started.
-On Mint that is `gnome-terminal-server`, activated once by Cinnamon; on Omarchy it is Hyprland, started once by uwsm.
+On Mint that is `gnome-terminal-server`, activated once by Cinnamon; on Omarchy it is Hyprland, started once by uwsm; a multiplexer adds a second layer (a tmux or herdr server older than the last `environment.d` change).
 * **The Consequence:** If you update your environment (e.g., via `env_reload`), the launcher does **not** see these changes.
   Every new terminal would inherit its *stale* environment.
-* **The Solution:** By starting a login shell and calling `_env_pull`, we bypass the stale process tree and fetch variables directly from the `systemd --user` manager.
+* **The Solution:** Fish's `conf.d` pulls the `systemd --user` environment at the start of every interactive shell (and of every login shell, even non-interactive — see [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment), bypassing the stale process tree.
 * **The Limit:** Only shells get this.
   Anything else Hyprland or Cinnamon launches (apps, launchers, menus) keeps the session-start environment until the next login.
 
@@ -92,7 +92,7 @@ While Fish is our primary interactive shell, we use Bash as the entry point for 
 1.  **Entry:** Most sessions start `/bin/bash`.
 2.  **Relay (`~/.config/bash/bashrc`):** If the shell is interactive and runs no command string (`bash -ilc` stays in bash), it `exec`s into `fish`.
     `yadm/bootstrap.d/20_fish.sh` keeps the relay at the top of `bashrc`, rewriting it when it changes.
-3.  **State Preservation:** Bash checks if it is a login shell and passes the `--login` flag to Fish, ensuring the environment sync logic is triggered.
+3.  **State Preservation:** Bash checks if it is a login shell and passes the `--login` flag to Fish, keeping the POSIX login contract; fish's env sync no longer depends on it ([ADR-0003](adr/0003-shell-entry-bash-then-fish.md) amendment).
 
 ### Login Shell Support (`~/.config/profile`)
 This architecture works seamlessly on TTYs, via SSH, and for any other login shell:
@@ -159,8 +159,9 @@ See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md).
 `PATH` is one of those overridden names: uwsm exports it after mise activation, so a `PATH` change in `environment.d` reaches nothing until the next login, `env_reload` included.
 The first bootstrap writes `environment.d` inside a session that started without it, so `yadm/bootstrap` ends by warning to log out when any `environment.d` file is newer than the user manager.
 
-foot, Omarchy's terminal, starts a non-login shell by default, so `bashrc` would relay into a non-login `fish` and `_env_pull` would never run.
-`foot/foot.ini` sets `shell=/usr/bin/bash --login` for §4 to hold; its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
+foot, Omarchy's terminal, starts a non-login shell by default; `bashrc` would relay into a non-login `fish`, which is fine since [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment pulls on every interactive fish.
+`foot/foot.ini` still pins `shell=/usr/bin/bash --login` (harmless redundancy); its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
+herdr panes and the scratchpad wrapper need no login flag for the same reason: any interactive fish they start pulls the manager env itself, so a server's launch-time env never matters to new panes (`env_reload` still cannot refresh *existing* panes — it pushes to tmux only).
 
 ## 8.1 Locale
 `12_locale.conf` sets `LC_TIME=en_GB.UTF-8` and leaves `LANG` at `en_US.UTF-8`, so messages stay English while dates and day and month names are Monday-first ([ADR-0091](adr/0091-monday-first-lc-time.md)).
@@ -181,11 +182,12 @@ The locale itself is root-owned data in `/usr/lib/locale/locale-archive`; `boots
 1.  **X11 -> Systemd:** Run `systemctl --user show-environment | grep DISPLAY`.
     It should be set (synced via Script 95).
 2.  **Systemd -> Shell on Mint:** Open a **new** terminal window and run `echo $EDITOR`.
-    It should match `tools.conf` after the login-shell pull.
+    It should match `tools.conf` after the interactive-shell pull.
 
 ### Troubleshooting "Stale" Variables
 If a variable isn't updating in your terminal:
-1.  **Check if it's a login shell:** Run `status is-login` in Fish.
-    If it says `no`, your terminal isn't calling `_env_pull`.
+1.  **Check the shell is interactive or login:** Run `status is-interactive` in Fish.
+    If it says `no` and `status is-login` also says `no`, this shell inherits instead of pulling.
 2.  **Check the manager value:** Run `systemctl --user show-environment`.
     If it is stale after `env_reload`, check for a later dynamic override; the reload no longer removes session values.
+3.  **Check the fetch guard:** If `systemctl --user show-environment` itself fails, `_env_pull` keeps the current env — fix the manager (or `SSH_AGENT_PID`-style breakage) before expecting fresh values.

@@ -7,7 +7,15 @@
 # _env_pull_managed (non-exported, so it never leaks into a child
 # process's own environment) records the names pulled last time, so
 # whatever's no longer among the fresh ones can be erased afterward.
+#
+# A failed fetch must keep the current env, never prune it: the interactive
+# trigger lets a shell outlive its user manager, and erasing on failure
+# would wipe this shell's PATH mid-session instead of leaving it stale.
 function _env_pull -d "Import systemd user environment into fish"
+    if not _env_fetch >/dev/null
+        return 1
+    end
+
     set -l new_names
     _env_fetch | while read -lz key; and read -lz value
         set -a new_names $key
