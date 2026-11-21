@@ -2,7 +2,7 @@ set -g fish_greeting
 if status is-interactive
     if test "$TERM" = linux
         if command -qs ttyscheme
-            ttyscheme gruvbox_dark
+            ttyscheme ayu_dark
         end
     else
         set -l theme_file $__fish_config_dir/themes/custom.theme
