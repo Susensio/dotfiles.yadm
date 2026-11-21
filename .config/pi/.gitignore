@@ -22,6 +22,8 @@
 !agent/extensions/**
 !agent/patches/
 !agent/patches/**
+!agent/bin/
+!agent/bin/**
 !agent/bundler/
 !agent/bundler/**
 

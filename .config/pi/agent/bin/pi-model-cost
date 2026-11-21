@@ -1,0 +1,366 @@
+#!/usr/bin/env python3
+"""OpenCode Go quota cost and Artificial Analysis intelligence table.
+
+Fetches the live OpenCode Go model catalog (multipliers, prices, peak
+windows) and each model's Artificial Analysis Intelligence Index, then
+computes the quota arithmetic the model tiers are decided on:
+
+  blended cost /1M   = 0.8 x input + 0.2 x output   (agentic token mix)
+  5h drain % /1M     = blended / (monthly cap x 0.20) x 100
+  IPD                = intelligence / drain, relative to --baseline as 100
+
+The Go endpoint is authoritative and unauthenticated. The intelligence
+scores are scraped from artificialanalysis.ai model pages, anchored to
+each model's own record; models the site does not score print "n/a" and
+are skipped in the IPD column, never guessed. Scores are only comparable
+within one index version, printed beside every table.
+
+Usage:
+  pi-model-cost                 # configured Go models (alias + enabledModels)
+  pi-model-cost --all           # every Go model
+  pi-model-cost --models glm-5.3,deepseek-v4-pro
+  pi-model-cost --no-aa         # skip intelligence scraping
+  pi-model-cost --json          # machine-readable
+"""
+
+import argparse
+import json
+import re
+import sys
+import time
+import urllib.request
+from datetime import date
+
+GO_MODELS_URL = "https://opencode.ai/inference/go/v1/models"
+AA_SITEMAP_URL = "https://artificialanalysis.ai/sitemap.xml"
+AA_MODEL_URL = "https://artificialanalysis.ai/models/{slug}"
+USER_AGENT = "pi-model-cost/1.0 (+dotfiles sync-models)"
+HTTP_TIMEOUT = 30
+# AA throttles bursts of page fetches into 404 shells with real pages on
+# retry; pause between fetches and back off once when a shell comes back.
+AA_PAUSE_S = 2.0
+AA_BACKOFF_S = 15.0
+
+DRAIN_FORMULA = "blended/(cap x 0.20), blended = 0.8*in + 0.2*out / 1M"
+SINGLE_PROMPT_DRAIN = 25.0  # percent of the 5h window; above this, never a default
+
+
+def http_get(url: str) -> tuple[int, bytes]:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as res:
+        return res.status, res.read()
+
+
+def slugify(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.strip().lower()).strip("-")
+
+
+# ---------------------------------------------------------------- catalog --
+
+
+def fetch_go_models() -> list[dict]:
+    status, body = http_get(GO_MODELS_URL)
+    if status != 200:
+        sys.exit(f"error: Go catalog returned HTTP {status}")
+    return json.loads(body)["data"]
+
+
+def go_row(model: dict, plan: str) -> dict | None:
+    """Extract the quota facts one table row needs, or None for unusable."""
+    usage = model.get("go") or {}
+    cap = (usage.get("monthly_usage") or {}).get(plan)
+    cost = (model.get("cost") or {}).get("text") or {}
+    inp = cost.get("input") or {}
+    price_in = inp.get("price")
+    price_out = (cost.get("output") or {}).get("price")
+    if price_in is None or price_out is None:
+        return None
+    cache_read = (inp.get("cache") or {}).get("read")
+    peaks = [
+        f"{m.get('factor')}x {describe_when(m.get('when', {}))}"
+        for m in model.get("cost", {}).get("multipliers") or []
+    ]
+    return {
+        "id": model["id"],
+        "name": model.get("name"),
+        "canonical_id": model.get("canonical_id"),
+        "in": price_in,
+        "out": price_out,
+        "cache_read": cache_read,
+        "cap": cap,  # None for the free models: unlimited, never drains
+        "context_k": round((model.get("limit") or {}).get("context", 0) / 1000),
+        "peaks": peaks,
+        "blended": round(0.8 * price_in + 0.2 * price_out, 4),
+    }
+
+
+def describe_when(when: dict) -> str:
+    days = ",".join((when.get("utc_days") or {}).get("in", [])) or "any day"
+    hours = []
+    for cond in when.get("any") or []:
+        parts = cond.get("all") or []
+        lo = next((p["utc_hours"]["gte"] for p in parts if "gte" in p.get("utc_hours", {})), None)
+        hi = next((p["utc_hours"]["lt"] for p in parts if "lt" in p.get("utc_hours", {})), None)
+        if lo or hi:
+            hours.append(f"{lo or '?'}-{hi or '?'} UTC")
+    return f"{days} {','.join(hours)}".strip()
+
+
+def drain_pct(row: dict) -> float | None:
+    """Percent of the 5h window one million tokens burn, or None if uncapped."""
+    if row["cap"] in (None, 0):
+        return None
+    return row["blended"] / (row["cap"] * 0.20) * 100
+
+
+# ------------------------------------------------------- intelligence -----
+
+AA_SLUG_PREFIX = "https://artificialanalysis.ai/models/"
+
+
+def aa_sitemap_slugs() -> set[str] | None:
+    try:
+        status, body = http_get(AA_SITEMAP_URL)
+        if status != 200:
+            return None
+        return set(
+            m.group(1)
+            for m in re.finditer(r"<loc>https://artificialanalysis\.ai/models/([a-z0-9\-]+)/?</loc>", body.decode("utf-8", "ignore"))
+        )
+    except Exception:
+        return None
+
+
+def aa_slug_candidates(model: dict, known: set[str] | None) -> str | None:
+    """Derive the AA slug from names and canonical ids, verified against the
+    sitemap. Neither source alone is reliable: the plain name misses hy4
+    (listed as tencent-hy4) and the canonical id misses hy3 (listed plain)."""
+    creator = (model.get("canonical_id") or "").split("/")[0]
+    canon = (model.get("canonical_id") or "").split("/")[-1]
+    options = [
+        slugify(model.get("name") or ""),
+        slugify(canon),
+        slugify(model["id"]),
+        f"{slugify(creator)}-{slugify(model.get('name') or '')}",
+        f"{slugify(creator)}-{slugify(canon)}",
+    ]
+    if known is not None:
+        for slug in options:
+            if slug and slug in known:
+                return slug
+        return None
+    return next((s for s in options if s), None)
+
+
+# The hero score appears raw on some pages and only inside the escaped
+# Next.js flight payload on others, so both forms are searched. The
+# "N/A" hero is a real answer: the site has not scored that model.
+HERO_RE = re.compile(
+    r'class="flex-none text-4xl[^"]*">(N/A|[0-9]+(?:\.[0-9]+)?)</div>'
+    r'<div class="text-xs text-neutral-500[^"]*">\s*'
+    r"Artificial Analysis Intelligence Index"
+)
+# Flight record for the model's own entry; the negative lookahead keeps a
+# neighbouring model's score from being attributed to this one.
+FLIGHT_RE_TMPL = (
+    r'\\"slug\\":\\"{slug}\\",\\"name\\":\\"[^\\]*\\"(?:(?!\\"slug\\").){{0,2000}}?'
+    r'\\"intelligenceIndex\\":([0-9.]+|null)'
+)
+
+
+def aa_fetch_page(slug: str) -> str | None:
+    try:
+        status, body = http_get(AA_MODEL_URL.format(slug=slug))
+    except Exception:
+        return None
+    if status != 200:
+        return None
+    html = body.decode("utf-8", "ignore")
+    # The 404 shell is a page-sized Next.js bundle with a "Page not found"
+    # string in its flight data; a real model page carries the score markup,
+    # and every score-bearing page so far contains the index label. Treat
+    # that as the page test, not the 404 string, which also appears inside
+    # a real page's not-found widget flight data.
+    if "Artificial Analysis Intelligence Index" not in html:
+        return ""
+    return html
+
+
+def aa_score(html: str, slug: str) -> float | None:
+    escaped = html.replace('\\"', '"')
+    for text in (html, escaped):
+        hero = HERO_RE.search(text)
+        if hero and hero.group(1) != "N/A":
+            return float(hero.group(1))
+    flight = re.search(FLIGHT_RE_TMPL.format(slug=re.escape(slug)), html, re.S)
+    if flight and flight.group(1) != "null":
+        return round(float(flight.group(1)), 1)
+    return None
+
+
+def aa_index_version(html: str) -> str | None:
+    m = re.search(r"Intelligence Index v(\d+(?:\.\d+)*)", html)
+    return f"v{m.group(1)}" if m else None
+
+
+# ------------------------------------------------------------ selection ---
+
+
+def configured_go_models() -> list[str]:
+    import os
+
+    agent_dir = os.environ.get("PI_AGENT_DIR", os.path.expanduser("~/.config/pi/agent"))
+    refs: list[str] = []
+    try:
+        with open(os.path.join(agent_dir, "model-alias.json")) as f:
+            aliases = json.load(f)
+        for value in aliases.values():
+            if isinstance(value, list):
+                refs += value
+            elif isinstance(value, dict) and isinstance(value.get("targets"), list):
+                refs += value["targets"]
+    except (OSError, json.JSONDecodeError):
+        pass
+    try:
+        with open(os.path.join(agent_dir, "settings.json")) as f:
+            refs += json.load(f).get("enabledModels") or []
+    except (OSError, json.JSONDecodeError):
+        pass
+    return sorted(
+        {
+            ref.split("/", 1)[1]
+            for ref in refs
+            if isinstance(ref, str) and ref.startswith("opencode-go/") and "*" not in ref
+        }
+    )
+
+
+# -------------------------------------------------------------- output ----
+
+
+def build_rows(
+    models: list[dict], plan: str, want: set[str] | None, with_aa: bool
+) -> tuple[list[dict], str | None]:
+    rows = []
+    slugs = aa_sitemap_slugs() if with_aa else None
+    index_version: str | None = None
+    for model in models:
+        row = go_row(model, plan)
+        if row is None:
+            continue
+        if want is not None and row["id"] not in want:
+            continue
+        row["drain"] = round(drain_pct(row), 2) if drain_pct(row) is not None else None
+        row["aa_score"] = None
+        row["aa_slug"] = None
+        if with_aa:
+            slug = aa_slug_candidates(model, slugs)
+            row["aa_slug"] = slug
+            if slug:
+                time.sleep(AA_PAUSE_S)
+                html = aa_fetch_page(slug)
+                if html == "":  # throttled: back off once, then give up quietly
+                    time.sleep(AA_BACKOFF_S)
+                    html = aa_fetch_page(slug)
+                if html:
+                    row["aa_score"] = aa_score(html, slug)
+                    index_version = index_version or aa_index_version(html)
+        rows.append(row)
+    return rows, index_version
+
+
+def add_ipd(rows: list[dict], baseline_id: str) -> None:
+    for r in rows:
+        r["ipd"] = None
+    base = next((r for r in rows if r["id"] == baseline_id), None)
+    if not base or not base["aa_score"] or base["drain"] in (None, 0):
+        return
+    base_ipd = base["aa_score"] / base["drain"]
+    for r in rows:
+        if r["aa_score"] and r["drain"]:
+            r["ipd"] = round((r["aa_score"] / r["drain"]) / base_ipd * 100, 1)
+
+
+def flags(row: dict) -> str:
+    out = []
+    if row["peaks"]:
+        out.append("peak-hours")
+    if row["drain"] is not None and row["drain"] > SINGLE_PROMPT_DRAIN:
+        out.append("single-prompt-only")
+    if row["aa_score"] is None and row["cap"] is not None:
+        out.append("no-aa-score")
+    return ",".join(out)
+
+
+def print_table(rows: list[dict], index_version: str | None, plan: str, baseline: str) -> None:
+    id_w = max(len(r["id"]) for r in rows)
+    cols = (
+        ("model", id_w),
+        ("cap", 5),
+        ("in/out/1M", 13),
+        ("blended", 8),
+        ("5h%/1M", 8),
+        ("intel", 6),
+        ("IPD", 6),
+        ("ctx", 7),
+        ("flags", 24),
+    )
+    header = "  ".join(c.ljust(w) for c, w in cols)
+    print(header)
+    print("-" * len(header))
+    for r in sorted(rows, key=lambda r: (r["drain"] is None, r["drain"] or 0)):
+        intel = str(r["aa_score"]) if r["aa_score"] is not None else "n/a"
+        ipd = str(r["ipd"]) if r["ipd"] is not None else "-"
+        print(
+            f"{r['id']:<{id_w}}  "
+            f"{str(r['cap'] if r['cap'] is not None else 'free'):>5}  "
+            f"{f'{r['in']:.2f}/{r['out']:.2f}':>13}  "
+            f"{r['blended']:>8.2f}  "
+            f"{(f'{r['drain']:.2f}' if r['drain'] is not None else 'unlim'):>8}  "
+            f"{intel:>6}  "
+            f"{ipd:>6}  "
+            f"{str(r['context_k']) + 'k':>7}  "
+            f"{flags(r):<24}"
+        )
+    print()
+    print(f"plan: {plan}  baseline: {baseline} = 100  drain: {DRAIN_FORMULA}")
+    if index_version:
+        print(f"intelligence: Artificial Analysis Intelligence Index {index_version}, read {date.today().isoformat()}")
+    else:
+        print("intelligence: not fetched (--no-aa or no pages reached)")
+    print("scores are comparable only within one index version; n/a means the site has not scored the model")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--plan", choices=["go", "go-plus", "go-teams"], default="go")
+    parser.add_argument("--models", metavar="IDS", help="comma-separated Go model ids")
+    parser.add_argument("--all", action="store_true", help="every Go model, not just configured ones")
+    parser.add_argument("--no-aa", action="store_true", help="skip intelligence scraping")
+    parser.add_argument("--baseline", default="deepseek-v4.1-flash", help="IPD baseline model id")
+    parser.add_argument("--json", action="store_true", help="machine-readable output")
+    args = parser.parse_args()
+
+    models = fetch_go_models()
+    want = None
+    if args.models:
+        want = {m.strip() for m in args.models.split(",")}
+    elif not args.all:
+        configured = configured_go_models()
+        want = set(configured) if configured else None
+        if want is not None and not want:
+            sys.exit("error: no opencode-go models found in model-alias.json or enabledModels; use --models or --all")
+
+    rows, index_version = build_rows(models, args.plan, want, with_aa=not args.no_aa)
+    if not rows:
+        sys.exit("error: no matching models")
+    add_ipd(rows, args.baseline)
+
+    if args.json:
+        print(json.dumps(rows, indent=2))
+    else:
+        print_table(rows, index_version, args.plan, args.baseline)
+
+
+if __name__ == "__main__":
+    main()
