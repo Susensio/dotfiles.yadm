@@ -159,8 +159,8 @@ See [ADR-0051](adr/0051-keep-uwsm-editor-launcher.md).
 `PATH` is one of those overridden names: uwsm exports it after mise activation, so a `PATH` change in `environment.d` reaches nothing until the next login, `env_reload` included.
 The first bootstrap writes `environment.d` inside a session that started without it, so `yadm/bootstrap` ends by warning to log out when any `environment.d` file is newer than the user manager.
 
-foot, Omarchy's terminal, starts a non-login shell by default; `bashrc` would relay into a non-login `fish`, which is fine since [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment pulls on every interactive fish.
-`foot/foot.ini` still pins `shell=/usr/bin/bash --login` (harmless redundancy); its `login-shell=yes` would also prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
+foot, Omarchy's terminal, starts a non-login `$SHELL` by default; `bashrc` relays into a non-login `fish`, which is fine since [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment pulls on every interactive fish.
+foot's `login-shell=yes` is still avoided: it would prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
 herdr panes and the scratchpad wrapper need no login flag for the same reason: any interactive fish they start pulls the manager env itself, so a server's launch-time env never matters to new panes (`env_reload` still cannot refresh *existing* panes — it pushes to tmux only).
 
 ## 8.1 Locale
@@ -190,4 +190,4 @@ If a variable isn't updating in your terminal:
     If it says `no` and `status is-login` also says `no`, this shell inherits instead of pulling.
 2.  **Check the manager value:** Run `systemctl --user show-environment`.
     If it is stale after `env_reload`, check for a later dynamic override; the reload no longer removes session values.
-3.  **Check the fetch guard:** If `systemctl --user show-environment` itself fails, `_env_pull` keeps the current env — fix the manager (or `SSH_AGENT_PID`-style breakage) before expecting fresh values.
+3.  **Check the fetch guard:** If `systemctl --user show-environment` itself fails, `_env_pull` keeps the current env — fix the manager before expecting fresh values.
