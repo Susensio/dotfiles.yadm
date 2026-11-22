@@ -1,6 +1,6 @@
 # ADR-0121: Keep single-prompt-rung models out of the tier chains, top included
 
-Status: Accepted
+Status: Superseded by [ADR-0123](0123-pi-go-queue-two-rungs.md)
 Date: 2026-11-22
 
 ## Context
