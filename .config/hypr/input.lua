@@ -11,15 +11,14 @@ hl.config({
       natural_scroll = true,
       -- Right-click in the lower-right corner, besides with two fingers
       clickfinger_behavior = false,
+      -- Omarchy damps touchpads to 0.4; 1.0 scrolls at the pad's own deltas.
+      scroll_factor = 1.0,
     },
   },
 })
 
--- ZapFast and Spotifast each apply their own 1.8x to the 0.4x Omarchy leaves
--- every touchpad; 1 cancels that out, so they scroll at the pad's own deltas.
-o.window("zapfast", { scroll_touchpad = 1 })
-o.window("spotifast", { scroll_touchpad = 1 })
-o.window("Omamail", { scroll_touchpad = 1 })
+-- Chromium and its webapps scroll too fast at the raw base; 0.6 is the middle ground.
+o.window("(chromium|chrome-.*)", { scroll_touchpad = 0.6 })
 
 -- One entry per mouse; the name comes from `hyprctl devices`. MX Master 3
 hl.device({ name = "logitech-mx-master-3-1", accel_profile = "flat", sensitivity = 0.8 })
