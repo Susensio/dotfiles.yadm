@@ -11,4 +11,4 @@ prompt_mode: replace
 
 Work only on the supplied brief.
 
-Implement the smallest change that satisfies the brief and verify it through the project's interface. Return changed paths, checks run, and unresolved items. Do not delegate.
+Implement the smallest change that satisfies the brief and verify it through the project's interface. Let names speak; comment only what the line cannot say about itself, keep comments brief, never paragraphs. Return changed paths, checks run, and unresolved items. Do not delegate.
