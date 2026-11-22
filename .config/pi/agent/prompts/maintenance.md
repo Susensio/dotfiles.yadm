@@ -31,6 +31,10 @@ Draft a reply in the user's voice when one is due.
 - `uncommitted`: separate what an `omarchy update` migration wrote (`docs/omarchy.md`, "Omarchy writes into tracked files") from the user's own edits in progress, using `yadm diff <path>`; for a migration's edit, propose keeping it, reverting it, or teaching the bootstrap to undo it.
 - `bootstrap`: a warning from the last bootstrap run, kept in `~/.local/state/yadm/bootstrap.log`; a stale patch names its step, whose comment links the PR to check.
 - `unpushed commits`: mention, nothing more.
+- `fork patch behind upstream`: a plugin clone whose fix lives on the user's fork has an `upstream` remote, and upstream has moved (ADR-0122).
+  Propose the rebase the line prints, then run `omarchy-plugin-validate` on the clone and rescan plugins before pushing, since the patch now sits on newer code.
+- `fork patch reached upstream`: the clone's commits are already in upstream by patch identity, so the fork has no reason to exist.
+  Apply the reset the line prints, delete the fork with `gh repo delete`, and confirm whether the installed package carries the fix before dropping the `upstream` remote.
 - `failed unit` and `config to merge`: find the cause from the journal or the `.pacnew` diff and propose the fix.
 
 ## Report

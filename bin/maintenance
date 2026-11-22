@@ -74,12 +74,45 @@ notifications() {
     "  \(.repository.full_name)\(if $n == "" then "" else "#\($n)" end) \(.reason | gsub("_"; " ")): \(.subject.title) (\(.updated_at[:10]))"'
 }
 
+# A plugin clone whose fix lives on the user's fork carries an `upstream` remote
+# beside origin (ADR-0122). A fork that has fallen behind, or whose patch has
+# reached upstream, is drift nobody would otherwise notice.
+plugin_forks() {
+  local dir name base_ref base listed unmerged behind
+  for dir in "$HOME"/.config/omarchy/plugins/*/.git; do
+    dir=${dir%/.git}
+    git -C "$dir" remote get-url upstream &>/dev/null || continue
+    name=${dir##*/}
+    # A fork that cannot be reached is left alone: a stale ref is not drift.
+    timeout 15 git -C "$dir" fetch --quiet upstream 2>/dev/null || continue
+    base_ref=$(git -C "$dir" symbolic-ref --quiet --short refs/remotes/upstream/HEAD 2>/dev/null ||
+      echo upstream/main)
+    base=$(git -C "$dir" rev-parse --verify --quiet "$base_ref" 2>/dev/null || true)
+    [[ -n $base ]] || continue
+    # By patch identity, so a squash or a rebase upstream still counts as landed.
+    # A listing that cannot be read is not a landing, so it is skipped instead.
+    listed=$(git -C "$dir" cherry "$base" HEAD 2>/dev/null) || continue
+    unmerged=$(grep -c '^+' <<<"$listed" || true)
+    if ((unmerged == 0)); then
+      echo "  fork patch reached upstream: $name"
+      echo "    git -C $dir fetch upstream && git reset --hard $base_ref && git push --force origin main"
+      continue
+    fi
+    behind=$(git -C "$dir" rev-list --count "HEAD..$base" 2>/dev/null || echo 0)
+    if ((behind > 0)); then
+      echo "  fork patch behind upstream by $behind: $name"
+      echo "    git -C $dir rebase $base_ref && git push --force origin main"
+    fi
+  done
+}
+
 local_drift() {
   yadm status --porcelain --untracked-files=no | cut -c4- | sed 's|^|  uncommitted: ~/|'
   if (($(yadm rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0) > 0)); then
     echo "  unpushed commits on $(yadm branch --show-current)"
     echo "    yadm log @{upstream}..HEAD"
   fi
+  plugin_forks
   # The vault (docs/plans/vault.md): pass commits, never pushes, and its git half
   # fails silently (docs/secrets.md), so both halves are checked here.
   local vault=${PASSWORD_STORE_DIR:-$HOME/.local/share/secrets}
