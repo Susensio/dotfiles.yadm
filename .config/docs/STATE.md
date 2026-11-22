@@ -1,5 +1,19 @@
 # State
 
+## Speaker calibrator plugin: two crackles (2026-11-22, patch pending upstream)
+
+Two separate crackles with separate causes, both on `dell`.
+
+- **Random, under load:** realtime scheduling was missing. The plugin's filter-chain unit asks RTKit to make its data thread realtime, but nothing installs `rtkit` on x86_64 Omarchy (upstream adds it only for aarch64). Installed and enabled here; the plugin's DSP thread and PipeWire's ALSA thread both run `SCHED_RR 20`. Upstream, [issue #40](https://github.com/thefreshoffice/omarchy-speaker-calibrator/issues/40) asks for it in the dependency table and the panel's package check.
+- **On every volume change:** the loudness tracker forked a `pw-cli` and connected a client per ramp step, 7–16 per key press. [PR #42](https://github.com/thefreshoffice/omarchy-speaker-calibrator/pull/42) streams the ramp through one session; verified here (a 12-step ramp lands on its target, ~100 ms warm, eight writes 135 ms forked against 1 ms). [issue #41](https://github.com/thefreshoffice/omarchy-speaker-calibrator/issues/41) carries the report, corrected to withdraw its measured claims after the capture path proved unreliable (`omarchy_speaker_tuning.monitor` taps the filter's input, not its output).
+
+The plugin clone's `origin` is `Susensio/omarchy-speaker-calibrator` and `upstream` is `thefreshoffice/omarchy-speaker-calibrator`, with `origin/main` holding the fix commit, so `omarchy plugin update thefreshoffice.speaker-calibrator` reports "up to date" instead of failing ([ADR-0122](adr/0122-plugin-patch-on-fork.md)); `plugins.conf` and the shell placement are untouched.
+
+Still open:
+- Once #42 merges, reset the fork and delete it: `git -C ~/.config/omarchy/plugins/thefreshoffice.speaker-calibrator fetch upstream && git reset --hard upstream/main && git push --force origin main`.
+- `rtkit` is in no bootstrap step, and the plugin's dependency table omits it, so a rebuilt machine loses realtime scheduling and the random crackle returns. `dependencies.txt` entries are `command [package]`, so the candidate is `rtkit-daemon rtkit` (the same package name on pacman and apt). Held back until #40 decides whether the plugin should offer it itself.
+- Neither fix has been through a fresh-machine bootstrap; both are verified on `dell` only.
+
 ## Secrets: the pass vault (2026-11-18, accepted; migration complete on `dell`)
 
 `docs/plans/vault.md` is done on `dell` (steps 0–4 passed 2026-11-20: stub published, throwaway clone unlocked by it alone, `.env` sum equal, fresh-keyring passphrase asked) and step 6 retired the age file with it; ADR-0115's Corrections section now records the key-keeping change (vault GPG key, no age file) and the memory-only master passphrase with its decrypt drill, replacing the paper copy the plan first wanted.
