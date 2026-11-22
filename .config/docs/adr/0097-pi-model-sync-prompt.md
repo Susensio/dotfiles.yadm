@@ -25,3 +25,10 @@ The warning repeats until `/sync-models` runs, by design.
 Accepted limitation: the extension lists new IDs but cannot tell which configured model one replaces; the prompt does that pairing.
 Accepted limitation: the seen list is machine-local and built in two places, the extension from the model registry and the prompt from `pi --list-models`; if pi changes that table's columns they diverge and the warning misfires.
 Accepted limitation: the warning depends on the catalog cache, which the bootstrap refreshes about daily, so a new model can arrive a day late.
+
+## Corrections
+
+2026-11-22: the seen list is gone, so the limitation above about it no longer holds.
+`state/models-seen.txt` was machine-local state rewritten in two places, and it existed only to tell "new since the last sync" from "known and ignored" — a distinction `$bench` in `model-alias.json` now carries as a written decision per model.
+The `model-drift` extension warns only about configured models missing from the catalog; discovering new ones moved to `pi-model-cost`, which prices every Go model on demand, and to `/sync-models` step 4.
+The decision in this record is unchanged: nothing edits the config unattended.

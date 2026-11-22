@@ -1,17 +1,21 @@
 /**
- * model-drift — warn at startup about configured models that no longer resolve
- * and about models the config's providers added since the last /sync-models.
+ * model-drift — warn at startup about configured models that no longer resolve.
  *
  * A dead alias target fails its whole chain and a dead enabledModels entry is
- * dropped silently. New models are compared against state/models-seen.txt,
- * which /sync-models rewrites; the first run seeds it without a warning.
+ * dropped silently, which is the failure this catches: both are silent by
+ * default and neither is visible until a turn falls through the chain.
+ *
+ * Tracking "models added since the last sync" used to live here, through
+ * state/models-seen.txt. It is gone: the catalog gains models constantly and
+ * most are never placed, so the nudge fired on churn, needed a machine-local
+ * file rewritten in two places, and now duplicates what `pi-model-cost` lists
+ * on demand — every Go model, priced, with the unplaced ones in the same table.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 
-const SEEN = join(getAgentDir(), "state", "models-seen.txt");
 const CHECKED = Symbol.for("model-drift.checked");
 
 function readJson(file: string): any {
@@ -35,30 +39,16 @@ export default function (pi: ExtensionAPI) {
 		const store = globalThis as Record<symbol, boolean>;
 		if (store[CHECKED]) return;
 		store[CHECKED] = true;
-		const lines: string[] = [];
+		let dead: string[];
 		try {
-			const refs = configuredRefs();
-			const dead = refs.filter((ref) => {
+			dead = configuredRefs().filter((ref) => {
 				const slash = ref.indexOf("/");
 				return slash < 0 || !ctx.modelRegistry.find(ref.slice(0, slash), ref.slice(slash + 1));
 			});
-			if (dead.length > 0) lines.push("Configured models not in the catalog:", ...dead);
-
-			const current = ctx.modelRegistry.getAvailable().map((m) => `${m.provider}/${m.id}`);
-			if (!existsSync(SEEN)) {
-				mkdirSync(dirname(SEEN), { recursive: true });
-				writeFileSync(SEEN, `${current.sort().join("\n")}\n`);
-			} else {
-				const seen = new Set(readFileSync(SEEN, "utf8").split("\n"));
-				const providers = new Set(refs.map((ref) => ref.slice(0, ref.indexOf("/"))));
-				providers.delete("alias");
-				const added = current.filter((id) => providers.has(id.slice(0, id.indexOf("/"))) && !seen.has(id));
-				if (added.length > 0) lines.push("New models since the last sync:", ...added);
-			}
 		} catch {
 			return;
 		}
-		if (lines.length === 0) return;
-		ctx.ui.notify(`${lines.join("\n")}\nRun /sync-models.`, "warning");
+		if (dead.length === 0) return;
+		ctx.ui.notify(`Configured models not in the catalog:\n${dead.join("\n")}\nRun /sync-models.`, "warning");
 	});
 }
