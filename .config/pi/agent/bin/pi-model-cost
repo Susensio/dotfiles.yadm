@@ -12,12 +12,14 @@ computes the quota arithmetic the model tiers are decided on:
 The Go endpoint is authoritative and unauthenticated. The intelligence
 scores are scraped from artificialanalysis.ai model pages, anchored to
 each model's own record; models the site does not score print "n/a" and
-are skipped in the IPD column, never guessed. Scores are only comparable
-within one index version, printed beside every table.
+are skipped in the IPD column, never guessed. The `tb4/sci` column is
+Terminal-Bench 4.0 and Terminal-Bench-Science, which the index weights at
+10% and 15%, so a model without a composite still shows measured
+capability. Scores are only comparable within one index version.
 
 Usage:
-  pi-model-cost                 # configured Go models (alias + enabledModels)
-  pi-model-cost --all           # every Go model
+  pi-model-cost                 # every Go model
+  pi-model-cost --configured    # only the alias and enabledModels rungs
   pi-model-cost --models glm-5.3,deepseek-v4-pro
   pi-model-cost --no-aa         # skip intelligence scraping
   pi-model-cost --json          # machine-readable
@@ -203,6 +205,32 @@ def aa_index_version(html: str) -> str | None:
     return f"v{m.group(1)}" if m else None
 
 
+def aa_benchmarks(html: str, slug: str, score: float | None) -> tuple[int | None, int | None]:
+    """Terminal-Bench 4.0 and -Science as percentages.
+
+    The record carrying them is neither the first nor the last keyed by
+    the slug, so the scan takes the first with the field and, when both
+    carry a composite, refuses one that disagrees with the score already
+    read — that disagreement is a neighbouring model's record.
+    """
+    text = html.replace('\\"', '"')
+    marker = '"slug":"%s"' % slug
+    start = text.find(marker)
+    while start >= 0:
+        window = text[start : start + 4000]
+        if '"terminalBench40"' in window:
+            idx = re.search(r'"intelligenceIndex":([0-9.]+)', window)
+            if idx and score is not None and abs(float(idx.group(1)) - score) > 0.5:
+                return None, None
+            out = []
+            for key in ("terminalBench40", "terminalBenchScience"):
+                m = re.search(r'"%s":([0-9.]+)' % key, window)
+                out.append(round(float(m.group(1)) * 100) if m else None)
+            return out[0], out[1]
+        start = text.find(marker, start + len(marker))
+    return None, None
+
+
 # ------------------------------------------------------------ selection ---
 
 
@@ -253,6 +281,8 @@ def build_rows(
         row["drain"] = round(drain_pct(row), 2) if drain_pct(row) is not None else None
         row["aa_score"] = None
         row["aa_slug"] = None
+        row["tb40"] = None
+        row["tbsci"] = None
         if with_aa:
             slug = aa_slug_candidates(model, slugs)
             row["aa_slug"] = slug
@@ -264,6 +294,7 @@ def build_rows(
                     html = aa_fetch_page(slug)
                 if html:
                     row["aa_score"] = aa_score(html, slug)
+                    row["tb40"], row["tbsci"] = aa_benchmarks(html, slug, row["aa_score"])
                     index_version = index_version or aa_index_version(html)
         rows.append(row)
     return rows, index_version
@@ -301,6 +332,7 @@ def print_table(rows: list[dict], index_version: str | None, plan: str, baseline
         ("blended", 8),
         ("5h%/1M", 8),
         ("intel", 6),
+        ("tb4/sci", 9),
         ("IPD", 6),
         ("ctx", 7),
         ("flags", 24),
@@ -311,6 +343,7 @@ def print_table(rows: list[dict], index_version: str | None, plan: str, baseline
     for r in sorted(rows, key=lambda r: (r["drain"] is None, r["drain"] or 0)):
         intel = str(r["aa_score"]) if r["aa_score"] is not None else "n/a"
         ipd = str(r["ipd"]) if r["ipd"] is not None else "-"
+        tb = "/".join("-" if v is None else str(v) for v in (r["tb40"], r["tbsci"]))
         print(
             f"{r['id']:<{id_w}}  "
             f"{str(r['cap'] if r['cap'] is not None else 'free'):>5}  "
@@ -318,6 +351,7 @@ def print_table(rows: list[dict], index_version: str | None, plan: str, baseline
             f"{r['blended']:>8.2f}  "
             f"{(f'{r['drain']:.2f}' if r['drain'] is not None else 'unlim'):>8}  "
             f"{intel:>6}  "
+            f"{tb:>9}  "
             f"{ipd:>6}  "
             f"{str(r['context_k']) + 'k':>7}  "
             f"{flags(r):<24}"
@@ -328,14 +362,19 @@ def print_table(rows: list[dict], index_version: str | None, plan: str, baseline
         print(f"intelligence: Artificial Analysis Intelligence Index {index_version}, read {date.today().isoformat()}")
     else:
         print("intelligence: not fetched (--no-aa or no pages reached)")
-    print("scores are comparable only within one index version; n/a means the site has not scored the model")
+    print(
+        "tb4/sci = Terminal-Bench 4.0 / Terminal-Bench-Science, in the index at 10% and 15%; "
+        "n/a means no composite, not no evidence"
+    )
+    print("scores are comparable only within one index version")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--plan", choices=["go", "go-plus", "go-teams"], default="go")
     parser.add_argument("--models", metavar="IDS", help="comma-separated Go model ids")
-    parser.add_argument("--all", action="store_true", help="every Go model, not just configured ones")
+    parser.add_argument("--all", action="store_true", help="every Go model (the default)")
+    parser.add_argument("--configured", action="store_true", help="only the alias and enabledModels rungs")
     parser.add_argument("--no-aa", action="store_true", help="skip intelligence scraping")
     parser.add_argument("--baseline", default="deepseek-v4.1-flash", help="IPD baseline model id")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
@@ -345,11 +384,11 @@ def main() -> None:
     want = None
     if args.models:
         want = {m.strip() for m in args.models.split(",")}
-    elif not args.all:
+    elif args.configured:
         configured = configured_go_models()
         want = set(configured) if configured else None
         if want is not None and not want:
-            sys.exit("error: no opencode-go models found in model-alias.json or enabledModels; use --models or --all")
+            sys.exit("error: no opencode-go models found in model-alias.json or enabledModels; use --models")
 
     rows, index_version = build_rows(models, args.plan, want, with_aa=not args.no_aa)
     if not rows:
