@@ -27,7 +27,7 @@ A tier carries one opencode-go rung.
 A second is admitted only when the leader's monthly cap is small enough in tokens to bind before the pool drains, which no model in the current queue satisfies.
 
 `top` is `claude-opus-5-5`, then `glm-5.3`, then `openai-codex/gpt-5.6-terra`; `mid` is `claude-sonnet-5-5` then `glm-5.3`; `cheap` is `deepseek-v4.1-flash` then `claude-haiku-5-5`.
-`glm-5.3` holds both paid rungs it appears in because a tier's fallback is chosen for what it can still do: 42% against 34% on the weighted coding evaluation, a flat 2.00% drain instead of one that doubles in peak hours, and a $500 cap against $100, for one point of composite.
+`glm-5.3` holds the paid rungs in `top` and `mid` because a rung is chosen for what it can still do: 41.9% against 33.8% on Terminal-Bench 4.0 and 33.5% against 25.0% on CritPt v2, a flat 2.00% drain instead of one that doubles in peak hours, and a $500 cap against $100, for one composite point that `deepseek-v4.1-flash` earns on knowledge evaluations this harness does not exercise. `cheap` keeps `deepseek-v4.1-flash` regardless: its turns ask for less, it costs a tenth as much per token and drains less outside peak hours, and holding it there leaves the two Go rungs unlike each other, so one model's failure does not empty both halves of the pool.
 Each keeps its free tails (ADR-0120), and `reviewer` is unchanged.
 `gemini-4-argon` leaves every chain and is no longer enabled for selection; `muse-spark-1.3-contributor` stays enabled for direct use and in no chain.
 
