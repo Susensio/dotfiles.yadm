@@ -219,13 +219,7 @@ def aa_index_version(html: str) -> str | None:
 
 
 def aa_benchmarks(html: str, slug: str, score: float | None) -> tuple[int | None, int | None]:
-    """Terminal-Bench 4.0 and -Science as percentages.
-
-    The record carrying them is neither the first nor the last keyed by
-    the slug, so the scan takes the first with the field and, when both
-    carry a composite, refuses one that disagrees with the score already
-    read — that disagreement is a neighbouring model's record.
-    """
+    """Terminal-Bench 4.0 and -Science as percentages, refusing a record whose composite disagrees."""
     text = html.replace('\\"', '"')
     marker = '"slug":"%s"' % slug
     start = text.find(marker)
@@ -352,12 +346,7 @@ def flags(row: dict) -> str:
 
 
 def bench_gaps() -> list[str]:
-    """Enabled models that no chain places and `$bench` does not explain.
-
-    `$bench` in model-alias.json is where a rejected candidate's reason and
-    promotion condition live, so a model enabled but neither placed nor
-    benched is a decision nobody wrote down — the one gap this can catch.
-    """
+    """Enabled models that no chain places and `$bench` does not explain."""
     import os
 
     agent_dir = os.environ.get("PI_AGENT_DIR", os.path.expanduser("~/.config/pi/agent"))
