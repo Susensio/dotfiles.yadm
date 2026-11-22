@@ -18,6 +18,8 @@ Reproducing the composite from the published weights is possible — the methodo
 `pi-model-cost` prices every Go model by default, because a model no tier names can still be the best answer the provider sells; `--configured` narrows it back to the alias and `enabledModels` rungs.
 
 It prints Terminal-Bench 4.0 and Terminal-Bench-Science beside the composite, the two terminal-based evaluations the index weights at 10% and 15%, read from the record it already parses.
+It prints a second, intelligence-only table for the configured rungs outside `opencode-go` — claude-bridge, codex, google, mistral — because no per-token price applies to those pools while their scores still decide the other half of every tier.
+
 It does not reproduce the composite, re-normalise the weights over a subset, or estimate a missing component.
 
 ## Consequences

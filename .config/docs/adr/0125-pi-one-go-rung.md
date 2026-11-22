@@ -26,10 +26,15 @@ Its price for that is the toggle itself — every prompt through it is eligible 
 A tier carries one opencode-go rung.
 A second is admitted only when the leader's monthly cap is small enough in tokens to bind before the pool drains, which no model in the current queue satisfies.
 
-`top` is `claude-opus-5-5` then `glm-5.3`; `mid` is `claude-sonnet-5-5` then `glm-5.3`; `cheap` is `deepseek-v4.1-flash` then `claude-haiku-5-5`.
+`top` is `claude-opus-5-5`, then `glm-5.3`, then `openai-codex/gpt-5.6-terra`; `mid` is `claude-sonnet-5-5` then `glm-5.3`; `cheap` is `deepseek-v4.1-flash` then `claude-haiku-5-5`.
 `glm-5.3` holds both paid rungs it appears in because a tier's fallback is chosen for what it can still do: 42% against 34% on the weighted coding evaluation, a flat 2.00% drain instead of one that doubles in peak hours, and a $500 cap against $100, for one point of composite.
 Each keeps its free tails (ADR-0120), and `reviewer` is unchanged.
 `gemini-4-argon` leaves every chain and is no longer enabled for selection; `muse-spark-1.3-contributor` stays enabled for direct use and in no chain.
+
+The retained alias logs then showed what the pool model had assumed away: claude-bridge drains one five-hour window shared by every tier, and its bridge reports that window at 0.9 utilisation with overage rejected.
+Measured commit rates were 80% for `sonnet-5-5`, 30% for `haiku-5-5` and 0 of 9 for `opus-5-5` against 99% for every Go rung.
+Because `mid` carries most of the traffic, it spends that window first, so `top`'s Opus lead is opportunistic rather than dependable — the tier is expected to answer on `glm-5.3`.
+`openai-codex/gpt-5.6-terra` (32.0, tied with `glm-5.3`) was added behind it as the only rung drawn from a pool no other tier touches.
 
 ## Consequences
 

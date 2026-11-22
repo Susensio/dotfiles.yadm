@@ -15,7 +15,10 @@ each model's own record; models the site does not score print "n/a" and
 are skipped in the IPD column, never guessed. The `tb4/sci` column is
 Terminal-Bench 4.0 and Terminal-Bench-Science, which the index weights at
 10% and 15%, so a model without a composite still shows measured
-capability. Scores are only comparable within one index version.
+capability. A second table carries the intelligence of the configured
+non-Go rungs (claude-bridge, codex, google, mistral), which no Go price
+applies to but which decide the other half of every tier. Scores are only
+comparable within one index version.
 
 Usage:
   pi-model-cost                 # every Go model
@@ -120,7 +123,17 @@ def drain_pct(row: dict) -> float | None:
 AA_SLUG_PREFIX = "https://artificialanalysis.ai/models/"
 
 
+_SITEMAP_SLUGS: set[str] | None = None
+
+
 def aa_sitemap_slugs() -> set[str] | None:
+    global _SITEMAP_SLUGS
+    if _SITEMAP_SLUGS is None:
+        _SITEMAP_SLUGS = _fetch_sitemap_slugs()
+    return _SITEMAP_SLUGS
+
+
+def _fetch_sitemap_slugs() -> set[str] | None:
     try:
         status, body = http_get(AA_SITEMAP_URL)
         if status != 200:
@@ -235,6 +248,27 @@ def aa_benchmarks(html: str, slug: str, score: float | None) -> tuple[int | None
 
 
 def configured_go_models() -> list[str]:
+    return sorted(
+        {
+            ref.split("/", 1)[1]
+            for ref in configured_refs()
+            if ref.startswith("opencode-go/") and "*" not in ref
+        }
+    )
+
+
+def configured_other_models() -> list[str]:
+    """Refs outside opencode-go: intelligence only, since no pool here is priced per token."""
+    return sorted(
+        {
+            ref
+            for ref in configured_refs()
+            if not ref.startswith(("opencode-go/", "alias/")) and "*" not in ref
+        }
+    )
+
+
+def configured_refs() -> list[str]:
     import os
 
     agent_dir = os.environ.get("PI_AGENT_DIR", os.path.expanduser("~/.config/pi/agent"))
@@ -254,13 +288,7 @@ def configured_go_models() -> list[str]:
             refs += json.load(f).get("enabledModels") or []
     except (OSError, json.JSONDecodeError):
         pass
-    return sorted(
-        {
-            ref.split("/", 1)[1]
-            for ref in refs
-            if isinstance(ref, str) and ref.startswith("opencode-go/") and "*" not in ref
-        }
-    )
+    return [ref for ref in refs if isinstance(ref, str)]
 
 
 # -------------------------------------------------------------- output ----
@@ -321,6 +349,41 @@ def flags(row: dict) -> str:
     if row["aa_score"] is None and row["cap"] is not None:
         out.append("no-aa-score")
     return ",".join(out)
+
+
+def intel_rows(refs: list[str]) -> list[dict]:
+    """Intelligence and the two terminal evals for refs the Go catalog does not carry."""
+    slugs = aa_sitemap_slugs() or set()
+    rows = []
+    for ref in refs:
+        model_id = ref.split("/", 1)[1]
+        slug = next((s for s in (model_id, slugify(model_id)) if s in slugs), None)
+        row = {"ref": ref, "slug": slug, "score": None, "tb40": None, "tbsci": None}
+        if slug:
+            time.sleep(AA_PAUSE_S)
+            html = aa_fetch_page(slug)
+            if html == "":
+                time.sleep(AA_BACKOFF_S)
+                html = aa_fetch_page(slug)
+            if html:
+                row["score"] = aa_score(html, slug)
+                row["tb40"], row["tbsci"] = aa_benchmarks(html, slug, row["score"])
+        rows.append(row)
+    return rows
+
+
+def print_intel_table(rows: list[dict]) -> None:
+    if not rows:
+        return
+    width = max(len(r["ref"]) for r in rows)
+    print()
+    print("non-Go rungs: intelligence only, no per-token pricing in these pools")
+    print(f"{'model':<{width}}  {'intel':>6}  {'tb4/sci':>9}")
+    print("-" * (width + 20))
+    for r in sorted(rows, key=lambda r: (-(r["score"] or -1), r["ref"])):
+        score = "n/a" if r["score"] is None else str(r["score"])
+        tb = "/".join("-" if v is None else str(v) for v in (r["tb40"], r["tbsci"]))
+        print(f"{r['ref']:<{width}}  {score:>6}  {tb:>9}")
 
 
 def print_table(rows: list[dict], index_version: str | None, plan: str, baseline: str) -> None:
@@ -399,6 +462,8 @@ def main() -> None:
         print(json.dumps(rows, indent=2))
     else:
         print_table(rows, index_version, args.plan, args.baseline)
+        if not args.no_aa:
+            print_intel_table(intel_rows(configured_other_models()))
 
 
 if __name__ == "__main__":
