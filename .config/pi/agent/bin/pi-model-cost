@@ -351,6 +351,38 @@ def flags(row: dict) -> str:
     return ",".join(out)
 
 
+def bench_gaps() -> list[str]:
+    """Enabled models that no chain places and `$bench` does not explain.
+
+    `$bench` in model-alias.json is where a rejected candidate's reason and
+    promotion condition live, so a model enabled but neither placed nor
+    benched is a decision nobody wrote down — the one gap this can catch.
+    """
+    import os
+
+    agent_dir = os.environ.get("PI_AGENT_DIR", os.path.expanduser("~/.config/pi/agent"))
+    try:
+        with open(os.path.join(agent_dir, "model-alias.json")) as f:
+            aliases = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    placed = {ref for v in aliases.values() if isinstance(v, list) for ref in v}
+    placed |= {
+        ref
+        for v in aliases.values()
+        if isinstance(v, dict) and isinstance(v.get("targets"), list)
+        for ref in v["targets"]
+    }
+    bench = set((aliases.get("$bench") or {}).keys())
+    try:
+        with open(os.path.join(agent_dir, "settings.json")) as f:
+            enabled = set(json.load(f).get("enabledModels") or [])
+    except (OSError, json.JSONDecodeError):
+        enabled = set()
+    enabled = {m for m in enabled if not m.startswith("alias/")}
+    return sorted((enabled - placed) - bench)
+
+
 def intel_rows(refs: list[str]) -> list[dict]:
     """Intelligence and the two terminal evals for refs the Go catalog does not carry."""
     slugs = aa_sitemap_slugs() or set()
@@ -464,6 +496,9 @@ def main() -> None:
         print_table(rows, index_version, args.plan, args.baseline)
         if not args.no_aa:
             print_intel_table(intel_rows(configured_other_models()))
+        gaps = bench_gaps()
+        if gaps:
+            print(f"\nwarning: enabled but neither placed nor benched in $bench: {', '.join(gaps)}")
 
 
 if __name__ == "__main__":
