@@ -1,6 +1,6 @@
 # ADR-0123: Spend a tier's Go rungs on capability then one larger cap, and let top alone carry a high-drain head
 
-Status: Accepted
+Status: Superseded by [ADR-0125](0125-pi-one-go-rung.md)
 Date: 2026-11-22
 Supersedes: [ADR-0121](0121-pi-single-prompt-exclusion.md)
 
