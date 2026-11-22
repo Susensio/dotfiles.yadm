@@ -1,6 +1,6 @@
 # ADR-0106: Declare Omamail's keepLoaded in the plugin clone from a bugfix step, instead of waiting for the release or wrapping omarchy plugin update
 
-Status: Accepted
+Status: Superseded in part by [ADR-0122](0122-plugin-patch-on-fork.md) — the carrier is a commit on the user's fork, not a bootstrap step; the keepLoaded reasoning and its measurements stand
 Date: 2026-11-06
 
 ## Context

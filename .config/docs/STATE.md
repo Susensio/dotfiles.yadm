@@ -29,8 +29,8 @@ Still open:
 
 Goal: Omamail's window appears as soon as the bar icon is clicked, instead of rebuilding its whole QML composition on every summon (~1.3 s here).
 Omarchy's panel loader keeps a plugin's panel between summons only when its manifest sets `keepLoaded`, so the key belongs in Omamail's manifest; [huacnlee/omamail#464](https://github.com/huacnlee/omamail/pull/464) carries it and [ADR-0106](adr/0106-omamail-keep-loaded-patch.md) holds the reasoning and the drop condition.
-Locally, `yadm/bootstrap.d/omarchy/bugfix/omamail-keep-loaded.sh` inserts it into the untracked clone and rescans plugins.
-Finish it by deleting that step once a release carries the key; until then `omarchy plugin update omamail` needs `git -C ~/.config/omarchy/plugins/omamail checkout -- manifest.json` first, and the bootstrap after the update re-applies the step.
+Locally the clone's `origin` is `Susensio/omamail` and `upstream` is huacnlee's, with `keepLoaded` committed on the fork's `main`, so `omarchy plugin update omamail` fast-forwards instead of refusing ([ADR-0122](adr/0122-plugin-patch-on-fork.md)); the bootstrap step that used to insert the line is gone.
+Finish it by resetting the fork to `upstream` and dropping it once a release carries the key.
 The resident panel costs about 40 MB of shell RSS and lives for the session; a leak across a long session is unverified.
 
 ## pi-permission-system cd home-prefix patch (2026-10-24)

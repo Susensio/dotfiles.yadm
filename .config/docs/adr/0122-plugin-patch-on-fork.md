@@ -42,5 +42,6 @@ Deleting the fork is manual and nothing automated points at it once the patch la
 
 ## Corrections
 
+2026-11-22: the landing test matches by patch identity, which includes the surrounding lines, so an upstream file that changed around the patched hunk can hide a landing; the PR-closure finding still catches it.
 2026-11-22: the record was first committed scoped to the speaker calibrator's clone alone, as a remote-layout note for one pending PR.
 It was widened the same day to the standing rule for plugin clones, and the drift report it names became part of the decision rather than a convenience.
