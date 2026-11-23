@@ -79,3 +79,5 @@
 	format = ssh
 [gpg "ssh"]
 	allowedSignersFile = /home/susensio/.config/git/allowed_signers
+[core]
+	excludesfile = /home/susensio/.config/git/ignore
