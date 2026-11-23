@@ -13,12 +13,8 @@
     "reason": "saves ~22ms (60 -> 38ms paired, 2026-09-29); the import.meta.url hazard is inert while @juicesharp/rpiv-i18n is absent, but the saving does not earn a bundle"
   },
   "@tintinweb/pi-subagents": {
-    "decision": "bundle",
-    "reason": "new Worker takes WORKER_SOURCE with eval:true; worker-source.ts states the source is an inlined template literal precisely so it survives bundling, so no path is relocated.",
-    "reviewedKinds": [
-      "@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker\u00d71"
-    ],
-    "measured": "import 245ms -> 52ms (paired PI_TIMING pass, 2026-09-29)"
+    "decision": "skip",
+    "reason": "0.26.1 added a second path hazard: tool-description.ts resolves the shipped workflow SKILL.md via import.meta.url and reads it at startup; a bundle at <pkg>/.pi-bundler/bundle.mjs would resolve ../../skills outside the package and degrade the tool description to a broken pointer. The old new Worker verdict remains reviewed, but the new hazard reopens the decision."
   },
   "@narumitw/pi-usage": {
     "decision": "skip",
