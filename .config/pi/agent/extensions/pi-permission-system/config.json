@@ -264,7 +264,7 @@
     "write": "allow",
     "edit": "allow",
     "todo": "allow",
-    "ask_user_question": "allow",
+    "ask_user": "allow",
     "web_fetch": "allow",
     "web_search": "allow",
     "Agent": "allow",

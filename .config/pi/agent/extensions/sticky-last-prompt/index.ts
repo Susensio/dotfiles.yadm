@@ -4,7 +4,7 @@
  * Local changes:
  *  - dropped the leading nf-fa-user icon from the pin bar (upstream labelled
  *    U+F007 "thumb_tack"; it renders as a user glyph)
- *  - pool ask_user_question answers: an ask_user_question result is recorded
+ *  - pool ask_user answers: an ask_user result is recorded
  *    as an anchor too, so its answer is pinned like a typed prompt (formatted
  *    from the component's result.details), including hide-on-visible and
  *    click-to-jump.
@@ -153,7 +153,7 @@ interface UserAnchor {
  * pinnable entry's start row and text — UserMessageComponent,
  * SkillInvocationMessageComponent (a `/skill` invocation renders as a
  * collapsible `[skill] name` block, not as a user message, and with no
- * trailing args it is the whole prompt), and an `ask_user_question` tool
+ * trailing args it is the whole prompt), and an `ask_user` tool
  * result (whose answer is a tool result, not a user message). Recurses only
  * into plain Containers (pure concatenation of children) so offsets match
  * exactly what the transcript ScrollView paints.
@@ -182,7 +182,7 @@ function collectUserAnchors(
 				found.push({ start: offset, end: offset + height, text: `[skill] ${collapseWhitespace(name)}` });
 			}
 			offset += height;
-		} else if ((child as { toolName?: unknown }).toolName === ASK_USER_QUESTION_TOOL) {
+		} else if ((child as { toolName?: unknown }).toolName === ASK_USER_TOOL) {
 			// The answer to a questionnaire is a tool result, not a user
 			// message, but it is still user-origin input worth pinning.
 			const details = (child as { result?: { details?: unknown } }).result?.details;
@@ -219,32 +219,31 @@ function extractUserText(content: unknown): string {
 }
 
 /** Tool whose answers are user-facing choices worth pinning. */
-const ASK_USER_QUESTION_TOOL = "ask_user_question";
+const ASK_USER_TOOL = "ask_user";
 
-/** One-line summary of an ask_user_question result, or "" when the shape is
+/** One-line summary of an ask_user (pi-ask) result, or "" when the shape is
  *  unknown (the bar then falls back to the last typed prompt). */
 function formatQuestionnaireAnswer(details: unknown): string {
 	const d = details as
 		| {
-				answers?: ReadonlyArray<{ answer?: unknown; selected?: unknown; notes?: unknown }>;
-				globalNote?: unknown;
+				answers?: Record<
+					string,
+					{ labels?: unknown; customText?: unknown; note?: unknown }
+				>;
 				cancelled?: unknown;
 			}
 		| undefined;
 	if (!d) return "";
 	if (d.cancelled === true) return "declined to answer";
 	const parts: string[] = [];
-	for (const a of d.answers ?? []) {
-		const value =
-			typeof a.answer === "string" && a.answer.length > 0
-				? a.answer
-				: Array.isArray(a.selected)
-					? a.selected.filter((s): s is string => typeof s === "string").join(", ")
-					: "";
-		if (value) parts.push(value);
-		if (typeof a.notes === "string" && a.notes.length > 0) parts.push(`(${a.notes})`);
+	for (const a of Object.values(d.answers ?? {})) {
+		const labels = Array.isArray(a.labels)
+			? a.labels.filter((s): s is string => typeof s === "string")
+			: [];
+		if (typeof a.customText === "string" && a.customText.length > 0) labels.push(a.customText);
+		if (labels.length > 0) parts.push(labels.join(", "));
+		if (typeof a.note === "string" && a.note.length > 0) parts.push(`(${a.note})`);
 	}
-	if (typeof d.globalNote === "string" && d.globalNote.length > 0) parts.push(d.globalNote);
 	return collapseWhitespace(parts.join(" · "));
 }
 

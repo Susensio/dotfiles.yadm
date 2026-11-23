@@ -3,13 +3,13 @@
 // herdr-agent-state.ts (installed by `herdr integration install pi`, and
 // overwritten on every herdr update) listens for `herdr:blocked` to flip the
 // pane dot to its "agent waiting for user input" state. Nothing inside pi
-// emitted that, so an open ask_user_question questionnaire looked like the
-// agent was still working.
+// emitted that, so an open ask_user questionnaire looked like the agent was
+// still working.
 //
-// @juicesharp/rpiv-ask-user-question emits `rpiv:ask-user:blocked`
-// ({ active: boolean }) while its questionnaire awaits input; this forwards it
-// onto herdr's channel. Keep this file beside herdr-agent-state.ts — it
-// survives `herdr integration install pi` reinstalls.
+// @eko24ive/pi-ask emits `@eko24ive/pi-ask:started` / `:completed` around each
+// flow; this forwards them onto herdr's channel.
+// Keep this file beside herdr-agent-state.ts — it survives
+// `herdr integration install pi` reinstalls.
 //
 // pi-permission-system's permission dialog (bash asks, sandbox prompts) is a
 // separate UI that nothing reported, so a session waiting at "Approve? [y/s/b/n]"
@@ -24,13 +24,24 @@
 //   inactive event.
 // @ts-nocheck
 export default function (pi) {
-	// -- ask_user_question (questionnaire) --------------------------------
-	pi.events.on("rpiv:ask-user:blocked", (data: unknown) => {
+	// -- ask_user (@eko24ive/pi-ask) ---------------------------------------
+	// pi-ask has no "blocked" event; a flow is open from `started` to `completed`.
+	// Track flow ids so concurrent flows do not clear each other.
+	const openAsks = new Set<string>();
+	pi.events.on("@eko24ive/pi-ask:started", (e: { flowId?: string } | undefined) => {
+		if (!e?.flowId) return;
+		openAsks.add(e.flowId);
 		pi.events.emit("herdr:blocked", {
-			active: !!(data as { active?: boolean } | undefined)?.active,
-			label: "ask_user_question: waiting for your answer",
+			active: true,
+			label: "ask_user: waiting for your answer",
 		});
 	});
+	pi.events.on("@eko24ive/pi-ask:completed", (e: { flowId?: string } | undefined) => {
+		if (!e?.flowId || !openAsks.delete(e.flowId) || openAsks.size > 0) return;
+		pi.events.emit("herdr:blocked", { active: false, label: "ask_user answered" });
+	});
+	// pi-ask disposes open flows on shutdown without emitting `completed`.
+	pi.on("session_shutdown", () => openAsks.clear());
 
 	// -- pi-permission-system (bash/permission dialog) --------------------
 	let permissionDialogOpen = false;

@@ -12,15 +12,11 @@
     "decision": "skip",
     "reason": "saves ~22ms (60 -> 38ms paired, 2026-09-29); the import.meta.url hazard is inert while @juicesharp/rpiv-i18n is absent, but the saving does not earn a bundle"
   },
-  "@juicesharp/rpiv-ask-user-question": {
-    "decision": "skip",
-    "reason": "gate C: awaited init cycle dialog-builder <-> tab-content-strategy is still present in 2.11.0, the latest release; source import is ~55ms, so even fixed it would not earn a bundle"
-  },
   "@tintinweb/pi-subagents": {
     "decision": "bundle",
     "reason": "new Worker takes WORKER_SOURCE with eval:true; worker-source.ts states the source is an inlined template literal precisely so it survives bundling, so no path is relocated.",
     "reviewedKinds": [
-      "@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker×1"
+      "@tintinweb/pi-subagents/src/workflow/runtime.ts:new Worker\u00d71"
     ],
     "measured": "import 245ms -> 52ms (paired PI_TIMING pass, 2026-09-29)"
   },
@@ -36,8 +32,8 @@
     "decision": "bundle",
     "reason": "@anthropic-ai/claude-agent-sdk stays external: it locates its native CLI through import.meta.url and would throw once inlined. Patched; the bundle is rebuilt when the patch stamp changes. 0.10.0 added cache-trace.ts hits: the bundle lands at <pkg>/.pi-bundler/bundle.mjs, one level under the package, so its `../package.json` and its createRequire both see what src/ saw; a probe on 0.10.0 printed BRIDGE_VERSION 0.10.0 and sdk 0.3.308.",
     "reviewedKinds": [
-      "pi-claude-bridge/src/cache-trace.ts:import.meta.url×2",
-      "pi-claude-bridge/src/cache-trace.ts:createRequire×1"
+      "pi-claude-bridge/src/cache-trace.ts:import.meta.url\u00d72",
+      "pi-claude-bridge/src/cache-trace.ts:createRequire\u00d71"
     ],
     "externals": [
       "@anthropic-ai/claude-agent-sdk"
@@ -53,15 +49,19 @@
       "web-tree-sitter"
     ],
     "reviewedKinds": [
-      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:import.meta.url×1",
-      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:createRequire×1",
-      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:asset: .wasm×2",
-      "@gotgenes/pi-permission-system/src/config/extension-config.ts:import.meta.url×1",
-      "@gotgenes/pi-permission-system/src/path/node-modules-discovery.ts:import.meta.url×1"
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:import.meta.url\u00d71",
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:createRequire\u00d71",
+      "@gotgenes/pi-permission-system/src/access-intent/bash/parser.ts:asset: .wasm\u00d72",
+      "@gotgenes/pi-permission-system/src/config/extension-config.ts:import.meta.url\u00d71",
+      "@gotgenes/pi-permission-system/src/path/node-modules-discovery.ts:import.meta.url\u00d71"
     ]
   },
   "@mzwing/pi-permission-auto-review": {
     "decision": "skip",
     "reason": "gate A: esbuild cannot resolve #src/service/permission-events; source import is ~7ms, so there is nothing to win"
+  },
+  "@eko24ive/pi-ask": {
+    "decision": "skip",
+    "reason": "locates its configuration doc through import.meta.url, so inlining would break the path it tells the model to read; import is 14ms source (PI_TIMING pass, 2026-11-23), far under the bundle bar"
   }
 }

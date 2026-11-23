@@ -1,6 +1,6 @@
 # ADR-0060: Install herdr integrations from per-tool postinstall hooks scoped by the fired tool's name, instead of a hardcoded harness list or a global sync on every tool
 
-Status: Accepted
+Status: Superseded by [ADR-0127](0127-pi-ask-switch-herdr-bridge.md)
 Date: 2026-09-27
 
 ## Context
@@ -35,3 +35,5 @@ The task also takes an exclusive `flock` for its run: under parallel installs a 
 `--skip-tools` stopped the bootstrap hang but not the hooks of several auto-updating tools (`auto_update`) firing together: four `mise run` processes stuck in `futex_wait`, each holding some of the same mise lockfiles and waiting on the others, and the bootstrap then waited on herdr's install lock behind them.
 The script needs no `mise run`: it reads `MISE_TOOL_NAME` and `MISE_TOOL_INSTALL_PATH` from the hook's environment and serializes itself with `flock`.
 The lock-order cause is inferred from the stuck processes, not read from mise's source.
+
+Corrections (2026-11-23): the ask tool is now `@eko24ive/pi-ask` and the bridge forwards its `@eko24ive/pi-ask:started` / `:completed` lifecycle events, not `rpiv:ask-user:blocked`; see ADR-0127. Everything else here stands.
