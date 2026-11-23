@@ -123,6 +123,10 @@ async function renameTab(label: string, force = false) {
 	await herdrRequest("tab.rename", { tab_id: tabId, label });
 }
 
+function titleSessionId(id: string | undefined) {
+	return id ? `${id}:title` : undefined;
+}
+
 async function nameSession(pi: ExtensionAPI, ctx: ExtensionContext, prompt: string, force = false) {
 	const model = pickModel(ctx);
 	if (!model) return "";
@@ -140,8 +144,9 @@ async function nameSession(pi: ExtensionAPI, ctx: ExtensionContext, prompt: stri
 		},
 		{
 			temperature: 0.2,
-			// Required on opencode gateways; harmless elsewhere.
-			sessionId: ctx.sessionManager.getSessionId?.(),
+			// Required on opencode gateways. Suffixed: claude-bridge keys its live query
+			// by session id, so the real one makes this call kill the first turn.
+			sessionId: titleSessionId(ctx.sessionManager.getSessionId?.()),
 		},
 	);
 
