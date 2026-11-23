@@ -1,8 +1,8 @@
 {
-  "$comment": "Tier aliases plus the permission reviewer's chain; every entry is a concrete model, since aliases cannot nest. Rung order is ADR-0103's (capability, then turn completion here, then agentic evidence, then price); one Go rung per tier (ADR-0125). No prices, caps or scores here \u2014 `bin/pi-model-cost` prints them (ADR-0118). Rejected candidates live in `$bench`: why each is out and what would promote it.",
+  "$comment": "Tier aliases plus the permission reviewer's chain; every entry is a concrete model, since aliases cannot nest. Rung order is ADR-0103's (capability, then turn completion here, then agentic evidence, then price); one Go rung per tier (ADR-0125). No prices, caps or scores here \u2014 `bin/pi-model-cost` prints them (ADR-0118). Scores read 2026-11-23: Artificial Analysis Intelligence Index v5.0.1. Quota 402/429 is not unavailability (ADR-0131); unscored free-pool trials are benched with evidence (ADR-0132). Rejected candidates live in `$bench`: why each is out and what would promote it.",
   "$bench": {
     "opencode-go/muse-spark-1.3-contributor": {
-      "out": "stalls mid-turn here (output stops, user says continue), so turn completion fails despite 37.0 intel at 1.00% drain",
+      "out": "stalls mid-turn here (output stops, user says continue), so turn completion fails",
       "promote": "a later revision streams reliably to completion in this harness"
     },
     "opencode-go/hy4": {
@@ -36,6 +36,66 @@
     "claude-bridge/claude-fable-5-2": {
       "out": "the highest score the harness can reach, blocked by sharing one five-hour window with every tier, which mid needs first",
       "promote": "a window of its own appears, or mid stops leading with sonnet-5-5"
+    },
+    "opencode-go/iceman-contributor-free": {
+      "out": "free and answering here, including a bounded tool loop, but unscored and without comparative evidence over hy4-flash-free; text-only, training-eligible and not zero-retention",
+      "promote": "a comparable score or repeated harness evidence beats the current free tail and the training tradeoff is accepted"
+    },
+    "opencode-go/muse-spark-1.2-contributor": {
+      "out": "training-class contributor without a comparable composite; its coding component is far below the placed rungs",
+      "promote": "a comparable score or agentic evidence beats the current rung and the training tradeoff is accepted"
+    },
+    "opencode-go/hy3": {
+      "out": "no comparable composite and a very weak terminal benchmark component",
+      "promote": "a scored release or harness evidence beats the current free or paid tail"
+    },
+    "opencode-go/qwen3.8-flash": {
+      "out": "no comparable composite or terminal benchmark components",
+      "promote": "a scored release or measured agentic evidence beats the current rung"
+    },
+    "opencode-go/qwen3.7-plus": {
+      "out": "no comparable composite and a very weak terminal benchmark component",
+      "promote": "a scored release or measured agentic evidence beats the current rung"
+    },
+    "opencode-go/hy4-preview": {
+      "out": "preview endpoint without a comparable composite or terminal benchmark components",
+      "promote": "a stable scored release beats the current rung"
+    },
+    "opencode-go/step-5-preview": {
+      "out": "preview endpoint whose drain crosses the single-prompt-only threshold",
+      "promote": "a stable release clears the drain threshold and beats the current rung"
+    },
+    "opencode-go/gpt-5.6-luna": {
+      "out": "weaker composite and terminal benchmarks than the placed codex rung at higher drain",
+      "promote": "a new index reading or harness evidence makes it stronger than the placed codex rung"
+    },
+    "opencode-go/gpt-6-luna": {
+      "out": "weaker composite and terminal benchmarks than the placed rungs",
+      "promote": "a new index reading or harness evidence makes it beat a placed rung"
+    },
+    "opencode-go/minimax-m3": {
+      "out": "low composite and terminal benchmarks against the placed rungs",
+      "promote": "a new scored revision or harness evidence beats the current rung"
+    },
+    "opencode-go/grok-4.7": {
+      "out": "single-prompt-only drain despite a respectable composite",
+      "promote": "its drain clears the single-prompt threshold and the capability is needed"
+    },
+    "opencode-go/qwen3.8-max": {
+      "out": "single-prompt-only drain with no capability advantage over the placed rungs",
+      "promote": "its drain clears the single-prompt threshold and it beats the current rung"
+    },
+    "opencode-go/qwen4-max": {
+      "out": "single-prompt-only drain, with the shared pool cost outweighing its high composite",
+      "promote": "its drain clears the single-prompt threshold and top needs the capability"
+    },
+    "opencode-go/kimi-k3.1-pro": {
+      "out": "single-prompt-only drain that can exceed a whole five-hour window per million tokens",
+      "promote": "its drain clears the single-prompt threshold and top needs the capability"
+    },
+    "opencode-go/kimi-k3": {
+      "out": "single-prompt-only drain with no comparable composite",
+      "promote": "a scored revision clears the drain threshold and beats the current rung"
     }
   },
   "top": [
@@ -46,13 +106,11 @@
   "mid": [
     "claude-bridge/claude-sonnet-5-5",
     "opencode-go/glm-5.3",
-    "opencode-go/longcat-2.5-free",
     "opencode-go/hy4-flash-free"
   ],
   "cheap": [
     "opencode-go/deepseek-v4.1-flash",
     "claude-bridge/claude-haiku-5-5",
-    "opencode-go/longcat-2.5-free",
     "opencode-go/hy4-flash-free"
   ],
   "reviewer": {
@@ -60,7 +118,6 @@
       "google/gemini-3.5-flash-lite",
       "claude-bridge/claude-haiku-5-5",
       "opencode-go/beam-free",
-      "opencode-go/longcat-2.5-free",
       "opencode-go/hy4-flash-free",
       "mistral/ministral-14b-2512",
       "opencode-go/claude-haiku-5-5",
