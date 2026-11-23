@@ -1,6 +1,10 @@
 {
-  "$comment": "Tier aliases plus the permission reviewer's chain; every entry is a concrete model, since aliases cannot nest. Rung order is ADR-0103's (capability, then turn completion here, then agentic evidence, then price); one Go rung per tier (ADR-0125), except the muse-spark trial, which sits above each tier's schema rung so a failure returns to it (ADR-0126). No prices, caps or scores here \u2014 `bin/pi-model-cost` prints them (ADR-0118). Rejected candidates live in `$bench`: why each is out and what would promote it.",
+  "$comment": "Tier aliases plus the permission reviewer's chain; every entry is a concrete model, since aliases cannot nest. Rung order is ADR-0103's (capability, then turn completion here, then agentic evidence, then price); one Go rung per tier (ADR-0125). No prices, caps or scores here \u2014 `bin/pi-model-cost` prints them (ADR-0118). Rejected candidates live in `$bench`: why each is out and what would promote it.",
   "$bench": {
+    "opencode-go/muse-spark-1.3-contributor": {
+      "out": "stalls mid-turn here (output stops, user says continue), so turn completion fails despite 37.0 intel at 1.00% drain",
+      "promote": "a later revision streams reliably to completion in this harness"
+    },
     "opencode-go/hy4": {
       "out": "scores above glm-5.3 but burns several times as fast and carries a smaller cap, so it can neither lead nor sit behind it",
       "promote": "top needs another rung from the same pool and that burn is accepted"
@@ -36,19 +40,16 @@
   },
   "top": [
     "claude-bridge/claude-opus-5-5",
-    "opencode-go/muse-spark-1.3-contributor",
     "opencode-go/glm-5.3",
     "openai-codex/gpt-5.6-terra"
   ],
   "mid": [
     "claude-bridge/claude-sonnet-5-5",
-    "opencode-go/muse-spark-1.3-contributor",
     "opencode-go/glm-5.3",
     "opencode-go/longcat-2.5-free",
     "opencode-go/hy4-flash-free"
   ],
   "cheap": [
-    "opencode-go/muse-spark-1.3-contributor",
     "opencode-go/deepseek-v4.1-flash",
     "claude-bridge/claude-haiku-5-5",
     "opencode-go/longcat-2.5-free",
