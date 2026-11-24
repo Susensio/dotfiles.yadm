@@ -1,7 +1,7 @@
 ---
 name: tmux-testing
 user-invocable: false
-description: Use when running anything against a tmux server: checking tmux.conf loads, a binding fires, a format expands, or what a popup or menu renders.
+description: "Use when running anything against a tmux server: checking tmux.conf loads, a binding fires, a format expands, or what a popup or menu renders."
 ---
 
 # Tmux Testing
