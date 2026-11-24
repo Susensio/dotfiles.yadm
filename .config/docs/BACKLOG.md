@@ -1,5 +1,7 @@
 # Backlog
 
+- claude/pi | Agent root through `asroot`: pkexec at the desk, `sudo -A` with a herdr or tmux password popup over SSH, every command approved, replacing ADR-0119's elevated TTY; later, a TOTP factor so a phone session can pass a one-time code in chat.
+  See [`docs/plans/agent-sudo.md`](plans/agent-sudo.md); progress in [STATE](STATE.md).
 - fish | **soon** — make `_env_pull` preserve per-shell `PATH` entries instead of replacing `PATH` wholesale: union-merge the manager's `PATH` with entries the current shell added (venv `bin/`, direnv, ad-hoc prepends), so nesting an interactive fish or running `env_reload` no longer breaks an activated environment.
   The failure and its accepted-as-interim trade-off are documented in [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment and [`environment-architecture.md` §4a](environment-architecture.md) (the `fish -C` re-prepend is the workaround until this lands).
   The change must decide its own stale-entry rule: entries the manager drops would survive the merge unless the managed-set bookkeeping (`_env_pull_managed`) also learns per-entry diffs — keep the merge conservative (only preserve entries present in the current shell's `PATH` but absent from the manager's) and accept the accumulation across nesting, or supersede ADR-0003's amendment if the trade-off needs rebalancing.

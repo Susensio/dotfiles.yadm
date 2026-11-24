@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Agent root in one call, approved per command by the person (docs/plans/agent-sudo.md):
+# polkit's fingerprint dialog in a local login session, else sudo through the sudo-askpass popup.
+# Over SSH polkit has no agent to ask, and Tailscale SSH has no login session at all.
+set -u
+[[ $# -gt 0 ]] || { echo "usage: asroot <command> [args...]" >&2; exit 2; }
+
+local_session() {
+  # fish pulls the desktop's XDG_SESSION_ID from the user manager into SSH shells too, so SSH decides first.
+  [[ -z "${SSH_CONNECTION:-}" && -n "${XDG_SESSION_ID:-}" ]] &&
+    [[ "$(loginctl show-session "$XDG_SESSION_ID" -p Remote --value 2>/dev/null)" == no ]]
+}
+
+if command -v pkexec >/dev/null && local_session; then
+  exec pkexec "$@"
+fi
+# A person at a terminal gets sudo's own prompt there; agents have no controlling terminal.
+if { : >/dev/tty; } 2>/dev/null; then
+  exec sudo "$@"
+fi
+SUDO_ASKPASS="$HOME/bin/sudo-askpass" exec sudo -A "$@"

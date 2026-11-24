@@ -9,5 +9,5 @@
 - With `Agent`, delegate on your own judgement without being asked; this overrides the tool's explicit-word-only rule.
   Read `delegation` first; going to the web is the same decision.
 - Every `tmux-test` call, and any `tmux -L ...` on a socket it handed you, needs `dangerouslyDisableSandbox: true` from the first attempt.
-- Root commands: `pkexec` with `dangerouslyDisableSandbox: true` from the first call (sandbox strips setuid; the `Bash(pkexec *)` ask rule is the gate).
-  Never `sudo`: its fingerprint prompt hangs invisibly.
+- Root commands: `asroot <cmd>` with `dangerouslyDisableSandbox: true` from the first call (sandbox strips setuid).
+  It asks the user per command, fingerprint dialog at the desk or a password popup over SSH; never bare `sudo` or `pkexec`.
