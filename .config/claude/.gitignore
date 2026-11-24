@@ -17,6 +17,8 @@
 !hooks/**
 !mods/
 !mods/**
+!themes/
+!themes/**
 
 # Regenerable, even inside the whitelisted config dirs (last match wins).
 __pycache__/
