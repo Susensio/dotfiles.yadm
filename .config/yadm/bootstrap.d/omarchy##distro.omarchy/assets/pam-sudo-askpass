@@ -1,0 +1,7 @@
+#%PAM-1.0
+# sudo -A (agents, no terminal) reads the password through SUDO_ASKPASS; the fingerprint stage
+# would wait unseen, so this service is the stock sudo one without it.
+auth		include		system-auth
+account		include		system-auth
+session		include		system-auth
+session		optional	pam_systemd.so class=none
