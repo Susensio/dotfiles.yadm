@@ -219,9 +219,10 @@
       "yadm stash *": "ask",
       "pkexec *": "ask",
       "* pkexec *": "ask",
+      "asroot *": "allow",
       "sudo *": {
         "action": "deny",
-        "reason": "A command led by sudo runs as root with no visible prompt. Local root goes through pkexec (fingerprint); remote root through a TTY the operator elevated (ssh -t host sudo -i) that the agent then types into. This rule matches the first word only, so it never fires on prose."
+        "reason": "Run root commands as `asroot <cmd>`: it asks the user per command (fingerprint dialog at the desk, password popup over SSH), where bare sudo picks the wrong prompt. This rule matches the first word only, so it never fires on prose."
       },
       "git-crypt *": {
         "action": "deny",

@@ -15,8 +15,8 @@ Track a new file by adding it to the whitelist, above the knockouts at the end, 
 
 ## Operating notes
 
-- **Root commands** go through `pkexec`, never `sudo`, whose fingerprint prompt waits invisibly in Pi's pipes; allow a shell timeout of at least 60 seconds.
-  Commands listed in `agent/always-ask.json` always reach you ([ADR-0071](../docs/adr/0071-ask-before-pkexec.md)).
+- **Root commands** go through `asroot <cmd>`, allowed by the rule map because it asks you per command itself: polkit's fingerprint dialog at the desk, a herdr or tmux password popup over SSH ([plan](../docs/plans/agent-sudo.md)); allow a shell timeout of at least 100 seconds.
+  Bare `sudo` is denied; `pkexec` and the other commands in `agent/always-ask.json` always reach you ([ADR-0071](../docs/adr/0071-ask-before-pkexec.md)).
 - **`/yolo`** (or `pi --yolo`) approves every ask for the current session only ([ADR-0081](../docs/adr/0081-pi-session-yolo-always-ask.md)).
   Keep `always-ask` first in the authorizer chain so pkexec still prompts under it, and leave `yoloMode` in the permission config off: it applies to every running session.
 - **The permission reviewer** asks `alias/reviewer`, a fallback chain defined and explained in `agent/model-alias.json`.

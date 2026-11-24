@@ -24,7 +24,7 @@
     "hard_deny": [
       "$defaults",
       "Any command that runs pkexec; the user must approve it.",
-      "Any command that actually executes a privilege escalation: sudo, doas, su, runuser, or a shell that would (bash -c, sh -c, eval, a command or process substitution, or behind env, xargs, nice, nohup, timeout). The policy is that local root goes through pkexec and remote root through a TTY the operator elevated themselves; a command carrying its own privilege verb is neither. A privilege verb that is only prose the command does not execute - a commit message, an ADR title, a filename, a search pattern - is not a denial.",
+      "Any command that actually executes a privilege escalation: sudo, doas, su, runuser, or a shell that would (bash -c, sh -c, eval, a command or process substitution, or behind env, xargs, nice, nohup, timeout). The policy is that agent root goes through `asroot <cmd>`, which asks the user per command itself; a command carrying its own privilege verb bypasses that. A privilege verb that is only prose the command does not execute - a commit message, an ADR title, a filename, a search pattern - is not a denial.",
       "git or yadm commands that discard uncommitted changes beyond named files: reset --hard or --merge, checkout or restore of `.`, a directory or a glob, clean -f, stash drop or clear. The worktree may hold other sessions' work. reset --soft, reset --keep and per-file checkout or restore are routine."
     ]
   }
