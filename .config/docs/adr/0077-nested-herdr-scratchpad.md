@@ -30,3 +30,5 @@ The inner client briefly paints Herdr's machine picker on every attach: its pre-
 That flash stays until Herdr fixes it upstream (herdrdev/herdr#4790).
 The old tmux scratch sessions remain on their existing socket until stopped manually and are not migrated into Herdr panes.
 Switching outer workspaces while a popup is open can still leave the inner client attached invisibly.
+With saved machines the inner client survives a stopped server ("Local reconnecting"), so the shell wrapper also kills its own client by session name.
+A remote machine's popup runs the remote copy of these scripts, whose PATH lacks `~/.local/bin`, so they resolve herdr through `HERDR_BIN_PATH`; the remote `~/.config` checkout must be kept current.
