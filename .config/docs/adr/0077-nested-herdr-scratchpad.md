@@ -30,6 +30,6 @@ The inner client briefly paints Herdr's machine picker on every attach: its pre-
 That flash stays until Herdr fixes it upstream (herdrdev/herdr#4790).
 The old tmux scratch sessions remain on their existing socket until stopped manually and are not migrated into Herdr panes.
 Switching outer workspaces while a popup is open can still leave the inner client attached invisibly.
-With saved machines the inner client survives a stopped server ("Local reconnecting"), so the scratch shell's `fish_exit` handler also kills its own client by session name.
+The inner client runs with its own `XDG_STATE_HOME`, so it never loads saved machines: with any saved, a client survives its stopped server on "Local reconnecting" ([herdrdev/herdr#6184](https://github.com/herdrdev/herdr/issues/6184)).
 A remote machine's popup runs the remote checkout's scripts, which must be kept current, with the environment [ADR-0133](0133-ssh-commands-login-environment.md) gives SSH commands; they resolve herdr through `HERDR_BIN_PATH`.
 Under `herdr --remote` local custom-command keybindings are not sent, so the scratchpad needs `--remote-keybindings server`.

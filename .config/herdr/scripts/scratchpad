@@ -38,6 +38,7 @@ START_CWD="$PWD"
 
 # cd before exec so the inner herdr creates its startup workspace here.
 # Do not route the nested client back to the outer server's socket or session.
+# Own state dir: the scratch client must not load saved machines (herdrdev/herdr#6184).
 # stderr only carries the shutdown notice from scratchpad-shell, which the popup
 # closes too fast to read; silence it so the close looks clean.
 cd "$START_CWD" 2>/dev/null || cd "$HOME" || true
@@ -45,4 +46,5 @@ exec env -u HERDR_SOCKET_PATH -u HERDR_SESSION \
   -u HERDR_ACTIVE_WORKSPACE_ID -u HERDR_ACTIVE_TAB_ID -u HERDR_ACTIVE_PANE_ID -u HERDR_ACTIVE_PANE_CWD \
   -u HERDR_WORKSPACE_ID -u HERDR_TAB_ID -u HERDR_PANE_ID \
   HERDR_CONFIG_PATH="$SCRATCH_CONF" \
+  XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/herdr-scratchpad" \
   "$HERDR" --session "scratchpad-$WK_ID" 2>/dev/null

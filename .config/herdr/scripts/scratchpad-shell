@@ -4,8 +4,6 @@
 # exec keeps fish's parent the herdr server, not a shell, so the subshell prompt marker stays off.
 exec /usr/bin/fish --init-command '
 function __scratchpad_stop --on-event fish_exit
-    # BUG: herdr client with saved machines survives its server stopping; upstream issue not yet filed.
-    test -n "$HERDR_SESSION"; and pkill -f -- "herdr --session $HERDR_SESSION\$"
     set -q HERDR_BIN_PATH; and set -l herdr $HERDR_BIN_PATH; or set -l herdr herdr
     $herdr server stop >/dev/null 2>&1
 end' "$@"
