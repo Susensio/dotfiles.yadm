@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Agents' `sudo -A` (asroot over SSH) gets its own PAM service without Omarchy's fingerprint stage,
-# which would wait 30 s with its cue hidden in the agent's output (docs/plans/agent-sudo.md).
+# which would wait 30 s with its cue hidden in the agent's output (docs/adr/0134-agent-root-asroot.md).
 set -euo pipefail
 
 ASSETS_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/assets

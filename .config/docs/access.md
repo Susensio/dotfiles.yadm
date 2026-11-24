@@ -8,7 +8,7 @@ How to reach each machine, and with what credential.
 | From | To | Path | Credential |
 |---|---|---|---|
 | `dell` | `nuc` | tailnet name, `ssh nuc` | Tailscale identity |
-| `dell` | `nuc` | `192.168.1.103`, port 22 | `dell`'s signing key in `~/.ssh/authorized_keys` — the same keypair in both GitHub slots ([ADR-0117](adr/0117-one-key-two-slots.md)); the bootstrap seeds the file from the account's key list, so the rebuild needs no paste |
+| `dell` | `nuc` | `192.168.1.8`, port 22 | `dell`'s signing key in `~/.ssh/authorized_keys` — the same keypair in both GitHub slots ([ADR-0117](adr/0117-one-key-two-slots.md)); the bootstrap seeds the file from the account's key list, so the rebuild needs no paste |
 | phone | `nuc` | tailnet name, port 22 | Tailscale identity, no key |
 | phone | `nuc` | LAN address | not set up: no phone key on `nuc` |
 | anything | `dell` | tailnet name | Tailscale identity: `dell` runs no sshd |

@@ -1,2 +1,2 @@
-# sudo -A authenticates through /etc/pam.d/sudo-askpass, which has no fingerprint stage (docs/plans/agent-sudo.md).
+# sudo -A authenticates through /etc/pam.d/sudo-askpass, which has no fingerprint stage (docs/adr/0134-agent-root-asroot.md).
 Defaults pam_askpass_service=sudo-askpass

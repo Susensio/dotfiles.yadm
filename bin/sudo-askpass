@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SUDO_ASKPASS helper for agents, which run sudo with no terminal (docs/plans/agent-sudo.md).
+# SUDO_ASKPASS helper for agents, which run sudo with no terminal (docs/adr/0134-agent-root-asroot.md).
 # Asks in a herdr or tmux popup wherever the person's client is attached; with neither it fails fast.
 # `sudo-askpass --prompt` is the asking side, run inside the popup.
 set -u

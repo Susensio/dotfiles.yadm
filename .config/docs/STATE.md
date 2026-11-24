@@ -1,12 +1,5 @@
 # State
 
-## Agent root through `asroot` (2026-11-24, [plan](plans/agent-sudo.md))
-
-`~/bin/asroot`, `~/bin/sudo-askpass`, the herdr plugin and `dell`'s askpass PAM service are live, and Claude and Pi route root through `asroot`.
-Passed on `dell`: the fingerprint dialog per call at the desk; over Tailscale SSH in tmux, a popup per call, refusal, timeout cleanup, the no-multiplexer failure, and no root for a hidden `sudo`.
-The first herdr overlay test captured seven characters typed into the then-focused pane, which led to the typeahead drain; the herdr popup has not been answered end to end yet.
-Next: `asroot id -u` from a harness in herdr on `nuc`, then the ADR, which deletes the plan.
-
 ## Speaker calibrator plugin: two crackles (2026-11-22, patch pending upstream)
 
 Two separate crackles with separate causes, both on `dell`.

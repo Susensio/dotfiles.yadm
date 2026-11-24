@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Agent root in one call, approved per command by the person (docs/plans/agent-sudo.md):
+# Agent root in one call, approved per command by the person (docs/adr/0134-agent-root-asroot.md):
 # polkit's fingerprint dialog in a local login session, else sudo through the sudo-askpass popup.
-# Over SSH polkit has no agent to ask, and Tailscale SSH has no login session at all.
+# Over SSH polkit has no agent to ask, so pkexec would fail there.
 set -u
 [[ $# -gt 0 ]] || { echo "usage: asroot <command> [args...]" >&2; exit 2; }
 
