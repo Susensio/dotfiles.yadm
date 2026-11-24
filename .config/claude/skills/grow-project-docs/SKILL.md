@@ -1,23 +1,20 @@
 ---
 name: grow-project-docs
-description: Creating or growing a `README`, `docs/SPEC.md`, `docs/ROADMAP.md`, `docs/BACKLOG.md`, `docs/STATE.md` or `.scratch/` in one of this user's own repositories — which file holds what, and the overflow (or, for `docs/STATE.md`, work left mid-flight) that earns it. Use when starting such a project, when something in one has outgrown the file holding it, or when work on it is being left mid-flight across a session. Not for a repository whose conventions belong to someone else.
+description: Use when starting one of the user's own repos, when README, SPEC, ROADMAP, BACKLOG, STATE or .scratch/ is needed or outgrown, or when work is left mid-flight. Not for repos with others' conventions.
 ---
 
 # Grow project docs
 
 Records grow by overflow.
-A concern earns its own file when it can no longer be stated where it lives — sometimes a section graduating out of the README, sometimes the whole README failing to contain something.
-
-Nothing here is a schema to adopt.
-These are names for common overflows, so they stay consistent across this user's projects.
-A repository whose conventions belong to someone else is out of scope — there, `project-docs` finds what is already kept, and no file is created.
+A concern earns its own file when it can no longer be stated where it lives.
+These are names for common overflows, kept consistent across this user's projects, not a schema to adopt.
+A repository whose conventions belong to someone else is out of scope -- there, `project-docs` finds what is kept, and no file is created.
 
 ## Where things sit
 
-The root holds entry points only.
+The root holds entry points only; everything that overflowed goes under `docs/`.
 Below, `AGENTS.md` means the project's context file, or the `CLAUDE.md` it keeps instead.
-Never keep both: Claude reads `CLAUDE.md` and ignores an `AGENTS.md` beside it.
-Everything that overflowed goes under `docs/`, so location alone answers whether a thing overflowed.
+Never keep both: Claude ignores an `AGENTS.md` beside a `CLAUDE.md`.
 
 | What is held | Where it goes | Earned when |
 | --- | --- | --- |
@@ -34,18 +31,16 @@ Everything that overflowed goes under `docs/`, so location alone answers whether
 
 ## Earned, not adopted
 
-Adopt no row until the condition beside it is met.
-Until then the repository and its history are the record, and adding the file costs more than it holds.
-A file that is absent has not been earned yet; that is the only thing its absence means.
-An empty one is worse than absent: it advertises a record that does not exist.
+Adopt no row until its condition is met.
+Until then the repository and its history are the record.
+An absent file has not been earned yet; an empty one is worse, advertising a record that does not exist.
 
-Two rows are worth reading twice, because the instinct is to create them on day one.
+Two rows are the ones to create on day one by instinct:
 
-`README.md` is earned by a reader, not by the project existing.
-Where use and change are the same audience — a dotfiles tree, a private script — one file serves both and there is no README to write.
-
-The repository's `AGENTS.md` is earned by a surprise.
-One restating what `package.json` or the CI workflow already says costs every turn of every agent, and teaches the model to discount the lines sitting beside it.
+- `README.md` is earned by a reader, not by the project existing.
+  Where use and change are the same audience -- a dotfiles tree, a private script -- one file serves both.
+- The repository's `AGENTS.md` is earned by a surprise.
+  One restating what `package.json` or CI already says costs every agent turn and teaches the model to discount the lines beside it.
 
 Neither carries an index line pointing at the other.
 
@@ -54,14 +49,9 @@ Read it when you are about to create one.
 
 ## Creating one is two things at once
 
-Creating a file and naming it in the project's `AGENTS.md` are one step, never two.
+Creating a file and naming it in the project's `AGENTS.md` are one step.
 One line per file: where it sits, what kind of thing it holds, and who writes it.
+That line is what a later session reads: `AGENTS.md` loads every turn, so `project-docs` resolves it at step one of its ladder.
+The file's own first lines carry no such explanation, and no description of its layout -- a file explains its layout by having one.
 
-That line is what a later session actually reads.
-A repository's `AGENTS.md` loads every turn for every agent working in it, so `project-docs` resolves it at step one of its ladder, before anything has been opened.
-The file's own first lines carry no such explanation — a second copy there goes stale, and the reader who has already opened the file no longer needs routing.
-
-Formats stay out of it too.
-A file explains its own layout by having one, and a description of that layout is wrong the first time the layout changes.
-
-Done when every file created has met the condition beside it, each carries its line in the project's `AGENTS.md`, and the rows that were not earned are left unwritten.
+Done when every file created has met its condition, each carries its line in `AGENTS.md`, and the unearned rows are left unwritten.

@@ -1,7 +1,7 @@
 ---
 name: tmux-config
 user-invocable: false
-description: Use when writing or debugging tmux configuration — a binding, the status line, a pane title, a theme, a plugin, or a value that expands to the wrong thing.
+description: Use when writing or debugging tmux configuration — a binding, the status line, a pane title, a theme, a plugin, or a value that expands wrongly.
 ---
 
 # Tmux Config

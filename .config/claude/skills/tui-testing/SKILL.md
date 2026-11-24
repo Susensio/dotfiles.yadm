@@ -1,7 +1,7 @@
 ---
 name: tui-testing
 user-invocable: false
-description: Use when needing to run a TUI (like nvim, fzf, or any visual interactive terminal app) headlessly, send it keystrokes, and capture its screen state.
+description: Use to run a TUI (nvim, fzf, any interactive terminal app) headlessly, send keystrokes, and capture the screen.
 ---
 
 # TUI Testing

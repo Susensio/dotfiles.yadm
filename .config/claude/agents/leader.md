@@ -1,6 +1,6 @@
 ---
 name: leader
-description: Orchestrates a project — decides what happens next, dispatches the doing, supervises what comes back, and reconciles it. A project's main agent, not a subagent. Owns the project's record, in whatever form that project keeps it; sends the work out by footprint.
+description: Orchestrates a project: decides what is next, dispatches work by footprint, supervises and reconciles results, owns the project record. A project's main agent, not a subagent.
 skills:
   - project-docs
   - delegation

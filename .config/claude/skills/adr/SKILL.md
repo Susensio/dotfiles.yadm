@@ -1,71 +1,40 @@
 ---
 name: adr
-description: Checks which earlier decisions are still binding, then records the new one as a numbered ADR in docs/adr/. Use at the START of weighing a choice between real alternatives — a library, a structural boundary, a constraint accepted for a non-obvious reason — because an accepted ADR on the same ground is binding, and unknowingly re-deciding it is what this prevents. Use at the END of that same choice, once it is settled or reversed, while what was weighed and discarded is still in reach.
+description: Use at the start of weighing a choice between real alternatives (library, structural boundary, accepted constraint) to check binding ADRs, and at its end to record the decision in docs/adr/.
 ---
 
 # Architecture Decision Record Protocol
 
 ## Before deciding
-Run `${CLAUDE_SKILL_DIR}/scripts/adr.py list` — one line per ADR in number order: number, status, the later ADRs naming it, and title.
-A superseded record shows `-> <N>`, the number that replaced it, in place of its status.
-`<- <N>,<M>` are later ADRs that name this one without replacing it — a narrowing, a partial reversal, or a plain citation, and only reading the later one says which.
-It is derived from the records, so nothing has to be kept in step by hand.
-An `Accepted` ADR covering the same ground binds the decision it records: follow it, or supersede it deliberately (below).
-Never silently re-decide.
-`Superseded` is history, not current policy.
-For what to do right now, read the live file the decision was operationalized into — a skill, a rules file, a `CLAUDE.md`.
-The record says why it is that way and is fixed at a moment; the live file is what the rule became.
+Run `${CLAUDE_SKILL_DIR}/scripts/adr.py list`: one line per ADR with number, status, and title.
+`-> <N>` marks the superseding record; `<- <N>,<M>` are later ADRs naming this one (narrowing, partial reversal or citation; read them to tell).
+An `Accepted` ADR on the same ground binds: follow it or supersede it deliberately, never silently re-decide.
+`Superseded` is history; the live file the decision became (skill, rule, `CLAUDE.md`) is current policy.
 Open a full ADR only when its title looks relevant.
 
 ## When to write one
 
-A decision earns a record when the reason for it lives nowhere else — not in the diff, not in the config it produced, not in the tool's own docs.
-
-Ask where that reason would otherwise sit.
-Reason with a line to sit beside goes there as a comment, and the comment is the better record: whoever next edits the line finds it, without knowing `docs/adr/` exists.
-Two lines and an upstream link beside the setting beat a file nobody opens.
-A comment also travels with the file it annotates, where an accepted ADR's path references rot and have to be repaired by hand.
-
-Anchor to where the reasoning would be re-derived, not to where the setting is typed.
-A fix often lands somewhere other than the place that was investigated, and it is the place investigated that gets guessed wrong a second time.
-
+A decision earns a record when its reason lives nowhere else: not in the diff, the config, or the tool's docs.
+Reason with a line to sit beside goes there as a comment, anchored where the reasoning would be re-derived, not where the setting is typed.
 An ADR is for reason with no single line to mark:
-- it spans files, or describes a shape rather than a line — one anchor is a comment, two or more is a shape;
-- it explains an absence, the thing deliberately not done that no line can carry;
-- it binds future changes, so its subject is not written yet — a standing policy or a repo-wide convention has no line to sit beside because that line does not exist.
+- it spans files or describes a shape (two or more anchors);
+- it explains an absence, a thing deliberately not done;
+- it binds future changes whose subject is not written yet.
 
-A rule that keeps being edited as it evolves belongs in the live rules file it governs, not in a record fixed at a moment.
-
-Swapping one tool for an equivalent is not a decision when the diff already shows why.
-Adopting a documented, reversible setting because the tool's own docs say to — even one that reads as structural — is transcription, not decision: there is no discarded alternative for future-you to rediscover.
-Offer an ADR rather than assuming one is warranted.
+A rule that keeps evolving belongs in the live rules file, not a fixed record.
+Swapping a tool for an equivalent, or adopting a documented reversible setting, is not a decision.
+Offer an ADR rather than assuming one.
 
 ## How to write one
-1. Run `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>"` — prints the created file's path.
-   It finds `docs/adr/` by walking up from wherever it is invoked.
-   If there is none it stops and says where it looked, rather than starting a second set somewhere nobody reads.
-   `--dir <path>` names the directory outright when the search would find the wrong one; `--init` creates it, for a project with no records yet.
-   `<title>` can be a full sentence and becomes the H1; `--slug` is 3-6 words naming the core decision and becomes the filename — pick it deliberately rather than letting the title get truncated into it.
-   The title is the whole index, since it is what `list` prints: name the discarded alternative in it where there was one.
-   "Link mise tools into XDG directories instead of PATH shims" answers "did I already weigh PATH shims?" without the file being opened; the slug alone does not.
-2. Fill in the three sections:
-   - **Context:** the situation and forces at play, stated neutrally (why this needed a decision at all).
-   - **Decision:** what was decided.
-   - **Consequences:** what becomes easier or harder as a result — trade-offs, not just upside.
+1. `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>"` prints the new path.
+   It finds `docs/adr/` by walking up; `--dir <path>` names it outright, `--init` creates it.
+   The title becomes the H1 and is the whole index: name the discarded alternative in it ("Link mise tools into XDG directories instead of PATH shims").
+   `--slug` is 3-6 words naming the core decision.
+2. Fill **Context** (forces, stated neutrally), **Decision**, **Consequences** (trade-offs, not just upside).
+   Write the world in past tense, anchored to the moment; a present-tense standing fact belongs in the live file, cited by name.
+3. Cite skills and docs by name, never path.
+4. Never edit an accepted ADR's decision or reasoning once committed; a draft is free to revise until the commit that lands it.
+   Repair anything changing no decision (rotted pointer, typo, false claim about the world); where a repair changes a line's meaning, add a dated `## Corrections` note saying what it said before.
+   To change the decision: `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`, which flips the old status.
 
-   State the world in the past tense, anchored to the moment: "`hooks/task-interface.py` was the first attempt" cannot rot, because it is a claim about a past state and stays true forever.
-   A present-tense standing fact — what a file currently holds, where a kind of content currently goes — is what a future reader tests against the tree and finds wrong, and it is every rotted claim this format has produced.
-   Put that in the live file that governs it, cited by name, and record what was decided about it here.
-3. Cite a skill or a doc by name, never by path — a name is a stable address, a path moves and the record cannot chase it.
-   Naming the `harness-design` skill survives that skill's file being moved; the path `agents/skills/audit-harness/design-rules.md` did not.
-4. Never edit an accepted ADR's decision, or the reasoning that reached it, once it is committed.
-   A draft is not yet a decision: revise freely up to the commit that lands it, including a correction the user gives minutes after `new` wrote the file, with no `Corrections` note — nothing has been re-decided because nothing was decided yet.
-   Immutability protects the decision from being re-decided, not the prose from being repaired: repair anything that changes no decision — a rotted pointer, a broken link, a typo, or a claim about the world that was false or has since become so.
-   A claim nobody can act on wrongly is worth more than a record nobody trusts.
-   Where the repair changed what a line meant, add a dated note under a `## Corrections` heading saying what it said before: a repair that leaves no trace is its own half-truth.
-   If the decision changes, write a new ADR that supersedes it:
-   `${CLAUDE_SKILL_DIR}/scripts/adr.py new "<title>" --slug "<short-slug>" --supersedes <N>`
-   This writes `Supersedes: [ADR-<N>](<file>)` into the new file and flips ADR-`<N>`'s status to `Superseded by [ADR-<M>](<file>)` — the old record stays, it just stops being current.
-
-Title and status live in each record and `list` reads them from there.
-There is no index file to fall out of date.
+There is no index file; `list` derives it.

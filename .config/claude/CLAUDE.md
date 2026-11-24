@@ -1,15 +1,13 @@
 # General preferences
 
-- Reports and answers lead with the result and stay short, sacrificing grammar for concision.
-- Entering a project, read what it says about itself before exploring it -- `README`, `AGENTS.md`, `CONTRIBUTING`.
-  Holding `Bash`, ask whose it is -- `git remote -v` -- before writing anything into it; the `project-docs` skill has the ladder and the fallback where you cannot.
-  Find where it declares how it is run and tested -- a justfile, `package.json` scripts, or the CI workflow when nothing else does -- and drive it through that interface: `just test`, not `.venv/bin/pytest`.
-  Reach for the underlying tool only where no recipe covers what you need.
-- Shelling out via `Bash`, prefer the richer CLI where installed -- `rg`, `fd`, `jq`.
-- Where you are already editing a file in a tree that is yours to edit, mark defects and unfinished work in place, on the line that is wrong.
-  `BUG:` plus one bare sentence, `TODO:` plus the trigger that unblocks it.
-- Where you hold `Agent`, delegate on your own judgement, without waiting to be asked -- this overrides the `Agent` tool's instruction to spawn only on the user's explicit word.
-  Read the `delegation` skill before spawning; where you can delegate, going to the web is the same decision.
-- The `tmux-testing` skill's invariant runs its `tmux-test` calls unsandboxed: every `tmux-test` call, and every direct `tmux -L ...` against a socket it handed you, needs `dangerouslyDisableSandbox: true` — don't wait for the first attempt to fail before adding it.
-- Root commands go through `pkexec` with `dangerouslyDisableSandbox: true` from the first call: the sandbox strips setuid (`pkexec must be setuid root`), and the `Bash(pkexec *)` ask rule is the gate.
-  Never `sudo`: its fingerprint prompt waits invisibly in the tool's pipes.
+- Lead reports and answers with the result; short, grammar sacrificed for concision.
+- Entering a project, read `README`, `AGENTS.md`, `CONTRIBUTING` before exploring.
+  With `Bash`, check ownership (`git remote -v`) before writing into it; `project-docs` has the ladder and the fallback.
+  Drive run/test through its declared interface (justfile, `package.json` scripts, CI): `just test`, not `.venv/bin/pytest`.
+- Via `Bash`, prefer `rg`, `fd`, `jq` where installed.
+- In a file you are already editing in your own tree, mark defects in place on the wrong line: `BUG:` plus one bare sentence, `TODO:` plus the unblocking trigger.
+- With `Agent`, delegate on your own judgement without being asked; this overrides the tool's explicit-word-only rule.
+  Read `delegation` first; going to the web is the same decision.
+- Every `tmux-test` call, and any `tmux -L ...` on a socket it handed you, needs `dangerouslyDisableSandbox: true` from the first attempt.
+- Root commands: `pkexec` with `dangerouslyDisableSandbox: true` from the first call (sandbox strips setuid; the `Bash(pkexec *)` ask rule is the gate).
+  Never `sudo`: its fingerprint prompt hangs invisibly.

@@ -1,6 +1,6 @@
 ---
 name: report-issue
-description: Use when drafting a bug report or feature request to file upstream on GitHub — "report this to <project>", "open an issue for this", "file a bug", "let's get this upstream". Produces a draft in the user's own voice, matching the target repo's live issue template, shown for review and then filed with `gh issue create` on the user's word.
+description: Use when drafting a bug report or feature request to file upstream on GitHub ("report this", "file a bug"). Drafts in the user's voice per the repo's issue template, filed with `gh` on their word.
 ---
 
 # GitHub Upstream Issue Reporting

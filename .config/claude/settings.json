@@ -54,7 +54,10 @@
     "claude-api": "off",
     "update-config": "name-only",
     "run": "name-only",
-    "keybindings-help": "name-only"
+    "keybindings-help": "name-only",
+    "omarchy-app": "user-invocable-only",
+    "improve-codebase-architecture": "user-invocable-only",
+    "superwhisper": "user-invocable-only"
   },
   "hooks": {
     "SessionStart": [

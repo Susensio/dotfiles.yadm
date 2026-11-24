@@ -1,60 +1,50 @@
 ---
 name: project-docs
 user-invocable: false
-description: Where a project keeps its own information — what it is, what is planned, what is open, a settled decision, a defect — and how to find that place in a project you did not set up. Use when picking up a project, when something found needs writing down, and before adding any file to hold it.
+description: Use when picking up a project, when something found needs writing down, and before adding a file to hold it. Says where a project keeps its info (what, plan, open work, decisions, defects).
 ---
 
 # Project docs
 
-A project's record is written for a person to read, so it lives in the repository, not under `.claude/`.
-Finding where it already lives is the work — you rarely get to choose.
+A project's record is for a person to read, so it lives in the repository, not under `.claude/`.
+Finding where it already lives is the work.
 
 ## Find the home before writing
 
-**0. Whose repository is this?** Run `git remote -v`.
-An `upstream` remote means someone else's even where `origin` is your own fork, no remote at all means yours, and otherwise it is yours only if you own `origin`.
-Without `Bash` you cannot answer this: treat the repository as someone else's and report rather than write, which is the answer that is never harmful to be wrong about.
-Someone else's and you create nothing — not a file, not a `BUG:` marker on one wrong line — because what you found travels in your report instead.
-Anything that would post in public is the user's to send: `report-issue` drafts it for them and never files it.
-Silent when the repository is yours — that is the ordinary case and earns no line.
-Report only when it is not, since that is the answer that changes what happens next.
+**0. Whose repository?** Run `git remote -v`.
+An `upstream` remote means someone else's even where `origin` is your fork; no remote means yours; otherwise yours only if you own `origin`.
+Without `Bash`, treat it as someone else's.
+Someone else's: create nothing, not even a `BUG:` marker; findings travel in your report.
+Anything that would post publicly is the user's to send: `report-issue` drafts, never files.
+Say nothing when it is yours; report only when it is not.
 
 **1. What does it say about itself?** `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `README`.
-Take the nearest one above the files you touched; it beats the root's where they disagree.
-Below, `AGENTS.md` means the project's context file, or the `CLAUDE.md` it keeps instead.
-Never keep both: Claude reads `CLAUDE.md` and ignores an `AGENTS.md` beside it.
+The nearest one above the files you touched wins.
+Below, `AGENTS.md` means the project's context file or the `CLAUDE.md` it keeps instead; never keep both, since Claude ignores an `AGENTS.md` beside `CLAUDE.md`.
 
-**2. What does it visibly keep?** A `docs/` tree, `TODO.md`, `CHANGELOG.md`, an issue tracker it links to.
-Match it, even where the format is not what you would have chosen.
-A section that has drifted outside its file's purpose, like decisions in a backlog, is worth trimming rather than extending.
-Two candidates: follow whichever it used most recently for a finding like yours, and ask if that is still unclear.
-List the root directly — a file holding live state is often gitignored, and `rg` and `fd` skip those.
+**2. What does it visibly keep?** A `docs/` tree, `TODO.md`, `CHANGELOG.md`, a linked tracker.
+Match it.
+Where two fit, follow the one most recently used for a finding like yours, else ask.
+List the root directly: live-state files are often gitignored and `rg` and `fd` skip them.
 
-**3. Nothing holds this kind yet**, and step 0 said the repository is yours.
-The `grow-project-docs` skill has this user's filenames and what earns each.
+**3. Nothing holds this kind yet** and the repository is yours: `grow-project-docs` has this user's filenames and what earns each.
 
 Read a file before writing to it.
-Someone else's may declare its own boundary in its first lines and that governs; this user's will not, because the repository's own `AGENTS.md` carries a line per file — identity only, never the boundary or edit rule.
-A line found doing more than that is a defect in the project's `AGENTS.md`: trim it back to identity rather than following it (ADR-0041).
+A line in the project's `AGENTS.md` doing more than naming a file's identity is a defect: trim it back (ADR-0041).
 
 ## What kind of thing is it?
 
-These go wherever the ladder lands:
-
-- **What this project is**, and how someone uses it — a `README`.
-- **What it must do** — a spec, a requirements doc.
-- **The order things happen in** — a `ROADMAP`, milestones, a pinned issue. The user writes it; you read it and do not edit it unasked.
-- **What is open and nobody has committed to** — a bug found, tech debt, an unapproved idea. A `BACKLOG`, a `TODO`, an issue tracker.
-  A subagent reports it and the main agent writes it, so a finding never rides in a scoped diff.
-- **A procedure a person also runs by hand** — a deploy, a release. A doc, with the skill that fires on it pointing there.
-- **Work already committed to and not yet finished** — an accepted decision awaiting implementation, a change left mid-flight, the handoff a fresh session needs to resume it. A `STATE.md`, edited or dropped as work moves past it rather than appended to.
+- What the project is and how to use it: `README`.
+- What it must do: a spec.
+- Order of work: `ROADMAP`; the user writes it, you do not edit it unasked.
+- Open work nobody committed to (bug, debt, idea): `BACKLOG`, `TODO` or tracker.
+  A subagent reports it and the main agent writes it.
+- A procedure a person also runs: a doc, with the skill pointing there.
+- Committed, unfinished work and handoff: `STATE.md`, edited or dropped as work moves, not appended.
 
 Three skip the ladder.
-A settled choice between real alternatives, including a decision not to do something, goes to the `adr` skill, which decides whether it is worth recording at all.
-A standing fact about the system sits where it would otherwise be re-derived: a comment beside its code, or a path-scoped rule when it spans one path; one cheap to re-derive can simply go.
-`AGENTS.md` is for rules every session there needs, so it makes a poor catch-all.
-Throwaway material goes wherever the project already ignores, gone when the work commits.
+A settled choice between real alternatives, including a decision not to do something, goes to the `adr` skill.
+A standing fact goes beside its code as a comment, or in a path-scoped rule if it spans a path.
+Throwaway material goes wherever the project already ignores.
 
-Roadmap or backlog, when both fit: `grow-project-docs` holds that boundary.
-
-Never agent memory: it is unreviewable, invisible to everyone else working there, and does not reach a subagent, so a fact kept there is missing from whoever works next.
+Never agent memory: it is unreviewable and does not reach subagents.
