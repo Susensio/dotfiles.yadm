@@ -15,12 +15,17 @@
 !rules/**
 !hooks/
 !hooks/**
+!mods/
+!mods/**
 
 # Regenerable, even inside the whitelisted config dirs (last match wins).
 __pycache__/
 *.pyc
 .ruff_cache/
 .claude/
+# Engine-generated beside each mod when it loads.
+mods/*/tsconfig.json
+mods/*/.claude-plugin/types/
 # Anthropic skills synced from the claude.ai account, not hand-maintained.
 skills/synced/
 # Omarchy's skills, which omarchy/skills.sh links in. No trailing slash: to git

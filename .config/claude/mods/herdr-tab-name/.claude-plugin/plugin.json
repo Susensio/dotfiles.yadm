@@ -1,0 +1,1 @@
+{ "name": "herdr-tab-name", "version": "0.1.0", "description": "Names the herdr tab from the first prompt, only while it still has its default number label" }

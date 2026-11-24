@@ -1,7 +1,8 @@
 {
   "env": {
     "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1",
-    "CLAUDE_CODE_TMUX_TRUECOLOR": "1"
+    "CLAUDE_CODE_TMUX_TRUECOLOR": "1",
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/.config/claude/mods/herdr-tab-name"
   },
   "attribution": {
     "commit": "",
@@ -43,6 +44,7 @@
     ],
     "defaultMode": "auto"
   },
+  "model": "sonnet",
   "skillOverrides": {
     "design": "user-invocable-only",
     "dataviz": "user-invocable-only",
@@ -203,6 +205,5 @@
   "theme": "custom:omarchy",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell",
-  "switchModelsOnFlag": false,
-  "model": "sonnet"
+  "switchModelsOnFlag": false
 }
