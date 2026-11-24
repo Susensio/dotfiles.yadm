@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# SUDO_ASKPASS helper for agents, which run sudo with no terminal (docs/plans/agent-sudo.md).
+# Asks in a herdr or tmux popup wherever the person's client is attached; with neither it fails fast.
+# `sudo-askpass --prompt` is the asking side, run inside the popup.
+set -u
+
+if [[ "${1:-}" == --prompt ]]; then
+  reply="${SUDO_ASKPASS_REPLY:?not started by sudo-askpass}"
+  # Read-write so the answer never blocks, even if the waiting helper was killed.
+  exec 4<>"$reply" || exit 1
+  answer() { printf '%s\n' "$1" >&4; exit 0; }
+  # Ctrl+C or closing the popup refuses instead of leaving sudo to time out.
+  trap 'echo; answer cancel' INT HUP TERM
+  # A helper that timed out or was killed takes its popup with it.
+  [[ -n "${SUDO_ASKPASS_PID:-}" ]] &&
+    (while kill -0 "$SUDO_ASKPASS_PID" 2>/dev/null; do sleep 1; done; kill -TERM $$) 2>/dev/null &
+  printf 'An agent wants root for:\n\n  %s\n\n(Ctrl+C to refuse)\n\n' "${SUDO_ASKPASS_CALLER:-sudo}"
+  # The popup steals focus, so drop keys typed for another pane before it appeared.
+  while IFS= read -rs -t 0.5 -n 1024 _; do :; done
+  IFS= read -rs -p "${SUDO_ASKPASS_PROMPT:-[sudo] password: }" pw || answer cancel
+  echo
+  answer "ok $pw"
+fi
+
+prompt="${1:-[sudo] password: }"
+# Under the harnesses' own command timeouts, so an unanswered popup fails before the call does.
+timeout="${SUDO_ASKPASS_TIMEOUT:-90}"
+self="$(realpath "$0")"
+plugin_dir="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/plugins/sudo-askpass"
+herdr="${HERDR_BIN_PATH:-}"
+# After `herdr update` the injected path can name a deleted binary.
+[[ -x "$herdr" ]] || herdr="$(command -v herdr || true)"
+
+# The command as sudo received it, each argument quoted, so padding or spacing cannot hide a tail.
+caller=""
+if [[ -r /proc/$PPID/cmdline ]]; then
+  mapfile -d '' argv </proc/"$PPID"/cmdline
+  caller="$(printf '%q ' "${argv[@]}")"
+fi
+caller="${caller:-sudo (command unknown)}"
+max=400
+((${#caller} > max)) && caller="${caller:0:max} …($((${#caller} - max)) more chars)"
+
+dir="$(mktemp -d "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/sudo-askpass.XXXXXX")" || exit 1
+trap 'rm -rf "$dir"' EXIT
+mkfifo -m 600 "$dir/reply" || exit 1
+# Read-write so neither side blocks on open and `read -t` can time out with no answer.
+exec 3<>"$dir/reply"
+env_args=("SUDO_ASKPASS_REPLY=$dir/reply" "SUDO_ASKPASS_PROMPT=$prompt"
+  "SUDO_ASKPASS_CALLER=$caller" "SUDO_ASKPASS_PID=$$")
+
+open_herdr() {
+  [[ -n "${HERDR_PANE_ID:-}" && -n "$herdr" ]] || return 1
+  local e args=()
+  for e in "${env_args[@]}"; do args+=(--env "$e"); done
+  # The manifest makes it a popup: only plugins can open one, and 0.9.5's CLI has no flag for it.
+  pane_open() { "$herdr" plugin pane open --plugin sudo-askpass --entrypoint prompt --focus "${args[@]}" >/dev/null 2>&1; }
+  # Linking is per-machine herdr state, so the first prompt does it instead of a bootstrap step.
+  pane_open || { "$herdr" plugin link "$plugin_dir" >/dev/null 2>&1 && pane_open; } || return 1
+  "$herdr" notification show "sudo password needed" --sound request >/dev/null 2>&1 || :
+}
+
+open_tmux() {
+  [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" ]] && command -v tmux >/dev/null || return 1
+  # A detached session would take the popup nowhere and leave sudo waiting.
+  [[ "$(tmux display-message -p -t "$TMUX_PANE" '#{session_attached}' 2>/dev/null)" -gt 0 ]] || return 1
+  local e args=()
+  for e in "${env_args[@]}"; do args+=(-e "$e"); done
+  tmux display-popup -t "$TMUX_PANE" -E -w 80 -h 12 -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1 &
+}
+
+if ! open_herdr && ! open_tmux; then
+  echo "sudo-askpass: no herdr or tmux client to ask in; run it yourself: $caller" >&2
+  exit 1
+fi
+
+IFS= read -r -t "$timeout" reply <&3 || exit 1
+case "$reply" in
+  "ok "*) printf '%s\n' "${reply#ok }" ;;
+  *) exit 1 ;;
+esac

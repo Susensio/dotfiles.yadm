@@ -5,3 +5,8 @@
 !scripts/
 !scripts/**
 !SKILL-config.md
+# Local plugins only; herdr keeps per-plugin config under plugins/config/.
+!plugins/
+!plugins/*/
+!plugins/*/**
+plugins/config/

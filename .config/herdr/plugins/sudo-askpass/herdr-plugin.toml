@@ -1,0 +1,14 @@
+id = "sudo-askpass"
+name = "sudo askpass"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "Asks for an agent's sudo password in a popup; opened by ~/bin/sudo-askpass"
+platforms = ["linux"]
+
+[[panes]]
+id = "prompt"
+title = "sudo password"
+placement = "popup"
+width = 84
+height = 14
+command = ["sh", "-c", "exec \"$HOME/bin/sudo-askpass\" --prompt"]
