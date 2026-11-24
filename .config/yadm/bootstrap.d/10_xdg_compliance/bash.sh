@@ -17,6 +17,12 @@ if ! grep --quiet "${ETC_BASHRC_DIR}" ${ETC_BASHRC_FILE}; then
   cat "${ASSETS_DIR}${ETC_BASHRC_FILE}.patch" | sudo tee --append ${ETC_BASHRC_FILE} > /dev/null
 fi
 
+if ! grep --quiet "(ADR-0133)" ${ETC_BASHRC_FILE}; then
+  log info "Patching /etc/bash.bashrc to give SSH commands the login environment..."
+  { cat "${ASSETS_DIR}${ETC_BASHRC_FILE}.head"; cat ${ETC_BASHRC_FILE}; } | sudo tee ${ETC_BASHRC_FILE}.new > /dev/null
+  sudo chmod 644 ${ETC_BASHRC_FILE}.new && sudo mv ${ETC_BASHRC_FILE}.new ${ETC_BASHRC_FILE}
+fi
+
 # Install the asset files directly into /etc
 for file in "${ETC_BASHRC_XDG_FILE}" "${ETC_PROFILE_XDG_FILE}"; do
   cmp -s "${ASSETS_DIR}${file}" "${file}" || sudo install -Dv --mode 644 "${ASSETS_DIR}${file}" "${file}"

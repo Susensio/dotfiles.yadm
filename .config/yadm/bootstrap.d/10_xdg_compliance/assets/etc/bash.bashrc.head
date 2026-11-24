@@ -1,0 +1,2 @@
+# SSH commands return at the guard below; give them the login environment first (ADR-0133).
+[ -z "${PS1-}" ] && [ -n "${SSH_CLIENT-}" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/profile" >/dev/null 2>&1

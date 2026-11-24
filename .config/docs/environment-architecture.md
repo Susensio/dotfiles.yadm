@@ -105,11 +105,19 @@ While Fish is our primary interactive shell, we use Bash as the entry point for 
 3.  **State Preservation:** Bash checks if it is a login shell and passes the `--login` flag to Fish, keeping the POSIX login contract; fish's env sync no longer depends on it ([ADR-0003](adr/0003-shell-entry-bash-then-fish.md) amendment).
 
 ### Login Shell Support (`~/.config/profile`)
-This architecture works seamlessly on TTYs, via SSH, and for any other login shell:
+This architecture works seamlessly on TTYs, for SSH login shells, and for any other login shell (SSH commands are covered below):
 1.  **Login:** `/bin/bash` starts as a login shell and sources `~/.config/profile`, which sources `bashrc` first.
 2.  **Interactive Transition:** If interactive, `bashrc` `exec`s into `fish` here, replacing the process before it ever reaches step 3 below.
 3.  **Systemd Sync:** Otherwise (a non-interactive login shell, e.g. `bash -lc '...'`, or an interactive shell past `SHLVL` 2), control returns to `profile`, which unconditionally pulls the latest environment from `systemctl --user show-environment`, filtering out shell-managed names first.
     Before [ADR-0043](adr/0043-drop-display-guard-filter-env-import.md) this step only ran when no graphical display was detected, leaving a non-interactive login shell in a graphical session unable to reconstruct its own `$PATH` — the gap that ADR closes.
+
+### SSH Commands
+The relay and `profile` cover login shells only.
+`ssh host cmd` over Tailscale SSH skips PAM and runs `bash -c cmd`: not login, not interactive, with a bare environment.
+`/etc/bash.bashrc` is the only file bash reads there, and stock Debian returns from it at the `PS1` guard.
+The bootstrap therefore puts one line above that guard that sources `profile` when `PS1` is unset and `SSH_CLIENT` is set ([ADR-0133](adr/0133-ssh-commands-login-environment.md)).
+A server launched by an SSH command (herdr's remote server, `ssh -t host tmux`) keeps that environment, and its non-shell children (herdr popups, tmux `run-shell` and `#()`) inherit it instead of pulling.
+Interactive fish panes pull for themselves, so only those children depend on the line.
 
 ## 6. XDG Compliance & Dotfile Management
 Our system is designed to keep `$HOME` clean by adhering strictly to the **XDG Base Directory Specification**.
@@ -171,7 +179,7 @@ The first bootstrap writes `environment.d` inside a session that started without
 
 foot, Omarchy's terminal, starts a non-login `$SHELL` by default; `bashrc` relays into a non-login `fish`, which is fine since [ADR-0003](adr/0003-shell-entry-bash-then-fish.md)'s amendment pulls on every interactive fish.
 foot's `login-shell=yes` is still avoided: it would prefix commands run with `-e`, which breaks mise shims that dispatch on their name.
-herdr panes and the scratchpad wrapper need no login flag for the same reason: any interactive fish they start pulls the manager env itself, so a server's launch-time env never matters to new panes (`env_reload` still cannot refresh *existing* panes — it pushes to tmux only).
+herdr panes and the scratchpad shell need no login flag for the same reason: any interactive fish they start pulls the manager env itself, so a server's launch-time env never matters to new panes (`env_reload` still cannot refresh *existing* panes — it pushes to tmux only).
 
 ## 8.1 Locale
 `12_locale.conf` sets `LC_TIME=en_GB.UTF-8` and leaves `LANG` at `en_US.UTF-8`, so messages stay English while dates and day and month names are Monday-first ([ADR-0091](adr/0091-monday-first-lc-time.md)).

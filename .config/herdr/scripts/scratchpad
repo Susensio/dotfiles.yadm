@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# A remote server's popup env lacks ~/.local/bin on PATH, so resolve herdr explicitly.
+# Herdr exports HERDR_BIN_PATH for scripts it runs from bare environments.
 HERDR="${HERDR_BIN_PATH:-$(command -v herdr || echo "$HOME/.local/bin/herdr")}"
-PATH="$(dirname "$HERDR"):$PATH"
 # Herdr never reuses workspace IDs, so each scratch session has a stable owner.
 # Caller context: popup commands receive the HERDR_ACTIVE_* set and no
 # HERDR_PANE_ID; pane children receive HERDR_WORKSPACE_ID. Keys are never

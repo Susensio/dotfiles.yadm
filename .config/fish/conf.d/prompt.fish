@@ -26,3 +26,6 @@ function __prompt_last_command_info --on-event fish_postexec
         string join --no-empty ' ' $last_command_info
     end
 end
+
+# Herdr and tmux panes over SSH have SSH_CONNECTION but no SSH_TTY, which prompt_login checks.
+set -q SSH_CONNECTION; and set -g fish_color_host $fish_color_host_remote
