@@ -40,6 +40,19 @@ fi
 
 $systemd || exit 0
 
+# MagicDNS needs a resolver Tailscale can register with: without systemd-resolved
+# the DHCP client rewrites resolv.conf and short names like `dell` stop resolving.
+# Debian splits it out of systemd; Arch and Ubuntu ship the unit already.
+if ! systemctl cat systemd-resolved.service &>/dev/null; then
+  log info "Installing systemd-resolved for MagicDNS..."
+  pkg-install systemd-resolved
+fi
+if systemctl cat systemd-resolved.service &>/dev/null \
+   && { ! systemctl is-enabled --quiet systemd-resolved || ! systemctl is-active --quiet systemd-resolved; }; then
+  log info "Enabling systemd-resolved..."
+  sudo systemctl enable --now systemd-resolved
+fi
+
 if ! systemctl is-enabled --quiet tailscaled || ! systemctl is-active --quiet tailscaled; then
   log info "Enabling tailscaled..."
   sudo systemctl enable --now tailscaled
