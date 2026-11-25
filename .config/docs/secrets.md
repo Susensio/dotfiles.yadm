@@ -23,6 +23,13 @@ Recovery material (GitHub 2FA codes, the LUKS passphrase) stays offline.
    It refuses a file already committed in plain; that one needs rotating, not encrypting.
 4. The `pre_commit` hook refuses any marked file staged in plain.
 
+## Pi provider keys
+
+Static API keys live in `pi/agent/.env`, encrypted like any owner-written secret; Pi's own login file stays local because Pi rewrites it.
+`models.json` reads a key per provider through `pi/agent/bin/env-key NAME`.
+To add a provider: `/login` in Pi, then run `pi/agent/bin/adopt-keys` and commit what it prints; an OAuth login stays local and needs nothing.
+`maintenance` reports a key left in the login file, a locked or unencrypted `.env`, and a `models.json` entry with no key behind it.
+
 ## Bringing a repo to the vault key
 
 A private repository the owner fully controls may carry its own secrets under git-crypt, wrapped to the vault key: `gmailctl-config` does, and a candidate must be the owner's alone, with no actor that can become root besides the owner (the homelab's agent can, so its repository never gets this).
