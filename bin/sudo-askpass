@@ -14,10 +14,40 @@ if [[ "${1:-}" == --prompt ]]; then
   # A helper that timed out or was killed takes its popup with it.
   [[ -n "${SUDO_ASKPASS_PID:-}" ]] &&
     (while kill -0 "$SUDO_ASKPASS_PID" 2>/dev/null; do sleep 1; done; kill -TERM $$) 2>/dev/null &
-  printf 'An agent wants root for:\n\n  %s\n\n(Ctrl+C to refuse)\n\n' "${SUDO_ASKPASS_CALLER:-sudo}"
+
+  B=$'\e[1m' D=$'\e[2m' Y=$'\e[33m' G=$'\e[32m' Bl=$'\e[34m' Rd=$'\e[1;31m' Rv=$'\e[7m' X=$'\e[0m'
+  W=$(($(tput cols 2>/dev/null || echo 80) - 2))
+  agent="${SUDO_ASKPASS_AGENT:-agent}" host="${SUDO_ASKPASS_HOST:-?}" cwd="${SUDO_ASKPASS_CWD:-?}"
+  # Base64 because herdr's --env cannot carry the command's newlines.
+  cmd="$(base64 -d <<<"${SUDO_ASKPASS_CMD:-}" 2>/dev/null)"
+  printf '%s %-*s%s\n\n' "$Rv" "$((W - 1))" "${SUDO_ASKPASS_TITLE:-$agent wants root}" "$X"
+  if [[ -n "${SUDO_ASKPASS_REASON:-}" ]]; then
+    fold -s -w $((W - 4)) <<<"$SUDO_ASKPASS_REASON" | while IFS= read -r l; do printf ' %s▎ %s%s\n' "$Y" "$l" "$X"; done
+  else
+    printf ' %s▎ The agent gave no reason.%s\n' "$D" "$X"
+  fi
+  printf '\n'
+  # Wrap before colouring: a pad as wide as the prompt keeps line one short, later lines hang by 4.
+  plen=$((${#agent} + ${#host} + ${#cwd} + 10))
+  pad="$(printf '%*s' "$plen" '' | tr ' ' '\001')"
+  wrapped="$(fold -s -w "$W" <<<"$pad$cmd" | sed '1s/^\x01*//; 2,$s/^/   /')"
+  bat="$(command -v bat || command -v batcat)"
+  if [[ -n "$bat" ]]; then
+    shown="$("$bat" --language=bash --style=plain --color=always --paging=never <<<"$wrapped")"
+  else
+    shown="$B$wrapped$X"
+  fi
+  first=1
+  while IFS= read -r l; do
+    if ((first)); then printf ' %s%s@%s%s %s%s%s%s❯%s %ssudo%s %s\n' "$G" "$agent" "$host" "$X" "$Bl" "$cwd" "$X" "$G" "$X" "$Rd" "$X" "$l"
+    else printf ' %s\n' "$l"; fi
+    first=0
+  done <<<"$shown"
+  printf '\n'
   # The popup steals focus, so drop keys typed for another pane before it appeared.
   while IFS= read -rs -t 0.5 -n 1024 _; do :; done
-  IFS= read -rs -p "${SUDO_ASKPASS_PROMPT:-[sudo] password: }" pw || answer cancel
+  printf ' %sCtrl+C refuses%s\n' "$D" "$X"
+  IFS= read -rs -p " ${SUDO_ASKPASS_PROMPT:-[sudo] password: }" pw || answer cancel
   echo
   answer "ok $pw"
 fi
@@ -31,23 +61,55 @@ herdr="${HERDR_BIN_PATH:-}"
 # After `herdr update` the injected path can name a deleted binary.
 [[ -x "$herdr" ]] || herdr="$(command -v herdr || true)"
 
-# The command as sudo received it, each argument quoted, so padding or spacing cannot hide a tail.
-caller=""
+# Control characters go, so no text can redraw the popup around it; newlines stay where meant.
+clean() { printf '%s' "$1" | tr -d '\000-\011\013-\037\177' | tr '\n' ' ' | cut -c "1-$2"; }
+
+# What runs as root, from sudo's own argv minus sudo and its options, quoted the way a person
+# would type it: an argument with spaces or quotes cannot pass for several, nor hide a tail.
+cmd=""
 if [[ -r /proc/$PPID/cmdline ]]; then
   mapfile -d '' argv </proc/"$PPID"/cmdline
-  caller="$(printf '%q ' "${argv[@]}")"
+  i=1
+  while ((i < ${#argv[@]})) && [[ "${argv[i]}" == -* ]]; do
+    [[ "${argv[i]}" == -- ]] && { ((i++)); break; }
+    ((i++))
+  done
+  for a in "${argv[@]:i}"; do
+    a="$(printf '%s' "$a" | tr -d '\000-\011\013-\037\177')"
+    if [[ "$a" =~ ^[][A-Za-z0-9_./:=@%+,^~-]+$ ]]; then cmd+="$a "
+    else cmd+="'${a//\'/\'\\\'\'}' "; fi
+  done
 fi
-caller="${caller:-sudo (command unknown)}"
-max=400
-((${#caller} > max)) && caller="${caller:0:max} …($((${#caller} - max)) more chars)"
+cmd="${cmd% }"
+cmd="${cmd:-(command unknown)}"
+max=1200
+((${#cmd} > max)) && cmd="${cmd:0:max} …($((${#cmd} - max)) more chars)"
+
+harness="" pid=$PPID
+while [[ "$pid" -gt 1 && -r /proc/$pid/comm ]]; do
+  case "$(</proc/"$pid"/comm)" in claude | pi) harness="$(</proc/"$pid"/comm)"; break ;; esac
+  pid="$(awk '/^PPid:/ {print $2}' /proc/"$pid"/status 2>/dev/null)" || break
+done
+title=""
+if [[ -n "${HERDR_PANE_ID:-}" && -n "$herdr" ]]; then
+  title="$("$herdr" pane get "$HERDR_PANE_ID" 2>/dev/null | sed -n 's/.*"terminal_title_stripped":"\([^"]*\)".*/\1/p')"
+elif [[ -n "${TMUX_PANE:-}" ]]; then
+  title="$(tmux display-message -p -t "$TMUX_PANE" '#{window_name}' 2>/dev/null)"
+fi
+# sudo hands its environment and directory on to this helper; asroot -m exports the reason.
+cwd="$PWD"
+[[ "$cwd" == "$HOME"* ]] && cwd="~${cwd#"$HOME"}"
 
 dir="$(mktemp -d "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/sudo-askpass.XXXXXX")" || exit 1
 trap 'rm -rf "$dir"' EXIT
 mkfifo -m 600 "$dir/reply" || exit 1
 # Read-write so neither side blocks on open and `read -t` can time out with no answer.
 exec 3<>"$dir/reply"
-env_args=("SUDO_ASKPASS_REPLY=$dir/reply" "SUDO_ASKPASS_PROMPT=$prompt"
-  "SUDO_ASKPASS_CALLER=$caller" "SUDO_ASKPASS_PID=$$")
+env_args=("SUDO_ASKPASS_REPLY=$dir/reply" "SUDO_ASKPASS_PROMPT=$prompt" "SUDO_ASKPASS_PID=$$"
+  "SUDO_ASKPASS_CMD=$(printf '%s' "$cmd" | base64 -w0)"
+  "SUDO_ASKPASS_TITLE=$(clean "$title" 70)" "SUDO_ASKPASS_REASON=$(clean "${ASROOT_REASON:-}" 300)"
+  "SUDO_ASKPASS_AGENT=$(clean "${harness:-agent}" 20)" "SUDO_ASKPASS_HOST=$(clean "${HOSTNAME:-$(uname -n)}" 30)"
+  "SUDO_ASKPASS_CWD=$(clean "$cwd" 50)")
 
 open_herdr() {
   [[ -n "${HERDR_PANE_ID:-}" && -n "$herdr" ]] || return 1
@@ -66,11 +128,11 @@ open_tmux() {
   [[ "$(tmux display-message -p -t "$TMUX_PANE" '#{session_attached}' 2>/dev/null)" -gt 0 ]] || return 1
   local e args=()
   for e in "${env_args[@]}"; do args+=(-e "$e"); done
-  tmux display-popup -t "$TMUX_PANE" -E -w 80 -h 12 -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1 &
+  tmux display-popup -t "$TMUX_PANE" -E -w 80 -h 22 -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1 &
 }
 
 if ! open_herdr && ! open_tmux; then
-  echo "sudo-askpass: no herdr or tmux client to ask in; run it yourself: $caller" >&2
+  echo "sudo-askpass: no herdr or tmux client to ask in; run it yourself: sudo $cmd" >&2
   exit 1
 fi
 

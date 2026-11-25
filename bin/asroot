@@ -2,8 +2,20 @@
 # Agent root in one call, approved per command by the person (docs/adr/0134-agent-root-asroot.md):
 # polkit's fingerprint dialog in a local login session, else sudo through the sudo-askpass popup.
 # Over SSH polkit has no agent to ask, so pkexec would fail there.
+# `-m <why>` is the agent's reason; the prompt shows it labelled as the agent's claim.
 set -u
-[[ $# -gt 0 ]] || { echo "usage: asroot <command> [args...]" >&2; exit 2; }
+
+reason=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -m | --why) reason="${2:-}"; shift 2 || shift ;;
+    --) shift; break ;;
+    *) break ;;
+  esac
+done
+[[ $# -gt 0 ]] || { echo "usage: asroot [-m <why>] <command> [args...]" >&2; exit 2; }
+# sudo-askpass reads it from sudo's environment, which sudo's env_reset keeps from the command.
+export ASROOT_REASON="$reason"
 
 local_session() {
   # fish pulls the desktop's XDG_SESSION_ID from the user manager into SSH shells too, so SSH decides first.
@@ -12,6 +24,15 @@ local_session() {
 }
 
 if command -v pkexec >/dev/null && local_session; then
+  # polkit's dialog takes no extra text, so the reason arrives as a toast beside it.
+  if [[ -n "$reason" ]]; then
+    body="$(printf '%s' "$reason" | tr -d '\000-\037\177' | cut -c1-200)"
+    if [[ -n "${HERDR_PANE_ID:-}" ]] && command -v herdr >/dev/null; then
+      herdr notification show "Agent wants root" --body "$body" >/dev/null 2>&1 || :
+    elif command -v notify-send >/dev/null; then
+      notify-send "Agent wants root" "$body" 2>/dev/null || :
+    fi
+  fi
   exec pkexec "$@"
 fi
 # A person at a terminal gets sudo's own prompt there; agents have no controlling terminal.
