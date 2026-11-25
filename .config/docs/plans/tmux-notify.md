@@ -1,6 +1,6 @@
 # Proposal: tmux-notify — floating-pane notifications for agents and bells
 
-Status: deferred — blocked on tmux ≥ 3.8 (this box is `tmux 3.7_c-1`).
+Status: proposed — the tmux ≥ 3.8 gate opened 2026-11-25 (this box is `tmux 3.8`).
 Not implemented. A design write-up, not a decision — see `docs/BACKLOG.md`.
 The shape below is frozen for when the gate opens; herdr's own `[ui.toast]`
 and agent tracking (added after this write-up, now at 0.8.2) are worth a
@@ -81,7 +81,9 @@ popup but is non-modal and behaves like a pane; `-d` keeps the current pane
 active, so it never steals focus; it closes by itself when the toast command
 exits. Bottom-right anchored, ~44×3, `-T`/`-B` for frame and title.
 **Requires tmux ≥ 3.8** for the geometry flags; 3.7.x floating panes were
-mouse-movable only. (This box is on 3.7c — upgrade first.)
+mouse-movable only. This box is on 3.8. A floating pane lives in one
+window, so a toast shows only in the window you are in; the status-bar inbox
+covers the rest (`docs/reports/tmux-floating-panes.md`).
 
 **Tray reads the store.** `#(notify tray)` in `status-right` renders
 `[range=control|7]   n` or nothing, keeping the existing click region →

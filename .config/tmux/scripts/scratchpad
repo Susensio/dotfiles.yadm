@@ -80,5 +80,12 @@ elif ! scratchpad has -t "$scratch_window_target" &>/dev/null; then
   scratchpad new-window -d -t "$scratch_session_target" -n "$scratch_window_name" "${command[@]}"
 fi
 
-tmux -L "$current_socket" popup -c "$current_client" -w 80% -h 85% -E -b rounded -T "Scratchpad $scratch_window_name" \
+# A floating pane is targeted by pane, not client; resolve the client's active pane.
+# Modal with -K so every key, prefix included, reaches the scratch server.
+target_pane="$(tmux -L "$current_socket" display -c "$current_client" -pF '#{pane_id}')"
+popup_style="$(tmux -L "$current_socket" show -gv popup-style)"
+# TODO: use `-B rounded` once tmux 3.9 ships it (master has it in pane-border-lines; 3.8 rejects it).
+tmux -L "$current_socket" new-pane -t "$target_pane" -O -K -x 80% -y 85% -X 10% -Y 7% \
+  -B single -s "$popup_style" -S "$popup_style" -R "$popup_style" \
+  -T "Scratchpad $scratch_window_name" \
   "tmux -L '$scratch_socket' attach -t '$scratch_window_target'"
