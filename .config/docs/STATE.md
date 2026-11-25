@@ -95,6 +95,9 @@ Committed 2026-09-29, reordered 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order
 
 The ADRs ([0092](adr/0092-pi-tier-order-by-intelligence.md), [0093](adr/0093-pi-tier-lead-by-capability.md), [0103](adr/0103-pi-rung-order-shared-quota.md)) carry the chain orders; `pi-claude-bridge-index` carries only the #216 standalone route.
 
+- `pi-model-fallback-alias-keep-provider` (since 2026-11-24, [ADR-0136](adr/0136-alias-keeps-target-provider.md)) keeps the answering target's provider on alias messages, so pi-claude-bridge replays their thinking and stops rewriting the Claude session on every call.
+  Drop it once the alias ships a provider option; the relabel is not yet filed against the alias upstream.
+  Untested: footer and usage attribution, the permission reviewer, and a mid-session failover with mixed-provider history.
 - Untested live: the failover fix is covered by pi-claude-bridge's own test, not by an exhausted-quota run against a real chain.
 - claude-bridge once rewrote `pi/agent/claude-bridge.json` during this work and a `yadm restore` brought back the committed file; cause unknown, watch for a repeat before blaming the patch.
 

@@ -1,0 +1,11 @@
+--- alias-stream.ts
++++ alias-stream.ts
+@@ -225,7 +225,7 @@
+ 	return {
+ 		...message,
+ 		api: aliasModel.api,
+-		provider: aliasModel.provider,
++		// keeps the target provider: pi-claude-bridge replays thinking only for its own
+ 		model: aliasModel.id,
+ 		responseModel: message.responseModel ?? message.model,
+ 	};
