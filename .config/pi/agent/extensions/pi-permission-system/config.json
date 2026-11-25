@@ -250,11 +250,11 @@
       "* *.env": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
       "gpg *": {
         "action": "deny",
-        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/plans/vault.md)."
+        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/secrets.md)."
       },
       "pass *": {
         "action": "deny",
-        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/plans/vault.md)."
+        "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/secrets.md)."
       }
     },
     "skill": "allow",

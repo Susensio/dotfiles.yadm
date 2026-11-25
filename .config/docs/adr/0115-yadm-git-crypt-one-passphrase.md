@@ -52,9 +52,11 @@ A file committed in plain before its `.gitattributes` line is published unencryp
 
 ## Corrections
 
-2026-11-20: the key-keeping paragraphs above no longer describe the live mechanism; `docs/plans/vault.md` was accepted and its migration completed the same day.
+2026-11-20: the key-keeping paragraphs above no longer describe the live mechanism; the pass-vault plan was accepted and its migration completed the same day (the plan is deleted; this section and `docs/secrets.md` carry what it decided).
 The git-crypt key is no longer an age-locked export in a private repository: the vault's GPG key (`~/.local/share/secrets/vault-key.asc`, protected by the master passphrase, the store a tool-read directory rather than a project) wraps it through the committed stub (`git-crypt add-gpg-user`), so a fresh clone needs only `gpg --import` and `yadm git-crypt unlock` — no `age -d`, no key file copied.
 The paper copy the Decision declined was replaced on acceptance by a deliberate choice: the master passphrase is held in memory only, verified by an occasional decrypt drill, with no paper copy to lose.
 The homelab's own locked key (`git-crypt.key.age` at its repository root) was retired with it: the homelab keeps no secrets in git at all now (its `docs/plans/secrets.md`, accepted 2026-11-18).
 The `age` and git-crypt denies for Claude and pi stay — as guardrails against accidents by any secrets tool, not because age is part of this design anymore.
+KeePassXC with a `.kdbx` file was the alternative weighed: one file, a GUI, good phone apps.
+`pass` won because the store is git-native on Linux, gpg-agent asks once per session, and the same GPG key unlocks git-crypt; a phone vault was not needed, since a new machine reads the vault itself and the phone only approves logins.
 The rest of the record — plain-file marking, `add-secret`, the `pre_commit` guard, the relaxation of ADR-0100 — is unchanged.

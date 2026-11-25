@@ -16,7 +16,7 @@ Still open:
 
 ## Secrets: the pass vault (2026-11-18, accepted; migration complete on `dell`)
 
-`docs/plans/vault.md` is done on `dell` (steps 0–4 passed 2026-11-20: stub published, throwaway clone unlocked by it alone, `.env` sum equal, fresh-keyring passphrase asked) and step 6 retired the age file with it; ADR-0115's Corrections section now records the key-keeping change (vault GPG key, no age file) and the memory-only master passphrase with its decrypt drill, replacing the paper copy the plan first wanted.
+The vault plan (closed out into ADR-0115's Corrections and `docs/secrets.md`) is done on `dell` (steps 0–4 passed 2026-11-20: stub published, throwaway clone unlocked by it alone, `.env` sum equal, fresh-keyring passphrase asked) and step 6 retired the age file with it; ADR-0115's Corrections section now records the key-keeping change (vault GPG key, no age file) and the memory-only master passphrase with its decrypt drill, replacing the paper copy the plan first wanted.
 The vault lives at `~/.local/share/secrets` (tool-read, not a project), `new-machine` clones it, imports `vault-key.asc` and runs `yadm git-crypt unlock` with no key file, and the homelab keeps no secrets in git at all (its own plans); only its restic password is a `pass` entry.
 Agents stay denied `gpg`, `pass`, `age` and `git-crypt` and the vault directory (Claude and pi): the `age` deny is a guardrail now, not part of the flow, and a step never runs those commands (ADR-0111).
 

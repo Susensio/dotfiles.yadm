@@ -89,7 +89,7 @@ if [[ -t 0 && -t 1 ]]; then
       fi
     fi
 
-    # The vault (docs/plans/vault.md): its GPG key also unlocks this repository's
+    # The vault (docs/secrets.md): its GPG key also unlocks this repository's
     # git-crypt. Skipped quietly when the store cannot be cloned, as the logins are.
     VAULT=$HOME/.local/share/secrets
     if [[ ! -d $VAULT ]] && gh repo clone Susensio/secrets "$VAULT" &> /dev/null; then
