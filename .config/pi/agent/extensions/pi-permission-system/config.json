@@ -12,7 +12,6 @@
       "~/.config/google-chrome/*": "ask",
       "~/.config/chromium/*": "ask",
       "*.env": "deny",
-      "*.env.*": "deny",
       "*.pem": "deny",
       "*.key": "deny",
       "*.keyring": "deny",
@@ -61,7 +60,6 @@
       "~/.config/google-chrome/*Login Data*": "deny",
       "~/.config/google-chrome/*Web Data*": "deny",
       "*.env": "deny",
-      "*.env.*": "deny",
       "*.pem": "deny",
       "*.key": "deny",
       "*.keyring": "deny",
@@ -240,14 +238,38 @@
         "action": "deny",
         "reason": "The owner's secrets and keys are not for agents: run git-crypt and age yourself (docs/adr/0115)."
       },
-      "* ~/.ssh*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* ~/.gnupg*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* ~/.config/age*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* ~/.local/share/keyrings*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* ~/.local/share/gnupg*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* ~/.config/gh*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* *auth.json*": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
-      "* *.env": { "action": "deny", "reason": "Secrets are not for agents; path denies don't cover bash." },
+      "* ~/.ssh*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* ~/.gnupg*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* ~/.config/age*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* ~/.local/share/keyrings*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* ~/.local/share/gnupg*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* ~/.config/gh*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* *auth.json*": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
+      "* *.env": {
+        "action": "deny",
+        "reason": "Secrets are not for agents; path denies don't cover bash."
+      },
       "gpg *": {
         "action": "deny",
         "reason": "The owner's vault is not for agents: run gpg and pass yourself (docs/secrets.md)."

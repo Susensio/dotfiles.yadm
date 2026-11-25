@@ -136,6 +136,28 @@ provider_keys() {
   fi
 }
 
+# Pi's path denies are the source; Claude's Read denies must cover each one, mapped
+# (~/x/* becomes ~/x/**, a bare *pattern matches anywhere, so it is anchored at //**/).
+permission_drift() {
+  local pi=${PI_CODING_AGENT_DIR:-$HOME/.config/pi/agent}/extensions/pi-permission-system/config.json
+  local claude=$HOME/.config/claude/settings.json pattern want missing=
+  [[ -f $pi && -f $claude ]] || return 0
+  while IFS= read -r pattern; do
+    case $pattern in
+      '~/'*'/*') want=${pattern%/\*}/** ;;
+      '~/'*) want=$pattern ;;
+      \**) want=//**/$pattern ;;
+      *) want=$pattern ;;
+    esac
+    jq -e --arg r "Read($want)" '.permissions.deny | index($r)' "$claude" &>/dev/null ||
+      missing+="${missing:+, }$want"
+  done < <(jq -r '.permission.path | to_entries[] | select(.value == "deny") | .key' "$pi")
+  if [[ -n $missing ]]; then
+    echo "  claude read denies lack pi's path denies: $missing"
+    echo "    edit claude/settings.json permissions.deny to match $pi"
+  fi
+}
+
 local_drift() {
   yadm status --porcelain --untracked-files=no | cut -c4- | sed 's|^|  uncommitted: ~/|'
   if (($(yadm rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0) > 0)); then
@@ -144,6 +166,7 @@ local_drift() {
   fi
   plugin_forks
   provider_keys
+  permission_drift
   # The vault (docs/plans/vault.md): pass commits, never pushes, and its git half
   # fails silently (docs/secrets.md), so both halves are checked here.
   local vault=${PASSWORD_STORE_DIR:-$HOME/.local/share/secrets}
