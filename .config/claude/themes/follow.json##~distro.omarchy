@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/matcra587/claude-themes/main/schemas/theme.schema.json",
-  "name": "Omarchy",
+  "name": "Follow",
   "base": "dark",
   "overrides": {
     "claude": "rgb(254,128,25)",

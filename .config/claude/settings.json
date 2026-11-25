@@ -242,7 +242,7 @@
   },
   "syntaxHighlightingDisabled": false,
   "effortLevel": "high",
-  "theme": "custom:omarchy",
+  "theme": "custom:follow",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell",
   "switchModelsOnFlag": false
