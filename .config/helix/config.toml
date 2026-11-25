@@ -1,6 +1,6 @@
 # A yadm alternate puts Omarchy's live palette under this name; elsewhere a
-# gruvbox stand-in beside it takes the name (helix/themes/omarchy.toml).
-theme = "omarchy"
+# gruvbox stand-in beside it takes the name (helix/themes/follow.toml).
+theme = "follow"
 
 [editor]
 line-number = "relative"

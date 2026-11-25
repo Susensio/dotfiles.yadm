@@ -37,3 +37,5 @@ Omarchy's own provisioning of this path (upstream PR #13843) only creates a miss
 ## Corrections
 
 2026-12-14: the commit that first applied this decision left the materialised link `helix/themes/omarchy.toml` in the index, which the Decision had just ruled out: on every non-Omarchy machine `yadm alt` rewrites the link to the negated alternate's file, so the tracked path reads modified and `git-crypt unlock` refuses the dirty tree, leaving the vault locked on a fresh machine. It was the repository's only tracked plain-plus-`##` pair; the link is now untracked and covered by yadm's auto-exclude as this record prescribed all along.
+
+2026-11-25: the name is `follow`, not `omarchy`: the fallback is gruvbox off Omarchy, and a name claiming Omarchy misled there. Omarchy never owned the link (`omarchy-theme-set` only renders `helix.toml` and restarts Helix; its own provisioning, PR #13843, is unmerged), so the rename costs nothing; Claude's `themes/follow.json` pair uses the same name. The Consequences' "under the name `omarchy`" now reads `follow`.
