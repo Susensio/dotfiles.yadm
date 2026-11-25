@@ -30,6 +30,8 @@ A document is earned only when its information no longer fits its current home o
 | Ordered milestones | `docs/ROADMAP.md` | the README's roadmap or TODO has outgrown it |
 | Open work nobody is doing | `docs/BACKLOG.md` | the README's TODO has outgrown it |
 | Committed work left unfinished | `docs/STATE.md` | work or an accepted decision must survive a session boundary |
+| A proposal too long for a backlog line | `docs/plans/<name>.md` | the backlog entry can no longer carry it |
+| One review's findings | `docs/reports/<name>.md` | a reply can no longer carry them |
 | Durable architectural decisions | `docs/adr/` | the `adr` skill says the decision merits a record |
 | Human-operated procedures | a focused file under `docs/` | a person will perform the procedure too |
 | Throwaway working material | `.scratch/` | the first temporary repository-local file is needed |
@@ -39,6 +41,7 @@ Do not create empty process files.
 Treat roadmaps as user-owned unless asked to change them.
 Keep `docs/STATE.md` current rather than append-only, and remove it when the tracked work finishes.
 Ignore `.scratch/` before using it and remove its contents when the work lands.
+Plans and reports are temporary: a plan opens with `Status:` proposed, accepted or deferred; each plan step and report finding ends fixed, distilled (ADR, `STATE.md`, doc), tracked in the backlog or accepted with its reason, and the file is deleted in the commit that lands the last one.
 Use the `adr` skill for decisions rather than treating ADRs as ordinary overflow.
 
 Read [references/files.md](references/files.md) before creating or reorganizing one of these standard documents.

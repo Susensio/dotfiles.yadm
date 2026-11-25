@@ -59,6 +59,16 @@ Boundary: proposals remain in the backlog, while decision rationale remains in i
 Edit this file to reflect current truth; do not append a historical log.
 Remove completed sections, and delete the file when no unfinished state remains.
 
+## `docs/plans/` and `docs/reports/` — temporary working documents
+
+A plan holds what is not true yet; a report holds one review's findings.
+Earned when the backlog entry, or a reply, can no longer carry it.
+
+Boundary: both die by distillation, not by move.
+A plan opens with `Status:` proposed, accepted or deferred; a built plan is deleted.
+Each plan step and report finding ends fixed, distilled (ADR, `STATE.md`, doc, comment), tracked in the backlog or accepted with its reason.
+Delete the file in the commit that lands the last one.
+
 ## `docs/adr/` — durable decisions
 
 Number records as `NNNN-short-slug.md` and use the `adr` skill to decide when one is warranted.

@@ -15,7 +15,8 @@ XDG config repo for `~/.config`, managed with yadm.
 
 - Route decisions through the `adr` skill: comments beside a relevant line, otherwise `docs/adr/`; never auto-memory.
 - `docs/BACKLOG.md`: open work with no single line to mark, written by the main agent.
-- `docs/plans/<name>.md`: a proposal too long for a backlog entry, linked from one; `docs/adr/` holds only accepted decisions, so the ADR is written at acceptance and the plan deleted.
+- `docs/plans/<name>.md`: a proposal too long for a backlog entry, linked from one, from `STATE.md` once committed to; deleted when built, after distilling it (`docs/adr/` holds only accepted decisions).
+- `docs/reports/<name>.md`: one review's findings, deleted when its last finding is dispositioned.
 - `docs/STATE.md`: work committed to and unfinished, written by the main agent.
 - Find inline work with `rg -n 'BUG:|TODO:'`.
 - Record deliberately accepted limitations in an ADR's Consequences.

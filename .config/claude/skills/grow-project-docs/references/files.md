@@ -116,6 +116,18 @@ Edit the file, or drop a section once it is no longer current — never append.
 An append-only file is a log, and a log is not what a fresh session needs: it needs the current truth, not its history.
 Delete it, and its `AGENTS.md` line, once the work it tracks lands — an empty or stale one advertises a record that is no longer true.
 
+## docs/plans/ and docs/reports/ — temporary working documents
+
+A plan holds what is not true yet; a report holds one review's findings, dated and edited to mark each disposition.
+The main agent writes both.
+
+*Earned when* the backlog entry, or a reply, can no longer carry it.
+
+*Boundary:* both are temporary and die by distillation, not by move.
+A plan opens with `Status:` proposed, accepted or deferred; there is no built, because built is deleted.
+Each plan step and report finding ends fixed, distilled (ADR, `STATE.md`, a doc, a comment), tracked in the backlog, or accepted with its reason.
+Delete the file in the commit that lands the last one; `git log` keeps it, and a survivor is a defect.
+
 ## .scratch/ — working material
 
 Throwaway scripts, captured output, a dump being read once.

@@ -39,6 +39,7 @@ A line in the project's `AGENTS.md` doing more than naming a file's identity is 
 - Order of work: `ROADMAP`; the user writes it, you do not edit it unasked.
 - Open work nobody committed to (bug, debt, idea): `BACKLOG`, `TODO` or tracker.
   A subagent reports it and the main agent writes it.
+- A proposal or one review's findings, too long for a backlog line: `docs/plans/` or `docs/reports/`, deleted when its last item lands.
 - A procedure a person also runs: a doc, with the skill pointing there.
 - Committed, unfinished work and handoff: `STATE.md`, edited or dropped as work moves, not appended.
 

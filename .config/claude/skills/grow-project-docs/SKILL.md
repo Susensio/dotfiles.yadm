@@ -1,6 +1,6 @@
 ---
 name: grow-project-docs
-description: Use when starting one of the user's own repos, when README, SPEC, ROADMAP, BACKLOG, STATE or .scratch/ is needed or outgrown, or when work is left mid-flight. Not for repos with others' conventions.
+description: Use when starting one of the user's own repos, when README, SPEC, ROADMAP, BACKLOG, STATE, a plan, a report or .scratch/ is needed or outgrown, or when work is left mid-flight. Not for repos with others' conventions.
 ---
 
 # Grow project docs
@@ -24,6 +24,8 @@ Never keep both: Claude ignores an `AGENTS.md` beside a `CLAUDE.md`.
 | The order things happen in | `docs/ROADMAP.md` | the README's roadmap or TODO section outgrew it |
 | Open work nobody is on | `docs/BACKLOG.md` | the README's TODO section outgrew it |
 | Current state of work left unfinished across a session | `docs/STATE.md` | work on one concern is deliberately left mid-flight at a session boundary |
+| A proposal too long for a backlog line | `docs/plans/<name>.md` | the reasoning and order of work no longer fit the entry that started it |
+| One review's or investigation's findings | `docs/reports/<name>.md` | findings outnumber what a reply can carry |
 | Why it is built this way | `docs/adr/` | the `adr` skill decides — an event, never overflow |
 | A procedure a person also runs by hand | a doc in `docs/`, with the skill that fires on it pointing there | a person will run it too, not only an agent |
 | Throwaway material | `.scratch/` | the first temporary file is about to be written into the repository proper |
