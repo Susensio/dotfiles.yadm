@@ -19,6 +19,8 @@
 !mods/**
 !themes/
 !themes/**
+# The yadm alt link for the pair beside it.
+themes/follow.json
 
 # Regenerable, even inside the whitelisted config dirs (last match wins).
 __pycache__/
