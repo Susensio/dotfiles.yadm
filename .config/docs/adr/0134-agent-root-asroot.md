@@ -13,7 +13,7 @@ ADR-0119 had answered remote root with a TTY the operator elevated by hand, whic
 
 Claude Code had no way to prompt for a password (its feature request was closed as not planned), and its hooks run without a terminal.
 Sudo's own `SUDO_ASKPASS` hook could reach the person instead, provided something could draw a prompt where they were looking.
-Herdr popups can only be opened by a plugin; tmux has `display-popup`.
+Herdr popups can only be opened by a plugin and are session-modal; tmux 3.8 has floating panes (`new-pane`), which are not.
 
 The requirements were: Claude and Pi alike, local or over SSH, inside herdr, tmux or neither, with or without a reader, one agent turn per root command, low friction, and every root command in front of the person.
 
@@ -30,7 +30,7 @@ Agents run `asroot <cmd>`, a script in `~/bin` that makes the choice inside one 
 - In a local login session (no `SSH_CONNECTION`, and `XDG_SESSION_ID` naming a session logind reports as not remote), it runs `pkexec`: polkit's fingerprint dialog, as before.
 - With a controlling terminal, it runs plain `sudo`, which prompts there.
 - Otherwise it runs `sudo -A` with `SUDO_ASKPASS` set to `sudo-askpass`.
-  That script opens a herdr popup through the local herdr plugin `sudo-askpass`, or a tmux popup where a client is attached, showing the exact command sudo received, quoted.
+  That script opens a herdr popup through the local herdr plugin `sudo-askpass`, or a non-modal tmux floating pane (3.8+, focused but not modal, sized to the command) where a client is attached, showing the exact command sudo received, quoted.
   With neither, it fails at once with the command to run by hand.
   The password travels popup → mode-0600 FIFO under `$XDG_RUNTIME_DIR` → sudo; the prompt discards keys typed before it appeared, and closes when sudo stops waiting after 90 s.
 - Approval is per command, enforced by polkit or sudo rather than by matching command text: no `timestamp_type=global`, so an agent never inherits an earlier approval.

@@ -16,6 +16,7 @@ if [[ "${1:-}" == --prompt ]]; then
     (while kill -0 "$SUDO_ASKPASS_PID" 2>/dev/null; do sleep 1; done; kill -TERM $$) 2>/dev/null &
 
   B=$'\e[1m' D=$'\e[2m' Y=$'\e[33m' G=$'\e[32m' Bl=$'\e[34m' Rd=$'\e[1;31m' Rv=$'\e[7m' X=$'\e[0m'
+  MAXROWS=12
   W=$(($(tput cols 2>/dev/null || echo 80) - 2))
   agent="${SUDO_ASKPASS_AGENT:-agent}" host="${SUDO_ASKPASS_HOST:-?}" cwd="${SUDO_ASKPASS_CWD:-?}"
   # Base64 because herdr's --env cannot carry the command's newlines.
@@ -37,17 +38,36 @@ if [[ "${1:-}" == --prompt ]]; then
   else
     shown="$B$wrapped$X"
   fi
-  first=1
-  while IFS= read -r l; do
-    if ((first)); then printf ' %s%s@%s%s %s%s%s%s❯%s %ssudo%s %s\n' "$G" "$agent" "$host" "$X" "$Bl" "$cwd" "$X" "$G" "$X" "$Rd" "$X" "$l"
-    else printf ' %s\n' "$l"; fi
-    first=0
-  done <<<"$shown"
+  # The command is shown in full, never truncated: past MAXROWS lines the person pages through it first.
+  rows=$(wc -l <<<"$shown")
+  show_cmd() {
+    local first=1 n=0 l
+    while IFS= read -r l; do
+      if ((n >= MAXROWS)); then break; fi
+      if ((first)); then printf ' %s%s@%s%s %s%s%s%s❯%s %ssudo%s %s\n' "$G" "$agent" "$host" "$X" "$Bl" "$cwd" "$X" "$G" "$X" "$Rd" "$X" "$l"
+      else printf ' %s\n' "$l"; fi
+      first=0 n=$((n + 1))
+    done <<<"$shown"
+    ((rows > MAXROWS)) && printf ' %s… %d more lines%s\n' "$D" "$((rows - MAXROWS))" "$X"
+  }
+  show_cmd
   printf '\n'
   # The popup steals focus, so drop keys typed for another pane before it appeared.
   while IFS= read -rs -t 0.5 -n 1024 _; do :; done
-  printf ' %sCtrl+C refuses%s\n' "$D" "$X"
-  IFS= read -rs -p " ${SUDO_ASKPASS_PROMPT:-[sudo] password: }" pw || answer cancel
+  if ((rows > MAXROWS)); then hint="Tab views all $rows lines   Ctrl+C refuses"; else hint="Ctrl+C refuses"; fi
+  printf ' %s%s%s\n' "$D" "$hint" "$X"
+  prompt_text="${SUDO_ASKPASS_PROMPT:-[sudo] password: }"
+  while :; do
+    printf ' %s' "$prompt_text"
+    IFS= read -rs -n1 c || answer cancel
+    if [[ "$c" == $'\t' && $rows -gt $MAXROWS ]]; then
+      printf '\r\033[K'
+      { printf ' %s%s@%s%s %s%s%s%s❯%s %ssudo%s\n' "$G" "$agent" "$host" "$X" "$Bl" "$cwd" "$X" "$G" "$X" "$Rd" "$X"; printf '%s\n' "$shown"; } | less -R
+      continue
+    fi
+    break
+  done
+  if [[ -n "$c" ]]; then IFS= read -rs rest || answer cancel; pw="$c$rest"; else pw=""; fi
   echo
   answer "ok $pw"
 fi
@@ -82,8 +102,11 @@ if [[ -r /proc/$PPID/cmdline ]]; then
 fi
 cmd="${cmd% }"
 cmd="${cmd:-(command unknown)}"
-max=1200
-((${#cmd} > max)) && cmd="${cmd:0:max} …($((${#cmd} - max)) more chars)"
+# Too long to review honestly: the agent writes it to a file and the person reads that.
+if ((${#cmd} > 50000)); then
+  echo "sudo-askpass: command is ${#cmd} chars, too long to review; put it in a script and ask again" >&2
+  exit 1
+fi
 
 harness="" pid=$PPID
 while [[ "$pid" -gt 1 && -r /proc/$pid/comm ]]; do
@@ -111,12 +134,26 @@ env_args=("SUDO_ASKPASS_REPLY=$dir/reply" "SUDO_ASKPASS_PROMPT=$prompt" "SUDO_AS
   "SUDO_ASKPASS_AGENT=$(clean "${harness:-agent}" 20)" "SUDO_ASKPASS_HOST=$(clean "${HOSTNAME:-$(uname -n)}" 30)"
   "SUDO_ASKPASS_CWD=$(clean "$cwd" 50)")
 
+# Rows the command takes at 76 columns, newline-aware, capped where the prompt starts paging (+2: "more lines", hint).
+cmd_rows() { awk '{ n = int((length($0) + 75) / 76); r += n ? n : 1 } END { print (r > 12 ? 14 : r) }' <<<"$cmd"; }
+
 open_herdr() {
   [[ -n "${HERDR_PANE_ID:-}" && -n "$herdr" ]] || return 1
   local e args=()
   for e in "${env_args[@]}"; do args+=(--env "$e"); done
   # The manifest makes it a popup: only plugins can open one, and 0.9.5's CLI has no flag for it.
-  pane_open() { "$herdr" plugin pane open --plugin sudo-askpass --entrypoint prompt --focus "${args[@]}" >/dev/null 2>&1; }
+  # The socket request can size it to the command (9 lines of chrome, 2 of border); the CLI falls back to the manifest's.
+  pane_open() {
+    local lines=$((11 + $(cmd_rows) + (${#ASROOT_REASON} + 75) / 76)) sock="${HERDR_SOCKET_PATH:-}" req
+    if [[ -S "$sock" ]] && command -v socat >/dev/null && command -v jq >/dev/null; then
+      req="$(printf '%s\n' "${env_args[@]}" | jq -Rn --argjson h "$lines" \
+        '{id: "sudo-askpass", method: "plugin.pane.open", params: {plugin_id: "sudo-askpass", entrypoint: "prompt",
+          placement: "popup", width: 80, height: $h, focus: true,
+          env: ([inputs | capture("^(?<k>[^=]+)=(?<v>.*)$")] | map({(.k): .v}) | add)}}' -c)" &&
+        socat -t2 - UNIX-CONNECT:"$sock" <<<"$req" 2>/dev/null | jq -e '.error | not' >/dev/null 2>&1 && return 0
+    fi
+    "$herdr" plugin pane open --plugin sudo-askpass --entrypoint prompt --focus "${args[@]}" >/dev/null 2>&1
+  }
   # Linking is per-machine herdr state, so the first prompt does it instead of a bootstrap step.
   pane_open || { "$herdr" plugin link "$plugin_dir" >/dev/null 2>&1 && pane_open; } || return 1
   "$herdr" notification show "sudo password needed" --sound request >/dev/null 2>&1 || :
@@ -124,11 +161,18 @@ open_herdr() {
 
 open_tmux() {
   [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" ]] && command -v tmux >/dev/null || return 1
-  # A detached session would take the popup nowhere and leave sudo waiting.
+  # A detached session would take the pane nowhere and leave sudo waiting.
   [[ "$(tmux display-message -p -t "$TMUX_PANE" '#{session_attached}' 2>/dev/null)" -gt 0 ]] || return 1
-  local e args=()
+  local e args=() lines w h cols=80
   for e in "${env_args[@]}"; do args+=(-e "$e"); done
-  tmux display-popup -t "$TMUX_PANE" -E -w 80 -h 22 -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1 &
+  read -r w h < <(tmux display-message -p -t "$TMUX_PANE" '#{window_width} #{window_height}')
+  # Fit the command and reason (chrome is 9 lines, text wraps at 76); tmux clamps to the window.
+  lines=$((9 + $(cmd_rows) + (${#ASROOT_REASON} + 75) / 76))
+  # A floating pane (tmux 3.8) takes focus but is not modal: the person can move to the harness to read more context.
+  ((lines > h - 2)) && lines=$((h - 2))
+  ((cols > w - 2)) && cols=$((w - 2))
+  # new-pane has no centring option, so place the corner.
+  tmux new-pane -t "$TMUX_PANE" -x "$cols" -y "$lines" -X $(((w - cols) / 2)) -Y $(((h - lines) / 2)) -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1
 }
 
 if ! open_herdr && ! open_tmux; then
