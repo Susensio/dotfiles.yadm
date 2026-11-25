@@ -1,0 +1,5 @@
+#!/bin/sh
+# Print one variable from the agent dir's .env, for models.json's `!command` apiKey.
+case $1 in '' | *[!A-Za-z0-9_]*) echo "usage: env-key NAME" >&2; exit 2 ;; esac
+. "${PI_CODING_AGENT_DIR:?}/.env" || exit 1
+eval "printf %s \"\${$1}\""

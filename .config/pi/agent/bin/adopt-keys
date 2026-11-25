@@ -1,0 +1,23 @@
+#!/bin/bash
+# Move api_key logins from auth.json into the encrypted .env and wire models.json to read them.
+# Run it yourself after `/login`; agents cannot read these files. PI_*_FILE overrides are for tests.
+set -euo pipefail
+umask 077
+dir=${PI_CODING_AGENT_DIR:?}
+auth=${PI_AUTH_FILE:-$dir/auth.json}
+envf=${PI_ENV_FILE:-$dir/.env}
+models=$dir/models.json
+
+mapfile -t providers < <(jq -r 'to_entries[] | select(.value.type=="api_key") | .key' "$auth")
+((${#providers[@]})) || { echo "no api_key logins in auth.json"; exit 0; }
+
+for p in "${providers[@]}"; do
+  var=${p^^}; var=${var//-/_}_API_KEY
+  grep -q "^$var=" "$envf" 2>/dev/null && { echo "skip $p: $var already in .env" >&2; continue; }
+  printf '%s=%q\n' "$var" "$(jq -r --arg p "$p" '.[$p].key' "$auth")" >> "$envf"
+  jq --arg p "$p" --arg c "!\$PI_CODING_AGENT_DIR/bin/env-key $var" \
+    '.providers[$p].apiKey = $c' "$models" > "$models.tmp" && mv "$models.tmp" "$models"
+  jq --arg p "$p" 'del(.[$p])' "$auth" > "$auth.tmp" && mv "$auth.tmp" "$auth"
+  echo "moved $p -> $var"
+done
+echo "now commit: yadm add $envf $models && yadm commit -m 'pi: add provider keys'"

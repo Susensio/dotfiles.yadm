@@ -12,6 +12,9 @@
 !agent/cycled-models.json
 !agent/always-ask.json
 !agent/claude-bridge.json
+# Provider API keys, git-crypt'd via agent/.gitattributes; models.json sources it.
+!agent/.env
+!agent/.gitattributes
 !agent/agents/
 !agent/agents/**
 !agent/skills/
