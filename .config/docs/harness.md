@@ -35,6 +35,20 @@ A stale path can silently deny writes.
 Root commands go through `asroot <cmd>` ([ADR-0134](adr/0134-agent-root-asroot.md)): polkit's fingerprint dialog at the desk, a herdr or tmux password popup over SSH, one human action per command, so it carries no permission rule; `Bash(pkexec *)` stays a `permissions.ask` rule for a direct call ([ADR-0071](adr/0071-ask-before-pkexec.md)).
 The sandbox strips setuid, so `claude/CLAUDE.md` has Claude run `asroot` unsandboxed from the first call; `sandbox.excludedCommands` cannot do it, as Claude Code never lets it cover privilege wrappers (`sudo`, `su`, `doas`, `pkexec`, `runuser`, `chroot`).
 
+### Remote Control and root
+
+Measured 2026-11-26 on Claude Code 2.1.329, one session on `dell` over SSH inside herdr, with `/remote-control` run mid-session and the phone attached.
+
+- `CLAUDE_CODE_BRIDGE_SESSION_ID=session_…` appeared in the Bash tool's environment once the bridge connected; it was absent before.
+- It stayed set after the user returned to the terminal, so it says a bridge is connected, never which device is answering.
+- `CLAUDE_CODE_ENTRYPOINT` (`cli`) and `CLAUDE_CODE_SESSION_ATTENDED` (`1`) did not change, and no other variable differed.
+- A permission prompt reaches both surfaces and either can answer; the prompt is the harness's gate, not a credential sudo can check, since any process running as the user can write to the harness socket or call `sudo` itself.
+- Anything typed in the chat reaches the model, the transcript under `claude/projects/` and Anthropic's servers, so only a single-use secret is safe to type there.
+- Not measured: a session started with `claude remote-control` instead of `/remote-control`, whether the variable clears on disconnect, and whether the phone app renders an `ask` prompt for a Bash rule.
+
+From the phone, root works by SSH into the machine and attaching to the multiplexer that runs the agent, so the tmux or herdr popup of ADR-0134 takes the password outside the chat.
+Start the agent from an SSH shell on `dell` too, or `asroot` takes the `pkexec` path and draws its dialog on the desk screen.
+
 ## Two entry points
 
 **`claude`** — the default session, on the account's default model; `settings.json` pins none.

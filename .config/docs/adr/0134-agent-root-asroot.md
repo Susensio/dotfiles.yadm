@@ -54,7 +54,10 @@ A popup steals focus from whatever the person was typing into; the first herdr t
 
 Known gaps, accepted for now:
 - A herdr server started at the desk and later attached from the phone counts as local, so `asroot` picks pkexec and the dialog opens on `dell`'s unattended screen.
-- Phone sessions through Remote Control have no surface the helper can draw on, and a password must not go through chat; a TOTP factor in sudo's PAM stack is the proposed answer.
+- Phone sessions through Remote Control have no surface the helper can draw on, and a password must not go through chat.
+  Root from the phone is SSH into the machine and attaching to the multiplexer, where the popup takes the password outside the chat; the measurements are in [`harness.md`](../harness.md#remote-control-and-root).
+  Rejected for now: approving by a tap on the harness prompt (a convention, not a credential: any process running as the user could skip it) and typing the static password in chat (it reaches the transcript and the model).
+  Left open: a TOTP factor in sudo's PAM stack (`pam_oath`), so a one-time code pasted in chat reaches `sudo -S`; it keeps the approval in the app at the cost of an authenticator switch, and `CLAUDE_CODE_BRIDGE_SESSION_ID` can only hint that a bridge is connected.
 - A non-Omarchy host with a reader (Debian puts `pam_fprintd` in `common-auth`) would bring the 30 s wait back and needs its own askpass PAM service.
 
 Rejected alternatives: forwarded ssh-agent signing to `pam_ssh_agent_auth` (a dedicated key, agent, askpass and PAM module for one box); Tailscale SSH as root (no per-command human factor, Tailscale only); taking over the harness's terminal with job control (it races the harness for keystrokes, so a password could land in the transcript); a desktop-window surface (only reachable at the desk, where pkexec serves); the third-party `herdr-sudo-askpass` plugin (the same few dozen lines, but someone else's code handling the password).
