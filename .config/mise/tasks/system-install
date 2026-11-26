@@ -114,6 +114,15 @@ init_tool_context() {
   fi
 }
 
+# herdr's own postinstall runs before the extra assets exist, so its skill mirrors
+# come up empty; relink them now that the docs are in the install directory.
+# TODO: extract the asset fetch into a shared script herdr-integrations calls itself, once a second tool needs fetched assets plus links; then delete this.
+sync_herdr_mirrors() {
+  [[ ${tool[name]} == herdr ]] || return 0
+  env -u MISE_TOOL_NAME -u MISE_TOOL_INSTALL_PATH \
+    "${XDG_CONFIG_HOME:-$HOME/.config}/mise/tasks/herdr-integrations" || :
+}
+
 symlink() {
   local args=("$@")
   local real="${args[-2]}"
@@ -345,6 +354,7 @@ main() {
     PROCESSED_TOOLS+=("${tool[name]}" "${tool[name]//:/-}")
 
     process_extra_assets
+    sync_herdr_mirrors
     generate_completions
     generate_shell_init
     link_tool_assets

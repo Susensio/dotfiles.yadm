@@ -70,6 +70,10 @@ link_skill() {
 skill_mirrors() {
 	local install src_herdr src_config ref
 	install=$(dirname -- "$herdr_bin")
+	# The docs come from system-install's extra_assets, which runs after herdr's
+	# own postinstall; system-install re-runs this task once they exist.
+	compgen -G "$install/*.mdx" >/dev/null && [[ -f $install/SKILL.md ]] \
+		|| echo "herdr-integrations: no docs or SKILL.md in '$install'; skill mirrors incomplete until system-install fetches them" >&2
 	src_herdr="$install/SKILL.md"
 	src_config="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/SKILL-config.md"
 
