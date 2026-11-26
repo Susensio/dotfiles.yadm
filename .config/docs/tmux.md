@@ -1,24 +1,34 @@
-# tmux floating panes and the scratchpad
+# tmux facts
 
-Researched 2026-11-25 against tmux 3.8 (installed) and master (`next-3.9`, head `dace7f5b0`).
-Question: can `new-pane` replace the popup plus second-server scratchpad (`tmux/scripts/scratchpad`), and what does 3.9 change?
+Measured facts about the installed tmux that the config depends on; open work is in the `tmux |` entries of [BACKLOG](BACKLOG.md).
 
-## Findings
+Where tmux knowledge lives:
+
+| What | Where |
+| --- | --- |
+| What the config does and how to use it | [`tmux/README.md`](../tmux/README.md) |
+| Installed-version facts, upstream status, tested costs (this file) | `docs/tmux.md` |
+| Version-generic mechanics (format expansion, formats, headless hooks), verified on 3.7b | `claude/skills/tmux-config/references/` |
+| How to test against a throwaway server | `claude/skills/tmux-testing/` |
+| Why it is built this way | `docs/adr/` (`tmux`, `which-key`, key-table decisions) |
+| Planned features | `docs/plans/tmux-notify.md` |
+
+## Floating panes and the scratchpad
+
+Researched 2026-11-25 against tmux 3.8 (installed) and master (`next-3.9`, head `dace7f5b0`); master was not run, its claims come from source and PRs.
+3.9 has no release date, milestone or CHANGES section yet.
 
 1. **`display-popup` is already a modal floating pane on master.**
    The overlay code was removed in `34cd5da4` (nicm, 2026-09-21), and `cmd-display-menu.c` spawns `FLOATING|MODAL|FLOATOVERZOOM`.
    On 3.8 it is still the overlay.
-   Disposition: tracked.
    nicm warns that the floating pane needs `TMUX=` for a nested tmux, because his recipe attaches to the same server ([#5135](https://github.com/tmux/tmux/issues/5135), comment 5341139670).
    Tested on 3.8: `TMUX` is set in both the popup and a `new-pane -O -K` pane, and a plain `tmux -L <scratch> attach` still works in both.
    The refusal ("sessions should be nested with care, unset $TMUX to force") fired only when the attach ran inside a pane of the target's own server.
    The scratchpad attaches to a different server, so no `env -u TMUX` guard is needed; it is harmless if added.
-   What does change in 3.9 is scope: the popup becomes window-scoped (finding 2), so re-test the scratchpad then.
-   Backlog: `tmux | scratchpad`.
+   What does change in 3.9 is scope: the popup becomes window-scoped (fact 2), so re-test the scratchpad then.
 2. **A floating pane is a layout cell in one window.**
    There is no request, PR or plan for session-, client- or sticky-scoped floats.
    The nearest thread, [#5535](https://github.com/tmux/tmux/discussions/5535) (link one terminal into several panes), is closed and locked.
-   Disposition: accepted.
    The second server stays, because nicm's own answer for scratch sessions is a nested tmux in a floating pane: `new-pane -OK -X10% -Y12% -x80% -y75% 'env TMUX= tmux new-session -A -s scratch'`.
 3. **A parking-window toggle works on 3.8 with one server.**
    Tested in a throwaway server: pane id, PID, shell variables and a background loop survived every move, across windows, sessions and detach/reattach.
@@ -33,7 +43,6 @@ Question: can `new-pane` replace the popup plus second-server scratchpad (`tmux/
    - There are no isolated key tables or session lists.
    - Untested: percentage geometry, `-A` over zoom, several clients on one session.
 
-   Disposition: tracked.
    Revisit only if the second server hurts, since 3.9 changes zoom and floats underneath it.
 4. **Hidden panes are not in 3.8 and may not reach 3.9.**
    `hide-pane`/`show-pane` is draft [#5402](https://github.com/tmux/tmux/pull/5402).
@@ -41,17 +50,12 @@ Question: can `new-pane` replace the popup plus second-server scratchpad (`tmux/
    nicm: "I am not sold on hidden panes".
    The roadmap, [#5406](https://github.com/tmux/tmux/issues/5406), lists zoom with floating panes as probably 3.9 and hidden panes as potentially.
    Hidden is still per window, so it would not make a float follow you.
-   Disposition: tracked (revisit trigger in the backlog entry).
 5. **3.8 floating-pane bugs.**
    [#5384](https://github.com/tmux/tmux/issues/5384) (closed): a `run-shell` binding that creates a floating pane and waits on it deadlocks key input; use `new-pane -W`.
    Open: [#5892](https://github.com/tmux/tmux/issues/5892) (a lone float cannot be zoomed) and [#5906](https://github.com/tmux/tmux/issues/5906) (popup output lost on a deferred redraw).
-   Disposition: accepted.
    The `run` aliases are the reason to leave the popup callers alone until 3.9.
-6. **tmux-notify is unblocked.**
-   Its backlog entry waits on `new-pane` geometry flags (`-x/-y/-X/-Y`), and 3.8 has them.
-   Disposition: tracked in the `tmux | tmux-notify` backlog entry.
 
-## `new-pane` vs `popup` for the scratchpad (tested on 3.8)
+### `new-pane` vs `popup` for the scratchpad (tested on 3.8)
 
 Same: both run the nested attach, close on detach, pass every key including the prefix to the nested client, and restore the previous pane on close.
 Different:
@@ -70,9 +74,5 @@ Costs found:
   Master's `pane-border-lines` lists `rounded` (`options-table.c`, read 2026-11-25, not run), so it should arrive with 3.9; a `TODO:` in `scripts/scratchpad` marks the line to switch.
 - `#{window_panes}` counts the float, so `32_visual.conf`'s `>1` zoom/close button range shows on a single-pane window while the scratchpad is open (mouse on only).
 - The float's border renders `pane-border-format`, with the index and `pane-title` expansion.
+
 Not verified: rounded borders on a newer build, the real `32_visual.conf` and `pane-title` output, the `M-\`` binding with no `--client`, and the scratch-side `S` bind.
-
-## Not verified
-
-3.9 has no release date, milestone or CHANGES section yet.
-Master was not run; its claims come from source and PRs.

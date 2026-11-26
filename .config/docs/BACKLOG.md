@@ -12,7 +12,7 @@
   The old key stays trusted until then; nothing else reads it.
 - tmux | tmux-notify: floating-pane notification tray and toasts for agents and bells.
   See `docs/plans/tmux-notify.md`.
-  Unblocked 2026-11-25: tmux is 3.8 and `new-pane` has the geometry flags; start with the herdr `[ui.toast]` overlap check the plan asks for, and read [`docs/reports/tmux-floating-panes.md`](reports/tmux-floating-panes.md) for the floating-pane caveats (per-window scope, the `run-shell` deadlock [#5384](https://github.com/tmux/tmux/issues/5384)).
+  Unblocked 2026-11-25: tmux is 3.8 and `new-pane` has the geometry flags; start with the herdr `[ui.toast]` overlap check the plan asks for, and read [`docs/tmux.md`](tmux.md) for the floating-pane caveats (per-window scope, the `run-shell` deadlock [#5384](https://github.com/tmux/tmux/issues/5384)).
 - tmux | `PreToolUse` hook on `Bash` that blocks `tmux kill-server`/`kill-session`/`kill-window` when the command has no explicit `-L`/`-S`, message pointing at the `tmux-testing` skill's `scripts/tmux-test`.
   Prevents a bare destructive `tmux` command from silently falling through to the live default socket when hand-rolled `TMUX_TMPDIR` isolation resolves empty (happened in practice during tmux-uzi benchmarking: a cleanup command read an isolated socket path back from a file via `$(cat ...)`, the read failed silently, and `kill-server` hit the user's live session instead).
   `scripts/tmux-test` already prevents this for anything routed through it (`-L` on every call, refuses to kill a socket it did not create) — the gap is ad-hoc/scratch commands that skip the skill entirely because informal investigation doesn't feel like "testing."

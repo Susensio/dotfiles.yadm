@@ -19,6 +19,9 @@ Check it before `man tmux` or the web:
 - `references/formats.md` — the vocabulary inside `#{...}`: conditionals, matching, modifiers, and how to escape a literal `,` or `}`.
 - `references/headless_hooks_and_errors.md` — how tmux routes errors across execution contexts, why headless hooks fail with `(null):0: no current client`, and how to write client-safe hooks.
 
+- `docs/tmux.md` (in the config repo) — this setup's measured facts for the installed tmux version: floating panes, the scratchpad, what 3.9 changes.
+  The references above are version-generic and were verified on 3.7b; `docs/tmux.md` wins where the installed version differs.
+
 Beyond that:
 
 - Page `man tmux` with `cat`/`grep` or redirect it to a file — it is too long to read whole.

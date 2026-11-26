@@ -14,16 +14,11 @@ Still open:
 - `rtkit` is in no bootstrap step, and the plugin's dependency table omits it, so a rebuilt machine loses realtime scheduling and the random crackle returns. `dependencies.txt` entries are `command [package]`, so the candidate is `rtkit-daemon rtkit` (the same package name on pacman and apt). Held back until #40 decides whether the plugin should offer it itself.
 - Neither fix has been through a fresh-machine bootstrap; both are verified on `dell` only.
 
-## Secrets: the pass vault (2026-11-18, accepted; migration complete on `dell`)
+## Secrets: the pass vault (2026-11-18, migration complete on `dell` and `nuc`)
 
-The vault plan (closed out into ADR-0115's Corrections and `docs/secrets.md`) is done on `dell` (steps 0–4 passed 2026-11-20: stub published, throwaway clone unlocked by it alone, `.env` sum equal, fresh-keyring passphrase asked) and step 6 retired the age file with it; ADR-0115's Corrections section now records the key-keeping change (vault GPG key, no age file) and the memory-only master passphrase with its decrypt drill, replacing the paper copy the plan first wanted.
-The vault lives at `~/.local/share/secrets` (tool-read, not a project), `new-machine` clones it, imports `vault-key.asc` and runs `yadm git-crypt unlock` with no key file, and the homelab keeps no secrets in git at all (its own plans); only its restic password is a `pass` entry.
-Agents stay denied `gpg`, `pass`, `age` and `git-crypt` and the vault directory (Claude and pi): the `age` deny is a guardrail now, not part of the flow, and a step never runs those commands (ADR-0111).
+The flow and its decisions are in [`docs/secrets.md`](secrets.md) and ADR-0115; what remains is leftovers.
 
-Still open:
-- The nuc rebuild proved the flow on a real machine (2026-11-21): vault cloned, key imported, git-crypt unlocked after the tree was cleaned, keypair registered in both GitHub slots (titled `nuc`), `authorized_keys` seeded, and `ssh nuc` from dell passwordless over the LAN. Two bugs it surfaced are fixed and pushed: the tracked alt link that dirtied every non-Omarchy tree (`helix: untrack the alt link...`), and `new-machine`'s masked errexit (`yadm: catch failures in new-machine subshells...`); a third, found later, was the `36_authorized_keys.sh` mode (`yadm: mark the authorized_keys step executable...`) — added `100644`, it never ran on any bootstrap, only when run by hand.
 - Left on nuc: the fossil autostash of the moot link rewrite (`yadm stash drop`), and a logout/login for `environment.d`.
-- `maintenance` reports unpushed commits in `~/.local/share/secrets` and entries not in git (built 2026-11-20, `maintenance: report the vault's unpushed and uncommitted drift`), because `pass` commits without pushing and its git half fails silently.
 
 ## Omamail keepLoaded patch (2026-11-06)
 
@@ -82,10 +77,6 @@ Each is an ADR-0057 step under `yadm/bootstrap.d/omarchy/bugfix/`; delete it onc
 - `wheel-scroll.sh`: applies [#8959](https://github.com/omacom/omarchy/pull/8959), so touchpad scrolling moves the menus and the emoji picker by an eighth of the list per notch (the slowness is [issue #7361](https://github.com/omacom/omarchy/issues/7361); Hyprland's `touchpad.scroll_factor = 0.4` applies to layer surfaces and has no layer-rule override).
   Applied by a terminal `yadm bootstrap` on 2026-10-05; pending `omarchy-restart-shell`, then a real touchpad check that rows still hover and click.
 
-## pi session naming
-
-ADR-0062: sessions are named from their first prompt by `pi/agent/extensions/session-name.ts`, running on the cheap alias tier and renaming the herdr tab over the socket — the shipped `@tinysquid/pi-auto-session-name` alternative (checked 2026-10-18) names with the session's own model and knows nothing about herdr tabs, so the extension stays.
-
 ## pi permission reviewer
 
 Committed 2026-09-29, reordered 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md)) and 2026-11-05 ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)): the auto-reviewer calls `alias/reviewer` from `pi-model-fallback-alias` (`pi/agent/model-alias.json`).
@@ -96,36 +87,23 @@ Committed 2026-09-29, reordered 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order
 
 ## pi model catalog
 
-Committed 2026-10-18 ([ADR-0094](../adr/0094-pi-model-catalog-bootstrap.md)): `yadm/bootstrap.d/pi/models.sh` refreshes `pi/agent/models-store.json` once a day, because pi only refreshes when the TUI model selector opens and a headless machine therefore keeps the catalog bundled with its installed version.
+[ADR-0094](adr/0094-pi-model-catalog-bootstrap.md): `yadm/bootstrap.d/pi/models.sh` refreshes the catalog daily.
 
-- The step never fails the bootstrap: a refresh that times out exits non-zero upstream, so the step converts it to a warning. pi leaves an existing store untouched when a refresh fails, so the retry is free.
-- A store written before any provider is authenticated is `{}`; the next run with credentials overwrites it, and the daily gate stops that from repeating on every attempt.
 - Untested on a machine that has never run pi: the step's fresh-store path was exercised against scratch agent directories, not a real first bootstrap.
 
 ## pi model fallback
 
-Committed 2026-10-05 and reordered on 2026-10-18 ([ADR-0092](../adr/0092-pi-tier-order-by-intelligence.md), [ADR-0093](../adr/0093-pi-tier-lead-by-capability.md)) and 2026-11-05 ([ADR-0103](../adr/0103-pi-rung-order-shared-quota.md)); the ADRs carry the chain orders and their reasons.
+The ADRs ([0092](adr/0092-pi-tier-order-by-intelligence.md), [0093](adr/0093-pi-tier-lead-by-capability.md), [0103](adr/0103-pi-rung-order-shared-quota.md)) carry the chain orders; `pi-claude-bridge-index` carries only the #216 standalone route.
 
-- `pi-claude-bridge-index` now carries only the #216 standalone route (since 2026-11-06, the #163 half having shipped in 0.9.2).
 - Untested live: the failover fix is covered by pi-claude-bridge's own test, not by an exhausted-quota run against a real chain.
 - claude-bridge once rewrote `pi/agent/claude-bridge.json` during this work and a `yadm restore` brought back the committed file; cause unknown, watch for a repeat before blaming the patch.
 
-## SSD trim
-
-[ADR-0098](adr/0098-luks-discards-header-flag.md): TRIM reaches the SSD through the LUKS2 header's persistent `allow-discards` flag and btrfs's default async discard.
-
-- Applied and verified 2026-11-20: `lsblk --discard` shows the `root` mapping passing discards (`DISC-MAX 2T`) and `findmnt -no OPTIONS /` lists `discard=async`, so `fstrim.timer` stays off.
-- `bootstrap.d/luks-discards.sh` now walks the device chain to find the crypt device instead of asking the root's own device, so a rebuilt host whose root sits on LVM above the LUKS mapping is checked rather than silently skipped.
-
 ## Tailscale mesh and signing keys (2026-11-10)
 
-`dell` and `nuc` both answer Tailscale SSH on their tailnet IP, and `dell` reaches `nuc` by name with no key; `nuc` keeps OpenSSH on its LAN address as the fallback ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), superseded for the signing/auth split by [ADR-0117](adr/0117-one-key-two-slots.md); matrix in [access.md](access.md)).
-`35_machine_key.sh` mints and registers the per-machine keypair in both GitHub slots, and CI checks the second bootstrap by what it changed ([ADR-0111](adr/0111-rerun-checked-by-state-logins-warn.md)).
+`dell` and `nuc` answer Tailscale SSH on their tailnet IP ([ADR-0109](adr/0109-tailscale-ssh-mesh-per-machine-signing-keys.md), [ADR-0117](adr/0117-one-key-two-slots.md); matrix in [access.md](access.md)).
 
 - Unverified: the phone reaching `nuc` by tailnet name with no credential. Termux's `ssh` should offer "none" authentication; a phone app that demands one cannot.
 - `dell` runs no sshd, so it is reachable only through Tailscale SSH, and every other machine's bootstrap has yet to run the signing step.
-- `nuc`'s homelab `docs/STATE.md` listed an SSH key added to GitHub as signing *and* auth; [ADR-0117](adr/0117-one-key-two-slots.md) now allows one keypair filling both, so that line is no longer a contradiction, though the auth registration itself is unused.
-- Left over on GitHub: none — `gh api user/keys` returns an empty list (checked 2026-11-20), so `chuwi`'s authentication key (162582085) and `nuc`'s 2023 RSA key (87867050) are both gone; the account holds three signing keys only (`chuwi`, `dell`, `nuc`).
 
 ## yadm alt race and commit signing (2026-10-24)
 

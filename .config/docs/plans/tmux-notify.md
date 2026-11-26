@@ -83,7 +83,7 @@ exits. Bottom-right anchored, ~44×3, `-T`/`-B` for frame and title.
 **Requires tmux ≥ 3.8** for the geometry flags; 3.7.x floating panes were
 mouse-movable only. This box is on 3.8. A floating pane lives in one
 window, so a toast shows only in the window you are in; the status-bar inbox
-covers the rest (`docs/reports/tmux-floating-panes.md`).
+covers the rest (`docs/tmux.md`).
 
 **Tray reads the store.** `#(notify tray)` in `status-right` renders
 `[range=control|7]   n` or nothing, keeping the existing click region →

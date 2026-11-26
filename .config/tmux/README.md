@@ -25,7 +25,8 @@ Pane borders show small clickable `[z]`/`[x]` buttons (zoom/close), and the scro
 
 ## Scratchpads
 
-Prefix-bindable floating popup sessions/panes for quick, throwaway work — they pop up over whatever you're doing and close without disturbing the underlying layout.
+Prefix-bindable floating panes for quick, throwaway work — they pop up over whatever you're doing and close without disturbing the underlying layout.
+Their limits on the installed tmux version (per-window scope, border style, 3.9 changes) are in [`docs/tmux.md`](../docs/tmux.md).
 
 ## Sessionizer
 
@@ -42,16 +43,8 @@ Window/session activity and bell events are highlighted in the status line, and 
 
 ### Live theme updates
 
-In Omarchy 4.0.4, `omarchy-theme-set` renders the current theme, runs one updater per application, waits for them, then runs `omarchy-hook theme-set`; our `theme-set.d/tmux` hook runs at that last step.
-`omarchy-theme-set-tmux` is among those updaters and is disabled here by a no-op override in `~/bin/overrides` ([ADR-0075](../docs/adr/0075-omit-omarchy-tmux-updater.md)): it wrote pane styles that `32_visual.conf` overwrote a moment later, and it reached only one tmux server.
-The hook replaces it:
-
-- it reloads this config on every configured server found under `$TMUX_TMPDIR` (or `/tmp`) that carries the `TMUX_CONFIG_DIR` marker, which is what reapplies the palette, styles and `cursor-colour`;
-- it copies the theme's `gum_env.lua` values and `COLORFGBG` into those servers' global and session environments, for panes started after the switch — a running shell keeps the environment it was started with.
-
-The override is reached because `~/bin/overrides` precedes `/usr/bin` on the session `PATH` and Omarchy runs its updaters through `bash -lc`; `bootstrap.d/omarchy/bugfix/hypr-envs-path.sh` is what keeps `/usr/share/omarchy/bin` from being prepended.
-Nothing else from the updater was ported: its pane-TTY OSC writes and its `SIGWINCH`/`refresh-client` signals had no consumer here, and `omarchy-theme-set-foot` already writes the same palette to the outer foot terminal.
-If a live switch in foot shows a missed colour or a stale pane, that is the first place to look.
+A theme switch retints every running tmux server through the `theme-set` hook, which replaces Omarchy's own tmux updater ([ADR-0075](../docs/adr/0075-omit-omarchy-tmux-updater.md); the override's `PATH` reach is in [`docs/omarchy.md`](../docs/omarchy.md)).
+If a live switch in foot shows a missed colour or a stale pane, start with the ADR's dropped OSC and redraw writes.
 
 ## Plugins
 
