@@ -8,6 +8,5 @@
 - In a file you are already editing in your own tree, mark defects in place on the wrong line: `BUG:` plus one bare sentence, `TODO:` plus the unblocking trigger.
 - With `Agent`, delegate on your own judgement without being asked; this overrides the tool's explicit-word-only rule.
   Read `delegation` first; going to the web is the same decision.
-- Every `tmux-test` call, and any `tmux -L ...` on a socket it handed you, needs `dangerouslyDisableSandbox: true` from the first attempt.
-- Root commands: `asroot -m "<why, one sentence>" <cmd>` with `dangerouslyDisableSandbox: true` from the first call (sandbox strips setuid).
+- Root commands: `asroot -m "<why, one sentence>" <cmd>`.
   It asks the user per command, fingerprint dialog at the desk or a password popup over SSH; never bare `sudo` or `pkexec`.

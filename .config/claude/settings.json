@@ -79,9 +79,7 @@
       "Bash(* ~/.local/share/keyrings*)",
       "Bash(* ~/.ssh*)"
     ],
-    "ask": [
-      "Bash(pkexec *)"
-    ],
+    "ask": ["Bash(pkexec *)"],
     "defaultMode": "auto"
   },
   "model": "sonnet",
@@ -225,10 +223,9 @@
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
+    "excludedCommands": ["tmux-test", "asroot", "yadm commit"],
     "network": {
-      "allowedDomains": [
-        "*"
-      ]
+      "allowedDomains": ["*"]
     },
     "filesystem": {
       "allowWrite": [
