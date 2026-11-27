@@ -18,7 +18,7 @@ Unread notifications were dominated by `ci_activity` threads, one per workflow r
 `~/bin/maintenance` reports and never acts.
 It greps tracked files for GitHub issue, PR and discussion links, skipping ADRs, the `report-issue` skill's past issues, and vendored `.orig` copies, and asks GitHub, in one GraphQL request, which have closed or merged, listing each with its locations.
 The same request finds the user's open PRs with requested changes, conflicts or failing checks; unread notifications other than `ci_activity` come from a second request.
-Locally it lists uncommitted tracked files, unpushed commits, warnings from the last bootstrap run, failed systemd units and `.pacnew` or `.pacsave` files.
+Locally it lists uncommitted tracked files, unpushed commits, Omarchy stock templates that changed under our `omarchy/themed/` overrides (checksums in `~/.local/state/maintenance/templates`, accepted with `maintenance --ack-templates`), warnings from the last bootstrap run, failed systemd units and `.pacnew` or `.pacsave` files.
 `yadm bootstrap` copies its stderr to `~/.local/state/yadm/bootstrap.log` so those warnings outlive the terminal.
 
 The `/maintenance` pi prompt runs the report and judges each finding in context, since the same closure can mean deleting a step, waiting for a release, or nothing; it proposes and asks, and commits, posts or marks notifications read only on approval.

@@ -3,21 +3,39 @@
 # discussion has since closed, unread GitHub activity, open PRs of ours that
 # need work, and local drift. Reports only; the /maintenance pi prompt judges
 # the findings (docs/adr/0096).
-# Usage: maintenance [--new]
-#   --new  print only items no earlier --new run printed, and remember them
+# Usage: maintenance [--new | --ack-templates]
+#   --new            print only items no earlier --new run printed, and remember them
+#   --ack-templates  record the stock Omarchy templates as reviewed against our overrides
 # Exit 0 when there is nothing to report, 1 when there is.
 set -euo pipefail
 
 state=${XDG_STATE_HOME:-$HOME/.local/state}
 seen=$state/maintenance/seen
 bootstrap_log=$state/yadm/bootstrap.log
+templates=$state/maintenance/templates
+
+# Our overrides in omarchy/themed/ replace Omarchy's stock templates whole, so a stock
+# change reaches us only when someone diffs the two. First sight of an override only
+# records the stock checksum; a later difference is the finding.
+template_sums() { # prints "<name> <checksum of stock>" for each override with a stock twin
+  local stock_dir=/usr/share/omarchy/default/themed f name
+  for f in "$HOME/.config/omarchy/themed/"*.tpl; do
+    name=${f##*/}
+    [[ -f $stock_dir/$name ]] && printf '%s %s\n' "$name" "$(sha256sum <"$stock_dir/$name" | cut -c1-12)"
+  done
+}
 
 new_only=false
 case ${1:-} in
   --new) new_only=true ;;
+  --ack-templates)
+    mkdir -p "${templates%/*}"
+    template_sums >"$templates"
+    exit 0
+    ;;
   '') ;;
   *)
-    echo "Usage: maintenance [--new]" >&2
+    echo "Usage: maintenance [--new | --ack-templates]" >&2
     exit 2
     ;;
 esac
@@ -158,6 +176,21 @@ permission_drift() {
   fi
 }
 
+template_drift() {
+  local name sum known
+  mkdir -p "${templates%/*}"
+  touch "$templates"
+  while read -r name sum; do
+    known=$(awk -v n="$name" '$1 == n { print $2 }' "$templates")
+    if [[ -z $known ]]; then
+      echo "$name $sum" >>"$templates"
+    elif [[ $known != "$sum" ]]; then
+      echo "  stock template changed under our override: $name"
+      echo "    diff /usr/share/omarchy/default/themed/$name ~/.config/omarchy/themed/$name; maintenance --ack-templates"
+    fi
+  done < <(template_sums)
+}
+
 local_drift() {
   yadm status --porcelain --untracked-files=no | cut -c4- | sed 's|^|  uncommitted: ~/|'
   if (($(yadm rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0) > 0)); then
@@ -165,6 +198,7 @@ local_drift() {
     echo "    yadm log @{upstream}..HEAD"
   fi
   plugin_forks
+  template_drift
   provider_keys
   permission_drift
   # The vault (docs/plans/vault.md): pass commits, never pushes, and its git half
