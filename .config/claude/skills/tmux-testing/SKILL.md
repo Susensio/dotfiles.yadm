@@ -28,6 +28,7 @@ $t kill "$s"                               # server killed, socket file removed
 Every `tmux-test` call, and every direct `tmux -L ...` against a socket it handed you, must run outside any sandbox your harness puts around shell calls.
 A sandboxed shell blocks the Unix-domain-socket `bind`/`connect` syscall outright, regardless of path or allowlist, while plain file writes to the same directory succeed.
 Don't try relocating the socket to a sandbox-writable path first.
+Claude Code excludes `tmux-test` from its sandbox but not a bare `tmux -L`, so prefer `tmux-test eval` for queries; a direct `tmux -L` needs `dangerouslyDisableSandbox: true` from the first attempt.
 
 Spawning and killing go through it, every time.
 It passes `-L` on every call, unsets `$TMUX` before anything runs, refuses to kill a socket it did not create, and removes the socket file and its fakebin on every exit path including failure.

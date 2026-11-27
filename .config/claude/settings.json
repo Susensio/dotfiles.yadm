@@ -17,6 +17,7 @@
       "Bash(command -v *)",
       "Bash(git check-ignore *)",
       "Bash(yadm ls-files *)",
+      "Bash(yadm commit:*)",
       "Bash(claude --version)"
     ],
     "deny": [
