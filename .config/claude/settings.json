@@ -243,5 +243,7 @@
   "theme": "custom:follow",
   "verbose": false,
   "preferredNotifChannel": "terminal_bell",
-  "switchModelsOnFlag": false
+  "switchModelsOnFlag": false,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
 }
