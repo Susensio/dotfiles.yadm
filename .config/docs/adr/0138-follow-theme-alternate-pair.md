@@ -37,3 +37,9 @@ The fallbacks are uneven: Helix's is gruvbox, Claude's is gruvbox ANSI and looks
 The Claude fallback is a link into the plugin's marketplace checkout, so `gruvbox@claude-themes` must stay enabled and the checkout must exist, and the pi fallback dangles where pi is not installed through mise; neither has run on a machine without Omarchy.
 The pi name `omarchy-system` stays in Omarchy's script and in the `omarchy/themed/pi.json.tpl` override, because renaming the file it writes would collide with the link.
 The Claude template override is a snapshot of Omarchy's, kept honest only by the `maintenance` check.
+
+## Corrections
+
+2026-11-27: the pi theme's inner `name` is `follow`, set in the `omarchy/themed/pi.json.tpl` override, not `omarchy-system` as the last Consequences paragraph says.
+The `/settings` picker lists and checks a theme by that inner name, so with `omarchy-system` inside it showed `system` as the current theme although the Omarchy palette was applied; with `follow` inside it checks `follow`.
+`follow.json` links to Omarchy's `omarchy-system.json`, so the two paths are one file and raise no conflict; only the file Omarchy's script writes keeps its fixed name.
