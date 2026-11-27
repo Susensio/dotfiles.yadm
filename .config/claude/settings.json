@@ -119,6 +119,11 @@
             "type": "command",
             "command": "bash '/home/susensio/.config/claude/hooks/herdr-agent-state.sh' session",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$XDG_CONFIG_HOME/herdr/scripts/claude-rules\"",
+            "timeout": 10
           }
         ]
       }
@@ -195,7 +200,8 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "sh \"$CLAUDE_CONFIG_DIR/statusline.sh\""
+    "command": "sh \"$CLAUDE_CONFIG_DIR/statusline-refresh.sh\"",
+    "refreshInterval": 1
   },
   "subagentStatusLine": {
     "type": "command",

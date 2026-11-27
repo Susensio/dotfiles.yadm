@@ -32,7 +32,7 @@ Hooks and statuslines in `settings.json` use `$CLAUDE_CONFIG_DIR` and survive a 
 The write paths under `sandbox.filesystem.allowWrite` are literal; update them when moving the directory so the new location stays writable.
 A stale path can silently deny writes.
 
-Root commands go through `asroot <cmd>` ([ADR-0134](adr/0134-agent-root-asroot.md)): polkit's fingerprint dialog at the desk, a herdr or tmux password popup over SSH, one human action per command, so it carries no permission rule; for a burst, `asroot --yolo` or Ctrl+Y in the popup opens a timed window without prompts ([ADR-0137](adr/0137-asroot-yolo-window.md)); `Bash(pkexec *)` stays a `permissions.ask` rule for a direct call ([ADR-0071](adr/0071-ask-before-pkexec.md)).
+Root commands go through `asroot <cmd>` ([ADR-0134](adr/0134-agent-root-asroot.md)): polkit's fingerprint dialog at the desk, a herdr or tmux password popup over SSH, one human action per command, so it carries no permission rule; for a burst, `asroot --yolo` or Ctrl+Y in the popup opens a timed window without prompts ([ADR-0137](adr/0137-asroot-yolo-window.md)); while the popup is open the agent's herdr pane shows as waiting ([ADR-0139](adr/0139-asroot-popup-marks-agent-waiting.md)); `Bash(pkexec *)` stays a `permissions.ask` rule for a direct call ([ADR-0071](adr/0071-ask-before-pkexec.md)).
 The sandbox strips setuid, so `claude/CLAUDE.md` has Claude run `asroot` unsandboxed from the first call; `sandbox.excludedCommands` cannot do it, as Claude Code never lets it cover privilege wrappers (`sudo`, `su`, `doas`, `pkexec`, `runuser`, `chroot`).
 
 ### Remote Control and root

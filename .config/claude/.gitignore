@@ -7,6 +7,7 @@
 !settings.cloud.json
 !keybindings.json
 !statusline.sh
+!statusline-refresh.sh
 !agents/
 !agents/**
 !skills/

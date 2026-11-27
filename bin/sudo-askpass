@@ -141,8 +141,18 @@ fi
 cwd="$PWD"
 [[ "$cwd" == "$HOME"* ]] && cwd="~${cwd#"$HOME"}"
 
+# While a herdr popup is open the agent's pane shows as waiting (docs/adr/0139-asroot-popup-marks-agent-waiting.md):
+# a per-pane flag holding this PID, read by pi's asroot-waiting extension and Claude's statusline.
+waiting_dir="${XDG_RUNTIME_DIR:-/tmp}/asroot-waiting"
+flag=""
+mark_waiting() {
+  [[ -n "${HERDR_PANE_ID:-}" ]] || return 0
+  mkdir -p -m 700 "$waiting_dir" && echo $$ >"$waiting_dir/$HERDR_PANE_ID" && flag="$waiting_dir/$HERDR_PANE_ID"
+}
+clear_waiting() { [[ -z "$flag" ]] || rm -f "$flag"; }
+
 dir="$(mktemp -d "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/sudo-askpass.XXXXXX")" || exit 1
-trap 'rm -rf "$dir"' EXIT
+trap 'rm -rf "$dir"; clear_waiting' EXIT
 mkfifo -m 600 "$dir/reply" || exit 1
 # Read-write so neither side blocks on open and `read -t` can time out with no answer.
 exec 3<>"$dir/reply"
@@ -193,7 +203,9 @@ open_tmux() {
   tmux new-pane -t "$TMUX_PANE" -x "$cols" -y "$lines" -X $(((w - cols) / 2)) -Y $(((h - lines) / 2)) -T ' sudo ' "${args[@]}" "$self" --prompt >/dev/null 2>&1
 }
 
-if ! open_herdr && ! open_tmux; then
+if open_herdr; then
+  mark_waiting
+elif ! open_tmux; then
   echo "sudo-askpass: no herdr or tmux client to ask in; run it yourself: sudo $cmd" >&2
   exit 1
 fi
