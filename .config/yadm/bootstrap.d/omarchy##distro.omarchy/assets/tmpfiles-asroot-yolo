@@ -1,0 +1,2 @@
+# A reboot drops the transient timer that closes `asroot --yolo`, so the grant must not outlive it (docs/adr/0137-asroot-yolo-window.md).
+r! /etc/sudoers.d/zz-yolo

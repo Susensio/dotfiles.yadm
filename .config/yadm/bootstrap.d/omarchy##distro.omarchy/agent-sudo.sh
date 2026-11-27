@@ -15,3 +15,8 @@ if ! sudo cmp -s "$ASSETS_DIR/sudoers-agent-sudo" "$SUDOERS"; then
   visudo -cqf "$ASSETS_DIR/sudoers-agent-sudo"
   sudo install -Dv --mode=440 "$ASSETS_DIR/sudoers-agent-sudo" "$SUDOERS"
 fi
+
+# The `asroot --yolo` window's timer is transient; clear a leftover grant at boot.
+TMPFILES=/etc/tmpfiles.d/asroot-yolo.conf
+cmp -s "$ASSETS_DIR/tmpfiles-asroot-yolo" "$TMPFILES" ||
+  sudo install -Dv --mode=644 "$ASSETS_DIR/tmpfiles-asroot-yolo" "$TMPFILES"

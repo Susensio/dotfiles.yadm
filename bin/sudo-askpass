@@ -2,7 +2,15 @@
 # SUDO_ASKPASS helper for agents, which run sudo with no terminal (docs/adr/0134-agent-root-asroot.md).
 # Asks in a herdr or tmux popup wherever the person's client is attached; with neither it fails fast.
 # `sudo-askpass --prompt` is the asking side, run inside the popup.
+# Ctrl+Y in the popup also opens a 5-minute `asroot --yolo` window with the same password (docs/adr/0137-asroot-yolo-window.md).
 set -u
+
+YOLO_SECS=300
+# Askpass for the background yolo grant: replays the password the person just typed, from a FIFO.
+if [[ -n "${SUDO_ASKPASS_FEED:-}" ]]; then
+  IFS= read -r -t 5 pw <"$SUDO_ASKPASS_FEED" && printf '%s\n' "$pw"
+  exit
+fi
 
 if [[ "${1:-}" == --prompt ]]; then
   reply="${SUDO_ASKPASS_REPLY:?not started by sudo-askpass}"
@@ -54,12 +62,22 @@ if [[ "${1:-}" == --prompt ]]; then
   printf '\n'
   # The popup steals focus, so drop keys typed for another pane before it appeared.
   while IFS= read -rs -t 0.5 -n 1024 _; do :; done
-  if ((rows > MAXROWS)); then hint="Tab views all $rows lines   Ctrl+C refuses"; else hint="Ctrl+C refuses"; fi
+  hint="Ctrl+Y adds $((YOLO_SECS / 60))m without prompts   Ctrl+C refuses"
+  ((rows > MAXROWS)) && hint="Tab views all $rows lines   $hint"
   printf ' %s%s%s\n' "$D" "$hint" "$X"
   prompt_text="${SUDO_ASKPASS_PROMPT:-[sudo] password: }"
+  yolo=ok
   while :; do
-    printf ' %s' "$prompt_text"
+    if [[ $yolo == yolo ]]; then
+      printf '\r\033[K %s+%dm: this and all root for %d minutes%s %s' "$Rd" "$((YOLO_SECS / 60))" "$((YOLO_SECS / 60))" "$X" "$prompt_text"
+    else
+      printf '\r\033[K %s' "$prompt_text"
+    fi
     IFS= read -rs -n1 c || answer cancel
+    if [[ "$c" == $'\x19' ]]; then
+      [[ $yolo == ok ]] && yolo=yolo || yolo=ok
+      continue
+    fi
     if [[ "$c" == $'\t' && $rows -gt $MAXROWS ]]; then
       printf '\r\033[K'
       { printf ' %s%s@%s%s %s%s%s%s❯%s %ssudo%s\n' "$G" "$agent" "$host" "$X" "$Bl" "$cwd" "$X" "$G" "$X" "$Rd" "$X"; printf '%s\n' "$shown"; } | less -R
@@ -69,7 +87,7 @@ if [[ "${1:-}" == --prompt ]]; then
   done
   if [[ -n "$c" ]]; then IFS= read -rs rest || answer cancel; pw="$c$rest"; else pw=""; fi
   echo
-  answer "ok $pw"
+  answer "$yolo $pw"
 fi
 
 prompt="${1:-[sudo] password: }"
@@ -183,5 +201,30 @@ fi
 IFS= read -r -t "$timeout" reply <&3 || exit 1
 case "$reply" in
   "ok "*) printf '%s\n' "${reply#ok }" ;;
+  "yolo "*)
+    pw="${reply#yolo }"
+    printf '%s\n' "$pw"
+    # Detached so sudo sees this helper's stdout close; the pause lets sudo finish its own authentication first.
+    (
+      sleep 1
+      feed="$(mktemp -u "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/sudo-askpass-feed.XXXXXX")"
+      mkfifo -m 600 "$feed" || exit 1
+      trap 'rm -f "$feed"' EXIT
+      exec 5<>"$feed"
+      printf '%s\n' "$pw" >&5
+      unset pw
+      if SUDO_ASKPASS="$self" SUDO_ASKPASS_FEED="$feed" sudo -A "$HOME/bin/asroot" --yolo-grant "$YOLO_SECS" "$(id -un)"; then
+        msg="Root without prompts for $((YOLO_SECS / 60)) minutes"
+      else
+        msg="Could not open the root window"
+      fi
+      if [[ -n "${HERDR_PANE_ID:-}" && -n "$herdr" ]]; then
+        "$herdr" notification show "asroot yolo" --body "$msg" >/dev/null 2>&1
+      elif [[ -n "${TMUX:-}" ]]; then
+        tmux display-message "asroot yolo: $msg" 2>/dev/null
+      fi
+    ) </dev/null >/dev/null 2>&1 &
+    disown
+    ;;
   *) exit 1 ;;
 esac

@@ -3,17 +3,37 @@
 # polkit's fingerprint dialog in a local login session, else sudo through the sudo-askpass popup.
 # Over SSH polkit has no agent to ask, so pkexec would fail there.
 # `-m <why>` is the agent's reason; the prompt shows it labelled as the agent's claim.
+# `--yolo [N[s|m]|off]` opens a timed window (default 5m) where root needs no approval.
 set -u
 
-reason=""
+YOLO_FLAG=/run/asroot-yolo   # root-written expiry epoch; the sudoers drop-in is the grant
+
+# Root side of --yolo, also run by sudo-askpass when the popup's Ctrl+Y is used: `--yolo-grant <secs> <user>`, 0 closes.
+if [[ "${1:-}" == --yolo-grant ]]; then
+  (( EUID == 0 )) || { echo "asroot: --yolo-grant runs as root" >&2; exit 2; }
+  secs="${2:-}" user="${3:-}" grant=/etc/sudoers.d/zz-yolo
+  [[ "$secs" =~ ^[0-9]+$ ]] && (( secs <= 3600 )) && id -u "$user" >/dev/null 2>&1 ||
+    { echo "asroot: --yolo-grant <0-3600> <user>" >&2; exit 2; }
+  systemctl stop asroot-yolo.timer asroot-yolo.service 2>/dev/null
+  rm -f "$grant" "$YOLO_FLAG"
+  (( secs > 0 )) || exit 0
+  umask 077
+  printf '%s ALL=(ALL) NOPASSWD: ALL\n' "$user" >"$grant.tmp"
+  visudo -cqf "$grant.tmp" && chmod 440 "$grant.tmp" && mv "$grant.tmp" "$grant" || { rm -f "$grant.tmp"; exit 1; }
+  echo $(( $(date +%s) + secs )) >"$YOLO_FLAG" && chmod 644 "$YOLO_FLAG"
+  exec systemd-run --quiet --unit=asroot-yolo --on-active="${secs}s" rm -f "$grant" "$YOLO_FLAG"
+fi
+
+reason="" yolo=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -m | --why) reason="${2:-}"; shift 2 || shift ;;
+    --yolo) yolo="${2:-5m}"; shift; [[ $# -eq 0 ]] || shift; break ;;
     --) shift; break ;;
     *) break ;;
   esac
 done
-[[ $# -gt 0 ]] || { echo "usage: asroot [-m <why>] <command> [args...]" >&2; exit 2; }
+[[ -n "$yolo" || $# -gt 0 ]] || { echo "usage: asroot [-m <why>] <command> [args...] | asroot --yolo [N[s|m]|off]" >&2; exit 2; }
 # sudo-askpass reads it from sudo's environment, which sudo's env_reset keeps from the command.
 export ASROOT_REASON="$reason"
 
@@ -23,20 +43,49 @@ local_session() {
     [[ "$(loginctl show-session "$XDG_SESSION_ID" -p Remote --value 2>/dev/null)" == no ]]
 }
 
-if command -v pkexec >/dev/null && local_session; then
-  # polkit's dialog takes no extra text, so the reason arrives as a toast beside it.
-  if [[ -n "$reason" ]]; then
-    body="$(printf '%s' "$reason" | tr -d '\000-\037\177' | cut -c1-200)"
-    if [[ -n "${HERDR_PANE_ID:-}" ]] && command -v herdr >/dev/null; then
-      herdr notification show "Agent wants root" --body "$body" >/dev/null 2>&1 || :
-    elif command -v notify-send >/dev/null; then
-      notify-send "Agent wants root" "$body" 2>/dev/null || :
+approved() {
+  if command -v pkexec >/dev/null && local_session; then
+    # polkit's dialog takes no extra text, so the reason arrives as a toast beside it.
+    if [[ -n "$reason" ]]; then
+      body="$(printf '%s' "$reason" | tr -d '\000-\037\177' | cut -c1-200)"
+      if [[ -n "${HERDR_PANE_ID:-}" ]] && command -v herdr >/dev/null; then
+        herdr notification show "Agent wants root" --body "$body" >/dev/null 2>&1 || :
+      elif command -v notify-send >/dev/null; then
+        notify-send "Agent wants root" "$body" 2>/dev/null || :
+      fi
     fi
+    pkexec "$@"; return
   fi
-  exec pkexec "$@"
+  # A person at a terminal gets sudo's own prompt there; agents have no controlling terminal.
+  if { : >/dev/tty; } 2>/dev/null; then
+    sudo "$@"; return
+  fi
+  SUDO_ASKPASS="$HOME/bin/sudo-askpass" sudo -A "$@"
+}
+
+yolo_open() {
+  read -r exp 2>/dev/null <"$YOLO_FLAG" && (( exp > $(date +%s) ))
+}
+
+if [[ -n "$yolo" ]]; then
+  if [[ "$yolo" == off ]]; then
+    secs=0
+  elif [[ "$yolo" =~ ^([0-9]+)([sm]?)$ ]]; then
+    secs=${BASH_REMATCH[1]}
+    [[ "${BASH_REMATCH[2]}" == s ]] || secs=$(( secs * 60 ))
+    (( secs > 0 && secs <= 3600 )) || { echo "asroot: --yolo takes 1s to 60m, or off" >&2; exit 2; }
+  else
+    echo "usage: asroot --yolo [N[s|m]|off]" >&2; exit 2
+  fi
+  # Opening or closing the window is itself approved per use, so an agent cannot grant itself root.
+  reason="${reason:-open a $yolo window of root without prompts}"; export ASROOT_REASON="$reason"
+  approved "$(realpath "$0")" --yolo-grant "$secs" "$(id -un)"
+  rc=$?
+  (( rc == 0 )) && { [[ "$yolo" == off ]] && echo "asroot: yolo closed" || echo "asroot: yolo open for $yolo"; }
+  exit $rc
 fi
-# A person at a terminal gets sudo's own prompt there; agents have no controlling terminal.
-if { : >/dev/tty; } 2>/dev/null; then
-  exec sudo "$@"
+
+if yolo_open && sudo -n true 2>/dev/null; then
+  exec sudo -n "$@"
 fi
-SUDO_ASKPASS="$HOME/bin/sudo-askpass" exec sudo -A "$@"
+approved "$@"
