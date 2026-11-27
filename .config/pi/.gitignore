@@ -19,6 +19,11 @@
 !agent/agents/**
 !agent/skills/
 !agent/skills/**
+!agent/themes/
+!agent/themes/**
+# Omarchy's theme hook writes the first; yadm alt links the second beside the pair.
+agent/themes/omarchy-system.json
+agent/themes/follow.json
 !agent/prompts/
 !agent/prompts/**
 !agent/extensions/
