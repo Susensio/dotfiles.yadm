@@ -21,6 +21,8 @@
 !themes/**
 # The yadm alt link for the pair beside it.
 themes/follow.json
+# Written by Omarchy's theme hook; follow.json links to it.
+themes/omarchy.json
 
 # Regenerable, even inside the whitelisted config dirs (last match wins).
 __pycache__/
